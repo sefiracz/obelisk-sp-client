@@ -79,7 +79,7 @@ public class NexUPreLoader extends Preloader {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		if(getConfig().isShowSplashScreen()) {
-			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.jpg")));
+			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.png")));
 			final StackPane background = new StackPane(splash);
 			final Scene splashScene = new Scene(background, 600, 300);
 			primaryStage.setScene(splashScene);

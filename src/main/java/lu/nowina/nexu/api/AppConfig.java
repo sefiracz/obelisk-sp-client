@@ -396,7 +396,7 @@ public class AppConfig {
 
 
     public void loadFromProperties(final Properties props) {
-        this.setApplicationName(props.getProperty(APPLICATION_NAME, "NexU"));
+        this.setApplicationName(props.getProperty(APPLICATION_NAME, "Obelisk SP"));
 
         final String bindingPortsStr = props.getProperty(BINDING_PORTS, "9795");
         if (isNotEmpty(bindingPortsStr)) {
@@ -404,7 +404,7 @@ public class AppConfig {
         }
 
         this.setBindingIP(props.getProperty(BINDING_IP, "127.0.0.1"));
-        this.setServerUrl(props.getProperty(SERVER_URL, "http://lab.nowina.solutions/nexu"));
+        this.setServerUrl(props.getProperty(SERVER_URL, "http://lab.nowina.solutions/nexu")); //feedback url
         this.setInstallUrl(props.getProperty(INSTALL_URL, "http://nowina.lu/nexu/"));
         this.setNexuHostname(props.getProperty(NEXU_HOSTNAME, "localhost"));
         this.setHttpServerClass(props.getProperty(HTTP_SERVER_CLASS, "lu.nowina.nexu.jetty.JettyServer"));
