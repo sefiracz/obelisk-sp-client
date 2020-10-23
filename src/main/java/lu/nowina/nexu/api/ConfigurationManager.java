@@ -127,7 +127,7 @@ public class ConfigurationManager {
 	}
 
 	String getCompanyName() {
-		return "Nowina";
+		return "Sefira";
 	}
 
 	Path getCommonConfigPath(String appName) {

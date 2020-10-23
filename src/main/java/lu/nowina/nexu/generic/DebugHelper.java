@@ -49,8 +49,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 public class DebugHelper {
 
-	private static final String DEBUG_FILE_NAME = "nexu.debug";
-	private static final String LOG_FILE_NAME = "nexu.log";
+	private static final String DEBUG_FILE_NAME = "OB-SP-Client.debug";
+	private static final String LOG_FILE_NAME = "OB-SP-Client.log";
 	private static final Logger LOGGER = LoggerFactory.getLogger(DebugHelper.class);
 
 	Feedback collectDebugData(Throwable throwable) {
