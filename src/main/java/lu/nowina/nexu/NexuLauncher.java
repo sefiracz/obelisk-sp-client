@@ -79,7 +79,7 @@ public class NexuLauncher {
 		RollingFileAppender rfa = new RollingFileAppender();
 		rfa.setName("FileLogger");
 		File nexuHome = config.getNexuHome();
-		rfa.setFile(new File(nexuHome, "nexu.log").getAbsolutePath());
+		rfa.setFile(new File(nexuHome, "OB-SP-Client.log").getAbsolutePath());
 		rfa.setLayout(new PatternLayout("%d %-5p [%c{1}] %m%n"));
 		rfa.setThreshold(config.isDebug() ? Level.DEBUG : Level.INFO);
 		rfa.setAppend(true);

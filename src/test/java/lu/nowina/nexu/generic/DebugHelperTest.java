@@ -70,7 +70,7 @@ public class DebugHelperTest {
 
 	@Test
 	public void testBuildDebugFileWhenLogFound() throws IOException {
-		Path nexuLogPath = Paths.get(dummyNexuHome.getAbsolutePath(), "nexu.log");
+		Path nexuLogPath = Paths.get(dummyNexuHome.getAbsolutePath(), "OB-SP-Client.log");
 		File nexuLog = nexuLogPath.toFile();
 		nexuLog.createNewFile();
 		assertTrue(nexuLog.exists());
