@@ -150,12 +150,12 @@ public class TestMarshallUnmarshallJSON {
 			getCertificateResponse.setCertificate(certificate);
 			getCertificateResponse
 					.setCertificateChain(new CertificateToken[] { certificate, certificate, certificate });
-			getCertificateResponse.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
-			getCertificateResponse.setKeyId("keyId");
-			getCertificateResponse.setPreferredDigest(DigestAlgorithm.SHA256);
-			getCertificateResponse.setSupportedDigests(
-					Arrays.asList(DigestAlgorithm.SHA1, DigestAlgorithm.SHA256, DigestAlgorithm.SHA512));
-			getCertificateResponse.setTokenId(tokenId);
+//			getCertificateResponse.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
+//			getCertificateResponse.setKeyId("keyId");
+//			getCertificateResponse.setPreferredDigest(DigestAlgorithm.SHA256);
+//			getCertificateResponse.setSupportedDigests(
+//					Arrays.asList(DigestAlgorithm.SHA1, DigestAlgorithm.SHA256, DigestAlgorithm.SHA512));
+//			getCertificateResponse.setTokenId(tokenId);
 			final lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.GetCertificateResponse> respAPI = new lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.GetCertificateResponse>(
 					getCertificateResponse);
 			setFeedback(respAPI);

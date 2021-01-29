@@ -18,6 +18,8 @@ import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.QCStatementOids;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.x509.CertificateToken;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,6 +33,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
@@ -41,6 +44,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -52,9 +56,9 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
     private static final Logger logger = LoggerFactory.getLogger(KeySelectionController.class.getName());
 
-    private static final String ICON_UNLOCKED = "/images/unlocked.png";
-    private static final String ICON_QC = "/images/medal.png";
-    private static final String ICON_QCSD = "/images/quality.png";
+    private static final String ICON_UNLOCKED = "/images/key.png";
+    private static final String ICON_QC = "/images/qc.png";
+    private static final String ICON_QCSD = "/images/qscd.png";
 
     @FXML
     private Button select;
@@ -68,8 +72,11 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
     @FXML
     private ListView<DSSPrivateKeyEntry> listView;
 
+    private ResourceBundle resources;
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        this.resources = resources;
         this.select.setOnAction((event) -> {
             final DSSPrivateKeyEntry selectedItem = this.listView.getSelectionModel().getSelectedItem();
             logger.info("Selected item " + selectedItem);
@@ -148,11 +155,14 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         final HBox hBox = new HBox(vBoxLeft, vBox);
                         this.setGraphic(hBox);
+
+                        Tooltip tooltip = new Tooltip(getQCInfo(certificateToken));
+                        hackTooltipStartTiming(tooltip, 100);
+                        this.setTooltip(tooltip);
                     }
                 }
 
             };
-
         });
     }
 
@@ -170,6 +180,36 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         }
         return qcIconsImages;
     }
+
+    private String getQCInfo(final CertificateToken certificateToken) {
+        String tooltip = MessageFormat.format(resources.getString("certificates.status.noqc"), new Object[]{});
+        final List<String> qcStatements = DSSASN1Utils.getQCStatementsIdList(certificateToken);
+        if (qcStatements.contains(QCStatementOids.QC_COMPLIANCE.getOid())) {
+            tooltip = MessageFormat.format(resources.getString("certificates.status.qc"), new Object[]{});
+        }
+        if (qcStatements.contains(QCStatementOids.QC_SSCD.getOid())) {
+            tooltip = MessageFormat.format(resources.getString("certificates.status.qscd"), new Object[]{});
+        }
+        return tooltip;
+    }
+
+    private void hackTooltipStartTiming(Tooltip tooltip, double delayMillis) {
+        try {
+            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
+            fieldBehavior.setAccessible(true);
+            Object objBehavior = fieldBehavior.get(tooltip);
+
+            Field fieldTimer = objBehavior.getClass().getDeclaredField("activationTimer");
+            fieldTimer.setAccessible(true);
+            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
+
+            objTimer.getKeyFrames().clear();
+            objTimer.getKeyFrames().add(new KeyFrame(Duration.millis(delayMillis)));
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
+    }
+
 
     private ImageView fetchImage(final String imagePath) throws IOException {
         return new ImageView(new Image(this.getClass().getResource(imagePath).openStream()));
@@ -220,10 +260,17 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         this.back.setVisible(displayBackButton);
         final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
         final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
+        if(keys.isEmpty()) {
+          this.select.disableProperty().set(true);
+        }
+        this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
+            new Object[]{})));
         this.listView.setItems(items);
-        if(items.size()<=5) {
+        if(items.isEmpty()) {
+          this.listView.setPrefHeight(50);
+        } else if(items.size()<=5) {
         	this.listView.setPrefHeight(100.0*items.size());
-        }else {
+        } else {
         	this.listView.setPrefHeight(500);
         }
 

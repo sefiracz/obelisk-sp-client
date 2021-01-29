@@ -21,7 +21,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="210.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.MessageController">
+<BorderPane fx:id="messagePane" prefHeight="210.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.MessageController">
 
 	<bottom>
 		<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
@@ -33,7 +33,7 @@
 	<center>
 		<VBox BorderPane.alignment="CENTER">
          <children>
-            <Label text="NexU has finished" fx:id="message" styleClass="message" wrapText="true"/>
+            <Label text="Message dialog" fx:id="message" styleClass="message" wrapText="true"/>
          </children>
 		</VBox>
 	</center>

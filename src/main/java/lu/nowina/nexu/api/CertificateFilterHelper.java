@@ -1,11 +1,11 @@
 package lu.nowina.nexu.api;
 
+import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import eu.europa.esig.dss.tsl.KeyUsageBit;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Provides filtering capabilities for product adapters.
@@ -16,15 +16,28 @@ import java.util.List;
 public class CertificateFilterHelper {
 
 	public List<DSSPrivateKeyEntry> filterKeys(SignatureTokenConnection token, CertificateFilter filter) {
-		if (filter.getNonRepudiationBit()) {
-			List<DSSPrivateKeyEntry> filteredList = new ArrayList<>();
-			for (DSSPrivateKeyEntry entry : token.getKeys()) {
-				if (entry.getCertificate().checkKeyUsage(KeyUsageBit.nonRepudiation)) {
-					filteredList.add(entry);
-				}
+		List<DSSPrivateKeyEntry> fullList = token.getKeys();
+		List<DSSPrivateKeyEntry> filteredList = new ArrayList<>();
+		for (DSSPrivateKeyEntry entry : fullList) {
+			// expired
+			if (!filter.getAllowExpired() && entry.getCertificate().isExpiredOn(new Date())) {
+				filteredList.add(entry);
 			}
-			return filteredList;
+			// absolute certificate filter via SHA1 digest
+			if (filter.getCertificateSHA1() != null &&
+					!Arrays.equals(filter.getCertificateSHA1(), entry.getCertificate().getDigest(DigestAlgorithm.SHA1))) {
+				filteredList.add(entry);
+			}
+			// key usage nonRepudiation filter
+			if (filter.getNonRepudiationBit() && !entry.getCertificate().checkKeyUsage(KeyUsageBit.nonRepudiation)) {
+				filteredList.add(entry);
+			}
+			// key usage digitalSignature filter
+			if (filter.getDigitalSignatureBit() && !entry.getCertificate().checkKeyUsage(KeyUsageBit.digitalSignature)) {
+				filteredList.add(entry);
+			}
 		}
-		return token.getKeys();
+ 		fullList.removeAll(filteredList);
+		return fullList;
 	}
 }

@@ -20,11 +20,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
@@ -34,6 +36,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class ProductSelectionController extends AbstractUIOperationController<Product> implements Initializable {
+
+	@FXML
+	private BorderPane productsWindow;
 
 	@FXML
 	private Label message;
@@ -47,12 +52,16 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 	@FXML
 	private Button cancel;
 
+	@FXML
+	private Button refresh;
+
 	private ToggleGroup product;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		select.setOnAction(e -> signalEnd(getSelectedProduct()));
 		cancel.setOnAction(e -> signalUserCancel());
+		refresh.setOnAction(e -> signalEndWithStatus(CoreOperationStatus.BACK));
 
 		product = new ToggleGroup();
 		select.disableProperty().bind(product.selectedToggleProperty().isNull());
@@ -77,13 +86,17 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 			final List<Product> products = (List<Product>) params[2];
 			final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
+			int height = 0;
 			for (final DetectedCard card : cards) {
 				final RadioButton button = new RadioButton(api.getLabel(card));
 				button.setToggleGroup(product);
 				button.setUserData(card);
 				button.setMnemonicParsing(false);
 				radioButtons.add(button);
+				height+=50;
 			}
+			height = Math.min(height, 300);
+			productsWindow.setPrefHeight(productsWindow.getPrefHeight()+height);
 
 			for (final Product p : products) {
 				final RadioButton button = new RadioButton(api.getLabel(p));

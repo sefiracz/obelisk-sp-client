@@ -13,17 +13,20 @@
  */
 package lu.nowina.nexu.rest;
 
+import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.ToBeSigned;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.plugin.*;
 import lu.nowina.nexu.json.GsonHelper;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,12 +52,14 @@ public class RestHttpPlugin implements HttpPlugin {
 		final String target = req.getTarget();
 		logger.info("PathInfo " + target);
 
-		final String payload = IOUtils.toString(req.getInputStream());
+		final String payload = IOUtils.toString(req.getInputStream(), StandardCharsets.UTF_8);
 		logger.info("Payload '" + payload + "'");
 
 		switch(target) {
 		case "/sign":
 			return signRequest(api, req, payload);
+		case "/selectCertificate":
+		  return selectCertificate(api, req, payload);
 		case "/certificates":
 			return getCertificates(api, req, payload);
 		case "/identityInfo":
@@ -114,7 +119,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
-	private HttpResponse getCertificates(NexuAPI api, HttpRequest req, String payload) {
+	private synchronized HttpResponse getCertificates(NexuAPI api, HttpRequest req, String payload) {
 		logger.info("API call certificates");
 		final GetCertificateRequest r;
 		if (StringUtils.isEmpty(payload)) {
@@ -134,6 +139,12 @@ public class RestHttpPlugin implements HttpPlugin {
 					certificateFilter.setNonRepudiationBit(Boolean.parseBoolean(nonRepudiation));
 					r.setCertificateFilter(certificateFilter);
 				}
+				final String digitalSignature = req.getParameter("digitalSignature");
+				if(isNotBlank(digitalSignature)) {
+					final CertificateFilter certificateFilter = new CertificateFilter();
+					certificateFilter.setDigitalSignatureBit(Boolean.parseBoolean(digitalSignature));
+					r.setCertificateFilter(certificateFilter);
+				}
 			}
 
 		} else {
@@ -146,7 +157,30 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			logger.info("Call API");
 			final Execution<?> respObj = api.getCertificate(r);
-			return toHttpResponse(respObj);
+			return toHttpResponse(respObj); // GetCertificateResponse
+		}
+	}
+
+	private HttpResponse selectCertificate(NexuAPI api, HttpRequest req, String payload) {
+		final SelectCertificateRequest r;
+		if (StringUtils.isEmpty(payload)) {
+			r = new SelectCertificateRequest();
+			final String certificate = req.getParameter("certificate");
+			if (certificate != null) {
+				logger.info("Certificate: " + certificate);
+				r.setCertificate(DSSUtils.loadCertificate(Base64.decodeBase64(certificate)));
+			}
+		} else {
+			r = GsonHelper.fromJson(payload, SelectCertificateRequest.class);
+		}
+
+		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
+		if(invalidRequestHttpResponse != null) {
+			return invalidRequestHttpResponse;
+		} else {
+			logger.info("Call API");
+			final Execution<?> respObj = api.selectCertificate(r);
+			return toHttpResponse(respObj); // SelectCertificateResponse
 		}
 	}
 

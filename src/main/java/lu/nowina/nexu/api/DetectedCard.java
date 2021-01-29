@@ -13,18 +13,18 @@
  */
 package lu.nowina.nexu.api;
 
+import lu.nowina.nexu.generic.SCInfo;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "detectedCard", propOrder = { "atr", "terminalIndex" })
-public class DetectedCard implements Product {
+@XmlType(name = "detectedCard", propOrder = { "atr", "terminalIndex", "terminalLabel" })
+public class DetectedCard extends AbstractProduct {
 
 	/**
 	 * The atr.
@@ -39,15 +39,18 @@ public class DetectedCard implements Product {
 	/**
 	 * The terminal label.
 	 */
-	@XmlTransient
 	private String terminalLabel;
 
 	public DetectedCard() {
+		super();
+		this.type = KeystoreType.PKCS11;
 	}
 
 	public DetectedCard(String atr, int terminalIndex) {
+		super();
 		this.atr = atr;
 		this.terminalIndex = terminalIndex;
+		this.type = KeystoreType.PKCS11;
 	}
 
 	public DetectedCard(String atr, int terminalIndex, String terminalLabel) {
@@ -55,6 +58,7 @@ public class DetectedCard implements Product {
 		this.atr = atr;
 		this.terminalIndex = terminalIndex;
 		this.terminalLabel = terminalLabel;
+		this.type = KeystoreType.PKCS11;
 	}
 
 	/**
@@ -134,9 +138,35 @@ public class DetectedCard implements Product {
 	}
 
 	@Override
+	public String getSimpleLabel() {
+		return terminalLabel;
+	}
+
+	@Override
 	public String getLabel() {
 		return StringEscapeUtils.unescapeJava(MessageFormat.format(
 				ResourceBundle.getBundle("bundles/nexu").getString("product.selection.detected.card.button.label"),
 				this.getTerminalIndex(), this.getTerminalLabel(), this.getAtr()));
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()))) return false;
+
+		DetectedCard that = (DetectedCard) o;
+
+		if (!getCertificateId().equals(that.getCertificateId())) return false;
+		if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+		return getAtr().equalsIgnoreCase(that.getAtr());
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getCertificateId().hashCode();
+		result = 31 * result + getKeyAlias().hashCode();
+		result = 31 * result + getAtr().hashCode();
+		return result;
+	}
+
 }

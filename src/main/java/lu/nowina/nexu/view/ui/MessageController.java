@@ -17,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
@@ -26,6 +27,9 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MessageController extends AbstractUIOperationController<Void> implements Initializable {
+
+	@FXML
+	private BorderPane messagePane;
 
 	@FXML
 	private Label message;
@@ -48,13 +52,18 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
 	@Override
 	public void init(Object... params) {
-		if (params.length > 0) {
+		if (params.length >= 2) {
 			final String value = (String) params[0];
 			if (value != null) {
 				message.setText(
 						MessageFormat.format(resources.getString(value), Arrays.copyOfRange(params, 1, params.length)));
 			}
 			StageHelper.getInstance().setTitle((String) params[1], "message.title");
+			if(params.length == 4) {
+				int width = (int) params[2];
+				int height = (int) params[3];
+				this.messagePane.setPrefSize(width, height);
+			}
 		} else {
 			StageHelper.getInstance().setTitle("", "message.title");
 			message.setText(defaultErrorText);

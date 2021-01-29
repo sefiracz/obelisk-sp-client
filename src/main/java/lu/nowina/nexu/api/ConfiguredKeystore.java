@@ -28,17 +28,13 @@ import java.util.ResourceBundle;
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "configuredKeystore", propOrder = { "url", "type" })
-public class ConfiguredKeystore implements Product {
+@XmlType(name = "configuredKeystore", propOrder = { "url" })
+public class ConfiguredKeystore extends AbstractProduct {
 
 	private String url;
-	private KeystoreType type;
-	@XmlTransient
-	private boolean toBeSaved;
 
 	public ConfiguredKeystore() {
 		super();
-		this.toBeSaved = false;
 	}
 
 	/**
@@ -57,38 +53,9 @@ public class ConfiguredKeystore implements Product {
 		this.url = url;
 	}
 
-	/**
-	 * Returns the type of the configured keystore.
-	 * @return The type of the configured keystore.
-	 */
-	public KeystoreType getType() {
-		return type;
-	}
-
-	/**
-	 * Sets the type of the configured keystore.
-	 * @param type The type of the configured keystore.
-	 */
-	public void setType(KeystoreType type) {
-		this.type = type;
-	}
-
-	/**
-	 * Returns <code>true</code> if the <code>ConfiguredKeystore</code> must be saved and
-	 * <code>false</code> otherwise.
-	 * @return <code>true</code> if the <code>ConfiguredKeystore</code> must be saved and
-	 * <code>false</code> otherwise.
-	 */
-	public boolean isToBeSaved() {
-		return toBeSaved;
-	}
-
-	/**
-	 * Sets the value of the <code>toBeSaved</code> property.
-	 * @param toBeSaved The new value for the <code>toBeSaved</code> property.
-	 */
-	public void setToBeSaved(boolean toBeSaved) {
-		this.toBeSaved = toBeSaved;
+	@Override
+	public String getSimpleLabel() {
+		return this.getUrl().substring(this.getUrl().lastIndexOf('/') + 1) +" ("+this.getType().getLabel()+")";
 	}
 
 	@Override
@@ -96,5 +63,25 @@ public class ConfiguredKeystore implements Product {
 		return StringEscapeUtils.unescapeJava(MessageFormat.format(
 				ResourceBundle.getBundle("bundles/nexu").getString("product.selection.configured.keystore.button.label"),
 				this.getType().getLabel(), this.getUrl().substring(this.getUrl().lastIndexOf('/') + 1)));
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ConfiguredKeystore that = (ConfiguredKeystore) o;
+
+		if (!getCertificateId().equals(that.getCertificateId())) return false;
+		if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+		return getUrl().equals(that.getUrl());
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getCertificateId().hashCode();
+		result = 31 * result + getKeyAlias().hashCode();
+		result = 31 * result + getUrl().hashCode();
+		return result;
 	}
 }

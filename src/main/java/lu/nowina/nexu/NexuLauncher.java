@@ -25,11 +25,17 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Properties;
 
 public class NexuLauncher {
@@ -57,6 +63,7 @@ public class NexuLauncher {
 
 		proxyConfigurer = new ProxyConfigurer(config, new UserPreferences(config.getApplicationName()));
 
+		preLaunchCleanup();
 		beforeLaunch();
 
 		boolean started = checkAlreadyStarted();
@@ -104,6 +111,12 @@ public class NexuLauncher {
 		// Do nothing by contract
 	}
 
+	private void preLaunchCleanup() {
+		String tmpdir = System.getProperty("java.io.tmpdir");
+		File[] files = new File(tmpdir).listFiles((dir, name) -> name.startsWith("obelisk-sp_pkcs11-"));
+		Arrays.stream(files != null ? files : new File[0]).forEach(File::delete);
+	}
+
 	public static AppConfig getConfig() {
 		return config;
 	}
@@ -129,8 +142,8 @@ public class NexuLauncher {
 				continue;
 			}
 			try (InputStream in = connection.getInputStream()) {
-				final String info = IOUtils.toString(in);
-				logger.error("NexU already started. Version '" + info + "'");
+				final String info = IOUtils.toString(in, StandardCharsets.UTF_8);
+				logger.error("OBELISK Signing Portal already started. Version '" + info + "'");
 				return true;
 			} catch (Exception e) {
 				logger.info("No " + url.toString() + " detected, " + e.getMessage());
@@ -139,12 +152,10 @@ public class NexuLauncher {
 		return false;
 	}
 
-	private final Properties loadProperties() throws IOException {
-
+	private Properties loadProperties() throws IOException {
 		Properties props = new Properties();
 		loadPropertiesFromClasspath(props);
 		return props;
-
 	}
 
 	private void loadPropertiesFromClasspath(Properties props) throws IOException {

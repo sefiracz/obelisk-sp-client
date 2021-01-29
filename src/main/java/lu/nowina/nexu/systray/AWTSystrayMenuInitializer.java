@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Implementation of {@link SystrayMenuInitializer} using AWT.
@@ -42,6 +43,7 @@ public class AWTSystrayMenuInitializer implements SystrayMenuInitializer {
 
 			for(final SystrayMenuItem systrayMenuItem : systrayMenuItems) {
 				final MenuItem mi = new MenuItem(systrayMenuItem.getLabel());
+				mi.setName(systrayMenuItem.getName());
 				mi.addActionListener((l) -> systrayMenuItem.getFutureOperationInvocation().call(operationFactory));
 				popup.add(mi);
 			}
@@ -51,6 +53,7 @@ public class AWTSystrayMenuInitializer implements SystrayMenuInitializer {
 			trayIcon.setImageAutoSize(true);
 
 			final MenuItem mi = new MenuItem(exitMenuItem.getLabel());
+			mi.setName(exitMenuItem.getName());
 			mi.addActionListener((l) -> exit(operationFactory, exitMenuItem, trayIcon));
 			popup.add(mi);
 
@@ -64,9 +67,21 @@ public class AWTSystrayMenuInitializer implements SystrayMenuInitializer {
 		}
 	}
 
+	@Override
+	public void refreshLabels() {
+		TrayIcon[] trayIcons = SystemTray.getSystemTray().getTrayIcons();
+		if (trayIcons.length > 0) {
+			TrayIcon trayIcon = trayIcons[0];
+			for (int i = 0; i < trayIcon.getPopupMenu().getItemCount(); i++) {
+				MenuItem item = trayIcon.getPopupMenu().getItem(i);
+				item.setLabel(ResourceBundle.getBundle("bundles/nexu").getString(item.getName()));
+			}
+		}
+	}
+
 	private void exit(final OperationFactory operationFactory, final SystrayMenuItem exitMenuItem,
 			final TrayIcon trayIcon) {
 		SystemTray.getSystemTray().remove(trayIcon);
 		exitMenuItem.getFutureOperationInvocation().call(operationFactory);
-	}
+ 	}
 }

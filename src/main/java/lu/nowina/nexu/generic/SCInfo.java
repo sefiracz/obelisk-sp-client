@@ -14,6 +14,7 @@
 package lu.nowina.nexu.generic;
 
 import eu.europa.esig.dss.DigestAlgorithm;
+import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.EnvironmentInfo;
 
 import javax.xml.bind.annotation.*;
@@ -28,9 +29,7 @@ import java.util.List;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SCInfo {
-
-	private String atr;
+public class SCInfo extends DetectedCard {
 
 	@XmlElementWrapper(name = "connectionInfos")
 	@XmlElement(name = "connectionInfo")
@@ -71,14 +70,6 @@ public class SCInfo {
 
 	public void setInfos(List<ConnectionInfo> infos) {
 		this.infos = infos;
-	}
-
-	public String getAtr() {
-		return atr;
-	}
-
-	public void setAtr(String atr) {
-		this.atr = atr;
 	}
 
 	public String getLabel() {

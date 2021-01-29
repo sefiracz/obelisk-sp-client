@@ -22,7 +22,7 @@ import lu.nowina.nexu.api.Execution;
 
 public class GsonHelper {
 
-	private static final Gson customGson = new GsonBuilder()
+	private static final Gson customGson = new GsonBuilder().disableHtmlEscaping()
 			.registerTypeHierarchyAdapter(byte[].class, new ByteArrayTypeAdapter())
 			.registerTypeAdapter(CertificateToken.class, new CertificateTypeAdapter()).create();
 

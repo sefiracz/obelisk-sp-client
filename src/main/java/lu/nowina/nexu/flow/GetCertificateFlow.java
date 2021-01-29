@@ -13,9 +13,11 @@
  */
 package lu.nowina.nexu.flow;
 
+import eu.europa.esig.dss.DSSASN1Utils;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import eu.europa.esig.dss.x509.CertificateToken;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
@@ -23,9 +25,11 @@ import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.security.auth.x500.X500Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +61,9 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     				final OperationResult<Product> selectProductOperationResult = operation.perform();
     				if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     					selectedProduct = selectProductOperationResult.getResult();
-    				} else {
+    				} else if (selectProductOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
+    					continue;
+						} else {
     					return this.handleErrorOperationResult(selectProductOperationResult);
     				}
     			}
@@ -72,7 +78,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     				if (configureProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     					matchingProductAdapters = configureProductOperationResult.getResult();
     					final OperationResult<Map<TokenOperationResultKey, Object>> createTokenOperationResult = this.getOperationFactory()
-    							.getOperation(CreateTokenOperation.class, api, matchingProductAdapters).perform();
+    							.getOperation(CreateTokenOperation.class, api, matchingProductAdapters, selectedProduct).perform();
     					if (createTokenOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     						final Map<TokenOperationResultKey, Object> map = createTokenOperationResult.getResult();
     						final TokenId tokenId = (TokenId) map.get(TokenOperationResultKey.TOKEN_ID);
@@ -89,35 +95,35 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     							if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     								final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 
-    								if ((Boolean) map.get(TokenOperationResultKey.ADVANCED_CREATION)) {
-    									this.getOperationFactory().getOperation(AdvancedCreationFeedbackOperation.class, api, map).perform();
-    								}
-
-    								this.getOperationFactory().getOperation(SaveProductOperation.class, productAdapter, product, api).perform();
+										// save full config
+										this.getOperationFactory().getOperation(SaveFullSelectionOperation.class, token,
+												api, product, productAdapter, key, map).perform();
 
     								final GetCertificateResponse resp = new GetCertificateResponse();
-    								resp.setTokenId(tokenId);
-
+										// signing certificate
     								final CertificateToken certificate = key.getCertificate();
     								resp.setCertificate(certificate);
-    								resp.setKeyId(certificate.getDSSIdAsString());
-    								resp.setEncryptionAlgorithm(certificate.getEncryptionAlgorithm());
+										resp.setEncryptionAlgorithm(certificate.getEncryptionAlgorithm());
+										// certificate chain
+										final CertificateToken[] certificateChain = key.getCertificateChain();
+										if (certificateChain != null) {
+											resp.setCertificateChain(certificateChain);
+										}
+										// subject info
+										X500Principal subjectX500Principal = certificate.getSubjectX500Principal();
+    								resp.setSubjectCN(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, subjectX500Principal));
+										resp.setSubjectOrg(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.O, subjectX500Principal));
+										resp.setNotBefore(Utils.formatXsDateTime(certificate.getNotBefore()));
+										resp.setNotAfter(Utils.formatXsDateTime(certificate.getNotAfter()));
+										resp.setSerialNumber(certificate.getSerialNumber());
+										// issuer info
+										X500Principal issuerX500Principal = certificate.getIssuerX500Principal();
+										resp.setIssuerCN(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, issuerX500Principal));
+										resp.setIssuerOrg(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.O, issuerX500Principal));
 
-    								final CertificateToken[] certificateChain = key.getCertificateChain();
-    								if (certificateChain != null) {
-    									resp.setCertificateChain(certificateChain);
-    								}
-
-    								if (productAdapter.canReturnSuportedDigestAlgorithms(product)) {
-    									resp.setSupportedDigests(productAdapter.getSupportedDigestAlgorithms(product));
-    									resp.setPreferredDigest(productAdapter.getPreferredDigestAlgorithm(product));
-    								}
-
-    								if (api.getAppConfig().isEnablePopUps() && api.getAppConfig().isEnableInformativePopUps()) {
-    									this.getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-    											"certificates.flow.finished"
-    									}).perform();
-    								}
+										this.getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
+												"certificates.flow.finished", api.getAppConfig().getApplicationName(), 370, 120
+										}).perform();
     								return new Execution<GetCertificateResponse>(resp);
     							} else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
     								continue;

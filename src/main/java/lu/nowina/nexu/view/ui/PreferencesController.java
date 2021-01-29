@@ -18,14 +18,18 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import lu.nowina.nexu.LocaleConfigurer;
 import lu.nowina.nexu.NexuLauncher;
 import lu.nowina.nexu.ProxyConfigurer;
 import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.OS;
+import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.object.model.AppLanguage;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class PreferencesController extends AbstractUIOperationController<Void> implements Initializable {
@@ -63,9 +67,15 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@FXML
 	private PasswordField proxyPassword;
 
+	@FXML
+	private ComboBox<AppLanguage> language;
+
 	private UserPreferences userPreferences;
 
 	private BooleanProperty readOnly;
+
+	private final AppLanguage cz = new AppLanguage("Čeština", new Locale("cs", "CZ"));
+	private final AppLanguage en =new AppLanguage("English", Locale.ENGLISH);
 
 	private static final boolean isWindows;
 
@@ -123,6 +133,9 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		proxyPassword.disableProperty().bind(proxyAuthentication.disabledProperty().or(
 				proxyAuthentication.selectedProperty().not()));
 
+		language.getItems().add(cz);
+		language.getItems().add(en);
+
 		ok.setOnAction((evt) -> {
 			final Integer port;
 			try {
@@ -144,8 +157,11 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 			userPreferences.setProxyUsername(proxyUsername.isDisabled() ? null : proxyUsername.getText());
 			userPreferences.setProxyPassword(proxyPassword.isDisabled() ? null : proxyPassword.getText());
 			userPreferences.setProxyUseHttps(useHttps.isDisabled() ? null : useHttps.isSelected());
+			userPreferences.setLanguage(language.isDisabled() ? null :
+					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
 
 			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
+			LocaleConfigurer.setUserPreferences(userPreferences);
 
 			signalEnd(null);
 		});
@@ -161,8 +177,14 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 
 	@Override
 	public void init(Object... params) {
+		StageHelper.getInstance().setTitle("", "preferences.header");
 		final ProxyConfigurer proxyConfigurer = (ProxyConfigurer) params[0];
 		init(proxyConfigurer);
+		if(Locale.getDefault().getLanguage().equals(cz.getLocale().getLanguage())) {
+			language.getSelectionModel().select(cz);
+		} else {
+			language.getSelectionModel().select(en);
+		}
 		this.userPreferences = (UserPreferences) params[1];
 		this.readOnly.set((boolean) params[2]);
 	}

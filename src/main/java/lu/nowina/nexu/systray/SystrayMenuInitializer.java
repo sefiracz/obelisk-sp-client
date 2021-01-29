@@ -37,4 +37,9 @@ public interface SystrayMenuInitializer {
     void init(final String tooltip, final URL trayIconURL, final OperationFactory operationFactory,
     		final SystrayMenuItem exitMenuItem, final SystrayMenuItem... systrayMenuItems);
 
+  /**
+   * Refresh labels of systray menu items
+   */
+  void refreshLabels();
+
 }

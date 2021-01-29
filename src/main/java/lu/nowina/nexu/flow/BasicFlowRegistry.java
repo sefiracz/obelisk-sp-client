@@ -26,6 +26,8 @@ public class BasicFlowRegistry implements FlowRegistry {
 	@SuppressWarnings("unchecked")
 	public Flow<?, ?> getFlow(String code, UIDisplay display, NexuAPI api) {
 		switch (code) {
+	  case SELECT_CERTIFICATE_FLOW:
+		  return new SelectCertificateFlow(display, api);
 		case CERTIFICATE_FLOW:
 			return new GetCertificateFlow(display, api);
 		case SIGNATURE_FLOW:

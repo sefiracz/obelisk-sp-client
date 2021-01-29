@@ -16,13 +16,29 @@ package lu.nowina.nexu.api;
 public class CertificateFilter {
 
 	private Purpose purpose;
-	
-	/*
+
+	/**
+	 * if true the expiration validity is not checked. If false, only certificate with valid date will be
+	 * returned.
+	 */
+	private Boolean allowExpired = false;
+
+	/**
 	 * if false the nonRepudiation bit is not checked. If true, only certificate with nonRepudiationKeyUsage will be 
 	 * returned.
 	 */
-	private Boolean nonRepudiationBit = false;
-	
+	private Boolean nonRepudiationBit = true;
+
+	/**
+	 * if false the digitalSignature bit is not checked. If true, only certificate with digitalSignatureKeyUsage will be
+	 * returned.
+	 */
+	private Boolean digitalSignatureBit = false;
+
+	/**
+	 * if null the certificate SHA1 digest is not checked. If value is set, only certificate with equal digest will be
+	 * returned.
+	 */
 	private byte[] certificateSHA1;
 
 	public CertificateFilter() {
@@ -61,4 +77,19 @@ public class CertificateFilter {
 		this.nonRepudiationBit = nonRepudiationBit;
 	}
 
+	public Boolean getDigitalSignatureBit() {
+		return digitalSignatureBit;
+	}
+
+	public void setDigitalSignatureBit(Boolean digitalSignatureBit) {
+		this.digitalSignatureBit = digitalSignatureBit;
+	}
+
+	public Boolean getAllowExpired() {
+		return allowExpired;
+	}
+
+	public void setAllowExpired(Boolean allowExpired) {
+		this.allowExpired = allowExpired;
+	}
 }

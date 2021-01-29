@@ -31,6 +31,7 @@ import java.util.ResourceBundle;
 public class SystrayMenu {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystrayMenu.class.getName());
+	private SystrayMenuInitializer systrayMenuInitializer;
 
 	public SystrayMenu(OperationFactory operationFactory, NexuAPI api, UserPreferences prefs) {
 		final ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
@@ -39,14 +40,14 @@ public class SystrayMenu {
 		final SystrayMenuItem[] systrayMenuItems = new SystrayMenuItem[extensionSystrayMenuItems.size() + 2];
 
 		systrayMenuItems[0] = createAboutSystrayMenuItem(operationFactory, api, resources);
-		systrayMenuItems[1] = createPreferencesSystrayMenuItem(operationFactory, api, prefs, resources);
+		systrayMenuItems[1] = createPreferencesSystrayMenuItem(operationFactory, api, prefs);
 
 		int i = 2;
 		for(final SystrayMenuItem systrayMenuItem : extensionSystrayMenuItems) {
 			systrayMenuItems[i++] = systrayMenuItem;
 		}
 
-		final SystrayMenuItem exitMenuItem = createExitSystrayMenuItem(resources);
+		final SystrayMenuItem exitMenuItem = createExitSystrayMenuItem();
 
 		final String tooltip = api.getAppConfig().getApplicationName();
 		final URL trayIconURL = this.getClass().getResource("/tray-icon.png");
@@ -55,15 +56,15 @@ public class SystrayMenu {
 			case WINDOWS:
 			case MACOSX:
 				// Use reflection to avoid wrong initialization issues
-				Class.forName("lu.nowina.nexu.systray.AWTSystrayMenuInitializer")
-					.asSubclass(SystrayMenuInitializer.class).newInstance()
-					.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
+				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.AWTSystrayMenuInitializer")
+					.asSubclass(SystrayMenuInitializer.class).newInstance();
+				systrayMenuInitializer.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
 				break;
 			case LINUX:
 				// Use reflection to avoid wrong initialization issues
-				Class.forName("lu.nowina.nexu.systray.DorkboxSystrayMenuInitializer")
-					.asSubclass(SystrayMenuInitializer.class).newInstance()
-					.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
+				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.DorkboxSystrayMenuInitializer")
+					.asSubclass(SystrayMenuInitializer.class).newInstance();
+				systrayMenuInitializer.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
 				break;
 			case NOT_RECOGNIZED:
 				LOGGER.warn("System tray is currently not supported for NOT_RECOGNIZED OS.");
@@ -71,11 +72,7 @@ public class SystrayMenu {
 			default:
 				throw new IllegalArgumentException("Unhandled value: " + api.getEnvironmentInfo().getOs());
 			}
-		} catch (InstantiationException e) {
-			LOGGER.error("Cannot initialize systray menu", e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Cannot initialize systray menu", e);
-		} catch (ClassNotFoundException e) {
+		} catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
 			LOGGER.error("Cannot initialize systray menu", e);
 		}
 	}
@@ -83,9 +80,15 @@ public class SystrayMenu {
 	private SystrayMenuItem createAboutSystrayMenuItem(final OperationFactory operationFactory, final NexuAPI api,
 			final ResourceBundle resources) {
 		return new SystrayMenuItem() {
+
+			@Override
+			public String getName() {
+				return "systray.menu.about";
+			}
+
 			@Override
 			public String getLabel() {
-				return resources.getString("systray.menu.about");
+				return ResourceBundle.getBundle("bundles/nexu").getString(getName());
 			}
 
 			@Override
@@ -103,11 +106,17 @@ public class SystrayMenu {
 	}
 
 	private SystrayMenuItem createPreferencesSystrayMenuItem(final OperationFactory operationFactory,
-			final NexuAPI api, final UserPreferences prefs, final ResourceBundle resources) {
+			final NexuAPI api, final UserPreferences prefs) {
 		return new SystrayMenuItem() {
+
+			@Override
+			public String getName() {
+				return "systray.menu.preferences";
+			}
+
 			@Override
 			public String getLabel() {
-				return resources.getString("systray.menu.preferences");
+				return ResourceBundle.getBundle("bundles/nexu").getString(getName());
 			}
 
 			@Override
@@ -125,11 +134,17 @@ public class SystrayMenu {
 		};
 	}
 
-	private SystrayMenuItem createExitSystrayMenuItem(final ResourceBundle resources) {
+	private SystrayMenuItem createExitSystrayMenuItem() {
 		return new SystrayMenuItem() {
+
+			@Override
+			public String getName() {
+				return "systray.menu.exit";
+			}
+
 			@Override
 			public String getLabel() {
-				return resources.getString("systray.menu.exit");
+				return ResourceBundle.getBundle("bundles/nexu").getString(getName());
 			}
 
 			@Override
@@ -144,5 +159,9 @@ public class SystrayMenu {
 				};
 			}
 		};
+	}
+
+	public SystrayMenuInitializer getSystrayMenuInitializer() {
+		return systrayMenuInitializer;
 	}
 }

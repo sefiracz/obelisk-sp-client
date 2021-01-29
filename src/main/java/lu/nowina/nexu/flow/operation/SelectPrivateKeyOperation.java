@@ -13,17 +13,24 @@
  */
 package lu.nowina.nexu.flow.operation;
 
+import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.CancelledOperationException;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.CertificateFilter;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.ProductAdapter;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.generic.ProductPasswordManager;
 import lu.nowina.nexu.view.core.UIOperation;
+import org.apache.commons.lang.StringUtils;
+import sun.security.pkcs11.wrapper.PKCS11RuntimeException;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
@@ -90,56 +97,51 @@ public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPri
             }
         } catch(final CancelledOperationException e) {
             return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
+        } catch(PKCS11RuntimeException e) {
+            this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
+                "key.selection.pkcs11.not.found", api.getAppConfig().getApplicationName(), 370, 150
+            }).perform();
+            return new OperationResult<>(CoreOperationStatus.BACK);
+        } catch (Exception e) {
+            if(!Utils.checkPasswordInput(e, operationFactory, api))
+                throw e;
+            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
         }
 
         DSSPrivateKeyEntry key = null;
 
-        final Iterator<DSSPrivateKeyEntry> it = keys.iterator();
-        while (it.hasNext()) {
-            final DSSPrivateKeyEntry e = it.next();
-            if ("CN=Token Signing Public Key".equals(e.getCertificate().getCertificate().getIssuerDN().getName())) {
-                it.remove();
-            }
-        }
+        // Microsoft keystore
+        keys.removeIf(k -> "CN=Token Signing Public Key".equals(k.getCertificate().getCertificate().getIssuerDN().getName()));
 
-        if (keys.isEmpty()) {
-            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY);
-        } else if (keys.size() == 1) {
-            key = keys.get(0);
-            if((this.keyFilter != null) && !key.getCertificate().getDSSIdAsString().equals(this.keyFilter)) {
+        if (this.keyFilter != null) {
+            for (final DSSPrivateKeyEntry k : keys) {
+                if (k.getCertificate().getDSSIdAsString().equals(this.keyFilter)) {
+                    key = k;
+                    break;
+                }
+            }
+            if(key == null) {
                 return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
-            } else {
-                return new OperationResult<DSSPrivateKeyEntry>(key);
+            }
+        } else if(this.api.getAppConfig().isEnablePopUps()) {
+            @SuppressWarnings("unchecked")
+            final OperationResult<DSSPrivateKeyEntry> op =
+                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml", new Object[]{keys, this.api.getAppConfig().getApplicationName(), this.api.getAppConfig().isDisplayBackButton()}).perform();
+            if(op.getStatus().equals(CoreOperationStatus.BACK)) {
+                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
+            }
+            if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+                return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
+            }
+            key = op.getResult();
+            if(key == null) {
+                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
             }
         } else {
-            if (this.keyFilter != null) {
-                for (final DSSPrivateKeyEntry k : keys) {
-                    if (k.getCertificate().getDSSIdAsString().equals(this.keyFilter)) {
-                        key = k;
-                        break;
-                    }
-                }
-                if(key == null) {
-                    return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
-                }
-            } else if(this.api.getAppConfig().isEnablePopUps()) {
-                @SuppressWarnings("unchecked")
-                final OperationResult<DSSPrivateKeyEntry> op =
-                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml", new Object[]{keys, this.api.getAppConfig().getApplicationName(), this.api.getAppConfig().isDisplayBackButton()}).perform();
-                if(op.getStatus().equals(CoreOperationStatus.BACK)) {
-                    return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
-                }
-                if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-                    return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
-                }
-                key = op.getResult();
-                if(key == null) {
-                    return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
-                }
-            } else {
-                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
-            }
-            return new OperationResult<DSSPrivateKeyEntry>(key);
+            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
         }
+        return new OperationResult<DSSPrivateKeyEntry>(key);
     }
+
+
 }

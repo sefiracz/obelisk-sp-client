@@ -52,6 +52,7 @@ public class ProductDatabaseLoader {
 				saveAs(db, f);
 			}
 		});
+		db.initialize();
 		return db;
 	}
 

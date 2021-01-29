@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -148,7 +149,7 @@ public class AppConfig {
             if (versionResourceURL == null) {
                 logger.error("Cannot retrieve application version: version.txt not found");
             } else {
-                this.applicationVersion = IOUtils.toString(versionResourceURL);
+                this.applicationVersion = IOUtils.toString(versionResourceURL, StandardCharsets.UTF_8);
             }
         } catch (final IOException e) {
             logger.error("Cannot retrieve application version: " + e.getMessage(), e);

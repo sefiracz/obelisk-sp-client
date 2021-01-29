@@ -65,6 +65,19 @@ RadioButton {
 
 }
 
+.btn-green {
+
+    -fx-background-color: #4ab16b;
+    -fx-text-fill: white;
+
+}
+
+.btn-green:hover {
+
+    -fx-border-color:yellow;
+
+}
+
 .btn-primary {
 
     -fx-background-color: #ae0000;

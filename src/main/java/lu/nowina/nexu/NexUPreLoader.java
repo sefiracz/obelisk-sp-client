@@ -89,7 +89,7 @@ public class NexUPreLoader extends Preloader {
 			delay.setOnFinished(event -> primaryStage.close());
 			delay.play();
 		}
-    }
+  }
 
 	@Override
 	public boolean handleErrorNotification(ErrorNotification info) {

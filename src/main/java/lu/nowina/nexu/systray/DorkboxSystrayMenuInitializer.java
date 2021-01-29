@@ -21,7 +21,9 @@ import lu.nowina.nexu.api.flow.OperationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.event.ActionListener;
 import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Implementation of {@link SystrayMenuInitializer} using
@@ -32,6 +34,8 @@ import java.net.URL;
 public class DorkboxSystrayMenuInitializer implements SystrayMenuInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DorkboxSystrayMenuInitializer.class.getName());
+
+	private int menuItems = 0;
 
 	public DorkboxSystrayMenuInitializer() {
 		super();
@@ -50,12 +54,35 @@ public class DorkboxSystrayMenuInitializer implements SystrayMenuInitializer {
 
 		final Menu menu = systemTray.getMenu();
 		for(final SystrayMenuItem systrayMenuItem : systrayMenuItems) {
-			menu.add(new MenuItem(systrayMenuItem.getLabel(),
+			menu.add(new LocalizedMenuItem(systrayMenuItem.getLabel(), systrayMenuItem.getName(),
 					(e) -> systrayMenuItem.getFutureOperationInvocation().call(operationFactory)));
+			menuItems++;
 		}
 
-		menu.add(new MenuItem(exitMenuItem.getLabel(),
+		menu.add(new LocalizedMenuItem(exitMenuItem.getLabel(), exitMenuItem.getName(),
 				(e) -> exitMenuItem.getFutureOperationInvocation().call(operationFactory)));
+		menuItems++;
+	}
+
+	public void refreshLabels() {
+		for (int i = 0; i < menuItems; i++) {
+			LocalizedMenuItem entry = (LocalizedMenuItem) SystemTray.getNative().getMenu().get(i);
+			entry.setText(ResourceBundle.getBundle("bundles/nexu").getString(entry.getName()));
+		}
+	}
+
+	private static class LocalizedMenuItem extends MenuItem {
+
+		private final String name;
+
+		public LocalizedMenuItem(String text, String name, ActionListener callback) {
+			super(text, callback);
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
 }

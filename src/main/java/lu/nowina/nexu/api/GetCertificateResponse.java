@@ -13,17 +13,12 @@
  */
 package lu.nowina.nexu.api;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.EncryptionAlgorithm;
 import eu.europa.esig.dss.x509.CertificateToken;
 
-import java.util.List;
+import java.math.BigInteger;
 
 public class GetCertificateResponse {
-
-	private TokenId tokenId;
-
-	private String keyId;
 
 	private CertificateToken certificate;
 
@@ -31,28 +26,22 @@ public class GetCertificateResponse {
 
 	private EncryptionAlgorithm encryptionAlgorithm;
 
-	private List<DigestAlgorithm> supportedDigests;
+	private String subjectCN;
 
-	private DigestAlgorithm preferredDigest;
+	private String subjectOrg;
+
+	private String notBefore;
+
+	private String notAfter;
+
+	private BigInteger serialNumber;
+
+	private String issuerCN;
+
+	private String issuerOrg;
 
 	public GetCertificateResponse() {
 		super();
-	}
-
-	public TokenId getTokenId() {
-		return tokenId;
-	}
-
-	public void setTokenId(TokenId tokenId) {
-		this.tokenId = tokenId;
-	}
-
-	public String getKeyId() {
-		return keyId;
-	}
-
-	public void setKeyId(String keyId) {
-		this.keyId = keyId;
 	}
 
 	public CertificateToken getCertificate() {
@@ -79,19 +68,59 @@ public class GetCertificateResponse {
 		this.encryptionAlgorithm = encryptionAlgorithm;
 	}
 
-	public List<DigestAlgorithm> getSupportedDigests() {
-		return supportedDigests;
+	public String getSubjectCN() {
+		return subjectCN;
 	}
 
-	public void setSupportedDigests(List<DigestAlgorithm> supportedDigests) {
-		this.supportedDigests = supportedDigests;
+	public void setSubjectCN(String subjectCN) {
+		this.subjectCN = subjectCN;
 	}
 
-	public DigestAlgorithm getPreferredDigest() {
-		return preferredDigest;
+	public String getSubjectOrg() {
+		return subjectOrg;
 	}
 
-	public void setPreferredDigest(DigestAlgorithm preferredDigest) {
-		this.preferredDigest = preferredDigest;
+	public void setSubjectOrg(String subjectOrg) {
+		this.subjectOrg = subjectOrg;
+	}
+
+	public String getNotBefore() {
+		return notBefore;
+	}
+
+	public void setNotBefore(String notBefore) {
+		this.notBefore = notBefore;
+	}
+
+	public String getNotAfter() {
+		return notAfter;
+	}
+
+	public void setNotAfter(String notAfter) {
+		this.notAfter = notAfter;
+	}
+
+	public BigInteger getSerialNumber() {
+		return serialNumber;
+	}
+
+	public void setSerialNumber(BigInteger serialNumber) {
+		this.serialNumber = serialNumber;
+	}
+
+	public String getIssuerCN() {
+		return issuerCN;
+	}
+
+	public void setIssuerCN(String issuerCN) {
+		this.issuerCN = issuerCN;
+	}
+
+	public String getIssuerOrg() {
+		return issuerOrg;
+	}
+
+	public void setIssuerOrg(String issuerOrg) {
+		this.issuerOrg = issuerOrg;
 	}
 }

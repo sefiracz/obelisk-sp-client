@@ -13,9 +13,14 @@
  */
 package lu.nowina.nexu.windows.keystore;
 
+import lu.nowina.nexu.api.AbstractProduct;
+import lu.nowina.nexu.api.KeystoreType;
 import lu.nowina.nexu.api.Product;
 import org.apache.commons.lang.StringEscapeUtils;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ResourceBundle;
 
 /**
@@ -24,10 +29,18 @@ import java.util.ResourceBundle;
  * @author simon.ghisalberti
  *
  */
-public class WindowsKeystore implements Product {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "windowsKeystore", propOrder = { })
+public class WindowsKeystore extends AbstractProduct {
 
 	public WindowsKeystore() {
 		super();
+		this.type = KeystoreType.WINDOWS;
+	}
+
+	@Override
+	public String getSimpleLabel() {
+		return getLabel();
 	}
 
 	@Override

@@ -33,6 +33,8 @@ public interface NexuAPI {
 
 	List<Product> detectProducts();
 
+	void detectAll();
+
 	List<Match> matchingProductAdapters(Product p);
 
 	List<SystrayMenuItem> getExtensionSystrayMenuItems();
@@ -46,6 +48,8 @@ public interface NexuAPI {
 	SignatureTokenConnection getTokenConnection(TokenId tokenId);
 
 	Execution<GetCertificateResponse> getCertificate(GetCertificateRequest request);
+
+	Execution<GetCertificateResponse> selectCertificate(SelectCertificateRequest request);
 
 	Execution<SignatureResponse> sign(SignatureRequest request);
 

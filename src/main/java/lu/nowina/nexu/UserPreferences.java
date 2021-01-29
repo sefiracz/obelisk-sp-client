@@ -13,18 +13,20 @@
  */
 package lu.nowina.nexu;
 
+import java.util.Locale;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public class UserPreferences {
 
-	private static final String USE_SYSTEM_PROXY = "nowina.nexu.useSystemProxy";
-	private static final String PROXY_SERVER = "nowina.nexu.proxyServer";
-	private static final String PROXY_PORT = "nowina.nexu.proxyPort";
-	private static final String PROXY_AUTHENTICATION = "nowina.nexu.proxyAuthentication";
-	private static final String PROXY_USERNAME = "nowina.nexu.proxyUsername";
-	private static final String PROXY_PASSWORD = "nowina.nexu.proxyPassword";
-	private static final String PROXY_USE_HTTPS = "nowina.nexu.proxyHttps";
+	private static final String USE_SYSTEM_PROXY = "sefira.obelisk.sp.useSystemProxy";
+	private static final String PROXY_SERVER = "sefira.obelisk.sp.proxyServer";
+	private static final String PROXY_PORT = "sefira.obelisk.sp.proxyPort";
+	private static final String PROXY_AUTHENTICATION = "sefira.obelisk.sp.proxyAuthentication";
+	private static final String PROXY_USERNAME = "sefira.obelisk.sp.proxyUsername";
+	private static final String PROXY_PASSWORD = "sefira.obelisk.sp.proxyPassword";
+	private static final String PROXY_USE_HTTPS = "sefira.obelisk.sp.proxyHttps";
+	private static final String LANGUAGE = "sefira.obelisk.sp.language";
 
 	private final Preferences prefs;
 
@@ -35,6 +37,7 @@ public class UserPreferences {
 	private Boolean proxyAuthentication;
 	private String proxyUsername;
 	private String proxyPassword;
+	private String language;
 
 	public UserPreferences(final String applicationName) {
 		prefs = Preferences.userRoot().node(applicationName);
@@ -55,6 +58,8 @@ public class UserPreferences {
 		
 		proxyUsername = prefs.get(PROXY_USERNAME, null);
 		proxyPassword = prefs.get(PROXY_PASSWORD, null);
+
+		language = prefs.get(LANGUAGE, Locale.getDefault().getLanguage());
 	}
 
 	public void setUseSystemProxy(Boolean useSystemProxy) {
@@ -119,7 +124,16 @@ public class UserPreferences {
 		}
 		this.proxyPassword = proxyPassword;
 	}
-	
+
+	public void setLanguage(String language) {
+		if(language != null) {
+			prefs.put(LANGUAGE, language);
+		} else {
+			prefs.remove(LANGUAGE);
+		}
+		this.language = language;
+	}
+
 	public Boolean isUseSystemProxy() {
 		return useSystemProxy;
 	}
@@ -148,6 +162,10 @@ public class UserPreferences {
 		return proxyPassword;
 	}
 
+	public String getLanguage() {
+		return language;
+	}
+
 	public void clear() {
 		try {
 			this.prefs.clear();
@@ -161,5 +179,6 @@ public class UserPreferences {
 		proxyAuthentication = null;
 		proxyUsername = null;
 		proxyPassword = null;
+		language = null;
 	}
 }

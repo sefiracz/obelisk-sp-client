@@ -20,7 +20,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="200.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.APISelectionController">
+<BorderPane prefHeight="200.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.APISelectionController">
 
     <top>
 		<VBox BorderPane.alignment="CENTER">
@@ -42,10 +42,8 @@
 		<VBox BorderPane.alignment="CENTER" styleClass="form-container">
 			<children>
 				<RadioButton fx:id="pkcs11" mnemonicParsing="false" text="%api.pkcs11">
-	               	<toggleGroup>
-	        			<ToggleGroup fx:id="api" />
-	               	</toggleGroup>
-       			</RadioButton>
+          <toggleGroup><ToggleGroup fx:id="api" /></toggleGroup>
+       	</RadioButton>
 				<RadioButton fx:id="mscapi" mnemonicParsing="false" text="%api.mscapi" toggleGroup="$api" />
 				<RadioButton fx:id="mocca" mnemonicParsing="false" text="%api.mocca" toggleGroup="$api" />
 			</children>

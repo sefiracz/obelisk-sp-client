@@ -17,10 +17,13 @@ import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
+import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.Operation;
+import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A <code>ProductAdapter</code> can manage some specific {@link Product}s.
@@ -109,6 +112,14 @@ public interface ProductAdapter {
 	List<DSSPrivateKeyEntry> getKeys(SignatureTokenConnection token, CertificateFilter certificateFilter);
 
 	/**
+	 * Returns the key from <code>token</code> matching the <code>keyAlias</code>.
+	 * @param token The token to use to retrieve the key.
+	 * @param keyAlias Key alias that we are looking for.
+	 * @return The key from <code>token</code> matching the <code>keyAlias</code>.
+	 */
+	DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias);
+
+	/**
 	 * Returns <code>true</code> if this product adapter can return supported digest algorithms for the given <code>product</code>.
 	 * @param product The product for which one would like to retrieve the supported digest algorithms.
 	 * @return <code>true</code> if this product adapter can return supported digest algorithms for the given <code>product</code>.
@@ -152,11 +163,15 @@ public interface ProductAdapter {
 	 * specific to it. This method is used to retrieve this item.
 	 * @return The menu item specific to this <code>ProductAdapter</code> or <code>null</code> if none.
 	 */
-	SystrayMenuItem getExtensionSystrayMenuItem();
+	SystrayMenuItem getExtensionSystrayMenuItem(final NexuAPI api);
 
 	/**
 	 * Detects products that will <strong>maybe</strong> be accepted by this <code>ProductAdapter</code>.
 	 * @return Products that will <strong>maybe</strong> be accepted by this <code>ProductAdapter</code>.
 	 */
 	List<? extends Product> detectProducts();
+
+	void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map);
+
+	ProductDatabase getDatabase();
 }

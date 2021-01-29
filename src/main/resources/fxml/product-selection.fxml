@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.ScrollPane?>
 
-<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane prefHeight="300.0" prefWidth="500.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="lu.nowina.nexu.view.ui.ProductSelectionController">
 
     <top>
@@ -33,7 +33,7 @@
     </top>
 	
 	<center>
-		<ScrollPane hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+		<ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
 			<VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
 		</ScrollPane>
 	</center>
@@ -42,6 +42,7 @@
 		<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
 			<children>
 				<Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
+				<Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-green" text="%button.refresh" />
 				<Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next" />
 			</children>
 		</HBox>
