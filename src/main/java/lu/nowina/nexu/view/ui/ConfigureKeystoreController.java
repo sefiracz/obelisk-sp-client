@@ -19,15 +19,20 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import lu.nowina.nexu.NexuException;
 import lu.nowina.nexu.api.ConfiguredKeystore;
 import lu.nowina.nexu.api.KeystoreType;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import lu.nowina.nexu.view.core.ExtensionFilter;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -42,9 +47,7 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 	@FXML
 	private Button selectFile;
 
-	@FXML
-	private ComboBox<KeystoreType> keystoreType;
-
+	private KeystoreType keystoreType;
 	private File keystoreFile;
 	private final BooleanProperty keystoreFileSpecified;
 
@@ -59,8 +62,6 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
-
 		ok.setOnAction((event) -> {
 			final ConfiguredKeystore result = new ConfiguredKeystore();
 			try {
@@ -68,31 +69,56 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 			} catch (Exception e1) {
 				throw new NexuException(e1);
 			}
-			result.setType(keystoreType.getValue());
+			keystoreType = whichKeystoreType(keystoreFile);
+			result.setType(keystoreType);
 			result.setToBeSaved(true);
 			signalEnd(result);
 		});
 		ok.disableProperty().bind(Bindings.not(keystoreFileSpecified));
 		cancel.setOnAction(e -> signalUserCancel());
 		selectFile.setOnAction(e -> {
-			final ExtensionFilter extensionFilter;
-			switch(keystoreType.getValue()) {
-			case JKS:
-				extensionFilter = new ExtensionFilter("JKS", "*.jks", "*.JKS");
-				break;
-			case PKCS12:
-				extensionFilter = new ExtensionFilter("PKCS12", "*.p12", "*.pfx", "*.P12", "*.PFX");
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown keystore type: " +
-						keystoreType.getValue());
-			}
-			keystoreFile = getDisplay().displayFileChooser(extensionFilter);
+			keystoreFile = getDisplay().displayFileChooser(
+					new ExtensionFilter("KeyStore files", "*.p12", "*.pfx", "*.P12", "*.PFX", "*.jks", "*.JKS", "*.jceks" ,"*.JCEKS"),
+					new ExtensionFilter("All files", "*")
+			);
 			keystoreFileSpecified.set(keystoreFile != null);
+			selectFile.setText(keystoreFile.getName());
 		});
-		selectFile.disableProperty().bind(keystoreType.valueProperty().isNull());
+	}
 
-		keystoreType.getItems().setAll(KeystoreType.values());
+	private KeystoreType whichKeystoreType(File keystoreFile){
+		try {
+			byte[] bytes = FileUtils.readFileToByteArray(keystoreFile);
+			if(bytes.length < 4) {
+				return KeystoreType.UNKNOWN;
+			} else if (bytes[0] == (byte)0xFE && bytes[1] == (byte)0xED &&
+					bytes[2] == (byte)0xFE && bytes[3] == (byte)0xED) {
+				// JKS - 0xFEEDFEED
+				return KeystoreType.JKS;
+			} else if(bytes[0] == (byte)0xCE && bytes[1] == (byte)0xCE &&
+					bytes[2] == (byte)0xCE && bytes[3] == (byte)0xCE) {
+				// JCEKS - 0xCECECECE
+				return KeystoreType.JCEKS;
+			} else {
+				// PKCS12 - ASN1 structure check
+				ASN1Primitive pfx = ASN1Primitive.fromByteArray(bytes);
+				if (pfx instanceof ASN1Sequence) {
+					ASN1Sequence sequence = (ASN1Sequence) pfx;
+					if ((sequence.size() == 2) || (sequence.size() == 3)) {
+						ASN1Encodable firstComponent = sequence.getObjectAt(0);
+						if (firstComponent instanceof ASN1Integer) {
+							ASN1Integer version = (ASN1Integer) firstComponent;
+							if (version.getValue().intValue() == 3) {
+								return KeystoreType.PKCS12;
+							}
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			return KeystoreType.UNKNOWN;
+		}
+		return KeystoreType.UNKNOWN;
 	}
 
 }

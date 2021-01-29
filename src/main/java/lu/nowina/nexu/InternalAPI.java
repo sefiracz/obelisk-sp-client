@@ -31,11 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.CardTerminal;
+import java.io.File;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * Implementation of the NexuAPI
@@ -60,7 +58,7 @@ public class InternalAPI implements NexuAPI {
 
 	private UIDisplay display;
 
-	private SCDatabase myDatabase;
+	private SCDatabase smartcardDatabase;
 
 	private FlowRegistry flowRegistry;
 
@@ -72,10 +70,10 @@ public class InternalAPI implements NexuAPI {
 
 	private Future<?> currentTask;
 
-	public InternalAPI(UIDisplay display, SCDatabase myDatabase, CardDetector detector,
+	public InternalAPI(UIDisplay display, SCDatabase smartcardDatabase, CardDetector detector,
 			FlowRegistry flowRegistry, OperationFactory operationFactory, AppConfig appConfig) {
 		this.display = display;
-		this.myDatabase = myDatabase;
+		this.smartcardDatabase = smartcardDatabase;
 		this.detector = detector;
 		this.flowRegistry = flowRegistry;
 		this.operationFactory = operationFactory;
@@ -117,14 +115,22 @@ public class InternalAPI implements NexuAPI {
 		}
 		if (matches.isEmpty() && (p instanceof DetectedCard)) {
 			final DetectedCard d = (DetectedCard) p;
-			SCInfo info = null;
-			if (info == null && myDatabase != null) {
-				info = myDatabase.getInfo(d.getAtr());
-				if (info == null) {
-					logger.warn("Card " + d.getAtr() + " is not in the personal database");
-				} else {
-					matches.add(new Match(new GenericCardAdapter(info), d));
-				}
+//			SCInfo info = new SCInfo();
+//			info.setAtr(d.getAtr());
+//			info.setCertificateId(d.getCertificateId());
+//			info.setType(d.getType());
+//			info.setKeyAlias(d.getKeyAlias());
+//			info.setTerminalIndex(d.getTerminalIndex());
+//			info.setTerminalLabel(d.getTerminalLabel());
+//			info.setLabel(d.getLabel());
+//			matches.add(new Match(new GenericCardAdapter(info, this, appConfig.getNexuHome()), d));
+			smartcardDatabase = ProductDatabaseLoader.load(SCDatabase.class,
+					new File(getAppConfig().getNexuHome(), "database-smartcard.xml"));
+			SCInfo info = smartcardDatabase.getInfo(d.getAtr(), d.getCertificateId(), d.getKeyAlias());
+			if (info == null) {
+				logger.warn("Card " + d.getAtr() + " is not in the personal database");
+			} else {
+				matches.add(new Match(new GenericCardAdapter(info, this, appConfig.getNexuHome()), d));
 			}
 		}
 		return matches;
@@ -208,6 +214,14 @@ public class InternalAPI implements NexuAPI {
 	}
 
 	@Override
+	public Execution<GetCertificateResponse> selectCertificate(SelectCertificateRequest request) {
+		Flow<SelectCertificateRequest, GetCertificateResponse> flow =
+				flowRegistry.getFlow(FlowRegistry.SELECT_CERTIFICATE_FLOW, display, this);
+		flow.setOperationFactory(operationFactory);
+		return executeRequest(flow, request);
+	}
+
+	@Override
 	public Execution<SignatureResponse> sign(SignatureRequest request) {
 		Flow<SignatureRequest, SignatureResponse> flow =
 				flowRegistry.getFlow(FlowRegistry.SIGNATURE_FLOW, display, this);
@@ -240,8 +254,9 @@ public class InternalAPI implements NexuAPI {
 		httpPlugins.put(context, plugin);
 	}
 
-	public void store(String detectedAtr, ScAPI selectedApi, String apiParam) {
-		if (myDatabase != null) {
+	// TODO - store cards and info
+	public void store(DetectedCard detectedCard, ScAPI selectedApi, String apiParam) {
+		if (smartcardDatabase != null) {
 
 			EnvironmentInfo env = getEnvironmentInfo();
 			ConnectionInfo cInfo = new ConnectionInfo();
@@ -249,7 +264,7 @@ public class InternalAPI implements NexuAPI {
 			cInfo.setEnv(env);
 			cInfo.setApiParam(apiParam);
 
-			myDatabase.add(detectedAtr, cInfo);
+			smartcardDatabase.add(detectedCard, cInfo);
 		}
 	}
 
@@ -261,11 +276,13 @@ public class InternalAPI implements NexuAPI {
 	@Override
 	public List<SystrayMenuItem> getExtensionSystrayMenuItems() {
 		final List<SystrayMenuItem> result = new ArrayList<>();
+		detectAll();
 		for(final ProductAdapter adapter : adapters) {
-			final SystrayMenuItem menuItem = adapter.getExtensionSystrayMenuItem();
+			final SystrayMenuItem menuItem = adapter.getExtensionSystrayMenuItem(this);
 			if(menuItem != null) {
 				result.add(menuItem);
 			}
+			break;
 		}
 		return result;
 	}
@@ -277,6 +294,11 @@ public class InternalAPI implements NexuAPI {
 			result.addAll(adapter.detectProducts());
 		}
 		return result;
+	}
+
+	public void detectAll() {
+		detectProducts();
+		detectCards();
 	}
 
 	@Override

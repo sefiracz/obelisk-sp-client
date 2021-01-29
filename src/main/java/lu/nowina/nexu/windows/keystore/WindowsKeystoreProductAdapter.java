@@ -14,16 +14,18 @@
 package lu.nowina.nexu.windows.keystore;
 
 import eu.europa.esig.dss.DigestAlgorithm;
-import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
-import eu.europa.esig.dss.token.MSCAPISignatureToken;
-import eu.europa.esig.dss.token.PasswordInputCallback;
-import eu.europa.esig.dss.token.SignatureTokenConnection;
+import eu.europa.esig.dss.token.*;
+import lu.nowina.nexu.ProductDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
+import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
+import lu.nowina.nexu.keystore.KeystoreDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -32,10 +34,10 @@ import java.util.List;
  * @author simon.ghisalberti
  *
  */
-public class WindowsKeystoreProductAdapter implements ProductAdapter {
+public class WindowsKeystoreProductAdapter extends AbstractProductAdapter {
 
-	public WindowsKeystoreProductAdapter() {
-		super();
+	public WindowsKeystoreProductAdapter(File nexuHome) {
+		super(nexuHome);
 	}
 
 	@Override
@@ -89,6 +91,17 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
+	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+		List<DSSPrivateKeyEntry> keys = token.getKeys();
+		for(DSSPrivateKeyEntry key : keys) {
+			if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+				return key;
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public boolean canReturnSuportedDigestAlgorithms(Product product) {
 		return false;
 	}
@@ -114,15 +127,24 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public SystrayMenuItem getExtensionSystrayMenuItem() {
-		return null;
+	public List<Product> detectProducts() {
+		final List<Product> products = new ArrayList<>();
+		getDatabase().getKeystores();
+		products.add(new WindowsKeystore());
+		return products;
+	}
+
+	public WindowsKeystoreDatabase getDatabase() {
+		return ProductDatabaseLoader.load(WindowsKeystoreDatabase.class, new File(nexuHome, "database-windows.xml"));
+	}
+
+	public void saveKeystore(final WindowsKeystore keystore) {
+		getDatabase().add(keystore);
 	}
 
 	@Override
-	public List<Product> detectProducts() {
-		final List<Product> products = new ArrayList<>();
-		products.add(new WindowsKeystore());
-		return products;
+	public void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map) {
+		saveKeystore((WindowsKeystore) keystore);
 	}
 
 }

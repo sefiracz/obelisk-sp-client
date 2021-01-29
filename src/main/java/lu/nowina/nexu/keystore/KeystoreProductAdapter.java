@@ -20,6 +20,7 @@ import lu.nowina.nexu.ProductDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
+import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIOperation;
 
@@ -28,22 +29,20 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore.PasswordProtection;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Map;
 
 /**
  * Product adapter for {@link ConfiguredKeystore}.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class KeystoreProductAdapter implements ProductAdapter {
-
-	private final File nexuHome;
+public class KeystoreProductAdapter extends AbstractProductAdapter {
 
 	public KeystoreProductAdapter(final File nexuHome) {
-		super();
-		this.nexuHome = nexuHome;
+		super(nexuHome);
 	}
 
 	@Override
@@ -72,6 +71,9 @@ public class KeystoreProductAdapter implements ProductAdapter {
 			throw new IllegalArgumentException("Given product was not configured!");
 		}
 		final ConfiguredKeystore configuredKeystore = (ConfiguredKeystore) product;
+		if(callback instanceof NexuPasswordInputCallback) {
+			((NexuPasswordInputCallback) callback).setProduct((AbstractProduct) product);
+		}
 		return new KeystoreTokenProxy(configuredKeystore, callback);
 	}
 
@@ -92,12 +94,23 @@ public class KeystoreProductAdapter implements ProductAdapter {
 
 	@Override
 	public boolean supportCertificateFilter(Product product) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public List<DSSPrivateKeyEntry> getKeys(SignatureTokenConnection token, CertificateFilter certificateFilter) {
-		throw new IllegalStateException("This product adapter does not support certificate filter.");
+		return new CertificateFilterHelper().filterKeys(token, certificateFilter);
+	}
+
+	@Override
+	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+		List<DSSPrivateKeyEntry> keys = token.getKeys();
+		for(DSSPrivateKeyEntry key : keys) {
+			if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+				return key;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -142,35 +155,25 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public SystrayMenuItem getExtensionSystrayMenuItem() {
-		return new SystrayMenuItem() {
-			@Override
-			public String getLabel() {
-				return ResourceBundle.getBundle("bundles/nexu").getString("systray.menu.manage.keystores");
-			}
-
-			@Override
-			public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-				return UIOperation.getFutureOperationInvocation(NonBlockingUIOperation.class, "/fxml/manage-keystores.fxml",
-						getDatabase());
-			}
-		};
-	}
-
-	@Override
 	public List<Product> detectProducts() {
 		final List<Product> products = new ArrayList<>();
-		products.addAll(getDatabase().getKeystores());
+//		products.addAll(getDatabase().getKeystores()); // TODO - asi nechceme zobrazovat zapamatovane klicenky
+		getDatabase().getKeystores(); // reloads database
 		products.add(new NewKeystore());
 		return products;
 	}
 
-	private KeystoreDatabase getDatabase() {
-		return ProductDatabaseLoader.load(KeystoreDatabase.class, new File(nexuHome, "keystore-database.xml"));
+	public KeystoreDatabase getDatabase() {
+		return ProductDatabaseLoader.load(KeystoreDatabase.class, new File(nexuHome, "database-keystore.xml"));
 	}
 
 	public void saveKeystore(final ConfiguredKeystore keystore) {
 		getDatabase().add(keystore);
+	}
+
+	@Override
+	public void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map) {
+		saveKeystore((ConfiguredKeystore) keystore);
 	}
 
 	private static class KeystoreTokenProxy implements SignatureTokenConnection {
@@ -199,6 +202,10 @@ public class KeystoreProductAdapter implements ProductAdapter {
 					proxied = new JKSSignatureToken(new URL(configuredKeystore.getUrl()).openStream(),
 							new PasswordProtection(callback.getPassword()));
 					break;
+				case JCEKS:
+					proxied = new KeyStoreSignatureTokenConnection(new URL(configuredKeystore.getUrl()).openStream(),
+							"JCEKS", new PasswordProtection(callback.getPassword()));
+				  break;
 				default:
 					throw new IllegalStateException("Unhandled keystore type: " + configuredKeystore.getType());
 				}

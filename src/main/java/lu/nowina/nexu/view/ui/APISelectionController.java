@@ -71,6 +71,10 @@ public class APISelectionController extends AbstractUIOperationController<ScAPI>
 			mscapi.setVisible(false);
 			mscapi.setManaged(false);
 		}
+
+		// disable MOCCA
+		mocca.setVisible(false);
+		mocca.setManaged(false);
 	}
 
 	private ScAPI getSelectedAPI() {

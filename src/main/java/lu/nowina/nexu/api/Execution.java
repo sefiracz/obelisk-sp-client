@@ -13,6 +13,7 @@
  */
 package lu.nowina.nexu.api;
 
+import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.api.flow.OperationStatus;
 
 /**
@@ -33,6 +34,8 @@ public class Execution<T> {
 
 	private Feedback feedback;
 
+	private OperationResult<?> operationResult;
+
 	public Execution(T response) {
 		this.response = response;
 		this.success = true;
@@ -40,13 +43,18 @@ public class Execution<T> {
 		this.errorMessage = null;
 	}
 
-	public Execution(final OperationStatus errorOperationStatus) {
+	public Execution(final OperationResult<?> operationResult, final OperationStatus errorOperationStatus) {
 		this.success = false;
 		this.error = errorOperationStatus.getCode();
 		this.errorMessage = errorOperationStatus.getLabel();
 		this.response = null;
+		this.operationResult = operationResult;
 	}
-	
+
+	public Execution(final OperationStatus errorOperationStatus) {
+		this(null, errorOperationStatus);
+	}
+
 	public T getResponse() {
 		return response;
 	}
@@ -71,4 +79,7 @@ public class Execution<T> {
 		this.feedback = feedback;
 	}
 
+	public OperationResult<?> getOperationResult() {
+		return operationResult;
+	}
 }

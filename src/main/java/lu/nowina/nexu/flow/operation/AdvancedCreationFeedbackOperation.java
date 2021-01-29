@@ -13,11 +13,13 @@
  */
 package lu.nowina.nexu.flow.operation;
 
+import eu.europa.esig.dss.DigestAlgorithm;
+import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
+import eu.europa.esig.dss.token.KSPrivateKeyEntry;
 import lu.nowina.nexu.InternalAPI;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
-import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
-import lu.nowina.nexu.view.core.UIOperation;
 
 import java.util.Map;
 
@@ -36,6 +38,7 @@ public class AdvancedCreationFeedbackOperation extends AbstractCompositeOperatio
 
     private NexuAPI api;
     private Map<TokenOperationResultKey, Object> map;
+    private DSSPrivateKeyEntry key;
 
     public AdvancedCreationFeedbackOperation() {
         super();
@@ -47,8 +50,9 @@ public class AdvancedCreationFeedbackOperation extends AbstractCompositeOperatio
         try {
             this.api = (NexuAPI) params[0];
             this.map = (Map<TokenOperationResultKey, Object>) params[1];
+            this.key = (DSSPrivateKeyEntry) params[2];
         } catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Expected parameters: NexuAPI, Map");
+            throw new IllegalArgumentException("Expected parameters: NexuAPI, Map, Key");
         }
     }
 
@@ -65,17 +69,18 @@ public class AdvancedCreationFeedbackOperation extends AbstractCompositeOperatio
             if ((feedback.getSelectedCard() != null) && (feedback.getSelectedAPI() != null) &&
                     ((feedback.getSelectedAPI() == ScAPI.MOCCA) || (feedback.getSelectedAPI() == ScAPI.MSCAPI) ||
                             (feedback.getApiParameter() != null))) {
-                final OperationResult<Feedback> result =
-                        this.operationFactory.getOperation(UIOperation.class, "/fxml/store-result.fxml",
-                                new Object[]{feedback, this.api.getAppConfig().getServerUrl(), this.api.getAppConfig().getApplicationVersion(),
-                                        this.api.getAppConfig().getApplicationName(), this.api.getAppConfig()}).perform();
-                if(result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-                    final Feedback back = result.getResult();
-                    if (back != null) {
-                        ((InternalAPI) this.api).store(back.getSelectedCard().getAtr(),
-                                back.getSelectedAPI(), back.getApiParameter());
-                    }
+
+                // TODO - remove this code?
+                byte[] id = key.getCertificate().getDigest(DigestAlgorithm.SHA256);
+                String certificateId = Utils.encodeHexString(id);
+                feedback.getSelectedCard().setCertificateId(certificateId);
+                if (key instanceof KSPrivateKeyEntry) {
+                    feedback.getSelectedCard().setKeyAlias(((KSPrivateKeyEntry) key).getAlias());
                 }
+                // store info
+                ((InternalAPI) this.api).store(feedback.getSelectedCard(),
+                    feedback.getSelectedAPI(), feedback.getApiParameter());
+
             }
         }
         return new OperationResult<Void>((Void) null);

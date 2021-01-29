@@ -21,13 +21,22 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import lu.nowina.nexu.api.ConfiguredKeystore;
-import lu.nowina.nexu.api.KeystoreType;
-import lu.nowina.nexu.keystore.KeystoreDatabase;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import lu.nowina.nexu.ProductDatabase;
+import lu.nowina.nexu.api.*;
+import lu.nowina.nexu.generic.ProductMapHandler;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -37,24 +46,32 @@ import java.util.ResourceBundle;
  */
 public class ManageKeystoresController extends AbstractUIOperationController<Void> implements Initializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(ManageKeystoresController.class.getName());
+
+	@FXML
+	private Button certificate;
+
 	@FXML
 	private Button remove;
 
 	@FXML
-	private TableView<ConfiguredKeystore> keystoresTable;
+	private TableView<AbstractProduct> keystoresTable;
 
 	@FXML
-	private TableColumn<ConfiguredKeystore, String> keystoreNameTableColumn;
+	private TableColumn<AbstractProduct, String> keystoreNameTableColumn;
 
 	@FXML
-	private TableColumn<ConfiguredKeystore, KeystoreType> keystoreTypeTableColumn;
+	private TableColumn<AbstractProduct, String> keystoreKeyAliasTableColumn;
 
 	@FXML
-	private Label keystoreURL;
+	private TableColumn<AbstractProduct, String> keystoreTypeTableColumn;
 
-	private final ObservableList<ConfiguredKeystore> observableKeystores;
+	@FXML
+	private Label keystoreLabel;
 
-	private KeystoreDatabase database;
+	private final ObservableList<AbstractProduct> observableKeystores;
+
+	private NexuAPI api;
 
 	public ManageKeystoresController() {
 		super();
@@ -65,29 +82,62 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	public void initialize(URL location, ResourceBundle resources) {
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-		keystoreNameTableColumn.setCellValueFactory((param) -> {
-			final String url = param.getValue().getUrl();
-			return new ReadOnlyStringWrapper(url.substring(url.lastIndexOf('/') + 1));
+		keystoreNameTableColumn.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getLabel()));
+		keystoreKeyAliasTableColumn.setCellValueFactory((param) -> {
+			final String keyAlias = param.getValue().getKeyAlias();
+			return new ReadOnlyStringWrapper(keyAlias);
 		});
-		keystoreTypeTableColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+		keystoreTypeTableColumn.setCellValueFactory((param) -> {
+			final String type = param.getValue().getType().getLabel();
+			return new ReadOnlyStringWrapper(type);
+		});
 		keystoresTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				keystoreURL.setText(newValue.getUrl());
+				if(newValue instanceof ConfiguredKeystore) {
+					keystoreLabel.setText(((ConfiguredKeystore) newValue).getUrl());
+				} else {
+					keystoreLabel.setText(newValue.getLabel());
+				}
 			} else {
-				keystoreURL.setText(null);
+				keystoreLabel.setText(null);
 			}
 		});
 		keystoresTable.setItems(observableKeystores);
 
-		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
-		remove.setOnAction((event) -> {
-			observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem());
+		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
+		certificate.setOnAction(actionEvent -> {
+			if (Desktop.isDesktopSupported()) {
+				try {
+					final File tmpFile = File.createTempFile("certificate", ".crt");
+					tmpFile.deleteOnExit();
+					final String certificateStr = keystoresTable.getSelectionModel().getSelectedItem().getCertificate();
+					final FileWriter writer = new FileWriter(tmpFile);
+					writer.write(certificateStr);
+					writer.close();
+					new Thread(() -> {
+						try {
+							Desktop.getDesktop().open(tmpFile);
+						} catch (final IOException e) {
+							logger.error(e.getMessage(), e);
+						}
+					}).start();
+				} catch (final Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
 		});
 
-		observableKeystores.addListener((ListChangeListener<ConfiguredKeystore>)(c) -> {
+		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
+		remove.setOnAction((event) -> observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem()));
+
+		observableKeystores.addListener((ListChangeListener<AbstractProduct>)(c) -> {
 			while(c.next()) {
-				for(final ConfiguredKeystore removed : c.getRemoved()) {
-					database.remove(removed);
+				for(final AbstractProduct p : c.getRemoved()) {
+					List<Match> matchList = api.matchingProductAdapters(p);
+					if(!matchList.isEmpty()) {
+						ProductDatabase database = matchList.get(0).getAdapter().getDatabase();
+						database.remove(p);
+					}
 				}
 			}
 		});
@@ -95,9 +145,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 
 	@Override
 	public void init(Object... params) {
-		database = (KeystoreDatabase) params[0];
+		api = (NexuAPI) params[0];
 		Platform.runLater(() -> {
-			observableKeystores.setAll(database.getKeystores());
+			observableKeystores.setAll(ProductMapHandler.getInstance().getAll());
 		});
 	}
 

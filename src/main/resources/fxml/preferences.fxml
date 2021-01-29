@@ -49,17 +49,31 @@
 				
 				<Label text="%preferences.proxyPassword" GridPane.columnIndex="0" GridPane.rowIndex="7" />
 				<PasswordField fx:id="proxyPassword" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+
+				<Label text="%preferences.language" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+				<ComboBox fx:id="language" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 			</children>
 		</GridPane>
 	</top>
 	<bottom>
-        <HBox styleClass="btn-container" BorderPane.alignment="CENTER"
-          GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2" GridPane.rowSpan="1">
-            <children>
-                <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok" />
-                <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-primary" text="%button.cancel" />
-                <Button fx:id="reset" mnemonicParsing="false" styleClass="btn-primary" text="%button.reset" />
-            </children>
-        </HBox>
+		<BorderPane BorderPane.alignment="CENTER">
+			<left>
+				<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+					<children>
+						<Button fx:id="reset" mnemonicParsing="false" styleClass="btn-primary" text="%button.reset" />
+					</children>
+				</HBox>
+			</left>
+			<right>
+				<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+					<children>
+						<Button fx:id="ok" mnemonicParsing="false" styleClass="btn-green" text="%button.ok" />
+						<Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
+					</children>
+				</HBox>
+			</right>
+
+		</BorderPane>
+
 	</bottom>
 </BorderPane>

@@ -13,10 +13,23 @@
  */
 package lu.nowina.nexu;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.application.Preloader;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import lu.nowina.nexu.NexUPreLoader.PreloaderMessage;
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.NexuAPI;
@@ -26,6 +39,7 @@ import lu.nowina.nexu.flow.BasicFlowRegistry;
 import lu.nowina.nexu.flow.Flow;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.BasicOperationFactory;
+import lu.nowina.nexu.generic.ProductPasswordManager;
 import lu.nowina.nexu.generic.SCDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
@@ -39,6 +53,8 @@ import java.util.Properties;
 public class NexUApp extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(NexUApp.class.getName());
+
+	private static SystrayMenu systrayMenu;
 
 	private HttpServer server;
 
@@ -61,12 +77,27 @@ public class NexUApp extends Application {
 
 		final NexuAPI api = buildAPI(uiDisplay, operationFactory);
 
+		// TODO - how to fix splashscreen ?
+		if(getConfig().isShowSplashScreen()) {
+			logger.info("Show splash screen");
+			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.png")));
+			final StackPane background = new StackPane(splash);
+			final Scene splashScene = new Scene(background, 600, 300);
+			primaryStage.setTitle(getConfig().getApplicationName());
+			primaryStage.setScene(splashScene);
+			primaryStage.initStyle(StageStyle.UNDECORATED);
+			primaryStage.show();
+			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
+			delay.setOnFinished(event -> primaryStage.close());
+			delay.play();
+		}
+
 		logger.info("Start Jetty");
 
 		server = startHttpServer(api);
 
 		if(api.getAppConfig().isEnableSystrayMenu()) {
-			new SystrayMenu(operationFactory, api, new UserPreferences(getConfig().getApplicationName()));
+			systrayMenu = new SystrayMenu(operationFactory, api, new UserPreferences(getConfig().getApplicationName()));
 		} else {
 			logger.info("Systray menu is disabled.");
 		}
@@ -78,12 +109,13 @@ public class NexUApp extends Application {
 		File nexuHome = getConfig().getNexuHome();
 		SCDatabase db = null;
 		if (nexuHome != null) {
-			File store = new File(nexuHome, "store.xml");
+			File store = new File(nexuHome, "database-smartcard.xml");
 			logger.info("Load database from " + store.getAbsolutePath());
 			db = ProductDatabaseLoader.load(SCDatabase.class, store);
 		} else {
 			db = new SCDatabase();
 		}
+		LocaleConfigurer.setUserPreferences(new UserPreferences(getConfig().getApplicationName()));
 		final APIBuilder builder = new APIBuilder();
 		final NexuAPI api = builder.build(uiDisplay, getConfig(), getFlowRegistry(), db, operationFactory);
 		notifyPreloader(builder.initPlugins(api, getProperties()));
@@ -134,6 +166,8 @@ public class NexUApp extends Application {
 	public void stop() throws Exception {
 		logger.info("Stopping application...");
 		try {
+			// TODO - finalize all PKCS11 ???
+			ProductPasswordManager.getInstance().destroy();
 			if(server != null) {
 				server.stop();
 				server = null;
@@ -157,5 +191,10 @@ public class NexUApp extends Application {
 					message.getHeaderText(), message.getContentText());
 			notifyPreloader(preloaderMessage);
 		}
+	}
+
+	public static void refreshSystrayMenu() {
+		if(systrayMenu != null && systrayMenu.getSystrayMenuInitializer() != null)
+			systrayMenu.getSystrayMenuInitializer().refreshLabels();
 	}
 }

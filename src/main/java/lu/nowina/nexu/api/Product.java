@@ -21,6 +21,12 @@ package lu.nowina.nexu.api;
 public interface Product {
 
 	/**
+	 * Returns a simple label for this product.
+	 * @return A simple label for this product.
+	 */
+	String getSimpleLabel();
+
+	/**
 	 * Returns a label for this product.
 	 * @return A label for this product.
 	 */

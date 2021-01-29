@@ -14,23 +14,26 @@
 package lu.nowina.nexu.generic;
 
 import eu.europa.esig.dss.DigestAlgorithm;
-import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
-import eu.europa.esig.dss.token.MSCAPISignatureToken;
-import eu.europa.esig.dss.token.PasswordInputCallback;
-import eu.europa.esig.dss.token.SignatureTokenConnection;
+import eu.europa.esig.dss.token.*;
 import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
+import lu.nowina.nexu.ProductDatabaseLoader;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
+import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public class GenericCardAdapter extends AbstractCardProductAdapter {
 
     private final SCInfo info;
+    private final NexuAPI api;
 
-    public GenericCardAdapter(final SCInfo info) {
-        super();
+    public GenericCardAdapter(final SCInfo info, NexuAPI api, File nexuHome) {
+        super(nexuHome);
         this.info = info;
+        this.api = api;
     }
 
     @Override
@@ -55,6 +58,9 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
 
     @Override
     protected SignatureTokenConnection connect(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback) {
+        if(callback instanceof NexuPasswordInputCallback) {
+            ((NexuPasswordInputCallback) callback).setProduct(card);
+        }
         final ConnectionInfo cInfo = this.info.getConnectionInfo(api.getEnvironmentInfo());
         final ScAPI scApi = cInfo.getSelectedApi();
         switch (scApi) {
@@ -63,7 +69,8 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
                 return new MSCAPISignatureToken();
             case PKCS_11:
                 final String absolutePath = cInfo.getApiParam();
-                return new Pkcs11SignatureTokenAdapter(new File(absolutePath), callback, card.getTerminalIndex());
+                Utils.checkSlotIndex(api, card);
+                return Utils.getStoredPkcs11TokenAdapter(card, absolutePath, callback);
             case MOCCA:
                 return new MOCCASignatureTokenConnectionAdapter(new MOCCASignatureTokenConnection(callback), api, card);
             default:
@@ -110,5 +117,43 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
     @Override
     public List<DSSPrivateKeyEntry> getKeys(final SignatureTokenConnection token, final CertificateFilter certificateFilter) {
         return new CertificateFilterHelper().filterKeys(token, certificateFilter);
+    }
+
+    @Override
+    public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+        // TODO - MOCCAPrivateKeyEntry ?
+        List<DSSPrivateKeyEntry> keys = token.getKeys();
+        for(DSSPrivateKeyEntry key : keys) {
+            if(key instanceof IAIKPrivateKeyEntry && ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias)) {
+                return key;
+            }
+            if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    public SCDatabase getDatabase() {
+        return ProductDatabaseLoader.load(SCDatabase.class, new File(nexuHome, "database-smartcard.xml"));
+    }
+
+    private void saveKeystore(final DetectedCard keystore, Map<TokenOperationResultKey, Object> map) {
+      String apiParam = (String) map.get(TokenOperationResultKey.SELECTED_API_PARAMS);
+      ScAPI selectedApi = (ScAPI) map.get(TokenOperationResultKey.SELECTED_API);
+      if(selectedApi.equals(ScAPI.MSCAPI)) {
+        keystore.setType(KeystoreType.WINDOWS);
+      }
+      EnvironmentInfo env = api.getEnvironmentInfo();
+      ConnectionInfo cInfo = new ConnectionInfo();
+      cInfo.setSelectedApi(selectedApi);
+      cInfo.setEnv(env);
+      cInfo.setApiParam(apiParam);
+      getDatabase().add(keystore, cInfo);
+    }
+
+    @Override
+    public void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map) {
+      saveKeystore((DetectedCard) keystore, map);
     }
 }

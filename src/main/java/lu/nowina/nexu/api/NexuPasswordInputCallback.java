@@ -27,5 +27,7 @@ public interface NexuPasswordInputCallback extends PasswordInputCallback {
 	 * @param passwordPrompt The new password prompt.
 	 */
 	void setPasswordPrompt(String passwordPrompt);
+
+	void setProduct(AbstractProduct product);
 	
 }

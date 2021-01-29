@@ -20,11 +20,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.apache.commons.lang.StringUtils;
 
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public class PasswordInputController extends AbstractUIOperationController<char[]> implements Initializable {
@@ -41,20 +43,32 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 	@FXML
 	private PasswordField password;
 
+	private AbstractProduct product;
+
+	private ResourceBundle resources;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		EventHandler<ActionEvent> handler = event -> signalEnd(password.getText().toCharArray());
 		ok.setOnAction(handler);
 		password.setOnAction(handler);
 		cancel.setOnAction(e -> signalUserCancel());
+		this.resources = resources;
 	}
 
 	@Override
 	public void init(Object... params) {
 		StageHelper.getInstance().setTitle((String) params[1], "password.title");
 		final String passwordPrompt = (String) params[0];
-		if(StringUtils.isNotEmpty(passwordPrompt)) {
+		if(params.length > 2) {
+			product = (AbstractProduct) params[2];
+		}
+		if (product != null) {
+			this.passwordPrompt.setText(
+					MessageFormat.format(resources.getString("password.default.prompt"), product.getSimpleLabel()));
+		} else if(StringUtils.isNotEmpty(passwordPrompt)) {
 			this.passwordPrompt.setText(passwordPrompt);
 		}
+
 	}
 }

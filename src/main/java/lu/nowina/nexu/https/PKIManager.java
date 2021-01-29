@@ -122,7 +122,7 @@ public class PKIManager {
         final X500NameBuilder builder = new X500NameBuilder();
         builder.addRDN(BCStyle.CN, "localhost");
         builder.addRDN(BCStyle.O, applicationName);
-        builder.addRDN(BCStyle.C, "LU");
+        builder.addRDN(BCStyle.C, "CZ");
         return builder.build();
     }
 
@@ -131,7 +131,7 @@ public class PKIManager {
         builder.addRDN(BCStyle.CN, "localhost");
         builder.addRDN(BCStyle.O, applicationName);
         builder.addRDN(BCStyle.OU, "webserver");
-        builder.addRDN(BCStyle.C, "LU");
+        builder.addRDN(BCStyle.C, "CZ");
         return builder.build();
     }
 

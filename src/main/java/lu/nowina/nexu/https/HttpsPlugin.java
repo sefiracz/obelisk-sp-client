@@ -261,7 +261,8 @@ public class HttpsPlugin implements NexuPlugin {
 			final ProcessBuilder pb = new ProcessBuilder(unzippedFolder + File.separator + "add-certs.cmd");
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
-			if(!p.waitFor(180, TimeUnit.SECONDS)) {
+			// TODO - password protected firefox !!!
+			if(!p.waitFor(4, TimeUnit.SECONDS)) {
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Firefox");
 			}
 			if(p.exitValue() == -1) {

@@ -20,10 +20,15 @@ import java.util.ResourceBundle;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class NewKeystore implements Product {
+public class NewKeystore extends AbstractProduct {
 
 	public NewKeystore() {
 		super();
+	}
+
+	@Override
+	public String getSimpleLabel() {
+		return getLabel();
 	}
 
 	@Override

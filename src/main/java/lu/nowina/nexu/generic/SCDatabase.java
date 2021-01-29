@@ -15,6 +15,8 @@ package lu.nowina.nexu.generic;
 
 import lu.nowina.nexu.DatabaseEventHandler;
 import lu.nowina.nexu.ProductDatabase;
+import lu.nowina.nexu.api.AbstractProduct;
+import lu.nowina.nexu.api.DetectedCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,28 +35,44 @@ public class SCDatabase implements ProductDatabase {
 	private List<SCInfo> smartcards;
 
 	@XmlTransient
-	private DatabaseEventHandler onAddAction;
+	private DatabaseEventHandler onAddRemoveAction;
 
 	/**
-	 * Add a new ConnectionInfo to the database, associated with the ATR
+	 * Add a new ConnectionInfo to the database, associated with the DetectedCard and its ATR
 	 *
-	 * @param detectedAtr
+	 * @param detectedCard
 	 * @param cInfo
 	 */
-	public final void add(String detectedAtr, ConnectionInfo cInfo) {
-		SCInfo info = getInfo(detectedAtr);
+	public final void add(DetectedCard detectedCard, ConnectionInfo cInfo) {
+		SCInfo info = getInfo(detectedCard.getAtr(), detectedCard.getCertificateId(), detectedCard.getKeyAlias());
 		if (info == null) {
 			info = new SCInfo();
-			info.setAtr(detectedAtr);
-			getSmartcards0().add(info);
+			info.setAtr(detectedCard.getAtr());
+			info.setCertificateId(detectedCard.getCertificateId());
+			info.setCertificate(detectedCard.getCertificate());
+			info.setType(detectedCard.getType());
+			info.setKeyAlias(detectedCard.getKeyAlias());
+			info.setTerminalIndex(detectedCard.getTerminalIndex());
+			info.setTerminalLabel(detectedCard.getTerminalLabel());
+			info.setLabel(detectedCard.getLabel());
 		}
-		info.getInfos().add(cInfo);
-		onAdd();
+		if(!getSmartcards0().contains(info)) {
+			getSmartcards0().add(info);
+			info.getInfos().add(cInfo);
+		}
+		ProductMapHandler.getInstance().put(detectedCard.getCertificateId(), info);
+		onAddRemove();
 	}
 
-	private void onAdd() {
-		if(onAddAction != null) {
-			onAddAction.execute(this);
+	public final void remove(final AbstractProduct keystore) {
+		getSmartcards0().remove(keystore);
+		ProductMapHandler.getInstance().remove(keystore.getCertificateId(), keystore);
+		onAddRemove();
+	}
+
+	private void onAddRemove() {
+		if(onAddRemoveAction != null) {
+			onAddRemoveAction.execute(this);
 		} else {
 			logger.warn("No DatabaseEventHandler define, the database cannot be stored");
 		}
@@ -66,10 +84,13 @@ public class SCDatabase implements ProductDatabase {
 	 * @param atr
 	 * @return
 	 */
-	public SCInfo getInfo(String atr) {
-		for (SCInfo i : getSmartcards()) {
-			if (i.getAtr().equals(atr)) {
-				return i;
+	public SCInfo getInfo(String atr, String certId, String keyAlias) {
+		for (AbstractProduct ap : getKeystores()) {
+			SCInfo scInfo = (SCInfo) ap;
+			if (scInfo.getAtr().equals(atr) &&
+					(certId == null || scInfo.getCertificateId().equals(certId)) &&
+					(keyAlias == null || scInfo.getKeyAlias().equals(keyAlias))) {
+				return scInfo;
 			}
 		}
 		return null;
@@ -82,13 +103,19 @@ public class SCDatabase implements ProductDatabase {
 		return smartcards;
 	}
 
-	public List<SCInfo> getSmartcards() {
+	public List<AbstractProduct> getKeystores() {
 		return Collections.unmodifiableList(getSmartcards0());
-	};
+	}
 
 	@Override
-	public void setOnAddRemoveAction(DatabaseEventHandler onAddAction) {
-		this.onAddAction = onAddAction;
+	public void setOnAddRemoveAction(DatabaseEventHandler eventHandler) {
+		this.onAddRemoveAction = eventHandler;
+	}
+
+	public void initialize() {
+		for (SCInfo keystore : getSmartcards0()) {
+			ProductMapHandler.getInstance().put(keystore.getCertificateId(), keystore);
+		}
 	}
 
 }

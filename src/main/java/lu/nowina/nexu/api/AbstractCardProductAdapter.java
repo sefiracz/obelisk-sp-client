@@ -16,9 +16,14 @@ package lu.nowina.nexu.api;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
+import lu.nowina.nexu.ProductDatabaseLoader;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
+import lu.nowina.nexu.generic.SCDatabase;
+import lu.nowina.nexu.keystore.KeystoreDatabase;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -28,10 +33,10 @@ import java.util.ResourceBundle;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public abstract class AbstractCardProductAdapter implements ProductAdapter {
+public abstract class AbstractCardProductAdapter extends AbstractProductAdapter {
 
-	public AbstractCardProductAdapter() {
-		super();
+	public AbstractCardProductAdapter(File nexuHome) {
+		super(nexuHome);
 	}
 
 	private void setPasswordPrompt(final PasswordInputCallback callback) {
@@ -141,14 +146,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	protected FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, DetectedCard card) {
 		return new NoOpFutureOperationInvocation<Boolean>(true);
-	}
-
-	/**
-	 * This implementation returns <code>null</code>.
-	 */
-	@Override
-	public SystrayMenuItem getExtensionSystrayMenuItem() {
-		return null;
 	}
 
 	/**

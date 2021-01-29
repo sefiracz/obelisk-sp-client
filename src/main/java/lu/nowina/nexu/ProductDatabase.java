@@ -13,6 +13,10 @@
  */
 package lu.nowina.nexu;
 
+import lu.nowina.nexu.api.AbstractProduct;
+
+import java.util.List;
+
 /**
  * Generic interface for product databases.
  *
@@ -20,11 +24,19 @@ package lu.nowina.nexu;
  */
 public interface ProductDatabase {
 
+	void remove(AbstractProduct product);
+
+	/**
+	 * Initialize runtime HashMap of CertificateId to configured Products
+	 */
+	void initialize();
+
 	/**
 	 * Sets the event handler that must be triggered when an item is added or removed
 	 * to this database.
 	 * @param eventHandler The event handler to set.
 	 */
 	void setOnAddRemoveAction(DatabaseEventHandler eventHandler);
-	
+
+	List<AbstractProduct> getKeystores();
 }

@@ -14,6 +14,7 @@
 package lu.nowina.nexu.generic;
 
 import eu.europa.esig.dss.DigestAlgorithm;
+import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.ScAPI;
 import org.junit.Assert;
@@ -32,10 +33,10 @@ public class SCDatabaseTest {
 		cInfo.setApiParam("param");
 		cInfo.setSelectedApi(ScAPI.MSCAPI);
 		cInfo.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-		db.add("ADSF123FSDFS", cInfo);
+		db.add(new DetectedCard("ADSF123FSDFS", 0), cInfo);
 
-		db.getInfo("ADSF123FSDFS").getSupportedDigestAlgorithm().add(DigestAlgorithm.SHA1);
-		db.getInfo("ADSF123FSDFS").getSupportedDigestAlgorithm().add(DigestAlgorithm.MD5);
+		db.getInfo("ADSF123FSDFS", null, null).getSupportedDigestAlgorithm().add(DigestAlgorithm.SHA1);
+		db.getInfo("ADSF123FSDFS", null, null).getSupportedDigestAlgorithm().add(DigestAlgorithm.MD5);
 
 		JAXBContext ctx = JAXBContext.newInstance(SCDatabase.class);
 		ctx.createMarshaller().marshal(db, System.out);
@@ -51,31 +52,31 @@ public class SCDatabaseTest {
 		cInfo.setApiParam("param");
 		cInfo.setSelectedApi(ScAPI.MSCAPI);
 		cInfo.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-		db.add("ATR1", cInfo);
+		db.add(new DetectedCard("ATR1", 0), cInfo);
 
-		Assert.assertEquals(1, db.getSmartcards().size());
-		Assert.assertEquals(1, db.getSmartcards().get(0).getInfos().size());
+		Assert.assertEquals(1, db.getKeystores().size());
+		Assert.assertEquals(1, ((SCInfo)db.getKeystores().get(0)).getInfos().size());
 
 		ConnectionInfo cInfo2 = new ConnectionInfo();
 		cInfo2.setApiParam("param");
 		cInfo2.setSelectedApi(ScAPI.MSCAPI);
 		cInfo2.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-		db.add("ATR1", cInfo2);
+		db.add(new DetectedCard("ATR1", 0), cInfo2);
 
-		Assert.assertEquals(1, db.getSmartcards().size());
-		Assert.assertEquals(2, db.getSmartcards().get(0).getInfos().size());
+		Assert.assertEquals(1, db.getKeystores().size());
+		Assert.assertEquals(2, ((SCInfo)db.getKeystores().get(0)).getInfos().size());
 
 		ConnectionInfo cInfo3 = new ConnectionInfo();
 		cInfo3.setApiParam("param");
 		cInfo3.setSelectedApi(ScAPI.MSCAPI);
 		cInfo3.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-		db.add("ATR2", cInfo3);
+		db.add(new DetectedCard("ATR2", 0), cInfo3);
 
-		Assert.assertEquals(2, db.getSmartcards().size());
-		Assert.assertEquals(2, db.getSmartcards().get(0).getInfos().size());
-		Assert.assertEquals(1, db.getSmartcards().get(1).getInfos().size());
-		Assert.assertTrue(db.getInfo("ATR1") == db.getSmartcards().get(0));
-		Assert.assertTrue(db.getInfo("ATR2") == db.getSmartcards().get(1));
+		Assert.assertEquals(2, db.getKeystores().size());
+		Assert.assertEquals(2, ((SCInfo)db.getKeystores().get(0)).getInfos().size());
+		Assert.assertEquals(1, ((SCInfo)db.getKeystores().get(1)).getInfos().size());
+		Assert.assertTrue(db.getInfo("ATR1", null, null) == db.getKeystores().get(0));
+		Assert.assertTrue(db.getInfo("ATR2", null, null) == db.getKeystores().get(1));
 
 	}
 
