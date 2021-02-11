@@ -16,6 +16,7 @@ package lu.nowina.nexu.api;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ResourceBundle;
 
 /**
  * This enum gathers various keystore types supported by NexU.
@@ -26,20 +27,28 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum KeystoreType {
 
-	@XmlEnumValue("JKS") JKS("JKS"),
-	@XmlEnumValue("PKCS12") PKCS12("PKCS#12"),
-	@XmlEnumValue("JCEKS") JCEKS("JCEKS"),
-	@XmlEnumValue("PKCS11") PKCS11("PKCS#11"),
-	@XmlEnumValue("WINDOWS-MY") WINDOWS("WINDOWS-MY"),
-	@XmlEnumValue("UNKNOWN") UNKNOWN("UNKNOWN");
+	@XmlEnumValue("JKS") JKS("JKS", "Soubor .jks "),
+	@XmlEnumValue("PKCS12") PKCS12("PKCS#12", "Soubor .pfx"),
+	@XmlEnumValue("JCEKS") JCEKS("JCEKS","Soubor .jceks"),
+	@XmlEnumValue("PKCS11") PKCS11("PKCS#11","PKCS#11 Smartcard"),
+	@XmlEnumValue("WINDOWS-MY") WINDOWS("WINDOWS-MY","Windows"),
+	@XmlEnumValue("UNKNOWN") UNKNOWN("UNKNOWN", "");
 
 	private String label;
+	private String simpleLabel;
 	
-	private KeystoreType(final String label) {
+	KeystoreType(final String label, final String simpleLabel) {
 		this.label = label;
+		this.simpleLabel = simpleLabel;
 	}
 
 	public String getLabel() {
 		return label;
+	}
+
+	public String getSimpleLabel() {
+		// TODO
+		ResourceBundle.getBundle("");
+		return simpleLabel;
 	}
 }

@@ -23,6 +23,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.generic.*;
 import lu.nowina.nexu.model.Pkcs11Params;
+import lu.nowina.nexu.pkcs11.AbstractPkcs11SignatureTokenAdapter;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +73,11 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     public OperationResult<Map<TokenOperationResultKey, Object>> perform() {
         LOG.info(this.matchingProductAdapters.size() + " matching product adapters");
         try {
+            // TODO - if pkcs11 library is known but NOT present - custom unsupported-product dialog with download link
             if (!this.matchingProductAdapters.isEmpty() && Utils.isPkcs11LibraryPresent(matchingProductAdapters)) {
                 return this.createTokenAuto();
             } else {
+
                 boolean advanced = false;
                 if (this.api.getAppConfig().isAdvancedModeAvailable() && this.api.getAppConfig().isEnablePopUps()) {
                     LOG.info("Advanced mode available");
@@ -134,9 +137,9 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
         // smartcards
         if(supportedProduct instanceof DetectedCard) {
             map.put(TokenOperationResultKey.SELECTED_API, ScAPI.MSCAPI);
-            if (connect instanceof SunPkcs11SignatureTokenAdapter) {
+            if (connect instanceof AbstractPkcs11SignatureTokenAdapter) {
                 map.put(TokenOperationResultKey.SELECTED_API_PARAMS,
-                    ((SunPkcs11SignatureTokenAdapter) connect).getPkcs11Library());
+                    ((AbstractPkcs11SignatureTokenAdapter) connect).getPkcs11Library());
                 map.put(TokenOperationResultKey.SELECTED_API, ScAPI.PKCS_11);
             }
         }
@@ -181,9 +184,8 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
                 if(passwordInputCallback instanceof NexuPasswordInputCallback) {
                     ((NexuPasswordInputCallback) passwordInputCallback).setProduct(selectedCard);
                 }
-                Utils.checkSlotIndex(api, selectedCard);
                 tokenId = this.api.registerTokenConnection(
-                    Utils.getStoredPkcs11TokenAdapter(selectedCard, absolutePath, passwordInputCallback));
+                    Utils.getPkcs11TokenAdapterInstance(api, selectedCard, absolutePath, passwordInputCallback));
                 break;
             default:
                 return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);

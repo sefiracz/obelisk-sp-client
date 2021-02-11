@@ -22,21 +22,9 @@ import java.util.List;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public interface ProductDatabase {
+public interface ProductDatabase extends EntityDatabase {
 
 	void remove(AbstractProduct product);
-
-	/**
-	 * Initialize runtime HashMap of CertificateId to configured Products
-	 */
-	void initialize();
-
-	/**
-	 * Sets the event handler that must be triggered when an item is added or removed
-	 * to this database.
-	 * @param eventHandler The event handler to set.
-	 */
-	void setOnAddRemoveAction(DatabaseEventHandler eventHandler);
 
 	List<AbstractProduct> getKeystores();
 }

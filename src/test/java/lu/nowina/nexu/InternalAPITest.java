@@ -50,11 +50,13 @@ public class InternalAPITest {
 	@Test
 	public void testDetectCards1() throws Exception {
 
-		CardDetector detector = Mockito.mock(CardDetector.class);
-
 		UIDisplay display = Mockito.mock(UIDisplay.class);
 
-		InternalAPI api = new InternalAPI(display, null, detector, null, null, mock(AppConfig.class));
+		InternalAPI api = new InternalAPI(display, null, null, null, null, mock(AppConfig.class));
+
+		CardDetector detector = Mockito.mock(CardDetector.class);
+		detector.setApi(api);
+
 		Assert.assertEquals(0, api.detectCards().size());
 
 	}
@@ -62,12 +64,15 @@ public class InternalAPITest {
 	@Test
 	public void testDetectCards2() throws Exception {
 
-		CardDetector detector = Mockito.mock(CardDetector.class);
-		Mockito.when(detector.detectCard()).thenReturn(Arrays.asList(new DetectedCard("ATR", 0)));
-
 		UIDisplay display = Mockito.mock(UIDisplay.class);
 
-		InternalAPI api = new InternalAPI(display, null, detector, null, null, mock(AppConfig.class));
+		InternalAPI api = new InternalAPI(display, null, null, null, null, mock(AppConfig.class));
+
+		CardDetector detector = Mockito.mock(CardDetector.class);
+		detector.setApi(api);
+		Mockito.when(detector.detectCards()).thenReturn(Arrays.asList(new DetectedCard("ATR", 0)));
+
+
 		Assert.assertEquals(1, api.detectCards().size());
 
 	}
@@ -75,12 +80,15 @@ public class InternalAPITest {
 	@Test
 	public void testDetectCards3() throws Exception {
 
-		CardDetector detector = Mockito.mock(CardDetector.class);
-		Mockito.when(detector.detectCard()).thenReturn(Arrays.asList(new DetectedCard("ATR1", 0), new DetectedCard("ATR2", 0)));
 
 		UIDisplay display = Mockito.mock(UIDisplay.class);
 
-		InternalAPI api = new InternalAPI(display, null, detector, null, null, mock(AppConfig.class));
+		InternalAPI api = new InternalAPI(display, null, null, null, null, mock(AppConfig.class));
+
+		CardDetector detector = Mockito.mock(CardDetector.class);
+		detector.setApi(api);
+		Mockito.when(detector.detectCards()).thenReturn(Arrays.asList(new DetectedCard("ATR1", 0), new DetectedCard("ATR2", 0)));
+
 		Assert.assertEquals(2, api.detectCards().size());
 
 	}

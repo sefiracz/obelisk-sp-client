@@ -13,7 +13,6 @@
  */
 package lu.nowina.nexu.generic;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.ScAPI;
@@ -34,9 +33,6 @@ public class SCDatabaseTest {
 		cInfo.setSelectedApi(ScAPI.MSCAPI);
 		cInfo.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
 		db.add(new DetectedCard("ADSF123FSDFS", 0), cInfo);
-
-		db.getInfo("ADSF123FSDFS", null, null).getSupportedDigestAlgorithm().add(DigestAlgorithm.SHA1);
-		db.getInfo("ADSF123FSDFS", null, null).getSupportedDigestAlgorithm().add(DigestAlgorithm.MD5);
 
 		JAXBContext ctx = JAXBContext.newInstance(SCDatabase.class);
 		ctx.createMarshaller().marshal(db, System.out);

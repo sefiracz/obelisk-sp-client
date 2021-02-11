@@ -20,6 +20,7 @@ import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.x509.CertificateToken;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -77,6 +78,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         this.resources = resources;
+        this.select.disableProperty().bind(this.listView.getSelectionModel().selectedItemProperty().isNull());
         this.select.setOnAction((event) -> {
             final DSSPrivateKeyEntry selectedItem = this.listView.getSelectionModel().getSelectedItem();
             logger.info("Selected item " + selectedItem);
@@ -86,10 +88,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
                 this.signalEnd(null);
             }
         });
-        this.cancel.setOnAction((e) -> {
-            this.signalUserCancel();
-        });
-
+        this.cancel.setOnAction(e -> this.signalUserCancel());
         this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
 
         this.listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -193,6 +192,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         return tooltip;
     }
 
+    /* javafx 8 tooltip delay workaround */
     private void hackTooltipStartTiming(Tooltip tooltip, double delayMillis) {
         try {
             Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
@@ -222,31 +222,31 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         }
         final StringBuilder builder = new StringBuilder();
         if (keyUsages[0]) {
-            builder.append(resources.getString("keyUsage.digitalSignature") + "\n");
+            builder.append(resources.getString("keyUsage.digitalSignature")).append("\n");
         }
         if (keyUsages[1]) {
-            builder.append(resources.getString("keyUsage.nonRepudiation") + "\n");
+            builder.append(resources.getString("keyUsage.nonRepudiation")).append("\n");
         }
         if (keyUsages[2]) {
-            builder.append(resources.getString("keyUsage.keyEncipherment") + "\n");
+            builder.append(resources.getString("keyUsage.keyEncipherment")).append("\n");
         }
         if (keyUsages[3]) {
-            builder.append(resources.getString("keyUsage.dataEncipherment") + "\n");
+            builder.append(resources.getString("keyUsage.dataEncipherment")).append("\n");
         }
         if (keyUsages[4]) {
-            builder.append(resources.getString("keyUsage.keyAgreement") + "\n");
+            builder.append(resources.getString("keyUsage.keyAgreement")).append("\n");
         }
         if (keyUsages[5]) {
-            builder.append(resources.getString("keyUsage.keyCertSign") + "\n");
+            builder.append(resources.getString("keyUsage.keyCertSign")).append("\n");
         }
         if (keyUsages[6]) {
-            builder.append(resources.getString("keyUsage.crlSign") + "\n");
+            builder.append(resources.getString("keyUsage.crlSign")).append("\n");
         }
         if (keyUsages[7]) {
-            builder.append(resources.getString("keyUsage.encipherOnly") + "\n");
+            builder.append(resources.getString("keyUsage.encipherOnly")).append("\n");
         }
         if (keyUsages[8]) {
-            builder.append(resources.getString("keyUsage.decipherOnly") + "\n");
+            builder.append(resources.getString("keyUsage.decipherOnly")).append("\n");
         }
         return builder.toString();
     }
@@ -260,9 +260,6 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         this.back.setVisible(displayBackButton);
         final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
         final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
-        if(keys.isEmpty()) {
-          this.select.disableProperty().set(true);
-        }
         this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
             new Object[]{})));
         this.listView.setItems(items);

@@ -63,7 +63,6 @@ public class NexuLauncher {
 
 		proxyConfigurer = new ProxyConfigurer(config, new UserPreferences(config.getApplicationName()));
 
-		preLaunchCleanup();
 		beforeLaunch();
 
 		boolean started = checkAlreadyStarted();
@@ -111,12 +110,6 @@ public class NexuLauncher {
 		// Do nothing by contract
 	}
 
-	private void preLaunchCleanup() {
-		String tmpdir = System.getProperty("java.io.tmpdir");
-		File[] files = new File(tmpdir).listFiles((dir, name) -> name.startsWith("obelisk-sp_pkcs11-"));
-		Arrays.stream(files != null ? files : new File[0]).forEach(File::delete);
-	}
-
 	public static AppConfig getConfig() {
 		return config;
 	}
@@ -131,7 +124,7 @@ public class NexuLauncher {
 
 	private static boolean checkAlreadyStarted() throws MalformedURLException {
 		for (int port : config.getBindingPorts()) {
-			final URL url = new URL("http://" + config.getBindingIP() + ":" + port + "/nexu-info");
+			final URL url = new URL("http://" + config.getBindingIP() + ":" + port + "/client-info");
 			final URLConnection connection;
 			try {
 				connection = url.openConnection();

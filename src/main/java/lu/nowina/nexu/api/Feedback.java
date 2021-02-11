@@ -21,7 +21,7 @@ import java.util.Set;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "feedback", propOrder = { "apiParameter", "detected", "feedbackStatus", "selectedAPI", "selectedCard", "stacktrace", "userComment", "info", "nexuVersion" })
+@XmlType(name = "feedback", propOrder = { "apiParameter", "detected", "feedbackStatus", "selectedAPI", "selectedCard", "stacktrace", "userComment", "info", "version" })
 public class Feedback {
 
 	protected String apiParameter;
@@ -34,7 +34,7 @@ public class Feedback {
 	protected String stacktrace;
 	protected String userComment;
 	protected EnvironmentInfo info;
-	protected String nexuVersion;
+	protected String version;
 
 	public Feedback() {
 	}
@@ -58,7 +58,7 @@ public class Feedback {
 		result = prime * result + ((detected == null) ? 0 : detected.hashCode());
 		result = prime * result + ((feedbackStatus == null) ? 0 : feedbackStatus.hashCode());
 		result = prime * result + ((info == null) ? 0 : info.hashCode());
-		result = prime * result + ((nexuVersion == null) ? 0 : nexuVersion.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((selectedAPI == null) ? 0 : selectedAPI.hashCode());
 		result = prime * result + ((selectedCard == null) ? 0 : selectedCard.hashCode());
 		result = prime * result + ((stacktrace == null) ? 0 : stacktrace.hashCode());
@@ -92,10 +92,10 @@ public class Feedback {
 				return false;
 		} else if (!info.equals(other.info))
 			return false;
-		if (nexuVersion == null) {
-			if (other.nexuVersion != null)
+		if (version == null) {
+			if (other.version != null)
 				return false;
-		} else if (!nexuVersion.equals(other.nexuVersion))
+		} else if (!version.equals(other.version))
 			return false;
 		if (selectedAPI != other.selectedAPI)
 			return false;
@@ -275,12 +275,12 @@ public class Feedback {
 		this.info = info;
 	}
 
-	public String getNexuVersion() {
-		return nexuVersion;
+	public String getVersion() {
+		return version;
 	}
 
-	public void setNexuVersion(String nexuVersion) {
-		this.nexuVersion = nexuVersion;
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	public Exception getException() {

@@ -17,6 +17,7 @@ import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.pkcs11.IAIKPrivateKeyEntry;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.Map;
@@ -54,8 +55,11 @@ public class SaveFullSelectionOperation extends AbstractCompositeOperation<Boole
     product.setCertificateId(certificateId);
     if (key instanceof KSPrivateKeyEntry) {
       product.setKeyAlias(((KSPrivateKeyEntry) key).getAlias());
-      product.setCertificate(Base64.encodeBase64String(key.getCertificate().getEncoded()));
     }
+    if (key instanceof IAIKPrivateKeyEntry) {
+      product.setKeyAlias(((IAIKPrivateKeyEntry) key).getKeyLabel());
+    }
+    product.setCertificate(Base64.encodeBase64String(key.getCertificate().getEncoded()));
     // save fully-configured product
     productAdapter.saveKeystore(product, map);
     return new OperationResult<>(true);

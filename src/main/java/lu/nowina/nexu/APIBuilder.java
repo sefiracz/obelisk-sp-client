@@ -22,6 +22,7 @@ import lu.nowina.nexu.api.plugin.InitializationMessage;
 import lu.nowina.nexu.api.plugin.NexuPlugin;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.generic.SCDatabase;
+import lu.nowina.nexu.generic.SmartcardInfoDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.apache.commons.lang.ClassUtils;
 import org.slf4j.Logger;
@@ -51,22 +52,20 @@ public class APIBuilder {
 	 * @param appConfig The configuration parameters.
 	 * @param flowRegistry The implementation of {@link FlowRegistry} to use.
 	 * @param localDatabase The local database of smartcards.
-	 * @param remoteDatabaseLoader The loader of remote database of smartcards (can be <code>null</code> if none).
+	 * @param scInfoDB The local database of smartcard connections information.
 	 * @param operationFactory The implementation of {@link OperationFactory} to use.
 	 * @return The built instance of {@link NexuAPI}.
 	 */
 	public NexuAPI build(final UIDisplay display, final AppConfig appConfig, final FlowRegistry flowRegistry,
-			final SCDatabase localDatabase, final OperationFactory operationFactory) {
-		final CardDetector detector = new CardDetector(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-
-		return new InternalAPI(display, localDatabase, detector, flowRegistry,
-				operationFactory, appConfig);
+											 final SCDatabase localDatabase, final SmartcardInfoDatabase scInfoDB,
+											 final OperationFactory operationFactory) {
+		return new InternalAPI(display, localDatabase, scInfoDB, flowRegistry, operationFactory, appConfig);
 	}
 
 	/**
 	 * Init plugins on the given {@link NexuAPI} instance.
 	 * @param api The {@link NexuAPI} instance on which plugins must be initialized. It <strong>MUST</strong> be
-	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, AppConfig, FlowRegistry, SCDatabase, ProductDatabaseRefresher, OperationFactory)}.
+	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, AppConfig, FlowRegistry, SCDatabase, SmartcardInfoDatabase, OperationFactory)}.
 	 * @param properties Configuration properties of the plugin to initialize.
 	 * @return Messages about events that occurred during plugins initialization.
 	 */

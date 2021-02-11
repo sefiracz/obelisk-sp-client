@@ -13,12 +13,14 @@
  */
 package lu.nowina.nexu.api;
 
+import lu.nowina.nexu.Entity;
+
 /**
  * A product represents a potential signature mean for NexU.
  * 
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public interface Product {
+public interface Product extends Entity {
 
 	/**
 	 * Returns a simple label for this product.

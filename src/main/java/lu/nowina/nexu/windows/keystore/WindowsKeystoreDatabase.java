@@ -14,7 +14,7 @@ import lu.nowina.nexu.DatabaseEventHandler;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.ConfiguredKeystore;
-import lu.nowina.nexu.generic.ProductMapHandler;
+import lu.nowina.nexu.generic.ProductsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class WindowsKeystoreDatabase implements ProductDatabase {
     if(!getKeystores0().contains(keystore)) {
       getKeystores0().add(keystore);
     }
-    ProductMapHandler.getInstance().put(keystore.getCertificateId(), keystore);
+    ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
     onAddRemove();
   }
 
@@ -53,7 +53,7 @@ public class WindowsKeystoreDatabase implements ProductDatabase {
    */
   public final void remove(final AbstractProduct keystore) {
     getKeystores0().remove(keystore);
-    ProductMapHandler.getInstance().remove(keystore.getCertificateId(), keystore);
+    ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
     onAddRemove();
   }
 
@@ -81,9 +81,12 @@ public class WindowsKeystoreDatabase implements ProductDatabase {
     this.onAddRemoveAction = eventHandler;
   }
 
+  /**
+   * Initialize runtime HashMap of CertificateId to configured Products
+   */
   public void initialize() {
     for (WindowsKeystore keystore : getKeystores0()) {
-      ProductMapHandler.getInstance().put(keystore.getCertificateId(), keystore);
+      ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
     }
   }
 }

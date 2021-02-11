@@ -16,8 +16,10 @@ import eu.europa.esig.dss.token.SignatureTokenConnection;
 import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.OperationFactory;
-import lu.nowina.nexu.generic.IaikPkcs11SignatureTokenAdapter;
-import lu.nowina.nexu.generic.SunPkcs11SignatureTokenAdapter;
+import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.flow.operation.CheckCardTerminalOperation;
+import lu.nowina.nexu.flow.operation.CoreOperationStatus;
+import lu.nowina.nexu.pkcs11.IaikPkcs11SignatureTokenAdapter;
 import lu.nowina.nexu.generic.ProductPasswordManager;
 import lu.nowina.nexu.generic.SCInfo;
 import lu.nowina.nexu.view.core.UIOperation;
@@ -36,8 +38,6 @@ import java.util.Map;
 public class Utils {
 
   private static final FastDateFormat XS_DATE_TIME_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-  public static final Map<String, IaikPkcs11SignatureTokenAdapter> PKCS11_ADAPTERS = new HashMap<>();
 
   public static String formatXsDateTime(Date date) {
     StringBuilder sb = new StringBuilder(XS_DATE_TIME_FORMAT.format(date));
@@ -62,23 +62,23 @@ public class Utils {
     return sw.toString();
   }
 
-  public static boolean checkPasswordInput(Exception e, OperationFactory operationFactory, NexuAPI api) {
+  public static boolean checkWrongPasswordInput(Exception e, OperationFactory operationFactory, NexuAPI api) {
     String exception = Utils.printException(e);
     String msg;
-    if(exception.contains("CKR_PIN_INCORRECT")) {
+    if(exception.contains("CKR_PIN_INCORRECT") || exception.contains("CKR_PIN_LEN_RANGE")) {
       msg = "key.selection.error.pin.incorrect";
     } else if (exception.contains("keystore password was incorrect")) {
       msg = "key.selection.error.password.incorrect";
     } else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
     } else {
-      return false; // unknown exception - re-throw
+      return true; // unknown exception - re-throw
     }
     ProductPasswordManager.getInstance().destroy();
     operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
         msg, api.getAppConfig().getApplicationName(), 375, 120
     }).perform();
-    return true;
+    return false;
   }
 
   /**
@@ -100,43 +100,22 @@ public class Utils {
   }
 
   /**
-   * Checks if preconfigured smartcard has a same slot index as it has been detected
-   * @param api NexuAPI
-   * @param card Preconfigured smartcard
-   */
-  public static void checkSlotIndex(NexuAPI api, DetectedCard card) {
-    boolean deviceFound = false;
-    List<DetectedCard> detectedCards = api.detectCards();
-    for(DetectedCard c : detectedCards) {
-      if(c.getAtr().equals(card.getAtr())) {
-        card.setTerminalIndex(c.getTerminalIndex());
-        deviceFound = true;
-        break;
-      }
-    }
-    if(detectedCards.isEmpty() || !deviceFound) {
-      throw new PKCS11RuntimeException("No card detected");
-    }
-  }
-
-  /**
-   * Creates or returns previously stored Pkcs11SignatureTokenAdapter for given product
+   * Creates Pkcs11SignatureTokenAdapter for given product
    *
    * @param card DetectedCard product
    * @param absolutePkcs11Path Absolute path to PKCS11 native lib
    * @param callback PasswordInput callback
-   * @return Returns freshly created or previously stored Pkcs11SignatureTokenAdapter
+   * @return Returns freshly created Pkcs11SignatureTokenAdapter
    */
-  public static SignatureTokenConnection getStoredPkcs11TokenAdapter(DetectedCard card, String absolutePkcs11Path,
-                                                                     PasswordInputCallback callback) {
+  public static SignatureTokenConnection getPkcs11TokenAdapterInstance(NexuAPI api, DetectedCard card,
+                                                                       String absolutePkcs11Path,
+                                                                       PasswordInputCallback callback) {
     try {
-      IaikPkcs11SignatureTokenAdapter adapter = PKCS11_ADAPTERS.get(card.getAtr());
-      if(adapter == null || adapter.isModuleFinalized()) {
-        adapter = new IaikPkcs11SignatureTokenAdapter(new File(absolutePkcs11Path), callback, card);
-        PKCS11_ADAPTERS.put(card.getAtr(), adapter); // TODO - replace ATR with TokenInfo ???
-      }
-      return adapter;
-    } catch (IOException | TokenException e) {
+      // re-check terminal
+      card = api.detectCard(card);
+      return new IaikPkcs11SignatureTokenAdapter(api, new File(absolutePkcs11Path), callback, card);
+    }
+    catch (IOException | TokenException e) {
       throw new DSSException(e);
     }
   }

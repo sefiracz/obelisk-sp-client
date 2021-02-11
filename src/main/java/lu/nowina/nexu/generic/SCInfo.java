@@ -13,7 +13,6 @@
  */
 package lu.nowina.nexu.generic;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.EnvironmentInfo;
 
@@ -35,21 +34,23 @@ public class SCInfo extends DetectedCard {
 	@XmlElement(name = "connectionInfo")
 	private List<ConnectionInfo> infos;
 
-	private String label;
-
 	private String downloadUrl;
 
 	private String infoUrl;
 
-	@XmlElementWrapper(name = "supportedDigestAlgo")
-	@XmlElement(name = "digestAlgo")
-	private List<DigestAlgorithm> supportedDigestAlgorithm;
+	public SCInfo() {}
 
-	public List<DigestAlgorithm> getSupportedDigestAlgorithm() {
-		if (supportedDigestAlgorithm == null) {
-			supportedDigestAlgorithm = new ArrayList<>();
-		}
-		return supportedDigestAlgorithm;
+	public SCInfo(DetectedCard c) {
+		this.setAtr(c.getAtr());
+		this.setCertificateId(c.getCertificateId());
+		this.setCertificate(c.getCertificate());
+		this.setType(c.getType());
+		this.setKeyAlias(c.getKeyAlias());
+		this.setTerminalIndex(c.getTerminalIndex());
+		this.setTerminalLabel(c.getTerminalLabel());
+		this.setTokenLabel(c.getTokenLabel());
+		this.setTokenSerial(c.getTokenSerial());
+		this.setTokenManufacturer(c.getTokenManufacturer());
 	}
 
 	public ConnectionInfo getConnectionInfo(EnvironmentInfo env) {
@@ -72,14 +73,6 @@ public class SCInfo extends DetectedCard {
 		this.infos = infos;
 	}
 
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
 	public String getDownloadUrl() {
 		return downloadUrl;
 	}
@@ -94,10 +87,6 @@ public class SCInfo extends DetectedCard {
 
 	public void setInfoUrl(String infoUrl) {
 		this.infoUrl = infoUrl;
-	}
-
-	public void setSupportedDigestAlgorithm(List<DigestAlgorithm> supportedDigtestAlgorithm) {
-		this.supportedDigestAlgorithm = supportedDigtestAlgorithm;
 	}
 
 }

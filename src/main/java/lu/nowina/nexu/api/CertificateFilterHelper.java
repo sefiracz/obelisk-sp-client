@@ -21,7 +21,9 @@ public class CertificateFilterHelper {
 		for (DSSPrivateKeyEntry entry : fullList) {
 			// expired
 			if (!filter.getAllowExpired() && entry.getCertificate().isExpiredOn(new Date())) {
-				filteredList.add(entry);
+				if(System.getProperty("allowExpired") == null) {
+					filteredList.add(entry);
+				}
 			}
 			// absolute certificate filter via SHA1 digest
 			if (filter.getCertificateSHA1() != null &&

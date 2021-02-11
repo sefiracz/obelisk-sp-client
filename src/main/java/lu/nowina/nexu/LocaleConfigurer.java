@@ -15,11 +15,6 @@ package lu.nowina.nexu;
 
 import java.util.Locale;
 
-/**
- * Configurer for the HTTP proxy that takes into account properties and user preferences.
- *
- * @author Jean Lepropre (jean.lepropre@nowina.lu)
- */
 public class LocaleConfigurer {
 
 	public static void setUserPreferences(final UserPreferences preferences) {

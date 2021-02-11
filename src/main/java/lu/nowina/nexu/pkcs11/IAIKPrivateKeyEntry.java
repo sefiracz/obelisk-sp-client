@@ -1,4 +1,4 @@
-package lu.nowina.nexu.generic;
+package lu.nowina.nexu.pkcs11;
 
 /*
  * Copyright 2021 by SEFIRA, spol. s r. o.
@@ -31,11 +31,11 @@ public class IAIKPrivateKeyEntry implements DSSPrivateKeyEntry {
   private final CertificateToken[] certificateChain;
   private final EncryptionAlgorithm encryptionAlgorithm;
 
-  public IAIKPrivateKeyEntry(final PKCS11Module pkcs11, final String keyLabel) throws TokenException,
+  public IAIKPrivateKeyEntry(final TokenHandler token, final String keyLabel) throws TokenException,
       CertificateException {
     this.keyLabel = keyLabel;
 
-    byte[] encoded = pkcs11.getDEREncodedCertificateFromLabel(keyLabel);
+    byte[] encoded = token.getCertificate(keyLabel);
 
     X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X509")
         .generateCertificate(new ByteArrayInputStream(encoded));

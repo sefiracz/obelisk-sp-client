@@ -41,7 +41,8 @@ public class ProductPasswordManager {
     }
     // TODO - nahradit ATR za lepsi identifikator -> (PKCS11 session, cookie session, token info)
     if(this.product != null && product instanceof DetectedCard && this.product instanceof DetectedCard &&
-        ((DetectedCard) product).getAtr().equals(((DetectedCard) this.product).getAtr())) {
+        ((DetectedCard) product).getAtr().equals(((DetectedCard) this.product).getAtr()) &&
+        product.getSimpleLabel().equals(this.product.getSimpleLabel())) {
       return password.getPassword();
     }
     return null;
@@ -65,6 +66,7 @@ public class ProductPasswordManager {
 
     private final static int TIMER = 3600*1000; // 1 hour memory since last use
 
+    private final Object lock = new Object();
     private final Timer timer;
     private char[] password;
 
@@ -82,7 +84,9 @@ public class ProductPasswordManager {
     }
 
     public char[] getPassword() {
-      return p(password);
+      synchronized (lock) {
+        return password != null ? p(password) : null;
+      }
     }
 
     public void startTimer() {
@@ -90,8 +94,12 @@ public class ProductPasswordManager {
     }
 
     public void destroy() {
-      Arrays.fill(password, (char)0);
-      password = null;
+      synchronized (lock) {
+        if(password != null) {
+          Arrays.fill(password, (char) 0);
+          password = null;
+        }
+      }
     }
 
     private char[] p(char[] s) {

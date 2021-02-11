@@ -25,18 +25,16 @@ import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class ProductDatabaseLoader {
+public class EntityDatabaseLoader {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProductDatabaseLoader.class.getName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(EntityDatabaseLoader.class.getName());
 
-	public static <T extends ProductDatabase> T load(final Class<T> databaseClass, final File f) {
+	public static <T extends EntityDatabase> T load(final Class<T> databaseClass, final File f) {
 		final T db;
 		if (!f.exists()) {
 			try {
 				db = databaseClass.newInstance();
-			} catch (InstantiationException e) {
-				throw new TechnicalException("Cannot create database", e);
-			} catch (IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException e) {
 				throw new TechnicalException("Cannot create database", e);
 			}
 		} else {
@@ -48,7 +46,7 @@ public class ProductDatabaseLoader {
 		}
 		db.setOnAddRemoveAction(new DatabaseEventHandler() {
 			@Override
-			public <P extends ProductDatabase> void execute(P db) {
+			public <P extends EntityDatabase> void execute(P db) {
 				saveAs(db, f);
 			}
 		});
@@ -57,7 +55,7 @@ public class ProductDatabaseLoader {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends ProductDatabase> T load(final Class<T> databaseClass, final URL url) {
+	public static <T extends EntityDatabase> T load(final Class<T> databaseClass, final URL url) {
 		try {
 			final JAXBContext ctx = createJaxbContext(databaseClass);
 			final Unmarshaller u = ctx.createUnmarshaller();
@@ -67,7 +65,7 @@ public class ProductDatabaseLoader {
 		}
 	}
 
-	private static <T extends ProductDatabase> JAXBContext createJaxbContext(final Class<T> databaseClass) {
+	private static <T extends EntityDatabase> JAXBContext createJaxbContext(final Class<T> databaseClass) {
 		try {
 			return JAXBContext.newInstance(databaseClass);
 		} catch (JAXBException e) {
@@ -76,7 +74,7 @@ public class ProductDatabaseLoader {
 		}
 	}
 
-	static <T extends ProductDatabase> void saveAs(T db, File file) {
+	static <T extends EntityDatabase> void saveAs(T db, File file) {
 		try {
 			final JAXBContext ctx = createJaxbContext(db.getClass());
 			final Marshaller m = ctx.createMarshaller();

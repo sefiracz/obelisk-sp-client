@@ -25,6 +25,6 @@ public interface DatabaseEventHandler {
 	 * @param db The database on which the action associated to this handler must be performed.
 	 * @param <T> The type of the database on which the action must be performed.
 	 */
-	<T extends ProductDatabase> void execute(T db);
+	<T extends EntityDatabase> void execute(T db);
 
 }

@@ -34,6 +34,7 @@ import java.util.Map;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
+@Deprecated
 public class AdvancedCreationFeedbackOperation extends AbstractCompositeOperation<Void> {
 
     private NexuAPI api;

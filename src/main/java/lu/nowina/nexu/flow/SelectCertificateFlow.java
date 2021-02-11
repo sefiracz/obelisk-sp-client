@@ -20,18 +20,18 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
-import lu.nowina.nexu.generic.ProductMapHandler;
+import lu.nowina.nexu.generic.ProductsMap;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
- * description
+ * Automatically open device and select a private key based on certificate request
  */
 public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateRequest, SelectCertificateResponse> {
 
@@ -44,11 +44,11 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
   @Override
   @SuppressWarnings("unchecked")
   protected Execution<SelectCertificateResponse> process(final NexuAPI api, final SelectCertificateRequest req) throws Exception {
-    api.detectAll();
+//    api.detectAll();
     CertificateToken certificateToken = req.getCertificate();
     byte[] digest = certificateToken.getDigest(DigestAlgorithm.SHA256);
     String certificateId = Utils.encodeHexString(digest);
-    List<AbstractProduct> products = ProductMapHandler.getInstance().get(certificateId);
+    List<AbstractProduct> products = ProductsMap.getMap().get(certificateId);
     AbstractProduct selectedProduct;
     // manual select certificate/key
     if(products == null || products.isEmpty()) {
@@ -68,7 +68,7 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
         // manual selection error
         return this.handleErrorOperationResult(getCertificate.getOperationResult());
       }
-      products = ProductMapHandler.getInstance().get(certificateId);
+      products = ProductsMap.getMap().get(certificateId);
     }
 
     if(products == null || products.isEmpty()) {
@@ -90,8 +90,17 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
     SignatureTokenConnection token = null;
     try {
       while (true) {
+        // re-check terminals
+        if(selectedProduct instanceof DetectedCard) {
+          final OperationResult<DetectedCard> checkedCardOperationResult = this.getOperationFactory()
+              .getOperation(CheckCardTerminalOperation.class, api, selectedProduct).perform();
+          if(!checkedCardOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+            return this.handleErrorOperationResult(checkedCardOperationResult);
+          }
+        }
+
         final OperationResult<List<Match>> getMatchingCardAdaptersOperationResult = this.getOperationFactory()
-            .getOperation(GetMatchingProductAdaptersOperation.class, Arrays.asList(selectedProduct), api).perform();
+            .getOperation(GetMatchingProductAdaptersOperation.class, Collections.singletonList(selectedProduct), api).perform();
         if (getMatchingCardAdaptersOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
           List<Match> matchingProductAdapters = getMatchingCardAdaptersOperationResult.getResult();
 
@@ -138,7 +147,7 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
 
                   return new Execution<SelectCertificateResponse>(resp);
                 } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
-                  continue;
+                  closeToken(token);
                 } else {
                   return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
                 }
@@ -159,15 +168,7 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
       logger.error("Flow error", e);
       throw this.handleException(e);
     } finally {
-      if (token != null) {
-        if (req.isCloseToken()) {
-          try {
-            token.close();
-          } catch (final Exception e) {
-            logger.error("Exception when closing token", e);
-          }
-        }
-      }
+      closeToken(token);
     }
   }
 }
