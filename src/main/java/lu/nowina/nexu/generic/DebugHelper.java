@@ -61,7 +61,7 @@ public class DebugHelper {
 			exception = new NexuException(throwable);
 		}
 		final Feedback feedback = new Feedback(exception);
-		feedback.setNexuVersion(getConfig().getApplicationVersion());
+		feedback.setVersion(getConfig().getApplicationVersion());
 		feedback.setInfo(EnvironmentInfo.buildFromSystemProperties(getProperties()));
 		return feedback;
 	}

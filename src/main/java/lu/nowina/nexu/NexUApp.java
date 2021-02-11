@@ -16,12 +16,6 @@ package lu.nowina.nexu;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.application.Preloader;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -41,6 +35,7 @@ import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.BasicOperationFactory;
 import lu.nowina.nexu.generic.ProductPasswordManager;
 import lu.nowina.nexu.generic.SCDatabase;
+import lu.nowina.nexu.generic.SmartcardInfoDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,19 +100,24 @@ public class NexUApp extends Application {
 		logger.info("Start finished");
 	}
 
-	private NexuAPI buildAPI(final UIDisplay uiDisplay, final OperationFactory operationFactory) throws IOException {
+	private NexuAPI buildAPI(final UIDisplay uiDisplay, final OperationFactory operationFactory) {
 		File nexuHome = getConfig().getNexuHome();
-		SCDatabase db = null;
+		SCDatabase smartcardDB;
+		SmartcardInfoDatabase scInfoDB;
 		if (nexuHome != null) {
-			File store = new File(nexuHome, "database-smartcard.xml");
-			logger.info("Load database from " + store.getAbsolutePath());
-			db = ProductDatabaseLoader.load(SCDatabase.class, store);
+			File cards = new File(nexuHome, "database-smartcard.xml");
+			logger.info("Load smartcard database from " + cards.getAbsolutePath());
+			smartcardDB = EntityDatabaseLoader.load(SCDatabase.class, cards);
+			File infos = new File(nexuHome, "database-smartcard-info.xml");
+			logger.info("Load smartcard connections database from " + infos.getAbsolutePath());
+			scInfoDB = EntityDatabaseLoader.load(SmartcardInfoDatabase.class, infos);
 		} else {
-			db = new SCDatabase();
+			smartcardDB = new SCDatabase();
+			scInfoDB = new SmartcardInfoDatabase();
 		}
 		LocaleConfigurer.setUserPreferences(new UserPreferences(getConfig().getApplicationName()));
 		final APIBuilder builder = new APIBuilder();
-		final NexuAPI api = builder.build(uiDisplay, getConfig(), getFlowRegistry(), db, operationFactory);
+		final NexuAPI api = builder.build(uiDisplay, getConfig(), getFlowRegistry(), smartcardDB, scInfoDB, operationFactory);
 		notifyPreloader(builder.initPlugins(api, getProperties()));
 		return api;
 	}

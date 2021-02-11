@@ -17,6 +17,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lu.nowina.nexu.ConfigurationException;
 import lu.nowina.nexu.TechnicalException;
+import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.Execution;
 import lu.nowina.nexu.api.Feedback;
 import lu.nowina.nexu.api.NexuAPI;
@@ -131,10 +132,12 @@ public class RequestProcessor extends AbstractHandler {
 		try {
 			if ("/favicon.ico".equals(target)) {
 				favIcon(response);
+			/* TODO remove
 			} else if ("/nexu.js".equals(target)) {
 				nexuJs(request, response);
-			} else if ("/".equals(target) || "/nexu-info".equals(target)) {
-				nexuInfo(response);
+				*/
+			} else if ("/".equals(target) || "/client-info".equals(target)) {
+				clientInfo(response);
 			} else {
 				httpPlugin(target, request, response);
 			}
@@ -147,7 +150,7 @@ public class RequestProcessor extends AbstractHandler {
 
 				final Execution<?> execution = new Execution<Object>(BasicOperationStatus.EXCEPTION);
 				final Feedback feedback = new Feedback(e);
-				feedback.setNexuVersion(api.getAppConfig().getApplicationVersion());
+				feedback.setVersion(api.getAppConfig().getApplicationVersion());
 				feedback.setInfo(api.getEnvironmentInfo());
 				execution.setFeedback(feedback);
 
@@ -190,13 +193,22 @@ public class RequestProcessor extends AbstractHandler {
 		}
 	}
 
-	private void nexuInfo(HttpServletResponse response) throws IOException {
+	private void clientInfo(HttpServletResponse response) throws IOException {
 		response.setCharacterEncoding(UTF8);
 		response.setContentType(APPLICATION_JSON);
 		response.setHeader("pragma", "no-cache");
 		response.setIntHeader("expires", -1);
 		PrintWriter writer = response.getWriter();
-		writer.write("{ \"version\": \"" + api.getAppConfig().getApplicationVersion() + "\"}");
+		EnvironmentInfo info = api.getEnvironmentInfo();
+		String infoJson = " \"info\" : { " +
+				"\"jreVendor\": \""+info.getJreVendor()+"\"," +
+				"\"osName\": \""+info.getOsName()+"\"," +
+				"\"osArch\": \""+info.getOsArch()+"\"," +
+				"\"osVersion\": \""+info.getOsVersion()+"\"," +
+				"\"arch\": \""+info.getArch()+"\"," +
+				"\"os\": \""+info.getOs()+"\"" +
+				"}";
+		writer.write("{ "+infoJson+" , \"version\": \"" + api.getAppConfig().getApplicationVersion() + "\"}");
 		writer.close();
 	}
 

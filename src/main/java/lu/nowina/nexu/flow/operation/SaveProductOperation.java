@@ -30,6 +30,7 @@ import lu.nowina.nexu.api.flow.OperationResult;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
+@Deprecated
 public class SaveProductOperation extends AbstractCompositeOperation<Boolean> {
 
 	private ProductAdapter adapter;

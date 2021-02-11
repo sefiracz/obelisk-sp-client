@@ -76,15 +76,16 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 							final SignatureValue value = signOperationResult.getResult();
 							logger.info("Signature performed " + value);
 
-							if ((Boolean) map.get(TokenOperationResultKey.ADVANCED_CREATION)) {
-								getOperationFactory().getOperation(AdvancedCreationFeedbackOperation.class,
-										api, map).perform();
-							}
-
-							if(api.getAppConfig().isEnablePopUps() && api.getAppConfig().isEnableInformativePopUps()) {
-								getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-									"signature.flow.finished", api.getAppConfig().getApplicationName()).perform();
-							}
+							// TODO remove ?
+//							if ((Boolean) map.get(TokenOperationResultKey.ADVANCED_CREATION)) {
+//								getOperationFactory().getOperation(AdvancedCreationFeedbackOperation.class,
+//										api, map).perform();
+//							}
+//
+//							if(api.getAppConfig().isEnablePopUps() && api.getAppConfig().isEnableInformativePopUps()) {
+//								getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
+//									"signature.flow.finished", api.getAppConfig().getApplicationName()).perform();
+//							}
 
 							return new Execution<SignatureResponse>(new SignatureResponse(value, key.getCertificate(), key.getCertificateChain()));
 						} else {
@@ -111,13 +112,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 			logger.error("Flow error", e);
 			throw handleException(e);
 		} finally {
-			if(token != null) {
-				try {
-					token.close();
-				} catch(final Exception e) {
-					logger.error("Exception when closing token", e);
-				}
-			}
+			closeToken(token);
 		}
 	}
 }

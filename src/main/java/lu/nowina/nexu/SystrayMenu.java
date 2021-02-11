@@ -36,7 +36,7 @@ public class SystrayMenu {
 	public SystrayMenu(OperationFactory operationFactory, NexuAPI api, UserPreferences prefs) {
 		final ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
 
-		final List<SystrayMenuItem> extensionSystrayMenuItems = api.getExtensionSystrayMenuItems();
+		final List<SystrayMenuItem> extensionSystrayMenuItems = api.getExtensionSystrayMenuItem();
 		final SystrayMenuItem[] systrayMenuItems = new SystrayMenuItem[extensionSystrayMenuItems.size() + 2];
 
 		systrayMenuItems[0] = createAboutSystrayMenuItem(operationFactory, api, resources);

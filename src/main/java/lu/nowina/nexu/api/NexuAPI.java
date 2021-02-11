@@ -15,6 +15,7 @@ package lu.nowina.nexu.api;
 
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
+import lu.nowina.nexu.pkcs11.PKCS11Manager;
 
 import javax.smartcardio.CardTerminal;
 import java.util.List;
@@ -31,13 +32,15 @@ public interface NexuAPI {
 
 	List<DetectedCard> detectCards();
 
+	DetectedCard detectCard(DetectedCard card);
+
 	List<Product> detectProducts();
 
 	void detectAll();
 
 	List<Match> matchingProductAdapters(Product p);
 
-	List<SystrayMenuItem> getExtensionSystrayMenuItems();
+	List<SystrayMenuItem> getExtensionSystrayMenuItem();
 
 	EnvironmentInfo getEnvironmentInfo();
 
@@ -49,7 +52,9 @@ public interface NexuAPI {
 
 	Execution<GetCertificateResponse> getCertificate(GetCertificateRequest request);
 
-	Execution<GetCertificateResponse> selectCertificate(SelectCertificateRequest request);
+	Execution<SelectCertificateResponse> selectCertificate(SelectCertificateRequest request);
+
+	Execution<SmartcardListResponse> processSmartcardList(SmartcardListRequest request);
 
 	Execution<SignatureResponse> sign(SignatureRequest request);
 
@@ -62,4 +67,8 @@ public interface NexuAPI {
 	HttpPlugin getHttpPlugin(String pluginId);
 
 	String getLabel(Product p);
+
+	void loadSmartcardList(List<SmartcardInfo> infos, byte[] digest);
+
+	PKCS11Manager getPKCS11Manager();
 }

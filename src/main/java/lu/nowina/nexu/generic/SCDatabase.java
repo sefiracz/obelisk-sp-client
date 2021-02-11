@@ -44,7 +44,7 @@ public class SCDatabase implements ProductDatabase {
 	 * @param cInfo
 	 */
 	public final void add(DetectedCard detectedCard, ConnectionInfo cInfo) {
-		SCInfo info = getInfo(detectedCard.getAtr(), detectedCard.getCertificateId(), detectedCard.getKeyAlias());
+		SCInfo info = getInfo(detectedCard);
 		if (info == null) {
 			info = new SCInfo();
 			info.setAtr(detectedCard.getAtr());
@@ -54,19 +54,21 @@ public class SCDatabase implements ProductDatabase {
 			info.setKeyAlias(detectedCard.getKeyAlias());
 			info.setTerminalIndex(detectedCard.getTerminalIndex());
 			info.setTerminalLabel(detectedCard.getTerminalLabel());
-			info.setLabel(detectedCard.getLabel());
+			info.setTokenLabel(detectedCard.getTokenLabel());
+			info.setTokenSerial(detectedCard.getTokenSerial());
+			info.setTokenManufacturer(detectedCard.getTokenManufacturer());
 		}
-		if(!getSmartcards0().contains(info)) {
+		if(!getSmartcards0().contains(info)) { // TODO overit ze je toto spravne
 			getSmartcards0().add(info);
 			info.getInfos().add(cInfo);
 		}
-		ProductMapHandler.getInstance().put(detectedCard.getCertificateId(), info);
+		ProductsMap.getMap().put(detectedCard.getCertificateId(), info);
 		onAddRemove();
 	}
 
 	public final void remove(final AbstractProduct keystore) {
 		getSmartcards0().remove(keystore);
-		ProductMapHandler.getInstance().remove(keystore.getCertificateId(), keystore);
+		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
 		onAddRemove();
 	}
 
@@ -96,6 +98,19 @@ public class SCDatabase implements ProductDatabase {
 		return null;
 	}
 
+	public SCInfo getInfo(DetectedCard card) {
+		for (AbstractProduct ap : getKeystores()) {
+			SCInfo scInfo = (SCInfo) ap;
+			if (scInfo.getAtr().equals(card.getAtr()) &&
+					(card.getCertificateId() == null || scInfo.getCertificateId().equals(card.getCertificateId())) &&
+					(card.getKeyAlias() == null || scInfo.getKeyAlias().equals(card.getKeyAlias())) &&
+					(card.getTokenLabel() == null || scInfo.getTokenLabel().equals(card.getTokenLabel()))	) {
+				return scInfo;
+			}
+		}
+		return null;
+	}
+
 	private List<SCInfo> getSmartcards0() {
 		if (smartcards == null) {
 			this.smartcards = new ArrayList<>();
@@ -112,9 +127,12 @@ public class SCDatabase implements ProductDatabase {
 		this.onAddRemoveAction = eventHandler;
 	}
 
+	/**
+	 * Initialize runtime HashMap of CertificateId to configured Products
+	 */
 	public void initialize() {
 		for (SCInfo keystore : getSmartcards0()) {
-			ProductMapHandler.getInstance().put(keystore.getCertificateId(), keystore);
+			ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
 		}
 	}
 

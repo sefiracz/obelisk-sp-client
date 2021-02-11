@@ -14,14 +14,18 @@
 package lu.nowina.nexu;
 
 import com.sun.jna.*;
+import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.EnvironmentInfo;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.OS;
+import lu.nowina.nexu.pkcs11.PKCS11Manager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.*;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
@@ -43,7 +47,10 @@ public class CardDetector {
 
 	private final WinscardLibrary lib;
 
-	public CardDetector(final EnvironmentInfo info) {
+	private NexuAPI api;
+
+	public CardDetector(final NexuAPI api, final EnvironmentInfo info) {
+		this.api = api;
 		if (info.getOs() == OS.LINUX) {
 			logger.info("The OS is Linux, we check for Library");
 			try {
@@ -58,18 +65,15 @@ public class CardDetector {
 		}
 
 		this.cardTerminals = null;
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				if(cardTerminals != null) {
-					try {
-						closeCardTerminals();
-					} catch (Exception e) {
-						logger.warn("Exception when closing cardTerminals", e);
-					}
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if(cardTerminals != null) {
+				try {
+					closeCardTerminals();
+				} catch (Exception e) {
+					logger.warn("Exception when closing cardTerminals", e);
 				}
 			}
-		});
+		}));
 
 		final String libraryName = Platform.isWindows() ? WINDOWS_PATH : Platform.isMac() ? MAC_PATH : PCSC_PATH;
 		this.lib = (WinscardLibrary) Native.loadLibrary(libraryName, WinscardLibrary.class);
@@ -100,6 +104,14 @@ public class CardDetector {
 				try {
 					establishNewContext();
 				} catch(final Exception e1) {
+					Throwable t = e1;
+					while (t != null) {
+						if ("SCARD_E_NO_SERVICE".equals(t.getMessage())) {
+							logger.error(e.getMessage(), e);
+						}
+						t = t.getCause();
+					}
+					// Rethrow exception as is.
 					throw new RuntimeException(e1);
 				}
 				this.cardTerminals = null;
@@ -112,17 +124,11 @@ public class CardDetector {
 		}
 	}
 
-	/**
-	 * Detect the smartcard connected to the computer.
-	 *
-	 * @return a list of smartcard detection.
-	 */
-	public List<DetectedCard> detectCard() {
+	public DetectedCard detectCard(DetectedCard c) {
+		logger.info("Detect card '"+c.getTokenLabel()+"' terminal connection");
 		final List<DetectedCard> listCardDetect = new ArrayList<DetectedCard>();
 		int terminalIndex = 0;
 		for (CardTerminal cardTerminal : getCardTerminals()) {
-			// cardTerminal.isCardPresent() always returns false on MacOS, so
-			// catch the CardException instead
 			try {
 				final DetectedCard cardDetection = new DetectedCard();
 				final Card card = cardTerminal.connect("*");
@@ -130,6 +136,76 @@ public class CardDetector {
 				cardDetection.setAtr(DetectedCard.atrToString(atr.getBytes()));
 				cardDetection.setTerminalIndex(terminalIndex);
 				cardDetection.setTerminalLabel(cardTerminal.getName());
+				if(!c.getAtr().equals(cardDetection.getAtr())) {
+					continue;
+				}
+				try {
+					logger.info(MessageFormat.format("Check token info for ATR {0} in terminal {1}.", cardDetection.getAtr(), cardTerminal.getName()));
+					api.getPKCS11Manager().setTokenInfo(cardDetection);
+				} catch (IOException | TokenException e) {
+					logger.error("Unable to get token label: "+e.getMessage(), e);
+				}
+				if(cardDetection.equals(c)) {
+					listCardDetect.add(cardDetection);
+				}
+				logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, cardDetection.getAtr()));
+			} catch (CardException e) {
+				// Card not present or unreadable
+				logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+			}
+			terminalIndex++;
+		}
+		logger.info("Detected "+listCardDetect.size()+" card(s) that could be card "+c.getTokenLabel());
+		if(listCardDetect.isEmpty()) {
+			logger.warn("Card '"+c.getTokenLabel()+"' not found");
+			return null;
+		}
+		if(listCardDetect.size() == 1) {
+			DetectedCard detectedCard = listCardDetect.get(0);
+			c.setTerminalIndex(detectedCard.getTerminalIndex());
+			c.setTerminalLabel(detectedCard.getTerminalLabel());
+		} else {
+			logger.info("Can not conclusively determine the card - leaving untouched");
+		}
+		return c;
+	}
+
+	/**
+	 * Detect the smartcard connected to the computer.
+	 *
+	 * @return a list of smartcard detection.
+	 */
+	public List<DetectedCard> detectCards() {
+		logger.info("Detect all cards in terminals");
+		final List<DetectedCard> listCardDetect = new ArrayList<DetectedCard>();
+		int terminalIndex = 0;
+		for (CardTerminal cardTerminal : getCardTerminals()) {
+			// cardTerminal.isCardPresent() always returns false on MacOS, so // TODO zjistit, zdali je stale pravda ? ZS ? SunPkcs11 app to zvladne otestovat
+			// catch the CardException instead
+			try {
+				final Card card = cardTerminal.connect("*");
+				final DetectedCard cardDetection = new DetectedCard();
+				final ATR atr = card.getATR();
+				cardDetection.setAtr(DetectedCard.atrToString(atr.getBytes()));
+				cardDetection.setTerminalIndex(terminalIndex);
+				cardDetection.setTerminalLabel(cardTerminal.getName());
+				try {
+					logger.info(MessageFormat.format("Check token info for ATR {0} in terminal {1}.", cardDetection.getAtr(), cardTerminal.getName()));
+					// TODO - zmerit a zjistit dobu behu isCardPresent() a potencialne jestli by byl problem s volanim ve vlastnim vlakne ve smycce
+					// TODO nad kazdou kartou/terminalem(Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "SwapperThread")).scheduleAtFixedRate(swapper, 0, 20, TimeUnit.MILLISECONDS); )?
+					// Pouzity tokenHandler a session, ktere vzniknou pro tokenInfo rovnou nechat primo v DetectedCard, pro budouci pouziti ?
+					// Znamena to, ze musim drzet nekde "currentState/snapshot" co se tyce DetectedCards a CardTerminals
+					// Dokud je karta zapojena tak muzem session mit neustale pripojenou, a kdyz terminal, co mel kartu nahle vraci isCardPresent=false
+					// nebo terminal sam zmizel, tak zavrit session v karte (jak to karte rict? = nejake currentState api) kdyz ji
+					// tady nedostanu protoze uz neexistuje nebo terminal neexistuje ???
+					//
+					// u pkcs11 pak kontrolovat waitForSlotEvent() kdyby nahodou udelal nekdo rychloswap,
+					// pak se session muze nad tou kartou opravit sama, ale jinak se spolehat na zivotnost detectedCard
+					// login / logout se muze dit neustale (snad dost rychle, aby to nevadilo = zmerit benchmark operaci)
+					api.getPKCS11Manager().setTokenInfo(cardDetection); // TODO
+				} catch (IOException | TokenException e) {
+					logger.error("Unable to get token label: "+e.getMessage(), e);
+				}
 				listCardDetect.add(cardDetection);
 				logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, cardDetection.getAtr()));
 			} catch (CardException e) {
@@ -170,28 +246,34 @@ public class CardDetector {
 
 	private void closeCardTerminals() throws Exception {
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
-        final Field contextIdField = pcscTerminalsClass.getDeclaredField("contextId");
-        contextIdField.setAccessible(true);
-        final long contextId = contextIdField.getLong(null);
+		final Field contextIdField = pcscTerminalsClass.getDeclaredField("contextId");
+		contextIdField.setAccessible(true);
+		final long contextId = contextIdField.getLong(null);
 
-        if(contextId != 0L) {
-        	// Release current context
-        	final Dword result = lib.SCardReleaseContext(new SCardContext(contextId));
-        	if(result.longValue() != 0L) {
-        		logger.warn("Error when releasing context: " + result.longValue());
-        	} else {
-        		logger.debug("Context was released successfully.");
-        	}
+		if (contextId != 0L) {
+			// Release current context
+			final Dword result = lib.SCardReleaseContext(new SCardContext(contextId));
+			if (result.longValue() != 0L) {
+				logger.warn("Error when releasing context: " + result.longValue());
+			}
+			else {
+				logger.debug("Context was released successfully.");
+			}
 
-        	// Remove current context value
-        	contextIdField.setLong(null, 0L);
+			// Remove current context value
+			contextIdField.setLong(null, 0L);
 
-        	// Clear terminals
-            final Field terminalsField = pcscTerminalsClass.getDeclaredField("terminals");
-            terminalsField.setAccessible(true);
-        	final Map<?, ?> terminals = (Map<?, ?>) terminalsField.get(null);
-        	terminals.clear();
-        }
+			// Clear terminals
+			final Field terminalsField = pcscTerminalsClass.getDeclaredField("terminals");
+			terminalsField.setAccessible(true);
+			final Map<?, ?> terminals = (Map<?, ?>) terminalsField.get(null);
+			terminals.clear();
+
+			// finalize all initialized modules
+			api.getPKCS11Manager().finalizeAllModules();
+
+			// TODO - remove/kill currentState terminals/cards
+		}
 	}
 
 	private void establishNewContext() throws Exception {
@@ -199,6 +281,10 @@ public class CardDetector {
     	final Method initContextMethod = pcscTerminalsClass.getDeclaredMethod("initContext");
     	initContextMethod.setAccessible(true);
     	initContextMethod.invoke(null);
+	}
+
+	public void setApi(NexuAPI api) {
+		this.api = api;
 	}
 
 	/***********************************************************************************************************/

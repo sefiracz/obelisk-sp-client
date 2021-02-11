@@ -16,10 +16,11 @@ package lu.nowina.nexu.generic;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.*;
 import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
-import lu.nowina.nexu.ProductDatabaseLoader;
+import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
+import lu.nowina.nexu.pkcs11.IAIKPrivateKeyEntry;
 
 import java.io.File;
 import java.util.List;
@@ -69,8 +70,7 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
                 return new MSCAPISignatureToken();
             case PKCS_11:
                 final String absolutePath = cInfo.getApiParam();
-                Utils.checkSlotIndex(api, card);
-                return Utils.getStoredPkcs11TokenAdapter(card, absolutePath, callback);
+                return Utils.getPkcs11TokenAdapterInstance(api, card, absolutePath, callback);
             case MOCCA:
                 return new MOCCASignatureTokenConnectionAdapter(new MOCCASignatureTokenConnection(callback), api, card);
             default:
@@ -134,8 +134,8 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
         return null;
     }
 
-    public SCDatabase getDatabase() {
-        return ProductDatabaseLoader.load(SCDatabase.class, new File(nexuHome, "database-smartcard.xml"));
+    public SCDatabase getProductDatabase() {
+        return EntityDatabaseLoader.load(SCDatabase.class, new File(nexuHome, "database-smartcard.xml"));
     }
 
     private void saveKeystore(final DetectedCard keystore, Map<TokenOperationResultKey, Object> map) {
@@ -149,7 +149,7 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
       cInfo.setSelectedApi(selectedApi);
       cInfo.setEnv(env);
       cInfo.setApiParam(apiParam);
-      getDatabase().add(keystore, cInfo);
+      getProductDatabase().add(keystore, cInfo);
     }
 
     @Override

@@ -96,7 +96,7 @@
     <dependency>
       <groupId>iaik</groupId>
       <artifactId>iaik_pkcs11wrapper</artifactId>
-      <version>1.5</version>
+      <version>1.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>

@@ -92,7 +92,7 @@ public class DebugHelperTest {
 	public void testAppendFeedbackData() throws JAXBException, IOException {
 		Path nexuDebugPath = Paths.get(dummyNexuHome.getAbsolutePath(), dh.getDebugFileName());
 		Feedback feedback = new Feedback();
-		feedback.setNexuVersion("99");
+		feedback.setVersion("99");
 		FileUtils.write(nexuDebugPath.toFile(),
 				String.format("dummy log content %s %s", System.lineSeparator(), System.lineSeparator()), "utf-8");
 		File readyFile = dh.appendFeedbackData(nexuDebugPath, feedback);

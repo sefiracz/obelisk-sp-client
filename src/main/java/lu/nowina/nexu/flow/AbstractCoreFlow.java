@@ -13,11 +13,14 @@
  */
 package lu.nowina.nexu.flow;
 
+import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.api.Execution;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.view.core.UIDisplay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for flows of the core version of NexU.
@@ -25,6 +28,8 @@ import lu.nowina.nexu.view.core.UIDisplay;
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
 abstract class AbstractCoreFlow<I, O> extends Flow<I, O> {
+
+	static final Logger logger = LoggerFactory.getLogger(AbstractCoreFlow.class);
 
 	public AbstractCoreFlow(UIDisplay display, NexuAPI api) {
 		super(display, api);
@@ -46,6 +51,16 @@ abstract class AbstractCoreFlow<I, O> extends Flow<I, O> {
 			throw operationResult.getException();
 		} else {
 			return new Execution<>(operationResult, operationResult.getStatus());
+		}
+	}
+
+	protected void closeToken(SignatureTokenConnection token) {
+		if (token != null) {
+			try {
+				token.close();
+			} catch (final Exception e) {
+				logger.error("Exception when closing token", e);
+			}
 		}
 	}
 }

@@ -13,7 +13,6 @@
  */
 package lu.nowina.nexu;
 
-import lu.nowina.nexu.ProductDatabaseLoader;
 import lu.nowina.nexu.generic.SCDatabase;
 import org.junit.Test;
 
@@ -25,12 +24,12 @@ public class ProductDatabaseLoaderTest {
 	@Test
 	public void test1() throws Exception {
 
-		SCDatabase db = ProductDatabaseLoader.load(SCDatabase.class, new File("src/test/resources/db.xml"));
+		SCDatabase db = EntityDatabaseLoader.load(SCDatabase.class, new File("src/test/resources/db.xml"));
 
 		JAXBContext ctx = JAXBContext.newInstance(SCDatabase.class);
 		ctx.createMarshaller().marshal(db, System.out);
 
-		ProductDatabaseLoader.saveAs(db, new File("target/db.xml"));
+		EntityDatabaseLoader.saveAs(db, new File("target/db.xml"));
 
 	}
 

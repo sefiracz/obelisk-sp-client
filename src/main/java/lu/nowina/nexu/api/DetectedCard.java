@@ -13,17 +13,14 @@
  */
 package lu.nowina.nexu.api;
 
-import lu.nowina.nexu.generic.SCInfo;
-import org.apache.commons.lang.StringEscapeUtils;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "detectedCard", propOrder = { "atr", "terminalIndex", "terminalLabel" })
+@XmlType(name = "detectedCard", propOrder = { "atr", /*"terminalIndex", "terminalLabel",*/ "tokenLabel", "tokenSerial", "tokenManufacturer" })
 public class DetectedCard extends AbstractProduct {
 
 	/**
@@ -34,12 +31,30 @@ public class DetectedCard extends AbstractProduct {
 	/**
 	 * The terminal index.
 	 */
+	@XmlTransient
 	private int terminalIndex;
 
 	/**
 	 * The terminal label.
 	 */
+	@XmlTransient
 	private String terminalLabel;
+
+	/**
+	 * The token label
+	 */
+	private String tokenLabel;
+
+	/**
+	 * The token serial number
+	 */
+
+	private String tokenSerial;
+
+	/**
+	 * The token manufacturer name
+	 */
+	private String tokenManufacturer;
 
 	public DetectedCard() {
 		super();
@@ -137,16 +152,46 @@ public class DetectedCard extends AbstractProduct {
 		this.terminalLabel = terminalLabel;
 	}
 
+	public String getTokenLabel() {
+		return tokenLabel;
+	}
+
+	public String getTokenSerial() {
+		return tokenSerial;
+	}
+
+	public String getTokenManufacturer() {
+		return tokenManufacturer;
+	}
+
+	public void setTokenLabel(String tokenLabel) {
+		this.tokenLabel = tokenLabel;
+	}
+
+	public void setTokenSerial(String tokenSerial) {
+		this.tokenSerial = tokenSerial;
+	}
+
+	public void setTokenManufacturer(String tokenManufacturer) {
+		this.tokenManufacturer = tokenManufacturer;
+	}
+
 	@Override
 	public String getSimpleLabel() {
-		return terminalLabel;
+		return getTokenLabel()+ " " + getTokenSerial()  + " (" + getTokenManufacturer() + ")";
 	}
 
 	@Override
 	public String getLabel() {
-		return StringEscapeUtils.unescapeJava(MessageFormat.format(
-				ResourceBundle.getBundle("bundles/nexu").getString("product.selection.detected.card.button.label"),
-				this.getTerminalIndex(), this.getTerminalLabel(), this.getAtr()));
+		ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");
+		String label = rb.getString("card.label.tokenLabel")+": "+getTokenLabel();
+		if(getTokenManufacturer() != null) {
+			label += "\n"+rb.getString("card.label.tokenManufacturer")+": " + getTokenManufacturer();
+		}
+		if(getTokenSerial() != null) {
+			label += "\n"+rb.getString("card.label.tokenSerial")+": " + getTokenSerial();
+		}
+		return label;
 	}
 
 	@Override
@@ -156,9 +201,14 @@ public class DetectedCard extends AbstractProduct {
 
 		DetectedCard that = (DetectedCard) o;
 
-		if (!getCertificateId().equals(that.getCertificateId())) return false;
-		if (!getKeyAlias().equals(that.getKeyAlias())) return false;
-		return getAtr().equalsIgnoreCase(that.getAtr());
+		if (!getAtr().equalsIgnoreCase(that.getAtr())) return false;
+		if (getCertificateId() != null && that.getCertificateId() != null) {
+			if (!getCertificateId().equals(that.getCertificateId())) return false;
+		}
+		if (getKeyAlias() != null && that.getKeyAlias() != null) {
+			if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+		}
+		return getSimpleLabel().equalsIgnoreCase(that.getSimpleLabel());
 	}
 
 	@Override
@@ -166,6 +216,7 @@ public class DetectedCard extends AbstractProduct {
 		int result = getCertificateId().hashCode();
 		result = 31 * result + getKeyAlias().hashCode();
 		result = 31 * result + getAtr().hashCode();
+		result = 31 * result + getTokenLabel().hashCode();
 		return result;
 	}
 

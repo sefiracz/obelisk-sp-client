@@ -16,20 +16,18 @@ package lu.nowina.nexu.keystore;
 import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.*;
 import lu.nowina.nexu.NexuException;
-import lu.nowina.nexu.ProductDatabaseLoader;
+import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
-import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStore.PasswordProtection;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -158,17 +156,17 @@ public class KeystoreProductAdapter extends AbstractProductAdapter {
 	public List<Product> detectProducts() {
 		final List<Product> products = new ArrayList<>();
 //		products.addAll(getDatabase().getKeystores()); // TODO - asi nechceme zobrazovat zapamatovane klicenky
-		getDatabase().getKeystores(); // reloads database
+		getProductDatabase().getKeystores(); // reloads database
 		products.add(new NewKeystore());
 		return products;
 	}
 
-	public KeystoreDatabase getDatabase() {
-		return ProductDatabaseLoader.load(KeystoreDatabase.class, new File(nexuHome, "database-keystore.xml"));
+	public KeystoreDatabase getProductDatabase() {
+		return EntityDatabaseLoader.load(KeystoreDatabase.class, new File(nexuHome, "database-keystore.xml"));
 	}
 
 	public void saveKeystore(final ConfiguredKeystore keystore) {
-		getDatabase().add(keystore);
+		getProductDatabase().add(keystore);
 	}
 
 	@Override
@@ -209,9 +207,11 @@ public class KeystoreProductAdapter extends AbstractProductAdapter {
 				default:
 					throw new IllegalStateException("Unhandled keystore type: " + configuredKeystore.getType());
 				}
-			} catch (MalformedURLException e) {
-				throw new NexuException(e);
-			} catch (IOException e) {
+			}
+			catch (FileNotFoundException e) {
+				throw new KeystoreNotFoundException(configuredKeystore.getUrl());
+			}
+			catch (IOException e) {
 				throw new NexuException(e);
 			}
 		}

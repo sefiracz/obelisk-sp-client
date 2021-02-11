@@ -13,9 +13,12 @@
  */
 package lu.nowina.nexu;
 
+import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.EnvironmentInfo;
+import lu.nowina.nexu.view.core.UIDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -38,7 +41,9 @@ public class CardDetectorTest {
 	// hibernation
 	public void testSCardNoServiceIsHandledCorrectly() throws Exception {
 		EnvironmentInfo environmentInfo = new EnvironmentInfo();
-		CardDetector cardDetector = PowerMockito.spy(new CardDetector(environmentInfo));
+		UIDisplay display = Mockito.mock(UIDisplay.class);
+		InternalAPI api = new InternalAPI(display, null, null, null, null, mock(AppConfig.class));
+		CardDetector cardDetector = PowerMockito.spy(new CardDetector(api, environmentInfo));
 		CardTerminals cardTerminals = mock(CardTerminals.class);
 		CardException cardException = mock(CardException.class);
 		when(cardException.getCause()).thenReturn(new Exception("SCARD_E_NO_SERVICE"));

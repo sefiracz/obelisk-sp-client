@@ -16,14 +16,10 @@ package lu.nowina.nexu.api;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import lu.nowina.nexu.ProductDatabaseLoader;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
-import lu.nowina.nexu.generic.SCDatabase;
-import lu.nowina.nexu.keystore.KeystoreDatabase;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;

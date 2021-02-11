@@ -10,7 +10,6 @@ package lu.nowina.nexu.view.ui;
  * Author: hlavnicka
  */
 
-import eu.europa.esig.dss.x509.CertificateToken;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,11 +17,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import lu.nowina.nexu.api.AbstractProduct;
-import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
-import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
@@ -40,6 +38,9 @@ import java.util.ResourceBundle;
 public class ProductCollisionController extends AbstractUIOperationController<AbstractProduct> implements Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(UnknownCertificateMessageController.class.getName());
+
+  @FXML
+  private BorderPane productsWindow;
 
   @FXML
   private Label message;
@@ -82,13 +83,17 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
 
+      int height = 0;
       for (final AbstractProduct p : products) {
         final RadioButton button = new RadioButton(api.getLabel(p));
         button.setToggleGroup(product);
         button.setUserData(p);
         button.setMnemonicParsing(false);
         radioButtons.add(button);
+        height+=25;
       }
+      height = Math.min(height, 300);
+      productsWindow.setPrefHeight(productsWindow.getPrefHeight()+height);
 
       productsContainer.getChildren().addAll(radioButtons);
     });

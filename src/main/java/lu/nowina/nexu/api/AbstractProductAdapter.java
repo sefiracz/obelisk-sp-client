@@ -10,12 +10,7 @@ package lu.nowina.nexu.api;
  * Author: hlavnicka
  */
 
-import lu.nowina.nexu.api.flow.FutureOperationInvocation;
-import lu.nowina.nexu.view.core.NonBlockingUIOperation;
-import lu.nowina.nexu.view.core.UIOperation;
-
 import java.io.File;
-import java.util.ResourceBundle;
 
 /**
  * description
@@ -30,24 +25,7 @@ public abstract class AbstractProductAdapter implements ProductAdapter {
 
   @Override
   public SystrayMenuItem getExtensionSystrayMenuItem(final NexuAPI api) {
-    return new SystrayMenuItem() {
-
-      @Override
-      public String getName() {
-        return "systray.menu.manage.keystores";
-      }
-
-      @Override
-      public String getLabel() {
-        return ResourceBundle.getBundle("bundles/nexu").getString(getName());
-      }
-
-      @Override
-      public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-        return UIOperation.getFutureOperationInvocation(NonBlockingUIOperation.class,
-            "/fxml/manage-keystores.fxml", api);
-      }
-    };
+    return null; // override this
   }
 
 }

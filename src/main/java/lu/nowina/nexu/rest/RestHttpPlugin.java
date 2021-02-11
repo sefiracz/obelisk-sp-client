@@ -62,10 +62,12 @@ public class RestHttpPlugin implements HttpPlugin {
 		  return selectCertificate(api, req, payload);
 		case "/certificates":
 			return getCertificates(api, req, payload);
-		case "/identityInfo":
-			return getIdentityInfo(api, payload);
-		case "/authenticate":
-			return authenticate(api, req, payload);
+			case "/smartcardList":
+		return smartcardList(api, req, payload);
+//		case "/identityInfo":
+//			return getIdentityInfo(api, payload);
+//		case "/authenticate":
+//			return authenticate(api, req, payload);
 		default:
 			throw new RuntimeException("Target not recognized " + target);
 		}
@@ -184,6 +186,24 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
+	private HttpResponse smartcardList(NexuAPI api, HttpRequest req, String payload) {
+		byte[] digest = DSSUtils.digest(DigestAlgorithm.SHA256, payload.getBytes(StandardCharsets.UTF_8));
+		final SmartcardListRequest r = GsonHelper.fromJson(payload, SmartcardListRequest.class);
+		logger.info(Base64.encodeBase64String(digest));
+		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
+		if(invalidRequestHttpResponse != null) {
+			return invalidRequestHttpResponse;
+		} else {
+			logger.info("Call API");
+			try {
+				api.loadSmartcardList(r.getSmartcardInfos(), digest);
+				return new HttpResponse("OK", "application/json;charset=UTF-8", HttpStatus.OK);
+			} catch (Exception e) {
+				return new HttpResponse(e.getMessage(), "application/json;charset=UTF-8", HttpStatus.ERROR);
+			}
+		}
+	}
+
 	private HttpResponse getIdentityInfo(NexuAPI api, String payload) {
 		logger.info("API call get identity info");
 		final GetIdentityInfoRequest r;
@@ -242,7 +262,7 @@ public class RestHttpPlugin implements HttpPlugin {
 				feedback = verification.getFeedback();
 			}
 			feedback.setInfo(api.getEnvironmentInfo());
-			feedback.setNexuVersion(api.getAppConfig().getApplicationVersion());
+			feedback.setVersion(api.getAppConfig().getApplicationVersion());
 			return toHttpResponse(verification);
 		} else {
 			return null;

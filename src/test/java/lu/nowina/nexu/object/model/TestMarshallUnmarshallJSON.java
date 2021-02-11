@@ -18,7 +18,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import eu.europa.esig.dss.DigestAlgorithm;
-import eu.europa.esig.dss.EncryptionAlgorithm;
 import eu.europa.esig.dss.SignatureAlgorithm;
 import eu.europa.esig.dss.SignatureValue;
 import eu.europa.esig.dss.token.JKSSignatureToken;
@@ -74,7 +73,7 @@ public class TestMarshallUnmarshallJSON {
 	private void setFeedback(final lu.nowina.nexu.api.Execution<?> execution) {
 		final lu.nowina.nexu.api.Feedback feedback = new lu.nowina.nexu.api.Feedback();
 
-		feedback.setNexuVersion("nexuVersion");
+		feedback.setVersion("nexuVersion");
 
 		final lu.nowina.nexu.api.EnvironmentInfo environmentInfo = new lu.nowina.nexu.api.EnvironmentInfo();
 		environmentInfo.setArch(lu.nowina.nexu.api.Arch.AMD64);

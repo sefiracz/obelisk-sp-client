@@ -126,7 +126,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
 										}).perform();
     								return new Execution<GetCertificateResponse>(resp);
     							} else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
-    								continue;
+										closeToken(token);
     							} else {
     								return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
     							}
@@ -147,15 +147,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     		logger.error("Flow error", e);
     		throw this.handleException(e);
     	} finally {
-    		if (token != null) {
-    			if (req.isCloseToken()) {
-    				try {
-    					token.close();
-    				} catch (final Exception e) {
-    					logger.error("Exception when closing token", e);
-    				}
-    			}
-    		}
+				closeToken(token);
     	}
     }
 }

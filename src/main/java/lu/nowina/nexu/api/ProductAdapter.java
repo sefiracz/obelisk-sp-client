@@ -173,5 +173,5 @@ public interface ProductAdapter {
 
 	void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map);
 
-	ProductDatabase getDatabase();
+	ProductDatabase getProductDatabase();
 }

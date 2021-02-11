@@ -15,12 +15,11 @@ package lu.nowina.nexu.windows.keystore;
 
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.*;
-import lu.nowina.nexu.ProductDatabaseLoader;
+import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
-import lu.nowina.nexu.keystore.KeystoreDatabase;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -129,17 +128,17 @@ public class WindowsKeystoreProductAdapter extends AbstractProductAdapter {
 	@Override
 	public List<Product> detectProducts() {
 		final List<Product> products = new ArrayList<>();
-		getDatabase().getKeystores();
+		getProductDatabase().getKeystores();
 		products.add(new WindowsKeystore());
 		return products;
 	}
 
-	public WindowsKeystoreDatabase getDatabase() {
-		return ProductDatabaseLoader.load(WindowsKeystoreDatabase.class, new File(nexuHome, "database-windows.xml"));
+	public WindowsKeystoreDatabase getProductDatabase() {
+		return EntityDatabaseLoader.load(WindowsKeystoreDatabase.class, new File(nexuHome, "database-windows.xml"));
 	}
 
 	public void saveKeystore(final WindowsKeystore keystore) {
-		getDatabase().add(keystore);
+		getProductDatabase().add(keystore);
 	}
 
 	@Override

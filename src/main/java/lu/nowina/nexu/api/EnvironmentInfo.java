@@ -58,13 +58,13 @@ public class EnvironmentInfo {
 
 		String osArch = systemProperties.getProperty(OS_ARCH);
 		info.setOsArch(osArch);
-		info.setArch(Arch.forOSArch(osArch));
+		info.setArch(Arch.forOSArch(osArch)); // architecture
 
 		info.setJreVendor(JREVendor.forJREVendor(System.getProperty(JAVA_VENDOR)));
 
 		String osName = systemProperties.getProperty(OS_NAME);
 		info.setOsName(osName);
-		info.setOs(OS.forOSName(osName));
+		info.setOs(OS.forOSName(osName)); // operating system
 
 		String osVersion = systemProperties.getProperty(OS_VERSION);
 		info.setOsVersion(osVersion);
