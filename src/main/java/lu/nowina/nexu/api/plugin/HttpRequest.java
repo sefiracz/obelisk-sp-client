@@ -19,6 +19,8 @@ public interface HttpRequest {
 
 	String getParameter(String name);
 
+  String getHeader(String name);
+
 	String getTarget();
 
 	InputStream getInputStream();

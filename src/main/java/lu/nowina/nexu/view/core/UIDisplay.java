@@ -34,5 +34,7 @@ public interface UIDisplay {
 
 	void display(NonBlockingUIOperation operation);
 
+
+
 	void close(boolean blockingOperation);
 }

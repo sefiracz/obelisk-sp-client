@@ -30,6 +30,7 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKF_OS_LOCKING_OK;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
+@Deprecated
 public class SunPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureTokenAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SunPkcs11SignatureTokenAdapter.class.getName());

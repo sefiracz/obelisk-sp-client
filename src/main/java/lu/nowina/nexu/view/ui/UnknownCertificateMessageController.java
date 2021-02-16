@@ -17,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
@@ -58,27 +59,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     this.resources = resources;
     this.ok.setOnAction(e -> signalEnd(null));
     this.cancel.setOnAction((e) -> this.signalUserCancel());
-    this.certificate.setOnAction(actionEvent -> {
-      if (Desktop.isDesktopSupported()) {
-        try {
-          final File tmpFile = File.createTempFile("certificate", ".crt");
-          tmpFile.deleteOnExit();
-          final String certificateStr = DSSUtils.convertToPEM(certificateToken);
-          final FileWriter writer = new FileWriter(tmpFile);
-          writer.write(certificateStr);
-          writer.close();
-          new Thread(() -> {
-            try {
-              Desktop.getDesktop().open(tmpFile);
-            } catch (final IOException e) {
-              logger.error(e.getMessage(), e);
-            }
-          }).start();
-        } catch (final Exception e) {
-          logger.error(e.getMessage(), e);
-        }
-      }
-    });
+    this.certificate.setOnAction(actionEvent -> Utils.openCertificate(DSSUtils.convertToPEM(certificateToken)));
   }
 
   @Override

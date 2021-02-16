@@ -57,7 +57,7 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         final Product selectedProduct = new NewKeystore();
         when(api.detectCards()).thenReturn(Collections.emptyList());
         when(api.matchingProductAdapters(selectedProduct)).thenReturn(
-                Arrays.asList(new Match(new KeystoreProductAdapter(this.tempFolder.getRoot()), selectedProduct)));
+                Arrays.asList(new Match(new KeystoreProductAdapter(api), selectedProduct)));
         final Collection<SignatureTokenConnection> coll = new ArrayList<>();
         when(api.registerTokenConnection(any())).then(new Answer<TokenId>() {
             @Override

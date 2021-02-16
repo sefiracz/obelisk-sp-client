@@ -46,6 +46,7 @@ public class SCInfo extends DetectedCard {
 		this.setCertificate(c.getCertificate());
 		this.setType(c.getType());
 		this.setKeyAlias(c.getKeyAlias());
+		this.setTerminal(c.getTerminal());
 		this.setTerminalIndex(c.getTerminalIndex());
 		this.setTerminalLabel(c.getTerminalLabel());
 		this.setTokenLabel(c.getTokenLabel());

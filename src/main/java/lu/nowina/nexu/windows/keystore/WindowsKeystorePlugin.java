@@ -36,7 +36,7 @@ public class WindowsKeystorePlugin implements SignaturePlugin {
 	@Override
 	public List<InitializationMessage> init(String pluginId, NexuAPI api) {
 		if (OS.WINDOWS.equals(api.getEnvironmentInfo().getOs())) {
-			api.registerProductAdapter(new WindowsKeystoreProductAdapter(api.getAppConfig().getNexuHome()));
+			api.registerProductAdapter(new WindowsKeystoreProductAdapter(api));
 		}
 		return Collections.emptyList();
 	}

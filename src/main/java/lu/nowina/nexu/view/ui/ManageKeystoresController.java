@@ -24,6 +24,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import lu.nowina.nexu.ProductDatabase;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.generic.ProductsMap;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
@@ -109,25 +110,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		certificate.setOnAction(actionEvent -> {
-			if (Desktop.isDesktopSupported()) {
-				try {
-					final File tmpFile = File.createTempFile("certificate", ".crt");
-					tmpFile.deleteOnExit();
-					final String certificateStr = keystoresTable.getSelectionModel().getSelectedItem().getCertificate();
-					final FileWriter writer = new FileWriter(tmpFile);
-					writer.write(certificateStr);
-					writer.close();
-					new Thread(() -> {
-						try {
-							Desktop.getDesktop().open(tmpFile);
-						} catch (final IOException e) {
-							logger.error(e.getMessage(), e);
-						}
-					}).start();
-				} catch (final Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
+      Utils.openCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate());
 		});
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
@@ -139,7 +122,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 					List<Match> matchList = api.matchingProductAdapters(p);
 					if(!matchList.isEmpty()) {
 						ProductDatabase database = matchList.get(0).getAdapter().getProductDatabase();
-						database.remove(p);
+						database.remove(api, p);
 					}
 				}
 			}

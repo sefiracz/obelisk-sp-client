@@ -32,12 +32,12 @@ public class GsonHelperTest {
         final GetCertificateRequest req = new GetCertificateRequest();
         req.setCertificateFilter(new CertificateFilter(Purpose.SIGNATURE));
         req.setExternalId("externalId");
-        req.setNonce("nonce");
+        req.setSessionId("sessionId");
         req.setRequestSeal("seal");
         req.setUserLocale("fr");
 
         final String json = GsonHelper.toJson(req);
-        Assert.assertEquals("{\"certificateFilter\":{\"purpose\":\"SIGNATURE\",\"nonRepudiationBit\":false},\"closeToken\":true,\"userLocale\":\"fr\",\"externalId\":\"externalId\",\"requestSeal\":\"seal\",\"nonce\":\"nonce\"}", json);
+        Assert.assertEquals("{\"certificateFilter\":{\"purpose\":\"SIGNATURE\",\"nonRepudiationBit\":false},\"closeToken\":true,\"userLocale\":\"fr\",\"externalId\":\"externalId\",\"requestSeal\":\"seal\",\"sessionId\":\"sessionId\"}", json);
 
     }
 

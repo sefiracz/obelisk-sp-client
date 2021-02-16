@@ -23,8 +23,8 @@ import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.ProductAdapter;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
 import lu.nowina.nexu.view.core.UIOperation;
-import sun.security.pkcs11.wrapper.PKCS11RuntimeException;
 
 import java.util.List;
 
@@ -117,23 +117,22 @@ public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPri
             if(key == null) {
                 return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
             }
-        } else if(this.api.getAppConfig().isEnablePopUps()) {
+        } else {
             @SuppressWarnings("unchecked")
-            final OperationResult<DSSPrivateKeyEntry> op =
-                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml", new Object[]{keys, this.api.getAppConfig().getApplicationName(), this.api.getAppConfig().isDisplayBackButton()}).perform();
+            final OperationResult<Object> op =
+                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
+                        new Object[]{keys, this.api.getAppConfig().getApplicationName(),
+                                this.api.getAppConfig().isDisplayBackButton()}).perform();
             if(op.getStatus().equals(CoreOperationStatus.BACK)) {
-
                 return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
             }
             if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
                 return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
             }
-            key = op.getResult();
+            key = (DSSPrivateKeyEntry) op.getResult();
             if(key == null) {
                 return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
             }
-        } else {
-            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
         }
         return new OperationResult<DSSPrivateKeyEntry>(key);
     }

@@ -13,6 +13,7 @@ package lu.nowina.nexu.api;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +36,13 @@ public class SmartcardInfo {
   public SmartcardInfo() {
   }
 
+  public SmartcardInfo(String atr, String pkcs11Path) {
+    this.atr = atr;
+    this.drivers = new ArrayList<>();
+    if(pkcs11Path != null)
+      this.drivers.add(pkcs11Path);
+  }
+
   public String getAtr() {
     return atr;
   }
@@ -43,7 +51,11 @@ public class SmartcardInfo {
     this.atr = atr;
   }
 
-  public SmartcardInfo(String description) {
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
     this.description = description;
   }
 

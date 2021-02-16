@@ -61,7 +61,7 @@ public class SaveFullSelectionOperation extends AbstractCompositeOperation<Boole
     }
     product.setCertificate(Base64.encodeBase64String(key.getCertificate().getEncoded()));
     // save fully-configured product
-    productAdapter.saveKeystore(product, map);
+    productAdapter.saveProduct(product, map);
     return new OperationResult<>(true);
   }
 }

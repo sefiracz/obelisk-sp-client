@@ -1,5 +1,15 @@
 package lu.nowina.nexu.pkcs11;
 
+/*
+ * Copyright 2021 by SEFIRA, spol. s r. o.
+ * http://www.sefira.cz
+ *
+ * lu.nowina.nexu.pkcs11.PKCS11Module
+ *
+ * Created: 28.01.2021
+ * Author: hlavnicka
+ */
+
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import iaik.pkcs.pkcs11.TokenException;
 import iaik.pkcs.pkcs11.wrapper.*;
@@ -36,37 +46,51 @@ public class PKCS11Module {
     log.debug("Initialized");
   }
 
-  public synchronized long getTokenInReader(String reader) throws PKCS11Exception {
+  /**
+   * Get token handle value from token in given terminal
+   * @param terminalLabel Terminal name
+   * @return Token handle
+   * @throws PKCS11Exception
+   */
+  public synchronized long getTokenInTerminal(String terminalLabel) throws PKCS11Exception {
     long[] tokens = getSlotList(true);
     for (long token : tokens) {
       String slotTerminal = getSlotDescription(token);
       if(slotTerminal != null)
         slotTerminal = slotTerminal.trim();
-      // TODO proc takto slozite?
-/*
-      String slotTerminalTrimmed = slotTerminal.replaceAll(" ", "");
-      String readerTrimmed = reader.replaceAll(" ", "");
-      slotTerminal = slotTerminal.substring(0, slotTerminal.length() - 1);
-      if ((slotTerminal.startsWith(reader)) || (readerTrimmed.endsWith(slotTerminalTrimmed))) {
-        return token;
-      }
-*/
-      if(reader.trim().equals(slotTerminal)) {
+      if(terminalLabel.trim().equals(slotTerminal)) {
         return token;
       }
     }
     return -1;
   }
 
+  /**
+   * Get list of tokens in slot
+   * @param tokenPresent True if only present tokens are to be listed
+   * @return List of found token handles
+   * @throws PKCS11Exception
+   */
   public synchronized long[] getSlotList(boolean tokenPresent) throws PKCS11Exception {
     return pkcs11Module.C_GetSlotList(tokenPresent);
   }
 
+  /**
+   * Returns CK_SLOT_INFO slot information
+   * @param slotId Slot ID
+   * @return Slot information
+   * @throws PKCS11Exception
+   */
   public synchronized CK_SLOT_INFO getSlotInfo(long slotId) throws PKCS11Exception {
     return pkcs11Module.C_GetSlotInfo(slotId);
   }
 
-  public String getSlotDescription(long slotID) {
+  /**
+   * Returns slot description (terminal name)
+   * @param slotID Slot ID
+   * @return Slot description (terminal name)
+   */
+  private String getSlotDescription(long slotID) {
     try {
       CK_SLOT_INFO slotInfo = getSlotInfo(slotID);
       return new String(slotInfo.slotDescription);
@@ -76,22 +100,61 @@ public class PKCS11Module {
     }
   }
 
+  /**
+   * Returns CK_TOKEN_INFO token information
+   * @param tokenHandle Token handle
+   * @return Token information
+   * @throws PKCS11Exception
+   */
+  public synchronized CK_TOKEN_INFO getTokenInfo(long tokenHandle) throws PKCS11Exception {
+    if(tokenHandle < 0) {
+      throw new PKCS11Exception(CKR_TOKEN_NOT_PRESENT);
+    }
+    return pkcs11Module.C_GetTokenInfo(tokenHandle);
+  }
+
+  /**
+   * Open session for given token
+   * @param tokenHandle Token handle
+   * @return Session handle
+   * @throws TokenException
+   */
   public synchronized long openSession(long tokenHandle) throws TokenException {
     long sessionHandle = pkcs11Module.C_OpenSession(tokenHandle, PKCS11Constants.CKF_SERIAL_SESSION, null, null);
     log.debug("Session with handle: " + sessionHandle + " opened on token with handle: " + tokenHandle);
     return sessionHandle;
   }
 
-  public synchronized boolean login(PasswordInputCallback passwordCallback, long sessionHandle) throws PKCS11Exception {
+  /**
+   * Close session given session handle
+   * @param sessionHandle Session handle to be closed
+   * @throws PKCS11Exception
+   */
+  public synchronized void closeSession(long sessionHandle) throws PKCS11Exception {
+    log.debug("Closing session with handle: " + sessionHandle);
+    pkcs11Module.C_CloseSession(sessionHandle);
+  }
+
+  /**
+   * Log into user session
+   * @param passwordCallback Password callback
+   * @param sessionHandle Session handle
+   * @throws PKCS11Exception
+   */
+  public synchronized void login(PasswordInputCallback passwordCallback, long sessionHandle) throws PKCS11Exception {
     if (sessionHandle < 0) {
       throw new PKCS11Exception(CKR_SESSION_HANDLE_INVALID);
     }
     // log in as normal user
     pkcs11Module.C_Login(sessionHandle, PKCS11Constants.CKU_USER, passwordCallback.getPassword(), true);
     log.debug("User logged into session: " + sessionHandle);
-    return true;
   }
 
+  /**
+   * Log out of user session
+   * @param sessionHandle Session handle
+   * @throws PKCS11Exception
+   */
   public synchronized void logout(long sessionHandle) throws PKCS11Exception {
     if (sessionHandle < 0) {
       throw new PKCS11Exception(CKR_SESSION_HANDLE_INVALID);
@@ -101,18 +164,13 @@ public class PKCS11Module {
     log.debug("User logged out from session: " + sessionHandle);
   }
 
-  public synchronized void closeSession(long sessionHandle) throws PKCS11Exception {
-    log.debug("Closing session with handle: " + sessionHandle);
-    pkcs11Module.C_CloseSession(sessionHandle);
-  }
-
-  public synchronized CK_TOKEN_INFO getTokenInfo(long tokenHandle) throws PKCS11Exception {
-    if(tokenHandle < 0) {
-      throw new PKCS11Exception(CKR_TOKEN_NOT_PRESENT);
-    }
-    return pkcs11Module.C_GetTokenInfo(tokenHandle);
-  }
-
+  /**
+   * Get list of private key labels or identifications
+   * If key does not have CKA_LABEL, the CKA_ID is returned instead and the value is prefixed with {CKA_ID}
+   * @param sessionHandle Session handle
+   * @return List of key labels/identifications
+   * @throws TokenException
+   */
   public synchronized List<String> getPrivateKeyLabels(long sessionHandle) throws TokenException {
     List<String> keyLabels = new ArrayList<>();
     if (sessionHandle < 0) {
@@ -129,7 +187,7 @@ public class PKCS11Module {
       log.debug("Found " + objects.length + " signature keys");
       for (long signatureKeyHandle : objects) {
         String keyLabel = getPrivateKeyLabel(sessionHandle, signatureKeyHandle);
-        if(keyLabel != null) { // TODO CKA_ID?
+        if(keyLabel != null) {
           keyLabels.add(keyLabel);
         }
       }
@@ -139,6 +197,14 @@ public class PKCS11Module {
     return keyLabels;
   }
 
+  /**
+   * Returns key label or identification for given key handle
+   * If key does not have CKA_LABEL, the CKA_ID is returned instead and the value is prefixed with {CKA_ID}
+   * @param sessionHandle Session handle
+   * @param signatureKeyHandle Key handle
+   * @return Key label/identification
+   * @throws PKCS11Exception
+   */
   public synchronized String getPrivateKeyLabel(long sessionHandle, long signatureKeyHandle) throws PKCS11Exception {
     if (sessionHandle < 0) {
       throw new PKCS11Exception(CKR_SESSION_HANDLE_INVALID);
@@ -159,6 +225,13 @@ public class PKCS11Module {
       return null;
   }
 
+  /**
+   * Returns key handle
+   * @param sessionHandle Session handle
+   * @param label Key label (CKA_LABEL) or identification (CKA_ID)
+   * @return Key handle
+   * @throws PKCS11Exception
+   */
   public synchronized long getPrivateKey(long sessionHandle, String label) throws PKCS11Exception {
     long signatureKeyHandle = -1L;
     if (sessionHandle < 0) {
@@ -185,6 +258,13 @@ public class PKCS11Module {
     return signatureKeyHandle;
   }
 
+  /**
+   * Returns byte array of encoded X509 certificate
+   * @param sessionHandle Session handle
+   * @param label Certificate label (CKA_LABEL) or identification (CKA_ID)
+   * @return Byte array of encoded X509 certificate
+   * @throws TokenException
+   */
   public synchronized byte[] getCertificate(long sessionHandle, String label) throws TokenException {
     if (sessionHandle < 0) {
       throw new PKCS11Exception(CKR_SESSION_HANDLE_INVALID);
@@ -196,6 +276,13 @@ public class PKCS11Module {
     return getCertificate(sessionHandle, certificateHandle);
   }
 
+  /**
+   * Returns byte array of encoded X509 certificate
+   * @param sessionHandle Session handle
+   * @param certificateHandle Certificate object handle
+   * @return Byte array of encoded X509 certificate
+   * @throws PKCS11Exception
+   */
   public synchronized byte[] getCertificate(long sessionHandle, long certificateHandle) throws PKCS11Exception {
     if(certificateHandle < 0) {
       throw new PKCS11Exception(CKR_OBJECT_HANDLE_INVALID);
@@ -206,6 +293,13 @@ public class PKCS11Module {
     return (byte[]) template[0].pValue;
   }
 
+  /**
+   * Returns certificate object handle
+   * @param sessionHandle Session handle
+   * @param label Certificate label (CKA_LABEL) or identification (CKA_ID)
+   * @return Certificate object handle
+   * @throws PKCS11Exception
+   */
   public synchronized long getCertificateHandle(long sessionHandle, String label) throws PKCS11Exception {
     long certificateHandle = -1L;
     if (sessionHandle < 0) {
@@ -228,6 +322,15 @@ public class PKCS11Module {
     return certificateHandle;
   }
 
+  /**
+   * Sign digested data
+   * @param signatureKeyHandle Signature key handle
+   * @param sessionHandle Session handle
+   * @param signatureMechanism Signature mechanism
+   * @param data Data digest
+   * @return Signature value
+   * @throws PKCS11Exception
+   */
   public synchronized byte[] signData(long signatureKeyHandle, long sessionHandle, CK_MECHANISM signatureMechanism, byte[] data) throws PKCS11Exception {
     byte[] signature = null;
     if (sessionHandle < 0) {
@@ -245,10 +348,10 @@ public class PKCS11Module {
     return signature;
   }
 
-  public boolean isModuleFinalized() {
-    return moduleFinalized;
-  }
-
+  /**
+   * Finalize this PKCS11 module
+   * @throws Throwable
+   */
   public synchronized void moduleFinalize() throws Throwable {
     log.debug("Finalizing module: '" + pkcs11ModulePath + "'");
     pkcs11Module.C_Finalize(null);
@@ -256,8 +359,12 @@ public class PKCS11Module {
     log.debug("Finalized");
   }
 
-  public synchronized long waitForSlotEvent() throws PKCS11Exception {
-    return pkcs11Module.C_WaitForSlotEvent(CKF_DONT_BLOCK, null);
+  /**
+   * Returns true if PKCS11 has been finalized
+   * @return True if PKCS11 has been finalized
+   */
+  public boolean isModuleFinalized() {
+    return moduleFinalized;
   }
 
   private CK_ATTRIBUTE setLabelOrId(String label) {
@@ -275,23 +382,17 @@ public class PKCS11Module {
     return attribute;
   }
 
+  /**
+   * Removes items from list of key labels that do not have their X509 certificate
+   * @param sessionHandle Session handle
+   * @param keyLabels Key/certificate label (CKA_LABEL) or identification (CKA_ID)
+   * @throws TokenException
+   */
   private void removeKeysWithoutCertificates(long sessionHandle, List<String> keyLabels) throws TokenException {
     if(!keyLabels.isEmpty()) {
       ListIterator<String> iterator = keyLabels.listIterator();
       while(iterator.hasNext()) {
         String keyLabel = iterator.next();
-        /* TODO - remove */
-        try {
-          byte[] c = getCertificate(sessionHandle, keyLabel);
-        }catch (Exception e) {
-          e.printStackTrace();
-        }
-        try {
-          byte[] c = getCertificate(sessionHandle, keyLabel);
-        }catch (Exception e) {
-          e.printStackTrace();
-        }
-        /**/
         if(getCertificateHandle(sessionHandle, keyLabel) == -1) {
           iterator.remove();
         }

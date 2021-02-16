@@ -10,32 +10,23 @@ package lu.nowina.nexu;
  * Author: hlavnicka
  */
 
-import eu.europa.esig.dss.DSSException;
-import eu.europa.esig.dss.token.PasswordInputCallback;
-import eu.europa.esig.dss.token.SignatureTokenConnection;
-import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.OperationFactory;
-import lu.nowina.nexu.api.flow.OperationResult;
-import lu.nowina.nexu.flow.operation.CheckCardTerminalOperation;
-import lu.nowina.nexu.flow.operation.CoreOperationStatus;
-import lu.nowina.nexu.pkcs11.IaikPkcs11SignatureTokenAdapter;
-import lu.nowina.nexu.generic.ProductPasswordManager;
+import lu.nowina.nexu.generic.PasswordManager;
 import lu.nowina.nexu.generic.SCInfo;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.apache.commons.lang.time.FastDateFormat;
-import sun.security.pkcs11.wrapper.PKCS11RuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.awt.*;
+import java.io.*;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Utils {
+
+  private static final Logger logger = LoggerFactory.getLogger(Utils.class.getName());
 
   private static final FastDateFormat XS_DATE_TIME_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -74,7 +65,7 @@ public class Utils {
     } else {
       return true; // unknown exception - re-throw
     }
-    ProductPasswordManager.getInstance().destroy();
+    PasswordManager.getInstance().destroy();
     operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
         msg, api.getAppConfig().getApplicationName(), 375, 120
     }).perform();
@@ -87,6 +78,7 @@ public class Utils {
    * @param matchingProductAdapters List of matching product adapters
    * @return True if library is present or if product is not PKCS11
    */
+  // TODO ??? stale aktualni a potreba? // mozna lepe jit skrz PKCS11Manager
   public static boolean isPkcs11LibraryPresent(List<Match> matchingProductAdapters) {
     if(!matchingProductAdapters.isEmpty()) {
       Product p = matchingProductAdapters.get(0).getProduct();
@@ -99,24 +91,25 @@ public class Utils {
     return true; // product isn't PKCS11 so it's ok
   }
 
-  /**
-   * Creates Pkcs11SignatureTokenAdapter for given product
-   *
-   * @param card DetectedCard product
-   * @param absolutePkcs11Path Absolute path to PKCS11 native lib
-   * @param callback PasswordInput callback
-   * @return Returns freshly created Pkcs11SignatureTokenAdapter
-   */
-  public static SignatureTokenConnection getPkcs11TokenAdapterInstance(NexuAPI api, DetectedCard card,
-                                                                       String absolutePkcs11Path,
-                                                                       PasswordInputCallback callback) {
-    try {
-      // re-check terminal
-      card = api.detectCard(card);
-      return new IaikPkcs11SignatureTokenAdapter(api, new File(absolutePkcs11Path), callback, card);
-    }
-    catch (IOException | TokenException e) {
-      throw new DSSException(e);
+  public static void openCertificate(String certificate) {
+    if (Desktop.isDesktopSupported()) {
+      try {
+        final File tmpFile = File.createTempFile("certificate", ".crt");
+        tmpFile.deleteOnExit();
+        final FileWriter writer = new FileWriter(tmpFile);
+        writer.write(certificate);
+        writer.close();
+        new Thread(() -> {
+          try {
+            Desktop.getDesktop().open(tmpFile);
+          } catch (final IOException e) {
+            logger.error(e.getMessage(), e);
+          }
+        }).start();
+      } catch (final Exception e) {
+        logger.error(e.getMessage(), e);
+      }
     }
   }
+
 }

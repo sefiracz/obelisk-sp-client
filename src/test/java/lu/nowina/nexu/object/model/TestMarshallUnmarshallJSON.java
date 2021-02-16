@@ -65,7 +65,7 @@ public class TestMarshallUnmarshallJSON {
 
 	private void assertCommonRequestFields(final lu.nowina.nexu.api.NexuRequest request) {
 		Assert.assertEquals("externalId", request.getExternalId());
-		Assert.assertEquals("nonce", request.getNonce());
+		Assert.assertEquals("nonce", request.getSessionId());
 		Assert.assertEquals("requestSeal", request.getRequestSeal());
 		Assert.assertEquals("userLocale", request.getUserLocale());
 	}

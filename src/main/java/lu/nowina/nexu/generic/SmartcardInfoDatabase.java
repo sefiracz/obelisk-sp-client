@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @XmlRootElement(name = "database")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -47,7 +48,7 @@ public class SmartcardInfoDatabase implements EntityDatabase {
   }
 
   public Map<String, SmartcardInfo> getSmartcardInfosMap() {
-    Map<String, SmartcardInfo> infosMap = new HashMap<>();
+    Map<String, SmartcardInfo> infosMap = new ConcurrentHashMap<>();
     for(SmartcardInfo smartcardInfo : getStoredInfo()) {
       infosMap.put(smartcardInfo.getAtr(), smartcardInfo);
     }

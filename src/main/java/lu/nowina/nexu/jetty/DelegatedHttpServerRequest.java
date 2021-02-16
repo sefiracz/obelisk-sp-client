@@ -51,6 +51,11 @@ public class DelegatedHttpServerRequest implements HttpRequest {
 		}
 	}
 
+  @Override
+	public String getHeader(String name) {
+	  return wrapped.getHeader(name);
+  }
+
 	@Override
 	public String getParameter(String name) {
 		return wrapped.getParameter(name);

@@ -18,38 +18,41 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ProductPasswordManager {
+public class PasswordManager {
 
-  private static volatile ProductPasswordManager manager;
+  private static volatile PasswordManager manager;
 
   private AbstractProduct product = null;
   private PasswordTemp password = null;
+  private String sessionId = null;
 
-  private ProductPasswordManager() {}
+  private PasswordManager() {}
 
-  public synchronized static ProductPasswordManager getInstance() {
+  public synchronized static PasswordManager getInstance() {
     if(manager == null) {
-      manager = new ProductPasswordManager();
+      manager = new PasswordManager();
     }
     return manager;
   }
 
   public char[] getPasswordForProduct(AbstractProduct product) {
+    if(this.sessionId != null && !this.sessionId.equals(product.getSessionId())) {
+      return null; // different browser session
+    }
     if(this.product != null && product instanceof ConfiguredKeystore && this.product instanceof ConfiguredKeystore &&
         ((ConfiguredKeystore) product).getUrl().equals(((ConfiguredKeystore) this.product).getUrl())) {
-        return password.getPassword();
+        return password.getPassword(); // return stored password for this keystore product
     }
-    // TODO - nahradit ATR za lepsi identifikator -> (PKCS11 session, cookie session, token info)
     if(this.product != null && product instanceof DetectedCard && this.product instanceof DetectedCard &&
-        ((DetectedCard) product).getAtr().equals(((DetectedCard) this.product).getAtr()) &&
-        product.getSimpleLabel().equals(this.product.getSimpleLabel())) {
-      return password.getPassword();
+            ((DetectedCard) this.product).softEquals(product)) {
+      return password.getPassword(); // return stored password for this smartcard product
     }
-    return null;
+    return null; // different product
   }
 
   public void setProductPassword(AbstractProduct product, char[] password) {
     this.product = product;
+    this.sessionId = product.getSessionId();
     this.password = new PasswordTemp(password);
     this.password.startTimer();
   }
@@ -60,6 +63,17 @@ public class ProductPasswordManager {
     }
     this.password = null;
     this.product = null;
+  }
+
+  public void destroy(AbstractProduct product) {
+    if(this.product != null && product instanceof ConfiguredKeystore && this.product instanceof ConfiguredKeystore &&
+            ((ConfiguredKeystore) product).getUrl().equals(((ConfiguredKeystore) this.product).getUrl())) {
+      destroy();
+    }
+    if(this.product != null && product instanceof DetectedCard && this.product instanceof DetectedCard &&
+            ((DetectedCard) product).softEquals(this.product)) {
+      destroy();
+    }
   }
 
   private static class PasswordTemp extends TimerTask {

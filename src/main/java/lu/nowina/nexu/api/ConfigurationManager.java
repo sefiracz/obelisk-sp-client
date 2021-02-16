@@ -45,7 +45,7 @@ public class ConfigurationManager {
 		if (os != null && os.toLowerCase().contains("windows")) {
 			return manageWindowsConfiguration(applicationName);
 		} else {
-			return manageCommonConfiguration(applicationName);
+			return manageCommonConfiguration(applicationName); // TODO linux vs MacOS
 		}
 
 	}
@@ -117,7 +117,7 @@ public class ConfigurationManager {
 
 	String getWindowsAppDataPath() {
 		if (getOs().toLowerCase().contains("windows")) {
-			return Shell32Util.getFolderPath(ShlObj.CSIDL_LOCAL_APPDATA);
+			return Shell32Util.getFolderPath(ShlObj.CSIDL_LOCAL_APPDATA);  // ~/AppData/Local/Company/AppName
 		}
 		return "";
 	}
@@ -131,7 +131,7 @@ public class ConfigurationManager {
 	}
 
 	Path getCommonConfigPath(String appName) {
-		return Paths.get(getUserHome(), "." + appName);
+    return Paths.get(getUserHome(), ".config/" + getCompanyName() + "/" + appName); // ~/.config/Company/AppName
 	}
 
 	Path getWindowsConfigPath() {
