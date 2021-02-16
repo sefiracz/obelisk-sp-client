@@ -17,6 +17,7 @@ import lu.nowina.nexu.DatabaseEventHandler;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.ConfiguredKeystore;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.generic.ProductsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +44,8 @@ public class KeystoreDatabase implements ProductDatabase {
 	 * @param keystore The keystore to add.
 	 */
 	public final void add(final ConfiguredKeystore keystore) {
-		if(!getKeystores0().contains(keystore)) {
-			getKeystores0().add(keystore);
+		if(!getKeystores().contains(keystore)) {
+			getKeystores().add(keystore);
 		}
 		ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
 		onAddRemove();
@@ -54,8 +55,8 @@ public class KeystoreDatabase implements ProductDatabase {
 	 * Removes the given {@link ConfiguredKeystore} from the database.
 	 * @param keystore The keystore to remove.
 	 */
-	public final void remove(final AbstractProduct keystore) {
-		getKeystores0().remove(keystore);
+	public final void remove(NexuAPI api, final AbstractProduct keystore) {
+		getKeystores().remove(keystore);
 		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
 		onAddRemove();
 	}
@@ -68,22 +69,22 @@ public class KeystoreDatabase implements ProductDatabase {
 		}
 	}
 
-	private List<ConfiguredKeystore> getKeystores0() {
+	private List<ConfiguredKeystore> getKeystores() {
 		if (keystores == null) {
 			this.keystores = new ArrayList<>();
 		}
 		return keystores;
 	}
 
-	public List<AbstractProduct> getKeystores() {
-		return Collections.unmodifiableList(getKeystores0());
+	public List<AbstractProduct> getProducts() {
+		return Collections.unmodifiableList(getKeystores());
 	}
 
 	/**
 	 * Initialize runtime HashMap of CertificateId to configured Products
 	 */
 	public void initialize() {
-		for (ConfiguredKeystore keystore : getKeystores0()) {
+		for (ConfiguredKeystore keystore : getKeystores()) {
 			ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
 		}
 	}

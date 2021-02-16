@@ -26,7 +26,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
-import lu.nowina.nexu.generic.ProductPasswordManager;
+import lu.nowina.nexu.generic.PasswordManager;
 import lu.nowina.nexu.view.core.ExtensionFilter;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -138,14 +138,14 @@ public class StandaloneUIDisplay implements UIDisplay {
 		@Override
 		public char[] getPassword() {
 			LOGGER.info("Request password");
-			char[] password = ProductPasswordManager.getInstance().getPasswordForProduct(product);
+			char[] password = PasswordManager.getInstance().getPasswordForProduct(product);
 			if (password == null) {
 				@SuppressWarnings("unchecked")
-				final OperationResult<char[]> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
+				final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
 						UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
 						NexuLauncher.getConfig().getApplicationName(), product).perform();
 				if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-					password = passwordResult.getResult();
+					password = (char[]) passwordResult.getResult(); // get password
 				} else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
 					throw new CancelledOperationException();
 				} else if(passwordResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
@@ -161,7 +161,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 					throw new IllegalArgumentException("Not managed operation status: " + passwordResult.getStatus().getCode());
 				}
 			}
-			ProductPasswordManager.getInstance().setProductPassword(product, password);
+			PasswordManager.getInstance().setProductPassword(product, password); // set password to manager
 			return password;
 		}
 
@@ -170,6 +170,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 			this.passwordPrompt = passwordPrompt;
 		}
 
+    @Override
 		public void setProduct(AbstractProduct product) {
 			this.product = product;
 		}

@@ -13,6 +13,7 @@
  */
 package lu.nowina.nexu.flow.operation;
 
+import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.ProductAdapter;
 import lu.nowina.nexu.api.ScAPI;
 import lu.nowina.nexu.api.TokenId;

@@ -15,13 +15,11 @@ package lu.nowina.nexu.windows.keystore;
 
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.*;
-import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +31,12 @@ import java.util.Map;
  * @author simon.ghisalberti
  *
  */
-public class WindowsKeystoreProductAdapter extends AbstractProductAdapter {
+public class WindowsKeystoreProductAdapter implements ProductAdapter {
 
-	public WindowsKeystoreProductAdapter(File nexuHome) {
-		super(nexuHome);
+  private final NexuAPI api;
+
+	public WindowsKeystoreProductAdapter(final NexuAPI api) {
+		this.api = api;
 	}
 
 	@Override
@@ -121,20 +121,26 @@ public class WindowsKeystoreProductAdapter extends AbstractProductAdapter {
 	}
 
 	@Override
+  @Deprecated
 	public FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
 		return new NoOpFutureOperationInvocation<Boolean>(true);
 	}
 
-	@Override
+  @Override
+  public SystrayMenuItem getExtensionSystrayMenuItem(NexuAPI api) {
+    return null;
+  }
+
+  @Override
 	public List<Product> detectProducts() {
 		final List<Product> products = new ArrayList<>();
-		getProductDatabase().getKeystores();
+		getProductDatabase().getProducts();
 		products.add(new WindowsKeystore());
 		return products;
 	}
 
 	public WindowsKeystoreDatabase getProductDatabase() {
-		return EntityDatabaseLoader.load(WindowsKeystoreDatabase.class, new File(nexuHome, "database-windows.xml"));
+		return api.loadDatabase(WindowsKeystoreDatabase.class, "database-windows.xml");
 	}
 
 	public void saveKeystore(final WindowsKeystore keystore) {
@@ -142,8 +148,8 @@ public class WindowsKeystoreProductAdapter extends AbstractProductAdapter {
 	}
 
 	@Override
-	public void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map) {
-		saveKeystore((WindowsKeystore) keystore);
+	public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
+		saveKeystore((WindowsKeystore) product);
 	}
 
 }

@@ -25,6 +25,8 @@ public abstract class AbstractProduct implements Product {
   protected String keyAlias;
   @XmlTransient
   protected boolean toBeSaved;
+  @XmlTransient
+  protected String sessionId;
 
   public AbstractProduct() {
     this.toBeSaved = false;
@@ -120,6 +122,24 @@ public abstract class AbstractProduct implements Product {
    */
   public void setToBeSaved(boolean toBeSaved) {
     this.toBeSaved = toBeSaved;
+  }
+
+  /**
+   * Returns session identification
+   *
+   * @return Session identification
+   */
+  public String getSessionId() {
+    return sessionId;
+  }
+
+  /**
+   * Sets session identification
+   *
+   * @param sessionId Session identification value
+   */
+  public void setSessionId(String sessionId) {
+    this.sessionId = sessionId;
   }
 
   @Override

@@ -33,7 +33,7 @@ import lu.nowina.nexu.flow.BasicFlowRegistry;
 import lu.nowina.nexu.flow.Flow;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.BasicOperationFactory;
-import lu.nowina.nexu.generic.ProductPasswordManager;
+import lu.nowina.nexu.generic.PasswordManager;
 import lu.nowina.nexu.generic.SCDatabase;
 import lu.nowina.nexu.generic.SmartcardInfoDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -73,21 +72,24 @@ public class NexUApp extends Application {
 		final NexuAPI api = buildAPI(uiDisplay, operationFactory);
 
 		// TODO - how to fix splashscreen ?
-		if(getConfig().isShowSplashScreen()) {
-			logger.info("Show splash screen");
-			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.png")));
-			final StackPane background = new StackPane(splash);
-			final Scene splashScene = new Scene(background, 600, 300);
-			primaryStage.setTitle(getConfig().getApplicationName());
-			primaryStage.setScene(splashScene);
-			primaryStage.initStyle(StageStyle.UNDECORATED);
-			primaryStage.show();
-			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
-			delay.setOnFinished(event -> primaryStage.close());
-			delay.play();
-		}
+//		if(getConfig().isShowSplashScreen()) {
+//			logger.info("Show splash screen");
+//			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.png")));
+//			final StackPane background = new StackPane(splash);
+//			final Scene splashScene = new Scene(background, 600, 300);
+//			primaryStage.setTitle(getConfig().getApplicationName());
+//			primaryStage.setScene(splashScene);
+//			primaryStage.initStyle(StageStyle.UNDECORATED);
+//			primaryStage.show();
+//			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
+//			delay.setOnFinished(event -> primaryStage.close());
+//			delay.play();
+//		}
 
-		logger.info("Start Jetty");
+    logger.info("Detect all available products");
+    api.detectAll();
+
+    logger.info("Start Jetty");
 
 		server = startHttpServer(api);
 
@@ -167,7 +169,7 @@ public class NexUApp extends Application {
 		logger.info("Stopping application...");
 		try {
 			// TODO - finalize all PKCS11 ???
-			ProductPasswordManager.getInstance().destroy();
+			PasswordManager.getInstance().destroy();
 			if(server != null) {
 				server.stop();
 				server = null;

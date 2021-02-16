@@ -1,13 +1,21 @@
 package lu.nowina.nexu.pkcs11;
 
+/*
+ * Copyright 2021 by SEFIRA, spol. s r. o.
+ * http://www.sefira.cz
+ *
+ * lu.nowina.nexu.pkcs11.TokenHandler
+ *
+ * Created: 28.01.2021
+ * Author: hlavnicka
+ */
+
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import iaik.pkcs.pkcs11.TokenException;
 import iaik.pkcs.pkcs11.wrapper.CK_MECHANISM;
 import iaik.pkcs.pkcs11.wrapper.CK_TOKEN_INFO;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Constants;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
-import lu.nowina.nexu.api.DetectedCard;
-import lu.nowina.nexu.generic.ProductPasswordManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,23 +27,25 @@ public class TokenHandler {
   private static final Logger log = LoggerFactory.getLogger(TokenHandler.class.getName());
 
   private final PKCS11Module pkcs11Module;
-  private final String reader;
+  private final String terminalLabel;
 
   private CK_TOKEN_INFO tokenInfo;
-
   private long sessionHandle = -1;
   private long tokenHandle = -1;
 
-  public TokenHandler(PKCS11Module pkcs11Module, String reader) {
+  public TokenHandler(PKCS11Module pkcs11Module, String terminalLabel) {
     this.pkcs11Module = pkcs11Module;
-    this.reader = reader;
+    this.terminalLabel = terminalLabel;
   }
 
+  /**
+   * Open new session and initialize token
+   * @throws TokenException
+   */
   public void openSession() throws TokenException {
-    checkSessionState();
     if(sessionHandle < 0) {
       try {
-        this.tokenHandle = pkcs11Module.getTokenInReader(reader);
+        this.tokenHandle = pkcs11Module.getTokenInTerminal(terminalLabel);
         this.sessionHandle = pkcs11Module.openSession(tokenHandle);
         this.tokenInfo = pkcs11Module.getTokenInfo(tokenHandle);
       } catch (Exception e) {
@@ -46,50 +56,37 @@ public class TokenHandler {
     }
   }
 
+  /**
+   * Closes session and token handle
+   */
   public void closeSession() {
     if(sessionHandle > 0) {
       // close session
       try {
         pkcs11Module.closeSession(sessionHandle);
       } catch (PKCS11Exception e) {
-        log.error(e.getMessage());
+        log.error("Unable to close session: "+e.getMessage(), e);
       }
     }
     this.tokenHandle = -1;
     this.sessionHandle = -1;
   }
 
-
-  // TODO - prepsat logiku logovani
+  /**
+   * Log in user session
+   * @param callback PasswordInput callback
+   * @throws PKCS11Exception Login failed
+   */
   public void login(PasswordInputCallback callback) throws PKCS11Exception {
-    if (callback != null)
+    if (callback != null && sessionHandle > 0)
       pkcs11Module.login(callback, sessionHandle);
-//    try {
-//
-//    } catch (PKCS11Exception e) {
-//      log.warn(e.getMessage());
-//    }
   }
 
-  public void logout() {
-    try {
-      pkcs11Module.logout(sessionHandle);
-    }
-    catch (PKCS11Exception e) {
-      log.warn(e.getMessage());
-    }
-  }
-
-  public void checkSessionState() {
-    try {
-      long slotId = pkcs11Module.waitForSlotEvent();
-      if(slotId == tokenHandle) {
-        ProductPasswordManager.getInstance().destroy();
-        closeSession();
-      }
-    } catch (PKCS11Exception e) {
-      log.debug(e.getMessage());
-    }
+  /**
+   * Log out of user session
+   */
+  public void logout() throws PKCS11Exception {
+    pkcs11Module.logout(sessionHandle);
   }
 
   /**
@@ -115,7 +112,7 @@ public class TokenHandler {
   /**
    * Sign data using a key with given label
    * @param keyLabel Used private key label
-   * @param x509Certificate X509 certificate that is public part of private key
+   * @param x509Certificate X509 certificate that is public part of this private key
    * @param data Digest data to be signed
    * @return Signature value
    * @throws PKCS11Exception
@@ -140,27 +137,36 @@ public class TokenHandler {
     return pkcs11Module.signData(signatureKeyHandle, sessionHandle, signatureMechanism, data);
   }
 
+  /**
+   * Get token label
+   * @return Token label
+   */
   public String getTokenLabel() {
     return new String(tokenInfo.label).trim();
   }
 
+  /**
+   * Get token serial number
+   * @return Token serial number
+   */
   public String getTokenSerial() {
     return new String(tokenInfo.serialNumber).trim();
   }
 
+
+  /**
+   * Get token manufacturer name
+   * @return Token manufacturer name
+   */
   public String getTokenManufacturer() {
     return new String(tokenInfo.manufacturerID).trim();
   }
 
-  // TODO
-  public void setTokenInfo(DetectedCard card) throws TokenException {
-    openSession();
-    card.setTokenLabel(getTokenLabel());
-    card.setTokenSerial(getTokenSerial());
-    card.setTokenManufacturer(getTokenManufacturer());
-    closeSession();
-  }
-
+  /**
+   * Creates CK_MECHANISM object
+   * @param mechanism PKCS11Constants mechanism constant
+   * @return CK_MECHANISM object
+   */
   private CK_MECHANISM getMechanism(long mechanism) {
     CK_MECHANISM signatureMechanism = new CK_MECHANISM();
     signatureMechanism.mechanism = mechanism;

@@ -22,13 +22,13 @@ import lu.nowina.nexu.api.flow.OperationStatus;
  */
 public enum CoreOperationStatus implements OperationStatus {
 
-	UNSUPPORTED_PRODUCT("unsupported.product", "The provided product is not supported by this version of NexU."),
+	UNSUPPORTED_PRODUCT("unsupported.product", "The provided product is not supported by this version."),
 	NO_TOKEN("no.token", "The product adapter did not return any token."),
 	NO_TOKEN_ID("no.token.id", "No token ID was returned after having registered the token."),
 	NO_PRODUCT_FOUND("no.product.found", "No product was found."),
 	UNKNOWN_TOKEN_ID("unknown.token.id", "There is no registered token for the given token ID."),
 	NO_KEY("no.key", "No key was retrieved from the given token."),
-	CANNOT_SELECT_KEY("cannot.select.key", "Cannot automatically select key because of missing or invalid key filter."),
+	CANNOT_SELECT_KEY("cannot.select.key", "Cannot automatically select key because of missing or invalid key."),
 	NO_KEY_SELECTED("no.key.selected", "No key was selected by the user."),
 	NO_RESPONSE("no.response", "No response returned from the flow."),
 	BACK("back", "User wants to go backward in the flow operations.");

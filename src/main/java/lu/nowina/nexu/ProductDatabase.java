@@ -14,6 +14,7 @@
 package lu.nowina.nexu;
 
 import lu.nowina.nexu.api.AbstractProduct;
+import lu.nowina.nexu.api.NexuAPI;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public interface ProductDatabase extends EntityDatabase {
 
-	void remove(AbstractProduct product);
+	void remove(NexuAPI api, AbstractProduct product);
 
-	List<AbstractProduct> getKeystores();
+	List<AbstractProduct> getProducts();
 }

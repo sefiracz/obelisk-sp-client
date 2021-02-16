@@ -61,11 +61,9 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 					token = getTokenConnectionOperationResult.getResult();
 					logger.info("Token " + token);
 
-					final Product product = (Product) map.get(TokenOperationResultKey.SELECTED_PRODUCT);
-					final ProductAdapter productAdapter = (ProductAdapter) map.get(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER);
 					final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult =
 							getOperationFactory().getOperation(
-									SelectPrivateKeyOperation.class, token, api, product, productAdapter, null, req.getKeyId()).perform();
+									TokenPrivateKeyOperation.class, token, req.getKeyId()).perform();
 					if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
 						final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 
@@ -75,34 +73,22 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 						if(signOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
 							final SignatureValue value = signOperationResult.getResult();
 							logger.info("Signature performed " + value);
-
-							// TODO remove ?
-//							if ((Boolean) map.get(TokenOperationResultKey.ADVANCED_CREATION)) {
-//								getOperationFactory().getOperation(AdvancedCreationFeedbackOperation.class,
-//										api, map).perform();
-//							}
-//
-//							if(api.getAppConfig().isEnablePopUps() && api.getAppConfig().isEnableInformativePopUps()) {
-//								getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-//									"signature.flow.finished", api.getAppConfig().getApplicationName()).perform();
-//							}
-
 							return new Execution<SignatureResponse>(new SignatureResponse(value, key.getCertificate(), key.getCertificateChain()));
 						} else {
 							return handleErrorOperationResult(signOperationResult);
 						}
 					} else {
-						if(api.getAppConfig().isEnablePopUps()) {
-							getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-								"signature.flow.no.key.selected", api.getAppConfig().getApplicationName()).perform();
-						}
+//						if(api.getAppConfig().isEnablePopUps()) {
+//							getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
+//								"signature.flow.no.key.selected", api.getAppConfig().getApplicationName()).perform();
+//						}
 						return handleErrorOperationResult(selectPrivateKeyOperationResult);
 					}
 				} else {
-					if(api.getAppConfig().isEnablePopUps()) {
-						getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-							"signature.flow.bad.token", api.getAppConfig().getApplicationName()).perform();
-					}
+//					if(api.getAppConfig().isEnablePopUps()) {
+//						getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
+//							"signature.flow.bad.token", api.getAppConfig().getApplicationName()).perform();
+//					}
 					return handleErrorOperationResult(getTokenConnectionOperationResult);
 				}
 			} else {

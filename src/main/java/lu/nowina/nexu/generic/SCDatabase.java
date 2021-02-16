@@ -13,14 +13,17 @@
  */
 package lu.nowina.nexu.generic;
 
+import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.DatabaseEventHandler;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.DetectedCard;
+import lu.nowina.nexu.api.NexuAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.annotation.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +46,7 @@ public class SCDatabase implements ProductDatabase {
 	 * @param detectedCard
 	 * @param cInfo
 	 */
-	public final void add(DetectedCard detectedCard, ConnectionInfo cInfo) {
+	public final void add(NexuAPI api, DetectedCard detectedCard, ConnectionInfo cInfo) {
 		SCInfo info = getInfo(detectedCard);
 		if (info == null) {
 			info = new SCInfo();
@@ -58,18 +61,20 @@ public class SCDatabase implements ProductDatabase {
 			info.setTokenSerial(detectedCard.getTokenSerial());
 			info.setTokenManufacturer(detectedCard.getTokenManufacturer());
 		}
-		if(!getSmartcards0().contains(info)) { // TODO overit ze je toto spravne
-			getSmartcards0().add(info);
+		if(!getSmartcards().contains(info)) { // TODO overit ze je toto spravne
+			getSmartcards().add(info);
 			info.getInfos().add(cInfo);
 		}
 		ProductsMap.getMap().put(detectedCard.getCertificateId(), info);
+    api.getPKCS11Manager().registerCard(info);
 		onAddRemove();
 	}
 
-	public final void remove(final AbstractProduct keystore) {
-		getSmartcards0().remove(keystore);
+	public final void remove(NexuAPI api, final AbstractProduct keystore) {
+		getSmartcards().remove(keystore);
 		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
-		onAddRemove();
+    api.getPKCS11Manager().unregisterCard((SCInfo) keystore);
+    onAddRemove();
 	}
 
 	private void onAddRemove() {
@@ -87,7 +92,7 @@ public class SCDatabase implements ProductDatabase {
 	 * @return
 	 */
 	public SCInfo getInfo(String atr, String certId, String keyAlias) {
-		for (AbstractProduct ap : getKeystores()) {
+		for (AbstractProduct ap : getProducts()) {
 			SCInfo scInfo = (SCInfo) ap;
 			if (scInfo.getAtr().equals(atr) &&
 					(certId == null || scInfo.getCertificateId().equals(certId)) &&
@@ -99,7 +104,7 @@ public class SCDatabase implements ProductDatabase {
 	}
 
 	public SCInfo getInfo(DetectedCard card) {
-		for (AbstractProduct ap : getKeystores()) {
+		for (AbstractProduct ap : getProducts()) {
 			SCInfo scInfo = (SCInfo) ap;
 			if (scInfo.getAtr().equals(card.getAtr()) &&
 					(card.getCertificateId() == null || scInfo.getCertificateId().equals(card.getCertificateId())) &&
@@ -111,15 +116,15 @@ public class SCDatabase implements ProductDatabase {
 		return null;
 	}
 
-	private List<SCInfo> getSmartcards0() {
+	private List<SCInfo> getSmartcards() {
 		if (smartcards == null) {
 			this.smartcards = new ArrayList<>();
 		}
 		return smartcards;
 	}
 
-	public List<AbstractProduct> getKeystores() {
-		return Collections.unmodifiableList(getSmartcards0());
+	public List<AbstractProduct> getProducts() {
+		return Collections.unmodifiableList(getSmartcards());
 	}
 
 	@Override
@@ -131,7 +136,7 @@ public class SCDatabase implements ProductDatabase {
 	 * Initialize runtime HashMap of CertificateId to configured Products
 	 */
 	public void initialize() {
-		for (SCInfo keystore : getSmartcards0()) {
+		for (SCInfo keystore : getSmartcards()) {
 			ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
 		}
 	}

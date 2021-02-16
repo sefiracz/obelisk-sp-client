@@ -20,6 +20,7 @@ import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -29,10 +30,9 @@ import java.util.ResourceBundle;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public abstract class AbstractCardProductAdapter extends AbstractProductAdapter {
+public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
-	public AbstractCardProductAdapter(File nexuHome) {
-		super(nexuHome);
+	public AbstractCardProductAdapter() {
 	}
 
 	private void setPasswordPrompt(final PasswordInputCallback callback) {
@@ -136,10 +136,12 @@ public abstract class AbstractCardProductAdapter extends AbstractProductAdapter 
 	}
 
 	@Override
+  @Deprecated
 	public final FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
 		return getSaveOperation(api, (DetectedCard) product);
 	}
 
+  @Deprecated
 	protected FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, DetectedCard card) {
 		return new NoOpFutureOperationInvocation<Boolean>(true);
 	}

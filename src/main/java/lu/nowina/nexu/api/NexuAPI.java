@@ -14,10 +14,15 @@
 package lu.nowina.nexu.api;
 
 import eu.europa.esig.dss.token.SignatureTokenConnection;
+import lu.nowina.nexu.EntityDatabase;
+import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
 import lu.nowina.nexu.pkcs11.PKCS11Manager;
 
+import javax.smartcardio.CardException;
+import javax.smartcardio.CardNotPresentException;
 import javax.smartcardio.CardTerminal;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -28,11 +33,14 @@ import java.util.List;
 @SuppressWarnings("restriction")
 public interface NexuAPI {
 
+  // PCSC Terminal API
 	CardTerminal getCardTerminal(DetectedCard card);
 
 	List<DetectedCard> detectCards();
 
-	DetectedCard detectCard(DetectedCard card);
+	DetectedCard getPresentCard(DetectedCard selector) throws CardException;
+
+  // Product API
 
 	List<Product> detectProducts();
 
@@ -50,11 +58,11 @@ public interface NexuAPI {
 
 	SignatureTokenConnection getTokenConnection(TokenId tokenId);
 
+	// Flow executions
+
 	Execution<GetCertificateResponse> getCertificate(GetCertificateRequest request);
 
 	Execution<SelectCertificateResponse> selectCertificate(SelectCertificateRequest request);
-
-	Execution<SmartcardListResponse> processSmartcardList(SmartcardListRequest request);
 
 	Execution<SignatureResponse> sign(SignatureRequest request);
 
@@ -62,13 +70,17 @@ public interface NexuAPI {
 
 	Execution<AuthenticateResponse> authenticate(AuthenticateRequest request);
 
+	// Utils API
+
 	AppConfig getAppConfig();
 
 	HttpPlugin getHttpPlugin(String pluginId);
 
 	String getLabel(Product p);
 
-	void loadSmartcardList(List<SmartcardInfo> infos, byte[] digest);
+	void registerSmartcardInfos(List<SmartcardInfo> infos, byte[] digest);
 
 	PKCS11Manager getPKCS11Manager();
+
+  <T extends EntityDatabase> T loadDatabase(Class<T> c, String filename);
 }

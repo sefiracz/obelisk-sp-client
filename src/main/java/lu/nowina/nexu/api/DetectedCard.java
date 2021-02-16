@@ -13,32 +13,27 @@
  */
 package lu.nowina.nexu.api;
 
+import iaik.pkcs.pkcs11.TokenException;
+import lu.nowina.nexu.generic.PasswordManager;
+import lu.nowina.nexu.pkcs11.PKCS11Module;
+import lu.nowina.nexu.pkcs11.TokenHandler;
+
+import javax.smartcardio.CardTerminal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "detectedCard", propOrder = { "atr", /*"terminalIndex", "terminalLabel",*/ "tokenLabel", "tokenSerial", "tokenManufacturer" })
+@XmlType(name = "detectedCard", propOrder = { "atr", "tokenLabel", "tokenSerial", "tokenManufacturer" })
 public class DetectedCard extends AbstractProduct {
 
 	/**
 	 * The atr.
 	 */
 	private String atr;
-
-	/**
-	 * The terminal index.
-	 */
-	@XmlTransient
-	private int terminalIndex;
-
-	/**
-	 * The terminal label.
-	 */
-	@XmlTransient
-	private String terminalLabel;
 
 	/**
 	 * The token label
@@ -55,6 +50,50 @@ public class DetectedCard extends AbstractProduct {
 	 * The token manufacturer name
 	 */
 	private String tokenManufacturer;
+
+  /**
+   * Used card terminal
+   */
+  @XmlTransient
+  private CardTerminal terminal;
+
+  /**
+   * The terminal index.
+   */
+  @XmlTransient
+  private int terminalIndex;
+
+  /**
+   * The terminal label.
+   */
+  @XmlTransient
+  private String terminalLabel;
+
+  /**
+   * PKCS11 token handler
+   */
+	@XmlTransient
+	private TokenHandler tokenHandler;
+
+  /**
+   * Token is initialized
+   */
+	@XmlTransient
+	private boolean connected = false;
+
+  /**
+   * Token has been closed
+   */
+	@XmlTransient
+	private boolean closed = false;
+
+	public DetectedCard(byte[] atr, CardTerminal terminal, int terminalIndex, NexuAPI api) {
+		this.terminal = terminal;
+		this.atr = DetectedCard.atrToString(atr);
+		this.tokenLabel = api.getPKCS11Manager().getName(this.atr);
+		this.terminalIndex = terminalIndex;
+		this.terminalLabel = terminal.getName();
+	}
 
 	public DetectedCard() {
 		super();
@@ -77,28 +116,6 @@ public class DetectedCard extends AbstractProduct {
 	}
 
 	/**
-	 * Transform an ATR byte array into a string.
-	 *
-	 * @param b
-	 *            the ATR byte array
-	 * @return the string (empty if the ATR byte array is empty or null)
-	 */
-	public static String atrToString(byte[] b) {
-		final StringBuilder sb = new StringBuilder();
-		if (b != null && b.length > 0) {
-			sb.append(Integer.toHexString((b[0] & 240) >> 4));
-			sb.append(Integer.toHexString(b[0] & 15));
-
-			for (int i = 1; i < b.length; i++) {
-				// sb.append(' ');
-				sb.append(Integer.toHexString((b[i] & 240) >> 4));
-				sb.append(Integer.toHexString(b[i] & 15));
-			}
-		}
-		return sb.toString().toUpperCase();
-	}
-
-	/**
 	 * Gets the atr.
 	 *
 	 * @return the atr
@@ -117,7 +134,11 @@ public class DetectedCard extends AbstractProduct {
 		this.atr = atr;
 	}
 
-	/**
+  public void setTerminal(CardTerminal terminal) {
+    this.terminal = terminal;
+  }
+
+  /**
 	 * Get the index of the terminal from which the card info was read.
 	 *
 	 * @return the terminalIndex
@@ -152,29 +173,100 @@ public class DetectedCard extends AbstractProduct {
 		this.terminalLabel = terminalLabel;
 	}
 
+  /**
+   * Returns value of TokenLabel that might take on value of TokenLabel,
+   * ModelName or ATR depending on level of known card support
+   * @return TokenLabel value
+   */
 	public String getTokenLabel() {
 		return tokenLabel;
 	}
 
+  /**
+   * Returns token serial or null
+   * @return Token serial or null
+   */
 	public String getTokenSerial() {
 		return tokenSerial;
 	}
 
+  /**
+   * Returns token manufacturer or null
+   * @return Token manufacturer or null
+   */
 	public String getTokenManufacturer() {
 		return tokenManufacturer;
 	}
 
+  /**
+   * Returns connected terminal
+   * @return Connected terminal
+   */
+  public CardTerminal getTerminal() {
+    return terminal;
+  }
+
+  /**
+   * Returns initialized PKCS11 token handler
+   * @return
+   */
+  public TokenHandler getTokenHandler() {
+    return tokenHandler;
+  }
+
+  /**
+   * Sets token label, model name or ATR depending on level of known card support
+   * @param tokenLabel Token label value
+   */
 	public void setTokenLabel(String tokenLabel) {
 		this.tokenLabel = tokenLabel;
 	}
 
+  /**
+   * Sets token serial number
+   * @param tokenSerial Token serial number
+   */
 	public void setTokenSerial(String tokenSerial) {
 		this.tokenSerial = tokenSerial;
 	}
 
+  /**
+   * Sets token manufacturer name
+   * @param tokenManufacturer Token manufacturer name
+   */
 	public void setTokenManufacturer(String tokenManufacturer) {
 		this.tokenManufacturer = tokenManufacturer;
 	}
+
+  public boolean isConnected() {
+    return connected;
+  }
+
+  public boolean isClosed() {
+    return closed;
+  }
+
+  /**
+   * Transform an ATR byte array into a string.
+   *
+   * @param b
+   *            the ATR byte array
+   * @return the string (empty if the ATR byte array is empty or null)
+   */
+  public static String atrToString(byte[] b) {
+    final StringBuilder sb = new StringBuilder();
+    if (b != null && b.length > 0) {
+      sb.append(Integer.toHexString((b[0] & 240) >> 4));
+      sb.append(Integer.toHexString(b[0] & 15));
+
+      for (int i = 1; i < b.length; i++) {
+        // sb.append(' ');
+        sb.append(Integer.toHexString((b[i] & 240) >> 4));
+        sb.append(Integer.toHexString(b[i] & 15));
+      }
+    }
+    return sb.toString().toUpperCase();
+  }
 
 	@Override
 	public String getSimpleLabel() {
@@ -194,6 +286,48 @@ public class DetectedCard extends AbstractProduct {
 		return label;
 	}
 
+	public void connectToken(NexuAPI api, String pkcs11Path) throws IOException, TokenException {
+		PKCS11Module module = api.getPKCS11Manager().getModule(atr, pkcs11Path);
+		if (module != null) {
+			tokenHandler = new TokenHandler(module, terminalLabel);
+			tokenHandler.openSession();
+			tokenLabel = tokenHandler.getTokenLabel();
+			tokenSerial = tokenHandler.getTokenSerial();
+			tokenManufacturer = tokenHandler.getTokenManufacturer();
+			type = KeystoreType.PKCS11;
+			connected = true;
+		}
+	}
+
+	public void closeToken() {
+		try {
+			if (connected) {
+				connected = false;
+				tokenHandler.closeSession();
+			}
+		} finally {
+      PasswordManager.getInstance().destroy(this);
+			closed = true;
+		}
+	}
+
+	public boolean softEquals(Object o) {
+    if (this == o) return true;
+    if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()))) return false;
+
+    DetectedCard that = (DetectedCard) o;
+
+    if (!getAtr().equalsIgnoreCase(that.getAtr())) return false;
+    if (getCertificateId() != null && that.getCertificateId() != null) {
+      if (!getCertificateId().equals(that.getCertificateId())) return false;
+    }
+    if (getKeyAlias() != null && that.getKeyAlias() != null) {
+      if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+    }
+    // no terminal check (might have changed)
+    return getSimpleLabel().equalsIgnoreCase(that.getSimpleLabel());
+  }
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -208,15 +342,25 @@ public class DetectedCard extends AbstractProduct {
 		if (getKeyAlias() != null && that.getKeyAlias() != null) {
 			if (!getKeyAlias().equals(that.getKeyAlias())) return false;
 		}
+		if(getTerminalLabel() != null && that.getTerminalLabel() != null) {
+			if (!getTerminalLabel().equalsIgnoreCase(that.getTerminalLabel())) return false;
+		}
 		return getSimpleLabel().equalsIgnoreCase(that.getSimpleLabel());
 	}
 
 	@Override
 	public int hashCode() {
-		int result = getCertificateId().hashCode();
-		result = 31 * result + getKeyAlias().hashCode();
-		result = 31 * result + getAtr().hashCode();
-		result = 31 * result + getTokenLabel().hashCode();
+		int result = getAtr().hashCode();
+		if(getKeyAlias() != null) {
+			result = 31 * result + getKeyAlias().hashCode();
+		}
+		if(getCertificateId() != null) {
+			result = 31 * result + getCertificateId().hashCode();
+		}
+		if(getTerminalLabel() != null) {
+			result = 31 * result + getTerminalLabel().hashCode();
+		}
+		result = 31 * result + getSimpleLabel().hashCode();
 		return result;
 	}
 

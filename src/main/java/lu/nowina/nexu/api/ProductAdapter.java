@@ -156,6 +156,7 @@ public interface ProductAdapter {
 	 * @param product The product for which one would like to retrieve the save {@link Operation}.
 	 * @return The specification of the operation to call to save the configured <code>product</code>.
 	 */
+  @Deprecated
 	FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product);
 
 	/**
@@ -171,7 +172,12 @@ public interface ProductAdapter {
 	 */
 	List<? extends Product> detectProducts();
 
-	void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map);
+  /**
+   * Saves the product to its appropriate database
+   * @param product Product to be saved
+   * @param map Token information
+   */
+	void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map);
 
 	ProductDatabase getProductDatabase();
 }

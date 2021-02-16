@@ -18,8 +18,8 @@ import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.keystore.KeystoreNotFoundException;
+import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
 import lu.nowina.nexu.view.core.UIOperation;
-import sun.security.pkcs11.wrapper.PKCS11RuntimeException;
 
 import java.io.FileNotFoundException;
 
@@ -86,7 +86,6 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     }
     if(key == null) {
-      // TODO - nenalezen, spustit na zaklade vysledku novou serii operaci na vyber certifikatu/klice a ulozeni do database ???
        return new OperationResult<>(CoreOperationStatus.NO_KEY);
     }
     return new OperationResult<>(key);

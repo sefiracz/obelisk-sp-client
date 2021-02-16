@@ -47,9 +47,9 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     protected Execution<GetCertificateResponse> process(final NexuAPI api, final GetCertificateRequest req) throws Exception {
     	SignatureTokenConnection token = null;
     	try {
-    		Product defaultProduct = api.getAppConfig().getDefaultProduct();
+    		AbstractProduct defaultProduct = (AbstractProduct) api.getAppConfig().getDefaultProduct();
     		while (true) {
-    			final Product selectedProduct;
+    			final AbstractProduct selectedProduct;
     			if(defaultProduct != null) {
     				selectedProduct = defaultProduct;
     				defaultProduct = null;
@@ -57,22 +57,24 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     				final Object[] params = {
     						api.getAppConfig().getApplicationName(), api.detectCards(), api.detectProducts(), api
     				};
+    				// select a product (keystores, windows, smartcards)
     				final Operation<Product> operation = this.getOperationFactory().getOperation(UIOperation.class, "/fxml/product-selection.fxml", params);
     				final OperationResult<Product> selectProductOperationResult = operation.perform();
     				if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-    					selectedProduct = selectProductOperationResult.getResult();
+    					selectedProduct = (AbstractProduct) selectProductOperationResult.getResult();
+							selectedProduct.setSessionId(req.getSessionId()); // set user browser session
     				} else if (selectProductOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
-    					continue;
+    					continue; // refresh button
 						} else {
     					return this.handleErrorOperationResult(selectProductOperationResult);
     				}
     			}
-
+          // find usable adapters (keystore, windows, generic card adapter)
     			final OperationResult<List<Match>> getMatchingCardAdaptersOperationResult = this.getOperationFactory()
     					.getOperation(GetMatchingProductAdaptersOperation.class, Arrays.asList(selectedProduct), api).perform();
     			if (getMatchingCardAdaptersOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     				List<Match> matchingProductAdapters = getMatchingCardAdaptersOperationResult.getResult();
-
+            // configure the product
     				final OperationResult<List<Match>> configureProductOperationResult = this.getOperationFactory()
     						.getOperation(ConfigureProductOperation.class, matchingProductAdapters, api).perform();
     				if (configureProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {

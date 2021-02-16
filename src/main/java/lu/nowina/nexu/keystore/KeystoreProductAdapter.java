@@ -16,14 +16,12 @@ package lu.nowina.nexu.keystore;
 import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.*;
 import lu.nowina.nexu.NexuException;
-import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 import lu.nowina.nexu.view.core.UIOperation;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -37,10 +35,12 @@ import java.util.Map;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class KeystoreProductAdapter extends AbstractProductAdapter {
+public class KeystoreProductAdapter implements ProductAdapter {
 
-	public KeystoreProductAdapter(final File nexuHome) {
-		super(nexuHome);
+  private final NexuAPI api;
+
+	public KeystoreProductAdapter(final NexuAPI api) {
+		this.api = api;
 	}
 
 	@Override
@@ -138,6 +138,7 @@ public class KeystoreProductAdapter extends AbstractProductAdapter {
 
 	@Override
 	@SuppressWarnings("unchecked")
+  @Deprecated
 	public FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
 		if (product instanceof NewKeystore) {
 			throw new IllegalArgumentException("Given product was not configured!");
@@ -152,26 +153,30 @@ public class KeystoreProductAdapter extends AbstractProductAdapter {
 		}
 	}
 
-	@Override
+  @Override
+  public SystrayMenuItem getExtensionSystrayMenuItem(NexuAPI api) {
+    return null;
+  }
+
+  @Override
 	public List<Product> detectProducts() {
 		final List<Product> products = new ArrayList<>();
-//		products.addAll(getDatabase().getKeystores()); // TODO - asi nechceme zobrazovat zapamatovane klicenky
-		getProductDatabase().getKeystores(); // reloads database
+		getProductDatabase().getProducts(); // reloads database
 		products.add(new NewKeystore());
 		return products;
 	}
 
+  @Override
+  public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
+    saveKeystore((ConfiguredKeystore) product);
+  }
+
 	public KeystoreDatabase getProductDatabase() {
-		return EntityDatabaseLoader.load(KeystoreDatabase.class, new File(nexuHome, "database-keystore.xml"));
+		return api.loadDatabase(KeystoreDatabase.class, "database-keystore.xml");
 	}
 
 	public void saveKeystore(final ConfiguredKeystore keystore) {
 		getProductDatabase().add(keystore);
-	}
-
-	@Override
-	public void saveKeystore(AbstractProduct keystore, Map<TokenOperationResultKey, Object> map) {
-		saveKeystore((ConfiguredKeystore) keystore);
 	}
 
 	private static class KeystoreTokenProxy implements SignatureTokenConnection {

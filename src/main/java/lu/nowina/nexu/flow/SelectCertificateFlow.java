@@ -44,7 +44,6 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
   @Override
   @SuppressWarnings("unchecked")
   protected Execution<SelectCertificateResponse> process(final NexuAPI api, final SelectCertificateRequest req) throws Exception {
-//    api.detectAll();
     CertificateToken certificateToken = req.getCertificate();
     byte[] digest = certificateToken.getDigest(DigestAlgorithm.SHA256);
     String certificateId = Utils.encodeHexString(digest);
@@ -87,23 +86,16 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
       selectedProduct = products.get(0);
     }
 
+    selectedProduct.setSessionId(req.getSessionId()); // set user browser session
     SignatureTokenConnection token = null;
     try {
       while (true) {
-        // re-check terminals
-        if(selectedProduct instanceof DetectedCard) {
-          final OperationResult<DetectedCard> checkedCardOperationResult = this.getOperationFactory()
-              .getOperation(CheckCardTerminalOperation.class, api, selectedProduct).perform();
-          if(!checkedCardOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-            return this.handleErrorOperationResult(checkedCardOperationResult);
-          }
-        }
-
+        // find usable adapters (keystore, windows, generic card adapter)
         final OperationResult<List<Match>> getMatchingCardAdaptersOperationResult = this.getOperationFactory()
             .getOperation(GetMatchingProductAdaptersOperation.class, Collections.singletonList(selectedProduct), api).perform();
         if (getMatchingCardAdaptersOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
           List<Match> matchingProductAdapters = getMatchingCardAdaptersOperationResult.getResult();
-
+          // configure the product
           final OperationResult<List<Match>> configureProductOperationResult = this.getOperationFactory()
               .getOperation(ConfigureProductOperation.class, matchingProductAdapters, api).perform();
           if (configureProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {

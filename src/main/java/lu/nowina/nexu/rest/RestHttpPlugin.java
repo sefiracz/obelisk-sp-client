@@ -62,8 +62,8 @@ public class RestHttpPlugin implements HttpPlugin {
 		  return selectCertificate(api, req, payload);
 		case "/certificates":
 			return getCertificates(api, req, payload);
-			case "/smartcardList":
-		return smartcardList(api, req, payload);
+		case "/smartcardList":
+			return smartcardList(api, req, payload);
 //		case "/identityInfo":
 //			return getIdentityInfo(api, payload);
 //		case "/authenticate":
@@ -110,7 +110,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			r = GsonHelper.fromJson(payload, SignatureRequest.class);
 		}
-
+    r.setSessionId(req.getHeader("Cookie"));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -152,7 +152,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			r = GsonHelper.fromJson(payload, GetCertificateRequest.class);
 		}
-
+    r.setSessionId(req.getHeader("Cookie"));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -175,7 +175,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			r = GsonHelper.fromJson(payload, SelectCertificateRequest.class);
 		}
-
+    r.setSessionId(req.getHeader("Cookie"));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -196,7 +196,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			logger.info("Call API");
 			try {
-				api.loadSmartcardList(r.getSmartcardInfos(), digest);
+				api.registerSmartcardInfos(r.getSmartcardInfos(), digest);
 				return new HttpResponse("OK", "application/json;charset=UTF-8", HttpStatus.OK);
 			} catch (Exception e) {
 				return new HttpResponse(e.getMessage(), "application/json;charset=UTF-8", HttpStatus.ERROR);

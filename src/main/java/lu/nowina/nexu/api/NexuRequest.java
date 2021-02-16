@@ -26,7 +26,7 @@ public class NexuRequest {
 
 	private String requestSeal;
 	
-	private String nonce;
+	private String sessionId;
 
 	public String getUserLocale() {
 		return userLocale;
@@ -52,12 +52,12 @@ public class NexuRequest {
 		this.requestSeal = requestSeal;
 	}
 
-	public String getNonce() {
-		return nonce;
+	public String getSessionId() {
+		return sessionId;
 	}
 
-	public void setNonce(String nonce) {
-		this.nonce = nonce;
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 }

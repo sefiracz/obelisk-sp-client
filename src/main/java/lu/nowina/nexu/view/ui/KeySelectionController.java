@@ -35,6 +35,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
@@ -82,11 +83,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         this.select.setOnAction((event) -> {
             final DSSPrivateKeyEntry selectedItem = this.listView.getSelectionModel().getSelectedItem();
             logger.info("Selected item " + selectedItem);
-            if (selectedItem != null) {
-                this.signalEnd(selectedItem);
-            } else {
-                this.signalEnd(null);
-            }
+            this.signalEnd(selectedItem);
         });
         this.cancel.setOnAction(e -> this.signalUserCancel());
         this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
@@ -118,27 +115,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         final Hyperlink link = new Hyperlink(resources.getString("key.selection.certificate.open"));
 
-                        link.setOnAction(actionEvent -> {
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    final File tmpFile = File.createTempFile("certificate", ".crt");
-                                    tmpFile.deleteOnExit();
-                                    final String certificateStr = DSSUtils.convertToPEM(certificateToken);
-                                    final FileWriter writer = new FileWriter(tmpFile);
-                                    writer.write(certificateStr);
-                                    writer.close();
-                                    new Thread(() -> {
-                                        try {
-                                            Desktop.getDesktop().open(tmpFile);
-                                        } catch (final IOException e) {
-                                            logger.error(e.getMessage(), e);
-                                        }
-                                    }).start();
-                                } catch (final Exception e) {
-                                    logger.error(e.getMessage(), e);
-                                }
-                            }
-                        });
+                        link.setOnAction(actionEvent -> Utils.openCertificate(DSSUtils.convertToPEM(certificateToken)));
 
                         final VBox vBox = new VBox(lSubject, lEmitter, lValidity, link);
 
