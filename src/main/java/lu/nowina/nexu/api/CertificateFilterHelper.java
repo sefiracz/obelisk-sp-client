@@ -18,6 +18,8 @@ public class CertificateFilterHelper {
 	public List<DSSPrivateKeyEntry> filterKeys(SignatureTokenConnection token, CertificateFilter filter) {
 		List<DSSPrivateKeyEntry> fullList = token.getKeys();
 		List<DSSPrivateKeyEntry> filteredList = new ArrayList<>();
+		if(filter == null)
+			return fullList;
 		for (DSSPrivateKeyEntry entry : fullList) {
 			// expired
 			if (!filter.getAllowExpired() && entry.getCertificate().isExpiredOn(new Date())) {

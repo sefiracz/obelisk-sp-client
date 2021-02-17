@@ -79,13 +79,13 @@ public class DetectedCard extends AbstractProduct {
    * Token is initialized
    */
 	@XmlTransient
-	private boolean connected = false;
+	private boolean initialized = false;
 
   /**
-   * Token has been closed
+   * Token has open session
    */
 	@XmlTransient
-	private boolean closed = false;
+	private boolean opened = false;
 
 	public DetectedCard(byte[] atr, CardTerminal terminal, int terminalIndex, NexuAPI api) {
 		this.terminal = terminal;
@@ -238,12 +238,12 @@ public class DetectedCard extends AbstractProduct {
 		this.tokenManufacturer = tokenManufacturer;
 	}
 
-  public boolean isConnected() {
-    return connected;
+  public boolean isInitialized() {
+    return initialized;
   }
 
-  public boolean isClosed() {
-    return closed;
+  public boolean isOpened() {
+    return opened;
   }
 
   /**
@@ -286,29 +286,33 @@ public class DetectedCard extends AbstractProduct {
 		return label;
 	}
 
-	public void connectToken(NexuAPI api, String pkcs11Path) throws IOException, TokenException {
+	public void initializeToken(NexuAPI api, String pkcs11Path) throws IOException, TokenException {
 		PKCS11Module module = api.getPKCS11Manager().getModule(atr, pkcs11Path);
 		if (module != null) {
 			tokenHandler = new TokenHandler(module, terminalLabel);
-			tokenHandler.openSession();
+			tokenHandler.initialize();
 			tokenLabel = tokenHandler.getTokenLabel();
 			tokenSerial = tokenHandler.getTokenSerial();
 			tokenManufacturer = tokenHandler.getTokenManufacturer();
 			type = KeystoreType.PKCS11;
-			connected = true;
+			initialized = true;
+		}
+	}
+
+	public void openToken() {
+		if (initialized) {
+			tokenHandler.openSession();
+			opened = true;
 		}
 	}
 
 	public void closeToken() {
-		try {
-			if (connected) {
-				connected = false;
-				tokenHandler.closeSession();
-			}
-		} finally {
-      PasswordManager.getInstance().destroy(this);
-			closed = true;
+		if (initialized && opened) {
+			tokenHandler.closeSession();
+			opened = false;
+			initialized = false;
 		}
+		PasswordManager.getInstance().destroy(this);
 	}
 
 	public boolean softEquals(Object o) {

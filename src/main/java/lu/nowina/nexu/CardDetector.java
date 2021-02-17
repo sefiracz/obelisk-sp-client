@@ -138,11 +138,11 @@ public class CardDetector {
 	/**
 	 * Checks the present cards and returns the present instance
 	 * @param selector Selector card that is used as search template
-	 * @return Card that is currently connected (might not be initialized yet) and present in computer
+	 * @return Card that is currently physically connected and present in the computer (might not be initialized yet)
 	 * @throws CardException Unable to determine the correct card or not found any match
 	 */
 	public DetectedCard getPresentCard(DetectedCard selector) throws CardException {
-    if(selector.isConnected()) {
+    if(selector.isInitialized()) {
       // already connected, just return, nothing to do
       return selector;
     }
@@ -165,19 +165,18 @@ public class CardDetector {
           final Card card = cardTerminal.connect("*");
           final ATR atr = card.getATR();
           DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
-          // completely different card, just skip
-          if (!selector.getAtr().equals(detectedCard.getAtr())) {
-            continue;
-          }
-          detectedCard.connectToken(api, null);
-          if (presentCards.get(detectedCard) == null) {
-            presentCards.add(detectedCard);
-          } else {
-            detectedCard.closeToken();
-            detectedCard = presentCards.get(detectedCard); // use the existing one
-          }
-          detectedCardsList.add(detectedCard);
-          logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));
+          if (selector.getAtr().equals(detectedCard.getAtr())) {
+						detectedCard.initializeToken(api, null);
+						// check present cards
+						if (presentCards.get(detectedCard) == null) {
+							presentCards.add(detectedCard); // currently isn't recorded as present, add it
+						}
+						else {
+							detectedCard = presentCards.get(detectedCard); // already is present, use the existing one
+						}
+						detectedCardsList.add(detectedCard);
+						logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));
+					}
         } catch (CardException | IOException | TokenException e) {
           // Card not present or unreadable
           logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
@@ -196,7 +195,7 @@ public class CardDetector {
         logger.warn("Card '" + selector.getTokenLabel() + "' not found");
         throw new CardNotPresentException("Card '" + selector.getTokenLabel() + "' not found");
       } else {
-        logger.warn("Cannot conclusively determine card, return what is in the same terminal");
+        logger.info("Multiple cards located. Looking for the specific card in the terminal");
         for(DetectedCard detectedCard : detectedCardsList) {
         	if(detectedCard.getTerminalLabel().equals(selector.getTerminalLabel())) {
         		return detectedCard;
@@ -223,12 +222,12 @@ public class CardDetector {
 				final Card card = cardTerminal.connect("*");
 				final ATR atr = card.getATR();
 				DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
-				detectedCard.connectToken(api, null);
+				detectedCard.initializeToken(api, null);
+				// check present cards
 				if (presentCards.get(detectedCard) == null) {
-					presentCards.add(detectedCard);
+					presentCards.add(detectedCard); // currently isn't recorded as present, add it
 				} else {
-					detectedCard.closeToken();
-					detectedCard = presentCards.get(detectedCard); // use the existing one
+					detectedCard = presentCards.get(detectedCard); // already is present, use the existing one
 				}
 				listCardDetect.add(detectedCard);
 				logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));

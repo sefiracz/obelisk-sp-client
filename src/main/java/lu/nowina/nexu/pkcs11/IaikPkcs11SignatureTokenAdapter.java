@@ -53,14 +53,13 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     // get present card
     try {
       DetectedCard detectedCard = api.getPresentCard(card);
-      // check connection
-      if(!detectedCard.isConnected()) {
-        detectedCard.connectToken(api, pkcs11Path);
+      // check state
+      if(!detectedCard.isInitialized()) {
+        detectedCard.initializeToken(api, pkcs11Path);
       }
       // check session
-      if(detectedCard.isClosed()) {
-        throw new PKCS11RuntimeException("Token was closed");
-      }
+      if(!detectedCard.isOpened())
+        detectedCard.openToken();
       this.token = detectedCard.getTokenHandler();
     } catch (IOException | TokenException | CardException e) {
       throw new PKCS11RuntimeException("Token not present or unable to connect"); // TODO lepsi exceptions
@@ -78,12 +77,12 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
   public void close() {
     try {
       if(loggedIn) {
-        token.logout();
         loggedIn = false;
+        token.logout();
       }
     }
     catch (PKCS11Exception e) {
-      logger.warn("Unable to logout: "+e.getMessage());
+      logger.warn("Unable to logout: "+e.getMessage(), e);
     }
   }
 

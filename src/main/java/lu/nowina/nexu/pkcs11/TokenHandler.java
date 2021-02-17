@@ -39,19 +39,29 @@ public class TokenHandler {
   }
 
   /**
-   * Open new session and initialize token
-   * @throws TokenException
+   * Initializes token in terminal and gets token information
+   * @throws PKCS11Exception
    */
-  public void openSession() throws TokenException {
+  public void initialize() throws PKCS11Exception {
+    try {
+      this.tokenHandle = pkcs11Module.getTokenInTerminal(terminalLabel);
+      this.tokenInfo = pkcs11Module.getTokenInfo(tokenHandle);
+    } catch (Exception e) {
+      this.tokenHandle = -1;
+      this.sessionHandle = -1;
+      throw e;
+    }
+  }
+
+  /**
+   * Open new session
+   */
+  public void openSession() {
     if(sessionHandle < 0) {
       try {
-        this.tokenHandle = pkcs11Module.getTokenInTerminal(terminalLabel);
         this.sessionHandle = pkcs11Module.openSession(tokenHandle);
-        this.tokenInfo = pkcs11Module.getTokenInfo(tokenHandle);
-      } catch (Exception e) {
-        this.tokenHandle = -1;
-        this.sessionHandle = -1;
-        throw e;
+      } catch (TokenException e) {
+        log.error("Unable to open session: "+e.getMessage(), e);
       }
     }
   }
@@ -113,7 +123,7 @@ public class TokenHandler {
    * Sign data using a key with given label
    * @param keyLabel Used private key label
    * @param x509Certificate X509 certificate that is public part of this private key
-   * @param data Digest data to be signed
+   * @param data Digest data (wrapped in ASN1 structure) to be signed
    * @return Signature value
    * @throws PKCS11Exception
    */
