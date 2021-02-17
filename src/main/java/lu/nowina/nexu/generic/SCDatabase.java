@@ -73,8 +73,8 @@ public class SCDatabase implements ProductDatabase {
 	public final void remove(NexuAPI api, final AbstractProduct keystore) {
 		getSmartcards().remove(keystore);
 		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
-    api.getPKCS11Manager().unregisterCard((SCInfo) keystore);
     onAddRemove();
+		api.getPKCS11Manager().unregisterCard((SCInfo) keystore);
 	}
 
 	private void onAddRemove() {
