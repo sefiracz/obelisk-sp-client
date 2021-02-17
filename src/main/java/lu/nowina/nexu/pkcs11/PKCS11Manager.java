@@ -93,7 +93,20 @@ public class PKCS11Manager {
    * @param info Smartcard informations
    */
   public void unregisterCard(SCInfo info) {
-    registered.remove(info.getAtr());
+    SCDatabase scDatabase = api.loadDatabase(SCDatabase.class, "database-smartcard.xml");
+    List<AbstractProduct> savedCards = scDatabase.getProducts();
+    boolean unregister = true;
+    // check if there is no more saved cards with the same ATR
+    for(AbstractProduct savedCard : savedCards) {
+      if (((SCInfo) savedCard).getAtr().equals(info.getAtr())) {
+        unregister = false; // there is still some card with this ATR, do not unregister
+        break;
+      }
+    }
+    if(unregister) {
+      registered.remove(info.getAtr());
+      log.info("Unregistering card with ATR: "+info.getAtr());
+    }
   }
 
   /**

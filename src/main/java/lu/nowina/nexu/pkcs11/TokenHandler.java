@@ -75,7 +75,7 @@ public class TokenHandler {
       try {
         pkcs11Module.closeSession(sessionHandle);
       } catch (PKCS11Exception e) {
-        log.error("Unable to close session: "+e.getMessage(), e);
+        log.warn("Unable to close session: "+e.getMessage());
       }
     }
     this.tokenHandle = -1;
