@@ -72,8 +72,12 @@ public class ConfiguredKeystore extends AbstractProduct {
 
 		ConfiguredKeystore that = (ConfiguredKeystore) o;
 
-		if (!getCertificateId().equals(that.getCertificateId())) return false;
-		if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+		if (getCertificateId() != null && that.getCertificateId() != null) {
+			if (!getCertificateId().equals(that.getCertificateId())) return false;
+		}
+		if (getKeyAlias() != null && that.getKeyAlias() != null) {
+			if (!getKeyAlias().equals(that.getKeyAlias())) return false;
+		}
 		return getUrl().equals(that.getUrl());
 	}
 
