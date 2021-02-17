@@ -15,7 +15,7 @@ package lu.nowina.nexu.api;
 
 public class GetCertificateRequest extends NexuRequest {
 
-    private CertificateFilter certificateFilter = new CertificateFilter();
+    private CertificateFilter certificateFilter = new CertificateFilter(); // default filter
     private boolean closeToken = true;
 
     public GetCertificateRequest() {

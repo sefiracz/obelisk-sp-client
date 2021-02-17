@@ -116,22 +116,15 @@ public class PKCS11Manager {
       modules.put(pkcs11Path, module);
       return module;
     }
-    // check known PKCS11 models using given ATR
-    SmartcardInfo info = registered.get(atr);
-    info = info == null ? supported.get(atr) : info;
-    if(info == null)
-      return null;
-    // check if PKCS11 library driver is present
-    for(String pkcs11Driver : info.getDrivers()) {
-      if(pkcs11Driver != null && new File(pkcs11Driver).exists() && new File(pkcs11Driver).canRead()) {
-        // check if PKCS11 module is already initialized
-        module = modules.get(pkcs11Driver);
-        if (module == null) {
-          // use given PKCS11 library path to initialize new PKCS11 module
-          module = new PKCS11Module(pkcs11Driver);
-          modules.put(pkcs11Driver, module);
-        }
-        break;
+    // check known PKCS11 for present library drivers using given ATR
+    String pkcs11Driver = getAvailablePkcs11Library(atr);
+    if(pkcs11Driver != null) {
+      // check if PKCS11 module is already initialized
+      module = modules.get(pkcs11Driver);
+      if (module == null) {
+        // use given PKCS11 library path to initialize new PKCS11 module
+        module = new PKCS11Module(pkcs11Driver);
+        modules.put(pkcs11Driver, module);
       }
     }
     return module;

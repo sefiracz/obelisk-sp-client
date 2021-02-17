@@ -93,7 +93,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     							final Product product = (Product) map.get(TokenOperationResultKey.SELECTED_PRODUCT);
     							final ProductAdapter productAdapter = (ProductAdapter) map.get(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER);
     							final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult = this.getOperationFactory()
-    									.getOperation(SelectPrivateKeyOperation.class, token, api, product, productAdapter, req.getCertificateFilter()).perform();
+    									.getOperation(UserSelectPrivateKeyOperation.class, token, api, product, productAdapter, req.getCertificateFilter()).perform();
     							if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
     								final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 

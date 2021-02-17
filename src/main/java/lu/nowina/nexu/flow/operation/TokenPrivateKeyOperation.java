@@ -34,7 +34,7 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
       this.token = (SignatureTokenConnection) params[0];
       this.keyId = (String) params[1];
     } catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, key identification filter");
+      throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, String (keyId)");
     }
   }
 

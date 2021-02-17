@@ -29,8 +29,9 @@ import lu.nowina.nexu.view.core.UIOperation;
 import java.util.List;
 
 /**
- * This {@link CompositeOperation} allows to retrieve a private key for a given {@link SignatureTokenConnection}
- * and optional <code>certificate filter</code> and/or <code>key filter</code>.
+ * This {@link CompositeOperation} allows user to manually retrieve a private key from
+ * a given {@link SignatureTokenConnection} and using <code>certificate filter</code> to remove
+ * unwanted items from selection.
  *
  * Expected parameters:
  * <ol>
@@ -39,21 +40,19 @@ import java.util.List;
  * <li>{@link Product} (optional)</li>
  * <li>{@link ProductAdapter} (optional)</li>
  * <li>{@link CertificateFilter} (optional)</li>
- * <li>Key filter (optional): {@link String}</li>
  * </ol>
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPrivateKeyEntry> {
+public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPrivateKeyEntry> {
 
     private SignatureTokenConnection token;
     private NexuAPI api;
     private Product product;
     private ProductAdapter productAdapter;
     private CertificateFilter certificateFilter;
-    private String keyFilter;
 
-    public SelectPrivateKeyOperation() {
+    public UserSelectPrivateKeyOperation() {
         super();
     }
 
@@ -62,20 +61,11 @@ public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPri
         try {
             this.token = (SignatureTokenConnection) params[0];
             this.api = (NexuAPI) params[1];
-            if(params.length > 2) {
-                this.product = (Product) params[2];
-            }
-            if(params.length > 3) {
-                this.productAdapter = (ProductAdapter) params[3];
-            }
-            if(params.length > 4) {
-                this.certificateFilter = (CertificateFilter) params[4];
-            }
-            if(params.length > 5) {
-                this.keyFilter = (String) params[5];
-            }
+            this.product = (Product) params[2];
+            this.productAdapter = (ProductAdapter) params[3];
+            this.certificateFilter = (CertificateFilter) params[4];
         } catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuAPI, Product (optional), ProductAdapter (optional), CertificateFilter (optional), key filter (optional)");
+            throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuAPI, Product, ProductAdapter, CertificateFilter");
         }
     }
 
@@ -84,11 +74,7 @@ public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPri
         final List<DSSPrivateKeyEntry> keys;
 
         try {
-            if((this.productAdapter != null) && (this.product != null) && this.productAdapter.supportCertificateFilter(this.product) && (this.certificateFilter != null)) {
-                keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
-            } else {
-                keys = this.token.getKeys();
-            }
+            keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
         } catch(final CancelledOperationException e) {
             return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
         } catch(PKCS11RuntimeException e) {
@@ -107,32 +93,22 @@ public class SelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPri
         // Microsoft keystore
         keys.removeIf(k -> "CN=Token Signing Public Key".equals(k.getCertificate().getCertificate().getIssuerDN().getName()));
 
-        if (this.keyFilter != null) {
-            for (final DSSPrivateKeyEntry k : keys) {
-                if (k.getCertificate().getDSSIdAsString().equals(this.keyFilter)) {
-                    key = k;
-                    break;
-                }
-            }
-            if(key == null) {
-                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.CANNOT_SELECT_KEY);
-            }
-        } else {
-            @SuppressWarnings("unchecked")
-            final OperationResult<Object> op =
-                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
-                        new Object[]{keys, this.api.getAppConfig().getApplicationName(),
-                                this.api.getAppConfig().isDisplayBackButton()}).perform();
-            if(op.getStatus().equals(CoreOperationStatus.BACK)) {
-                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
-            }
-            if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-                return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
-            }
-            key = (DSSPrivateKeyEntry) op.getResult();
-            if(key == null) {
-                return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
-            }
+        // let user select private key
+        @SuppressWarnings("unchecked")
+        final OperationResult<Object> op =
+            this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
+                new Object[]{keys, this.api.getAppConfig().getApplicationName(),
+                    this.api.getAppConfig().isDisplayBackButton()}).perform();
+        if(op.getStatus().equals(CoreOperationStatus.BACK)) {
+            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
+        }
+        if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+            return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
+        }
+        // get selected key
+        key = (DSSPrivateKeyEntry) op.getResult();
+        if(key == null) {
+            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
         }
         return new OperationResult<DSSPrivateKeyEntry>(key);
     }
