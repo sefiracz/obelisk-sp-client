@@ -39,15 +39,10 @@ public class PasswordManager {
     if(this.sessionId != null && !this.sessionId.equals(product.getSessionId())) {
       return null; // different browser session
     }
-    if(this.product != null && product instanceof ConfiguredKeystore && this.product instanceof ConfiguredKeystore &&
-        ((ConfiguredKeystore) product).getUrl().equals(((ConfiguredKeystore) this.product).getUrl())) {
-        return password.getPassword(); // return stored password for this keystore product
+    if(this.product == null || !this.product.equals(product)) {
+      return null; // different product
     }
-    if(this.product != null && product instanceof DetectedCard && this.product instanceof DetectedCard &&
-            ((DetectedCard) this.product).softEquals(product)) {
-      return password.getPassword(); // return stored password for this smartcard product
-    }
-    return null; // different product
+    return password.getPassword();
   }
 
   public void setProductPassword(AbstractProduct product, char[] password) {
