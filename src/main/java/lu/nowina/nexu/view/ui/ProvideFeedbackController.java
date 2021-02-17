@@ -20,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import lu.nowina.nexu.NexuException;
+import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.Feedback;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.generic.DebugHelper;
@@ -28,10 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -64,7 +68,19 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 			}
 			new Thread(() -> {
 				try {
-					Desktop.getDesktop().browse(new URI(getAppConfig().getTicketUrl()));
+					// subject
+					String subject = MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
+							.getString("feedback.mail.subject"), getApplicationName());
+					// body
+					String stackTrace = Utils.printException(getFeedback().getException());
+					String body = MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
+							.getString("feedback.mail.body"), stackTrace);
+					// mailto
+					String uriStr = String.format("mailto:%s?subject=%s&body=%s",
+							getAppConfig().getTicketUrl(),
+							urlEncode(subject),
+							urlEncode(body));
+					Desktop.getDesktop().browse(new URI(uriStr));
 				} catch (IOException | URISyntaxException ioe) {
 					LOGGER.error(ioe.getMessage());
 				}
@@ -81,6 +97,14 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 			message.setText(MessageFormat.format(
 				ResourceBundle.getBundle("bundles/nexu").getString("feedback.message"),
 				ResourceBundle.getBundle("bundles/nexu").getString("button.report.incident"), getApplicationName())));
+	}
+
+	private String urlEncode(String str) {
+		try {
+			return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
+		} catch (UnsupportedEncodingException e) {
+			return "";
+		}
 	}
 
 }
