@@ -61,12 +61,7 @@ public class PasswordManager {
   }
 
   public void destroy(AbstractProduct product) {
-    if(this.product != null && product instanceof ConfiguredKeystore && this.product instanceof ConfiguredKeystore &&
-            ((ConfiguredKeystore) product).getUrl().equals(((ConfiguredKeystore) this.product).getUrl())) {
-      destroy();
-    }
-    if(this.product != null && product instanceof DetectedCard && this.product instanceof DetectedCard &&
-            ((DetectedCard) product).softEquals(this.product)) {
+    if(product.equals(this.product)) {
       destroy();
     }
   }
