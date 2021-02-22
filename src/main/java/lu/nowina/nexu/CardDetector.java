@@ -240,6 +240,45 @@ public class CardDetector {
 		return listCardDetect;
 	}
 
+	public void detectCardTerminal(final DetectedCard card) {
+		// check present cards
+		List<DetectedCard> detectedCards = presentCards.match(card);
+		if(detectedCards.size() == 1) {
+			DetectedCard presentCard = detectedCards.get(0);
+			card.setTerminal(presentCard.getTerminal());
+			card.setTerminalIndex(presentCard.getTerminalIndex());
+			card.setTerminalLabel(presentCard.getTerminalLabel());
+		} else if (detectedCards.isEmpty()) {
+			// disconnected
+			card.setTerminal(null);
+			card.setTerminalLabel(null);
+			// try looking it up
+			int terminalIndex = 0;
+			for (final CardTerminal cardTerminal : getCardTerminals()) {
+				try {
+					Card c = cardTerminal.connect("*");
+					final ATR atr = c.getATR();
+					DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
+					detectedCard.initializeToken(api, null);
+					if(detectedCard.match(card)) {
+						// card is connected to this terminal
+						card.setTerminal(cardTerminal);
+						card.setTerminalIndex(terminalIndex);
+						card.setTerminalLabel(cardTerminal.getName());
+						return;
+					}
+				} catch (Exception e) {
+					logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+				}
+				terminalIndex++;
+			}
+			logger.warn(MessageFormat.format("Card '{0}' is not present.", card.getSimpleLabel()));
+		} else {
+			// TODO error ?
+			logger.error("Cannot conclusively determine card terminal");
+		}
+	}
+
 	public CardTerminal getCardTerminal(final DetectedCard detectedCard) {
 		for(final CardTerminal cardTerminal : getCardTerminals()) {
 			Card card = null;
@@ -328,43 +367,35 @@ public class CardDetector {
     }, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
+	/**
+	 * Present cards API
+	 */
   private static class PresentCards {
 
-    private final Object lock = new Object();
     private final List<DetectedCard> presentCards = new ArrayList<>();
 
-    private List<DetectedCard> getPresentCards() {
-      synchronized (lock) {
-        return Collections.unmodifiableList(presentCards);
-      }
+    private synchronized List<DetectedCard> getPresentCards() {
+			return Collections.unmodifiableList(presentCards);
+		}
+
+    private synchronized void add(DetectedCard detectedCard) {
+			presentCards.add(detectedCard);
     }
 
-    private void add(DetectedCard detectedCard) {
-      synchronized (lock) {
-        presentCards.add(detectedCard);
-      }
+    private synchronized DetectedCard get(DetectedCard selector) {
+			int index = presentCards.indexOf(selector);
+			if (index != -1) {
+				return presentCards.get(index);
+			}
+			return null;
     }
 
-    private DetectedCard get(DetectedCard selector) {
-      synchronized (lock) {
-        int index = presentCards.indexOf(selector);
-        if (index != -1) {
-          return presentCards.get(index);
-        }
-        return null;
-      }
-    }
+    private synchronized List<DetectedCard> match(DetectedCard card) {
+			return presentCards.stream().filter(c -> c.match(card)).collect(Collectors.toList());
+		}
 
-    private List<DetectedCard> match(DetectedCard card) {
-      synchronized (lock) {
-        return presentCards.stream().filter(c -> c.softEquals(card)).collect(Collectors.toList());
-      }
-    }
-
-    private void remove(DetectedCard card) {
-      synchronized (lock) {
-        presentCards.remove(card);
-      }
+    private synchronized void remove(DetectedCard card) {
+			presentCards.remove(card);
     }
 
   }

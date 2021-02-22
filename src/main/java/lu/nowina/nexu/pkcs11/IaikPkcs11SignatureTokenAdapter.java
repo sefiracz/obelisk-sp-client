@@ -62,7 +62,7 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
         detectedCard.openToken();
       this.token = detectedCard.getTokenHandler();
     } catch (IOException | TokenException | CardException e) {
-      throw new PKCS11RuntimeException("Token not present or unable to connect"); // TODO lepsi exceptions
+      throw new PKCS11RuntimeException("Token not present or unable to connect"); // TODO lepsi exceptions / rozlisit odpojeni a spatny DLL
     }
   }
 

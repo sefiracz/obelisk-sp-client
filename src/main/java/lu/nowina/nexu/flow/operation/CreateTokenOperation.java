@@ -91,6 +91,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
                   this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml",
                           "unsuported.product.message", this.api.getAppConfig().getApplicationName()).perform();
                 }
+                // TODO - co tak misto toho vratit status BACK a poslat uzivatele zpet do vyberu?
                 return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
               }
             }

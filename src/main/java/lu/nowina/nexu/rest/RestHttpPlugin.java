@@ -58,10 +58,10 @@ public class RestHttpPlugin implements HttpPlugin {
 		switch(target) {
 		case "/sign":
 			return signRequest(api, req, payload);
-		case "/selectCertificate":
-		  return selectCertificate(api, req, payload);
-		case "/certificates":
-			return getCertificates(api, req, payload);
+		case "/getToken":
+		  return getToken(api, req, payload);
+		case "/getCertificate":
+			return getCertificate(api, req, payload);
 		case "/smartcardList":
 			return smartcardList(api, req, payload);
 //		case "/identityInfo":
@@ -121,7 +121,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
-	private synchronized HttpResponse getCertificates(NexuAPI api, HttpRequest req, String payload) {
+	private synchronized HttpResponse getCertificate(NexuAPI api, HttpRequest req, String payload) {
 		logger.info("API call certificates");
 		final GetCertificateRequest r;
 		if (StringUtils.isEmpty(payload)) {
@@ -163,17 +163,17 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
-	private HttpResponse selectCertificate(NexuAPI api, HttpRequest req, String payload) {
-		final SelectCertificateRequest r;
+	private HttpResponse getToken(NexuAPI api, HttpRequest req, String payload) {
+		final GetTokenRequest r;
 		if (StringUtils.isEmpty(payload)) {
-			r = new SelectCertificateRequest();
+			r = new GetTokenRequest();
 			final String certificate = req.getParameter("certificate");
 			if (certificate != null) {
 				logger.info("Certificate: " + certificate);
 				r.setCertificate(DSSUtils.loadCertificate(Base64.decodeBase64(certificate)));
 			}
 		} else {
-			r = GsonHelper.fromJson(payload, SelectCertificateRequest.class);
+			r = GsonHelper.fromJson(payload, GetTokenRequest.class);
 		}
     r.setSessionId(req.getHeader("Cookie"));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
@@ -181,8 +181,8 @@ public class RestHttpPlugin implements HttpPlugin {
 			return invalidRequestHttpResponse;
 		} else {
 			logger.info("Call API");
-			final Execution<?> respObj = api.selectCertificate(r);
-			return toHttpResponse(respObj); // SelectCertificateResponse
+			final Execution<?> respObj = api.getToken(r);
+			return toHttpResponse(respObj); // GetTokenResponse
 		}
 	}
 

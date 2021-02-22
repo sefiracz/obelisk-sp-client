@@ -210,7 +210,8 @@ public class KeystoreProductAdapter implements ProductAdapter {
 							"JCEKS", new PasswordProtection(callback.getPassword()));
 				  break;
 				default:
-					throw new IllegalStateException("Unhandled keystore type: " + configuredKeystore.getType());
+					throw new UnsupportedKeystoreTypeException("Unsupported keystore type: " + configuredKeystore.getUrl(),
+							configuredKeystore.getUrl());
 				}
 			}
 			catch (FileNotFoundException e) {

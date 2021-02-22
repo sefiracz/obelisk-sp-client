@@ -88,8 +88,9 @@ public class TokenHandler {
    * @throws PKCS11Exception Login failed
    */
   public void login(PasswordInputCallback callback) throws PKCS11Exception {
-    if (callback != null && sessionHandle > 0)
+    if (callback != null && sessionHandle > 0) {
       pkcs11Module.login(callback, sessionHandle);
+    }
   }
 
   /**

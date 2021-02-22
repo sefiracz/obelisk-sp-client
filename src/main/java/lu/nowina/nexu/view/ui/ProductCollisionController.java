@@ -20,8 +20,10 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import lu.nowina.nexu.api.AbstractProduct;
+import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   private Button select;
 
   @FXML
+  private Button refresh;
+
+  @FXML
   private Button cancel;
 
   private ToggleGroup product;
@@ -60,6 +65,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   public void initialize(URL location, ResourceBundle resources) {
     select.setOnAction(e -> signalEnd(getSelectedProduct()));
     cancel.setOnAction(e -> signalUserCancel());
+    refresh.setOnAction(e -> signalEndWithStatus(CoreOperationStatus.BACK));
 
     product = new ToggleGroup();
     select.disableProperty().bind(product.selectedToggleProperty().isNull());
@@ -85,6 +91,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
       int height = 0;
       for (final AbstractProduct p : products) {
+        if(p instanceof DetectedCard) {
+          api.detectCardTerminal((DetectedCard) p);
+        }
         final RadioButton button = new RadioButton(api.getLabel(p));
         button.setToggleGroup(product);
         button.setUserData(p);

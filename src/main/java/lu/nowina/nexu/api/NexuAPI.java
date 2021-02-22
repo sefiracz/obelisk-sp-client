@@ -15,14 +15,11 @@ package lu.nowina.nexu.api;
 
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.EntityDatabase;
-import lu.nowina.nexu.EntityDatabaseLoader;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
 import lu.nowina.nexu.pkcs11.PKCS11Manager;
 
 import javax.smartcardio.CardException;
-import javax.smartcardio.CardNotPresentException;
 import javax.smartcardio.CardTerminal;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -39,6 +36,8 @@ public interface NexuAPI {
 	List<DetectedCard> detectCards();
 
 	DetectedCard getPresentCard(DetectedCard selector) throws CardException;
+
+	void detectCardTerminal(DetectedCard card);
 
   // Product API
 
@@ -62,7 +61,7 @@ public interface NexuAPI {
 
 	Execution<GetCertificateResponse> getCertificate(GetCertificateRequest request);
 
-	Execution<SelectCertificateResponse> selectCertificate(SelectCertificateRequest request);
+	Execution<GetTokenResponse> getToken(GetTokenRequest request);
 
 	Execution<SignatureResponse> sign(SignatureRequest request);
 
