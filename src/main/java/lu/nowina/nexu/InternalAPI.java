@@ -109,6 +109,10 @@ public class InternalAPI implements NexuAPI {
 	public CardTerminal getCardTerminal(DetectedCard card) {
 		return detector.getCardTerminal(card);
 	}
+	@Override
+	public void detectCardTerminal(DetectedCard card) {
+		detector.detectCardTerminal(card);
+	}
 
 	@Override
 	public List<Match> matchingProductAdapters(Product p) {
@@ -233,9 +237,9 @@ public class InternalAPI implements NexuAPI {
 	}
 
 	@Override
-	public Execution<SelectCertificateResponse> selectCertificate(SelectCertificateRequest request) {
-		Flow<SelectCertificateRequest, SelectCertificateResponse> flow =
-				flowRegistry.getFlow(FlowRegistry.SELECT_CERTIFICATE_FLOW, display, this);
+	public Execution<GetTokenResponse> getToken(GetTokenRequest request) {
+		Flow<GetTokenRequest, GetTokenResponse> flow =
+				flowRegistry.getFlow(FlowRegistry.TOKEN_FLOW, display, this);
 		flow.setOperationFactory(operationFactory);
 		return executeRequest(flow, request);
 	}
@@ -373,7 +377,9 @@ public class InternalAPI implements NexuAPI {
 		}
 		if(p instanceof DetectedCard) {
 			ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");
-			return label+ "\n"+rb.getString("card.label.terminal")+": "+((DetectedCard) p).getTerminalLabel();
+			String terminalLabel = ((DetectedCard) p).getTerminalLabel();
+			return label + "\n" + rb.getString("card.label.terminal") + ": " +
+					(terminalLabel != null ? terminalLabel : rb.getString("card.label.terminal.disconnected"));
 		}
 		return label;
 	}

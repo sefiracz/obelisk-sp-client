@@ -18,6 +18,7 @@ import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.keystore.KeystoreNotFoundException;
+import lu.nowina.nexu.keystore.UnsupportedKeystoreTypeException;
 import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
 import lu.nowina.nexu.view.core.UIOperation;
 
@@ -60,6 +61,7 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public OperationResult<DSSPrivateKeyEntry> perform() {
     DSSPrivateKeyEntry key;
     try {
@@ -78,6 +80,12 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
     } catch(PKCS11RuntimeException e) {
       this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
           "key.selection.pkcs11.not.found", api.getAppConfig().getApplicationName(), 370, 150
+      }).perform();
+      return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
+    } catch (UnsupportedKeystoreTypeException e) {
+      this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
+          "key.selection.keystore.unsupported.type", api.getAppConfig().getApplicationName(), 370, 150,
+          e.getFilePath()
       }).perform();
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {

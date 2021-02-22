@@ -16,12 +16,8 @@ package lu.nowina.nexu.view.ui;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.Product;
@@ -38,7 +34,7 @@ import java.util.ResourceBundle;
 public class ProductSelectionController extends AbstractUIOperationController<Product> implements Initializable {
 
 	@FXML
-	private BorderPane productsWindow;
+	private StackPane productsWindow;
 
 	@FXML
 	private Label message;

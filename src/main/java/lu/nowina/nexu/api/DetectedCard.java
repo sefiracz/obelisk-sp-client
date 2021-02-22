@@ -315,9 +315,10 @@ public class DetectedCard extends AbstractProduct {
 		PasswordManager.getInstance().destroy(this);
 	}
 
-	public boolean softEquals(Object o) {
+	public boolean match(Object o) {
     if (this == o) return true;
-    if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()))) return false;
+		if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()) &&
+				!o.getClass().isAssignableFrom(getClass()))) return false;
 
     DetectedCard that = (DetectedCard) o;
 
@@ -335,7 +336,8 @@ public class DetectedCard extends AbstractProduct {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()))) return false;
+		if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()) &&
+				!o.getClass().isAssignableFrom(getClass()))) return false;
 
 		DetectedCard that = (DetectedCard) o;
 

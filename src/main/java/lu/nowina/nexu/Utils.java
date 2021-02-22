@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.*;
+import java.security.UnrecoverableKeyException;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +61,9 @@ public class Utils {
       msg = "key.selection.error.pin.incorrect";
     } else if (exception.contains("keystore password was incorrect")) {
       msg = "key.selection.error.password.incorrect";
-    } else if (exception.contains("CKR_PIN_LOCKED")) {
+    } else if(e.getCause() instanceof UnrecoverableKeyException) {
+      msg = "key.selection.error.password.incorrect"; // TODO - muze byt spatne heslo ke klici/technicky problem/???
+    }  else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
     } else {
       return true; // unknown exception - re-throw

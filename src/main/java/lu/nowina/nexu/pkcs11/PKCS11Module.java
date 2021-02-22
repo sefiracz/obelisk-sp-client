@@ -213,14 +213,15 @@ public class PKCS11Module {
       throw new PKCS11Exception(CKR_KEY_HANDLE_INVALID);
     }
     CK_ATTRIBUTE[] labelTemplate = {new CK_ATTRIBUTE(),new CK_ATTRIBUTE()};
-    labelTemplate[0].type = PKCS11Constants.CKA_LABEL;
-    labelTemplate[1].type = PKCS11Constants.CKA_ID;
+    labelTemplate[0].type = PKCS11Constants.CKA_ID;
+    labelTemplate[1].type = PKCS11Constants.CKA_LABEL;
     pkcs11Module.C_GetAttributeValue(sessionHandle, signatureKeyHandle, labelTemplate, true);
     // get key object identification
+    // TODO - evidovat oba identifikatory? v evidenci asi nema smysl ukazovat CKA_ID jako nazev klice
     if (labelTemplate[0].pValue != null)
-      return new String((char[]) labelTemplate[0].pValue);
+      return "{CKA_ID}" + Base64.encodeBase64String((byte[])labelTemplate[0].pValue);
     else if (labelTemplate[1].pValue != null)
-      return "{CKA_ID}" + Base64.encodeBase64String((byte[])labelTemplate[1].pValue);
+      return new String((char[]) labelTemplate[1].pValue);
     else
       return null;
   }
@@ -309,6 +310,7 @@ public class PKCS11Module {
     attributeTemplateList[0].type = PKCS11Constants.CKA_CLASS;
     attributeTemplateList[0].pValue = PKCS11Constants.CKO_CERTIFICATE;
     // set cert object identification
+    // TODO - mozna zkusit obe hodnoty postupne (kdyby nahodou certifikat nemel stejne CKA_ID, ale CKA_LABEL ano?)
     attributeTemplateList[1] = setLabelOrId(label);
 
     pkcs11Module.C_FindObjectsInit(sessionHandle, attributeTemplateList, true);

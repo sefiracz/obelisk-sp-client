@@ -12,7 +12,7 @@ package lu.nowina.nexu.api;
 
 import eu.europa.esig.dss.x509.CertificateToken;
 
-public class SelectCertificateRequest extends NexuRequest {
+public class GetTokenRequest extends NexuRequest {
 
   private CertificateToken certificate;
   private boolean closeToken = true;

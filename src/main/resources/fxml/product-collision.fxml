@@ -42,6 +42,7 @@
 		<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
 			<children>
 				<Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
+				<Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-green" text="%button.refresh" />
 				<Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next" />
 			</children>
 		</HBox>

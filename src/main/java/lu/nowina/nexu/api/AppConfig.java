@@ -397,7 +397,7 @@ public class AppConfig {
 
 
     public void loadFromProperties(final Properties props) {
-        this.setApplicationName(props.getProperty(APPLICATION_NAME, "Obelisk SP"));
+        this.setApplicationName(props.getProperty(APPLICATION_NAME, "Obelisk Signing Portal"));
 
         final String bindingPortsStr = props.getProperty(BINDING_PORTS, "9795");
         if (isNotEmpty(bindingPortsStr)) {
@@ -405,13 +405,13 @@ public class AppConfig {
         }
 
         this.setBindingIP(props.getProperty(BINDING_IP, "127.0.0.1"));
-        this.setServerUrl(props.getProperty(SERVER_URL, "http://lab.nowina.solutions/nexu")); //feedback url
-        this.setInstallUrl(props.getProperty(INSTALL_URL, "http://nowina.lu/nexu/"));
+        this.setServerUrl(props.getProperty(SERVER_URL, "http://lab.nowina.solutions/nexu")); //feedback url // TODO
+        this.setInstallUrl(props.getProperty(INSTALL_URL, "http://nowina.lu/nexu/")); // TODO
         this.setNexuHostname(props.getProperty(NEXU_HOSTNAME, "localhost"));
         this.setHttpServerClass(props.getProperty(HTTP_SERVER_CLASS, "lu.nowina.nexu.jetty.JettyServer"));
         this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
         this.setAdvancedModeAvailable(Boolean.parseBoolean(props.getProperty(ADVANCED_MODE_AVAILABLE, "true")));
-        this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "50")));
+        this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "1"))); // TODO zmeneno z 50 na 1 (staci nam jeden token?)
         this.setEnablePopUps(Boolean.parseBoolean(props.getProperty(ENABLE_POP_UPS, "true")));
         this.setEnableInformativePopUps(Boolean.parseBoolean(props.getProperty(ENABLE_INFORMATIVE_POP_UPS, "true")));
         // Always set to false, just in case
@@ -440,7 +440,7 @@ public class AppConfig {
         this.setEnableDatabaseWebLoader(Boolean.parseBoolean(props.getProperty(ENABLE_DATABASE_WEB_LOADER, "true")));
         this.setEnableSystrayMenu(Boolean.parseBoolean(props.getProperty(ENABLE_SYSTRAY_MENU, "true")));
         this.setCorsAllowedOrigins(props.getProperty(CORS_ALLOWED_ORIGIN, "*"));
-        this.setTicketUrl(props.getProperty(TICKET_URL, "https://github.com/nowina-solutions/nexu/issues/new"));
+        this.setTicketUrl(props.getProperty(TICKET_URL, "https://github.com/nowina-solutions/nexu/issues/new")); // TODO
         this.setEnableIncidentReport(Boolean.parseBoolean(props.getProperty(ENABLE_INCIDENT_REPORT, "false")));
         this.setShowSplashScreen(Boolean.parseBoolean(props.getProperty(SHOW_SPLASH_SCREEN, "false")));
         this.setDisplayBackButton(Boolean.parseBoolean(props.getProperty(DISPLAY_BACK_BUTTON, "false")));

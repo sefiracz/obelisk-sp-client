@@ -33,17 +33,17 @@ import java.util.Map;
 /**
  * Automatically open device and select a private key based on certificate request
  */
-public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateRequest, SelectCertificateResponse> {
+public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResponse> {
 
-  static final Logger logger = LoggerFactory.getLogger(SelectCertificateFlow.class);
+  static final Logger logger = LoggerFactory.getLogger(GetTokenFlow.class);
 
-  public SelectCertificateFlow(final UIDisplay display, final NexuAPI api) {
+  public GetTokenFlow(final UIDisplay display, final NexuAPI api) {
     super(display, api);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  protected Execution<SelectCertificateResponse> process(final NexuAPI api, final SelectCertificateRequest req) throws Exception {
+  protected Execution<GetTokenResponse> process(final NexuAPI api, final GetTokenRequest req) throws Exception {
     CertificateToken certificateToken = req.getCertificate();
     byte[] digest = certificateToken.getDigest(DigestAlgorithm.SHA256);
     String certificateId = Utils.encodeHexString(digest);
@@ -74,13 +74,16 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
       throw new IllegalStateException("Unable to find a manually stored keystore/device (product).");
     } else if (products.size() > 1) {
       // private key is found on multiple devices - selection dialog
-      final Operation<AbstractProduct> operation = this.getOperationFactory()
-          .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
-      final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
-      if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-        selectedProduct = selectProductOperationResult.getResult();
-      } else {
-        return this.handleErrorOperationResult(selectProductOperationResult);
+      while (true) {
+        final Operation<AbstractProduct> operation = this.getOperationFactory()
+            .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
+        final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
+        if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+          selectedProduct = selectProductOperationResult.getResult();
+          break;
+        } else if (!selectProductOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
+          return this.handleErrorOperationResult(selectProductOperationResult);
+        }
       }
     } else {
       selectedProduct = products.get(0);
@@ -119,7 +122,7 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
                 if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
                   final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 
-                  final SelectCertificateResponse resp = new SelectCertificateResponse();
+                  final GetTokenResponse resp = new GetTokenResponse();
                   resp.setTokenId(tokenId);
 
                   final CertificateToken certificate = key.getCertificate();
@@ -137,7 +140,7 @@ public class SelectCertificateFlow extends AbstractCoreFlow<SelectCertificateReq
                     resp.setPreferredDigest(productAdapter.getPreferredDigestAlgorithm(product));
                   }
 
-                  return new Execution<SelectCertificateResponse>(resp);
+                  return new Execution<GetTokenResponse>(resp);
                 } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
                   closeToken(token);
                 } else {

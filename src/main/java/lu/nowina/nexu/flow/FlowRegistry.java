@@ -22,9 +22,7 @@ public interface FlowRegistry {
 
 	static final String CERTIFICATE_FLOW = "certificate";
 
-	static final String SELECT_CERTIFICATE_FLOW = "selectCertificate";
-
-	static final String SMARTCARD_LIST_FLOW = "processSmartcardList";
+	static final String TOKEN_FLOW = "token";
 
 	static final String GET_IDENTITY_INFO_FLOW = "getIdentityInfo";
 

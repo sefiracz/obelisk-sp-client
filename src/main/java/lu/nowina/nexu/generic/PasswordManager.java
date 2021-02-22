@@ -10,9 +10,8 @@ package lu.nowina.nexu.generic;
  * Author: hlavnicka
  */
 
+import com.sun.istack.internal.NotNull;
 import lu.nowina.nexu.api.AbstractProduct;
-import lu.nowina.nexu.api.ConfiguredKeystore;
-import lu.nowina.nexu.api.DetectedCard;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -35,11 +34,11 @@ public class PasswordManager {
     return manager;
   }
 
-  public char[] getPasswordForProduct(AbstractProduct product) {
+  public char[] getPasswordForProduct(@NotNull AbstractProduct product) {
     if(this.sessionId != null && !this.sessionId.equals(product.getSessionId())) {
       return null; // different browser session
     }
-    if(this.product == null || !this.product.equals(product)) {
+    if(!product.equals(this.product)) {
       return null; // different product
     }
     return password.getPassword();

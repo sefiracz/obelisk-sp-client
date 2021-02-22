@@ -136,7 +136,7 @@ public class RequestProcessor extends AbstractHandler {
 			} else if ("/nexu.js".equals(target)) {
 				nexuJs(request, response);
 				*/
-			} else if ("/".equals(target) || "/client-info".equals(target)) {
+			} else if ("/".equals(target) || "/clientInfo".equals(target)) {
 				clientInfo(response);
 			} else {
 				httpPlugin(target, request, response);

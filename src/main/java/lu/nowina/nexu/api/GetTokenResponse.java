@@ -19,7 +19,7 @@ import eu.europa.esig.dss.x509.CertificateToken;
 
 import java.util.List;
 
-public class SelectCertificateResponse {
+public class GetTokenResponse {
 
 	private TokenId tokenId;
 
@@ -35,7 +35,7 @@ public class SelectCertificateResponse {
 
 	private DigestAlgorithm preferredDigest;
 
-	public SelectCertificateResponse() {
+	public GetTokenResponse() {
 		super();
 	}
 
