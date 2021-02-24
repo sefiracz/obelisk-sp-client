@@ -25,7 +25,15 @@ import java.util.List;
  */
 public interface ProductDatabase extends EntityDatabase {
 
+  /**
+   * Removes the given product from the database.
+   * @param product The product to remove.
+   */
 	void remove(NexuAPI api, AbstractProduct product);
 
+  /**
+   * Returns list of currently stored products
+   * @return List of currently stored products
+   */
 	List<AbstractProduct> getProducts();
 }

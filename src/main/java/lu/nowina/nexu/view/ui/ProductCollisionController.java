@@ -22,9 +22,12 @@ import javafx.scene.layout.Pane;
 import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
+import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import lu.nowina.nexu.view.core.NonBlockingUIOperation;
+import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +38,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * description
+ * User choice colliding products controller
  */
 public class ProductCollisionController extends AbstractUIOperationController<AbstractProduct> implements Initializable {
 
@@ -57,16 +60,26 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   private Button refresh;
 
   @FXML
+  private Button manage;
+
+  @FXML
   private Button cancel;
 
   private ToggleGroup product;
+
+  private NexuAPI api;
+
+  private List<AbstractProduct> products;
+
+  private OperationFactory operationFactory;
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     select.setOnAction(e -> signalEnd(getSelectedProduct()));
     cancel.setOnAction(e -> signalUserCancel());
     refresh.setOnAction(e -> signalEndWithStatus(CoreOperationStatus.BACK));
-
+    manage.setOnAction(e -> UIOperation.getFutureOperationInvocation(NonBlockingUIOperation.class,
+            "/fxml/manage-keystores.fxml", api, products).call(operationFactory));
     product = new ToggleGroup();
     select.disableProperty().bind(product.selectedToggleProperty().isNull());
   }
@@ -77,15 +90,15 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
   @Override
   public final void init(Object... params) {
-    final NexuAPI api = (NexuAPI) params[0];
+    this.api = (NexuAPI) params[0];
+    this.operationFactory = (OperationFactory) params[1];
     StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), "product.selection.title");
 
     Platform.runLater(() -> {
       message.setText(MessageFormat
           .format(ResourceBundle.getBundle("bundles/nexu").getString("product.collision.selection.header"), new Object[]{}));
 
-      @SuppressWarnings("unchecked")
-      final List<AbstractProduct> products = (List<AbstractProduct>) params[1];
+      products = (List<AbstractProduct>) params[2];
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
 

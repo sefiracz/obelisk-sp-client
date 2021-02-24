@@ -20,7 +20,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
-import lu.nowina.nexu.generic.ProductsMap;
+import lu.nowina.nexu.generic.RegisteredProducts;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
     CertificateToken certificateToken = req.getCertificate();
     byte[] digest = certificateToken.getDigest(DigestAlgorithm.SHA256);
     String certificateId = Utils.encodeHexString(digest);
-    List<AbstractProduct> products = ProductsMap.getMap().get(certificateId);
+    List<AbstractProduct> products = RegisteredProducts.getMap().get(certificateId);
     AbstractProduct selectedProduct;
     // manual select certificate/key
     if(products == null || products.isEmpty()) {
@@ -67,7 +67,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
         // manual selection error
         return this.handleErrorOperationResult(getCertificate.getOperationResult());
       }
-      products = ProductsMap.getMap().get(certificateId);
+      products = RegisteredProducts.getMap().get(certificateId);
     }
 
     if(products == null || products.isEmpty()) {
@@ -76,7 +76,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
       // private key is found on multiple devices - selection dialog
       while (true) {
         final Operation<AbstractProduct> operation = this.getOperationFactory()
-            .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
+            .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, getOperationFactory(), products);
         final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
         if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
           selectedProduct = selectProductOperationResult.getResult();
@@ -142,7 +142,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
 
                   return new Execution<GetTokenResponse>(resp);
                 } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
-                  closeToken(token);
+                  continue;
                 } else {
                   return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
                 }
@@ -161,9 +161,8 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
       }
     } catch (final Exception e) {
       logger.error("Flow error", e);
-      throw this.handleException(e);
-    } finally {
       closeToken(token);
+      throw this.handleException(e);
     }
   }
 }

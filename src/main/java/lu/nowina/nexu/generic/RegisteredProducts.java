@@ -20,21 +20,21 @@ import java.util.Map;
 /**
  * Map of all stored keystores (certificate/key)
  */
-public class ProductsMap {
+public class RegisteredProducts {
 
-  private static volatile ProductsMap productsMap;
+  private static volatile RegisteredProducts products;
 
   private final Map<String, List<AbstractProduct>> map;
 
-  private ProductsMap() {
+  private RegisteredProducts() {
     map = new HashMap<>();
   }
 
-  public synchronized static ProductsMap getMap() {
-    if(productsMap == null) {
-      productsMap = new ProductsMap();
+  public synchronized static RegisteredProducts getMap() {
+    if(products == null) {
+      products = new RegisteredProducts();
     }
-    return productsMap;
+    return products;
   }
 
   public synchronized void put(String certificateId, AbstractProduct keystore) {

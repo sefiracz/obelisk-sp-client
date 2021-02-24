@@ -10,10 +10,9 @@ package lu.nowina.nexu;
  * Author: hlavnicka
  */
 
-import lu.nowina.nexu.api.*;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationFactory;
-import lu.nowina.nexu.generic.PasswordManager;
-import lu.nowina.nexu.generic.SCInfo;
+import lu.nowina.nexu.generic.TokenManager;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import java.awt.*;
 import java.io.*;
 import java.security.UnrecoverableKeyException;
 import java.util.Date;
-import java.util.List;
 
 public class Utils {
 
@@ -62,36 +60,17 @@ public class Utils {
     } else if (exception.contains("keystore password was incorrect")) {
       msg = "key.selection.error.password.incorrect";
     } else if(e.getCause() instanceof UnrecoverableKeyException) {
-      msg = "key.selection.error.password.incorrect"; // TODO - muze byt spatne heslo ke klici/technicky problem/???
+      msg = "key.selection.error.password.incorrect"; // TODO - muze byt jine heslo ke klici nez keystore/jiny technicky problem/???
     }  else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
     } else {
       return true; // unknown exception - re-throw
     }
-    PasswordManager.getInstance().destroy();
+    TokenManager.getManager().destroy();
     operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
         msg, api.getAppConfig().getApplicationName(), 375, 120
     }).perform();
     return false;
-  }
-
-  /**
-   * Check if adapter is for PKCS11 and the library is present on expected location
-   *
-   * @param matchingProductAdapters List of matching product adapters
-   * @return True if library is present or if product is not PKCS11
-   */
-  // TODO ??? stale aktualni a potreba? // mozna lepe jit skrz PKCS11Manager
-  public static boolean isPkcs11LibraryPresent(List<Match> matchingProductAdapters) {
-    if(!matchingProductAdapters.isEmpty()) {
-      Product p = matchingProductAdapters.get(0).getProduct();
-      if(p instanceof SCInfo && ((SCInfo) p).getType().equals(KeystoreType.PKCS11) &&
-          ((SCInfo) p).getInfos().get(0).getSelectedApi().equals(ScAPI.PKCS_11)) {
-        String pkcs11Path = ((SCInfo)p).getInfos().get(0).getApiParam();
-        return new File(pkcs11Path).exists() && new File(pkcs11Path).canRead();
-      }
-    }
-    return true; // product isn't PKCS11 so it's ok
   }
 
   public static void openCertificate(String certificate) {
@@ -114,5 +93,6 @@ public class Utils {
       }
     }
   }
+
 
 }

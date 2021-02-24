@@ -123,7 +123,7 @@ public class PKCS11Manager {
       return modules.get(pkcs11Path);
     }
     PKCS11Module module = null;
-    // use given PKCS11 library path to initialize new PKCS11 module
+    // if not null then use given PKCS11 library path to initialize new PKCS11 module
     if(pkcs11Path != null && new File(pkcs11Path).exists() && new File(pkcs11Path).canRead()) {
       module = new PKCS11Module(pkcs11Path);
       modules.put(pkcs11Path, module);
@@ -135,7 +135,7 @@ public class PKCS11Manager {
       // check if PKCS11 module is already initialized
       module = modules.get(pkcs11Driver);
       if (module == null) {
-        // use given PKCS11 library path to initialize new PKCS11 module
+        // use available PKCS11 library to initialize new PKCS11 module
         module = new PKCS11Module(pkcs11Driver);
         modules.put(pkcs11Driver, module);
       }
@@ -143,6 +143,11 @@ public class PKCS11Manager {
     return module;
   }
 
+  /**
+   * Returns available PKCS11 library for given ATR
+   * @param atr Smartcard ATR
+   * @return PKCS11 driver library path or null if drivers are unknown or unavailable
+   */
   public String getAvailablePkcs11Library(String atr) {
     SmartcardInfo info = getAvailableSmartcardInfo(atr);
     return getAvailableDriver(info);

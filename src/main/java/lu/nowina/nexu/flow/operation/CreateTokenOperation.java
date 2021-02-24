@@ -13,24 +13,17 @@
  */
 package lu.nowina.nexu.flow.operation;
 
-import eu.europa.esig.dss.token.MSCAPISignatureToken;
-import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
-import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.flow.exceptions.AbstractTokenRuntimeException;
 import lu.nowina.nexu.generic.*;
 import lu.nowina.nexu.model.Pkcs11Params;
-import lu.nowina.nexu.pkcs11.AbstractPkcs11SignatureTokenAdapter;
-import lu.nowina.nexu.pkcs11.IaikPkcs11SignatureTokenAdapter;
-import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,137 +66,131 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     @Override
     @SuppressWarnings("unchecked")
     public OperationResult<Map<TokenOperationResultKey, Object>> perform() {
-        LOG.info(this.matchingProductAdapters.size() + " matching product adapters");
-        try {
-            // TODO if pkcs11 library is known but NOT present - custom unsupported-product dialog with download link?
-            if (!this.matchingProductAdapters.isEmpty() && Utils.isPkcs11LibraryPresent(matchingProductAdapters)) {
-                return this.createTokenAuto(); // automatic token configuration
-            } else {
-              // TODO - nepodporovan vs podporovan ale drivery chybi
-              final OperationResult<Object> result =
-                      this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
-                              new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
-              if(result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-                return this.createTokenAdvanced(); // manual token configuration
-              } else {
-                // TODO - uzivatel zrusil konfigurace => nevi jak se pripojit
-                if(this.api.getAppConfig().isEnablePopUps()) {
-                  this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml",
-                          "unsuported.product.message", this.api.getAppConfig().getApplicationName()).perform();
-                }
-                // TODO - co tak misto toho vratit status BACK a poslat uzivatele zpet do vyberu?
-                return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
-              }
-            }
-        } catch (PKCS11RuntimeException e) {
-            this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-                "key.selection.pkcs11.not.found", api.getAppConfig().getApplicationName(), 370, 150
-            }).perform();
-            return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
+      LOG.info(this.matchingProductAdapters.size() + " matching product adapters");
+      try {
+        if (!this.matchingProductAdapters.isEmpty()) {
+          return this.createTokenAuto(); // automatic token configuration
+        } else {
+          // TODO if pkcs11 library is known but NOT present - custom unsupported-product dialog with download link?
+          // TODO - nepodporovan vs podporovan ale drivery chybi
+          final OperationResult<Object> result =
+                  this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
+                          new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
+          if (result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+            return this.createTokenAdvanced(); // manual token configuration
+          } else {
+            // TODO - uzivatel zrusil konfigurace => nevi jak se pripojit
+            this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml",
+                    "unsuported.product.message", this.api.getAppConfig().getApplicationName()).perform();
+            // TODO - co tak misto toho vratit status BACK a poslat uzivatele zpet do vyberu?
+            return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
+          }
         }
+      } catch (AbstractTokenRuntimeException e) {
+        this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
+                e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
+        }).perform();
+        return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
+      } catch (Exception e) {
+        throw e;
+      }
     }
 
   /**
    * Automatically creates token adapter
-   * @return Operation returns Map with initialized adapter
+   * @return Operation returns Map with initialized token
    */
   private OperationResult<Map<TokenOperationResultKey, Object>> createTokenAuto() {
-        final Match match = this.matchingProductAdapters.get(0);
-        final Product supportedProduct = match.getProduct();
-        final ProductAdapter adapter = match.getAdapter();
+    final Match match = this.matchingProductAdapters.get(0);
+    final Product supportedProduct = match.getProduct();
+    final ProductAdapter adapter = match.getAdapter();
 
-        final SignatureTokenConnection connect;
-        if(adapter.supportMessageDisplayCallback(supportedProduct)) {
-            connect = adapter.connect(this.api, supportedProduct, this.display.getPasswordInputCallback(),
-                    this.display.getMessageDisplayCallback());
-        } else {
-            connect = adapter.connect(this.api, supportedProduct, this.display.getPasswordInputCallback());
-        }
-        if (connect == null) {
-            LOG.error("No connect returned");
-            return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.NO_TOKEN);
-        }
-        final TokenId tokenId = this.api.registerTokenConnection(connect);
-        if (tokenId == null) {
-            LOG.error("Received null TokenId after registration");
-            return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.NO_TOKEN_ID);
-        }
-        final Map<TokenOperationResultKey, Object> map = new HashMap<TokenOperationResultKey, Object>();
-        map.put(TokenOperationResultKey.TOKEN_ID, tokenId);
-        map.put(TokenOperationResultKey.ADVANCED_CREATION, false);
-        map.put(TokenOperationResultKey.SELECTED_PRODUCT, supportedProduct);
-        map.put(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER, adapter);
-        // smartcards
-        if(supportedProduct instanceof DetectedCard) {
-            map.put(TokenOperationResultKey.SELECTED_API, ScAPI.MSCAPI);
-            if (connect instanceof AbstractPkcs11SignatureTokenAdapter) {
-                map.put(TokenOperationResultKey.SELECTED_API_PARAMS,
-                    ((AbstractPkcs11SignatureTokenAdapter) connect).getPkcs11Library());
-                map.put(TokenOperationResultKey.SELECTED_API, ScAPI.PKCS_11);
-            }
-        }
-        return new OperationResult<Map<TokenOperationResultKey, Object>>(map);
-    }
+    final Map<TokenOperationResultKey, Object> map = new HashMap<>();
+    map.put(TokenOperationResultKey.SELECTED_API, match.getScAPI());
+    map.put(TokenOperationResultKey.SELECTED_API_PARAMS, match.getApiParameters());
+
+    // create token
+    return createToken(supportedProduct, adapter, map);
+  }
+
 
   /**
    * Creates token adapter given user input/configuration
-   * @return Operation returns Map with initialized adapter
+   * @return Operation returns Map with initialized token
    */
-    private OperationResult<Map<TokenOperationResultKey, Object>> createTokenAdvanced() {
-        LOG.info("Advanced mode selected");
-        @SuppressWarnings("unchecked")
-        final OperationResult<Object> result =
-        this.operationFactory.getOperation(UIOperation.class, "/fxml/api-selection.fxml",
-                new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
-        if(result.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-            return new OperationResult<Map<TokenOperationResultKey, Object>>(BasicOperationStatus.USER_CANCEL);
-        }
-        ScAPI scAPI = (ScAPI) result.getResult();
-        final Map<TokenOperationResultKey, Object> map = new HashMap<TokenOperationResultKey, Object>();
-        map.put(TokenOperationResultKey.ADVANCED_CREATION, true);
-        map.put(TokenOperationResultKey.SELECTED_API, result.getResult());
-        final DetectedCard selectedCard = (DetectedCard) product;
-        map.put(TokenOperationResultKey.SELECTED_PRODUCT, selectedCard);
-        final TokenId tokenId;
-        switch (scAPI) {
-            case MOCCA:
-                tokenId = this.api.registerTokenConnection(
-                        new MOCCASignatureTokenConnectionAdapter(new MOCCASignatureTokenConnection(
-                                this.display.getPasswordInputCallback()), this.api, selectedCard));
-                break;
-            case MSCAPI:
-                tokenId = this.api.registerTokenConnection(new MSCAPISignatureToken());
-                break;
-            case PKCS_11:
-                @SuppressWarnings("unchecked")
-                final OperationResult<Object> op2 =
-                this.operationFactory.getOperation(UIOperation.class, "/fxml/pkcs11-params.fxml", new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
-                if(op2.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-                    return new OperationResult<Map<TokenOperationResultKey, Object>>(BasicOperationStatus.USER_CANCEL);
-                }
-                final Pkcs11Params pkcs11Params = (Pkcs11Params) op2.getResult();
-                final String absolutePath = pkcs11Params.getPkcs11Lib().getAbsolutePath();
-                map.put(TokenOperationResultKey.SELECTED_API_PARAMS, absolutePath);
-                PasswordInputCallback passwordInputCallback = this.display.getPasswordInputCallback();
-                if(passwordInputCallback instanceof NexuPasswordInputCallback) {
-                    ((NexuPasswordInputCallback) passwordInputCallback).setProduct(selectedCard);
-                }
-                tokenId = this.api.registerTokenConnection(new IaikPkcs11SignatureTokenAdapter(api, new File(absolutePath), passwordInputCallback, selectedCard));
-                break;
-            default:
-                return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
-        }
-        map.put(TokenOperationResultKey.TOKEN_ID, tokenId);
+  @SuppressWarnings("unchecked")
+  private OperationResult<Map<TokenOperationResultKey, Object>> createTokenAdvanced(){
+    final Map<TokenOperationResultKey, Object> map = new HashMap<>();
+    map.put(TokenOperationResultKey.ADVANCED_CREATION, true);
+    map.put(TokenOperationResultKey.SELECTED_PRODUCT, product);
 
-        final ConnectionInfo connectionInfo = new ConnectionInfo();
-        connectionInfo.setApiParam((String) map.get(TokenOperationResultKey.SELECTED_API_PARAMS));
-        connectionInfo.setSelectedApi((ScAPI) map.get(TokenOperationResultKey.SELECTED_API));
-        connectionInfo.setEnv(this.api.getEnvironmentInfo());
-        final SCInfo info = new SCInfo(selectedCard);
-        info.getInfos().add(connectionInfo);
-        final GenericCardAdapter cardAdapter = new GenericCardAdapter(info, api);
-        map.put(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER, cardAdapter);
-
-        return new OperationResult<Map<TokenOperationResultKey,Object>>(map);
+    // select token API
+    final OperationResult<Object> apiSelection = this.operationFactory.getOperation(UIOperation.class,
+            "/fxml/api-selection.fxml", this.api.getAppConfig().getApplicationName()).perform();
+    if(apiSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+      return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     }
+    ScAPI scAPI = (ScAPI) apiSelection.getResult();
+    map.put(TokenOperationResultKey.SELECTED_API, scAPI);
+
+    // select PKCS11 parameters
+    if(scAPI.equals(ScAPI.PKCS_11)) {
+      final OperationResult<Object> op2 = operationFactory.getOperation(UIOperation.class,
+              "/fxml/pkcs11-params.fxml", this.api.getAppConfig().getApplicationName()).perform();
+      if(op2.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+        return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
+      }
+      final Pkcs11Params pkcs11Params = (Pkcs11Params) op2.getResult();
+      final String absolutePath = pkcs11Params.getPkcs11Lib().getAbsolutePath();
+      map.put(TokenOperationResultKey.SELECTED_API_PARAMS, absolutePath);
+    }
+
+    // prepare smartcard information and generic card adapter
+    final ConnectionInfo connectionInfo = new ConnectionInfo();
+    connectionInfo.setApiParam((String) map.get(TokenOperationResultKey.SELECTED_API_PARAMS));
+    connectionInfo.setSelectedApi(scAPI);
+    connectionInfo.setEnv(this.api.getEnvironmentInfo());
+    final SCInfo info = new SCInfo((DetectedCard) product);
+    info.getInfos().add(connectionInfo);
+
+    final GenericCardAdapter adapter = new GenericCardAdapter(info, api);
+
+    // create token
+    return createToken(product, adapter, map);
+  }
+
+  /**
+   * Creates token adapter
+   *
+   * @param product Product Product that describes token connection information
+   * @param adapter Adapter that will be used to connect to token
+   * @param map Map to fill with token parameters and returned
+   * @return Operation returns Map with initialized token and parameters
+   */
+  private OperationResult<Map<TokenOperationResultKey, Object>> createToken(Product product, ProductAdapter adapter,
+                                                                            Map<TokenOperationResultKey, Object> map) {
+    // createToken(Product product, ProductAdapter adapter)
+    final SignatureTokenConnection connect;
+    if(adapter.supportMessageDisplayCallback(product)) {
+      connect = adapter.connect(api, product, display.getPasswordInputCallback(), display.getMessageDisplayCallback());
+    } else {
+      connect = adapter.connect(api, product, display.getPasswordInputCallback());
+    }
+    if (connect == null) {
+      LOG.error("No connect returned");
+      return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
+    }
+    final TokenId tokenId = api.registerTokenConnection(connect);
+    if (tokenId == null) {
+      LOG.error("Received null TokenId after registration");
+      return new OperationResult<>(CoreOperationStatus.NO_TOKEN_ID);
+    }
+
+    map.put(TokenOperationResultKey.TOKEN_ID, tokenId);
+    map.put(TokenOperationResultKey.ADVANCED_CREATION, false);
+    map.put(TokenOperationResultKey.SELECTED_PRODUCT, product);
+    map.put(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER, adapter);
+
+    return new OperationResult<>(map);
+  }
 }

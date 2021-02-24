@@ -142,14 +142,11 @@ public class CardDetector {
 	 * @throws CardException Unable to determine the correct card or not found any match
 	 */
 	public DetectedCard getPresentCard(DetectedCard selector) throws CardException {
-    if(selector.isInitialized()) {
-      // already connected, just return, nothing to do
-      return selector;
-    }
     // check if the card is currently being detected and present
     List<DetectedCard> detectedCards = presentCards.match(selector);
     if (detectedCards.size() == 1) {
       DetectedCard detectedCard = detectedCards.get(0);
+      detectedCard.setSessionId(selector.getSessionId());
       // set key/certificate values
       detectedCard.setCertificate(selector.getCertificate());
       detectedCard.setCertificateId(selector.getCertificateId());
@@ -187,6 +184,7 @@ public class CardDetector {
       logger.info("Detected " + detectedCardsList.size() + " card(s) that could be card " + selector.getTokenLabel());
       if (detectedCardsList.size() == 1) {
         DetectedCard detectedCard = detectedCardsList.get(0);
+        detectedCard.setSessionId(selector.getSessionId());
         detectedCard.setCertificate(selector.getCertificate());
         detectedCard.setCertificateId(selector.getCertificateId());
         detectedCard.setKeyAlias(selector.getKeyAlias());
@@ -198,6 +196,7 @@ public class CardDetector {
         logger.info("Multiple cards located. Looking for the specific card in the terminal");
         for(DetectedCard detectedCard : detectedCardsList) {
         	if(detectedCard.getTerminalLabel().equals(selector.getTerminalLabel())) {
+            detectedCard.setSessionId(selector.getSessionId());
         		return detectedCard;
 					}
 				}

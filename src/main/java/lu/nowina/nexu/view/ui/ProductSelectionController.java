@@ -68,6 +68,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 	}
 
 	@Override
+  @SuppressWarnings("unchecked")
 	public final void init(Object... params) {
 		final NexuAPI api = (NexuAPI) params[3];
 		StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(),
@@ -76,10 +77,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 		Platform.runLater(() -> {
 			message.setText(MessageFormat
 					.format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), params[0]));
-			@SuppressWarnings("unchecked")
 			final List<DetectedCard> cards = (List<DetectedCard>) params[1];
-			@SuppressWarnings("unchecked")
 			final List<Product> products = (List<Product>) params[2];
+
 			final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
 			int height = 0;

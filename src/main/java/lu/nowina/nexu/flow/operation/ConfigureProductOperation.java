@@ -57,7 +57,7 @@ public class ConfigureProductOperation extends AbstractCompositeOperation<List<M
 		for(final Match match : matches) {
 			final OperationResult<Product> op = handleMatch(match.getAdapter(), match.getProduct());
 			if(op.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-				result.add(new Match(match.getAdapter(), op.getResult()));
+				result.add(new Match(match.getAdapter(), op.getResult(), match.getScAPI(), match.getApiParameters()));
 			} else {
 				if(op.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
 					return new OperationResult<List<Match>>(op.getException());

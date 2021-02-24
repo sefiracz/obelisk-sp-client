@@ -19,8 +19,10 @@ import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 import lu.nowina.nexu.pkcs11.IAIKPrivateKeyEntry;
-import lu.nowina.nexu.pkcs11.IaikPkcs11SignatureTokenAdapter;
+import lu.nowina.nexu.pkcs11.IAIKPkcs11SignatureTokenAdapter;
+import lu.nowina.nexu.flow.exceptions.PKCS11TokenException;
 
+import javax.smartcardio.CardException;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -65,11 +67,23 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
         switch (scApi) {
             case MSCAPI:
                 // Cannot intercept cancel and timeout for MSCAPI (too generic error).
-                return new MSCAPISignatureToken();
+                return new MSCAPISignatureToken(); // TODO ? filter the token content
             case PKCS_11:
+              try {
                 final String absolutePath = cInfo.getApiParam();
-                return new IaikPkcs11SignatureTokenAdapter(api, new File(absolutePath), callback, card);
+                // get present card
+                DetectedCard detectedCard = api.getPresentCard(card);
+                SignatureTokenConnection token = TokenManager.getManager().getInitializedTokenForProduct(detectedCard);
+                if(token == null) {
+                  token = new IAIKPkcs11SignatureTokenAdapter(api, new File(absolutePath), callback, detectedCard);
+                }
+                TokenManager.getManager().setToken(detectedCard, token);
+                return token;
+              } catch (CardException e) {
+                throw new PKCS11TokenException("Token not present or unable to connect", e);
+              }
             case MOCCA:
+              // TODO - remove ?
                 return new MOCCASignatureTokenConnectionAdapter(new MOCCASignatureTokenConnection(callback), api, card);
             default:
                 throw new RuntimeException("API not supported");

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import lu.nowina.nexu.api.DetectedCard;
+import lu.nowina.nexu.flow.exceptions.PKCS11TokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,11 +146,11 @@ public class SunPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToken
                 } else if (t instanceof CancelledOperationException) {
                     throw (CancelledOperationException) t;
                 } else if ("PKCS11 not found".equals(t.getMessage())) {
-                    throw new PKCS11RuntimeException(e);
+                    throw new PKCS11TokenException(e);
                 } else if ("Token has been removed".equals(t.getMessage())) {
-                    throw new PKCS11RuntimeException(e);
+                    throw new PKCS11TokenException(e);
                 } else if (t.getMessage() != null && t.getMessage().contains("Reason: null")) {
-                    throw new PKCS11RuntimeException(e);
+                    throw new PKCS11TokenException(e);
                 }
                 t = t.getCause();
             }

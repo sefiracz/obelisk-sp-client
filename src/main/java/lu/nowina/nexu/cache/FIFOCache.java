@@ -40,17 +40,6 @@ public class FIFOCache<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     protected boolean removeEldestEntry(final java.util.Map.Entry<K, V> eldest) {
-        final boolean remove = (this.size() > this.maxSize);
-        if (remove && (eldest != null)) {
-            final V eldestValue = eldest.getValue();
-            if ((eldestValue != null) && (eldestValue instanceof AutoCloseable)) {
-                try {
-                    ((AutoCloseable) eldestValue).close();
-                } catch (final Exception e) {
-                    logger.error("Exception when removing eldest entry from cache: " + e.getMessage(), e);
-                }
-            }
-        }
-        return remove;
+      return this.size() > this.maxSize;
     }
 }

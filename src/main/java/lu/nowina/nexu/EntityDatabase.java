@@ -11,12 +11,13 @@ package lu.nowina.nexu;
  */
 
 /**
- * description
+ * Entity database
  */
 public interface EntityDatabase {
 
   /**
-   * Method that can be used to initialize loaded database data
+   * This method is run everytime a database is loaded.
+   * Can be implemented to initialize data just as they are loaded from database.
    */
   void initialize();
 
