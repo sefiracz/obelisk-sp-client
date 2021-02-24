@@ -18,7 +18,7 @@ import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.ConfiguredKeystore;
 import lu.nowina.nexu.api.NexuAPI;
-import lu.nowina.nexu.generic.ProductsMap;
+import lu.nowina.nexu.generic.RegisteredProducts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class KeystoreDatabase implements ProductDatabase {
 		if(!getKeystores().contains(keystore)) {
 			getKeystores().add(keystore);
 		}
-		ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
+		RegisteredProducts.getMap().put(keystore.getCertificateId(), keystore);
 		onAddRemove();
 	}
 
@@ -57,7 +57,7 @@ public class KeystoreDatabase implements ProductDatabase {
 	 */
 	public final void remove(NexuAPI api, final AbstractProduct keystore) {
 		getKeystores().remove(keystore);
-		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
+		RegisteredProducts.getMap().remove(keystore.getCertificateId(), keystore);
 		onAddRemove();
 	}
 
@@ -85,7 +85,7 @@ public class KeystoreDatabase implements ProductDatabase {
 	 */
 	public void initialize() {
 		for (ConfiguredKeystore keystore : getKeystores()) {
-			ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
+			RegisteredProducts.getMap().put(keystore.getCertificateId(), keystore);
 		}
 	}
 

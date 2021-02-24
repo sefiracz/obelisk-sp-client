@@ -24,9 +24,7 @@ import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
-import lu.nowina.nexu.keystore.KeystoreNotFoundException;
-import lu.nowina.nexu.keystore.UnsupportedKeystoreTypeException;
-import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
+import lu.nowina.nexu.flow.exceptions.*;
 import lu.nowina.nexu.view.core.UIOperation;
 
 /**
@@ -68,27 +66,17 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 	}
 
 	@Override
+  @SuppressWarnings("unchecked")
 	public OperationResult<SignatureValue> perform() {
 		try {
 			try {
 				return new OperationResult<SignatureValue>(token.sign(toBeSigned, digestAlgorithm, key));
-			} catch (KeystoreNotFoundException e) {
-				this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-						"key.selection.keystore.not.found", api.getAppConfig().getApplicationName(), 370, 150, e.getMessage()
-				}).perform();
-				return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-			} catch(PKCS11RuntimeException e) {
-				this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-						"key.selection.pkcs11.not.found", api.getAppConfig().getApplicationName(), 370, 150
-				}).perform();
-				return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-			} catch (UnsupportedKeystoreTypeException e) {
-				this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-						"key.selection.keystore.unsupported.type", api.getAppConfig().getApplicationName(), 370, 150,
-						e.getFilePath()
-				}).perform();
-				return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-			} catch (Exception e) {
+			} catch (AbstractTokenRuntimeException e) {
+        this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
+                e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
+        }).perform();
+        return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
+      } catch (Exception e) {
 				if(Utils.checkWrongPasswordInput(e, operationFactory, api))
 					throw e;
 				return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);

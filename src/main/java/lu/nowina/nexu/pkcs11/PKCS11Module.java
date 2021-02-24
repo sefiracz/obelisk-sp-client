@@ -35,15 +35,18 @@ public class PKCS11Module {
 
   public PKCS11Module(String pkcs11ModulePath) throws IOException, TokenException {
     this.pkcs11ModulePath = pkcs11ModulePath;
-    log.debug("Initialization");
+    log.info("Initialization");
 
-    log.debug("Trying to connect to PKCS#11 module: '" + pkcs11ModulePath + "'");
+    log.info("Trying to connect to PKCS#11 module: '" + pkcs11ModulePath + "'");
     pkcs11Module = PKCS11Connector.connectToPKCS11Module(pkcs11ModulePath);
-    log.debug("Connected");
+    log.info("Connected");
 
     log.debug("Initializing module: '" + pkcs11ModulePath + "'");
     pkcs11Module.C_Initialize(null, true);
-    log.debug("Initialized");
+    log.info("Initialized");
+
+    CK_INFO ckInfo = pkcs11Module.C_GetInfo();
+    log.info("Cryptoki info:\n"+ckInfo.toString());
   }
 
   /**

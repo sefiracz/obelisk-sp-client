@@ -22,7 +22,6 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
 import lu.nowina.nexu.view.core.UIDisplay;
-import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,17 +77,11 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 							return handleErrorOperationResult(signOperationResult);
 						}
 					} else {
-//						if(api.getAppConfig().isEnablePopUps()) {
-//							getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-//								"signature.flow.no.key.selected", api.getAppConfig().getApplicationName()).perform();
-//						}
+					  // key error
 						return handleErrorOperationResult(selectPrivateKeyOperationResult);
 					}
 				} else {
-//					if(api.getAppConfig().isEnablePopUps()) {
-//						getOperationFactory().getOperation(UIOperation.class, "/fxml/message.fxml",
-//							"signature.flow.bad.token", api.getAppConfig().getApplicationName()).perform();
-//					}
+				  // token error
 					return handleErrorOperationResult(getTokenConnectionOperationResult);
 				}
 			} else {
@@ -96,9 +89,8 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 			}
 		} catch (Exception e) {
 			logger.error("Flow error", e);
-			throw handleException(e);
-		} finally {
 			closeToken(token);
+			throw handleException(e);
 		}
 	}
 }

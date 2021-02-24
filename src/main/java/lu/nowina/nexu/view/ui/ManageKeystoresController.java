@@ -13,6 +13,7 @@
  */
 package lu.nowina.nexu.view.ui;
 
+import eu.europa.esig.dss.DSSASN1Utils;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -26,16 +27,18 @@ import javafx.scene.control.Label;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
-import lu.nowina.nexu.generic.ProductsMap;
+import lu.nowina.nexu.generic.RegisteredProducts;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -61,7 +64,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	private TableColumn<AbstractProduct, String> keystoreNameTableColumn;
 
 	@FXML
-	private TableColumn<AbstractProduct, String> keystoreKeyAliasTableColumn;
+  private TableColumn<AbstractProduct, String> keystoreCertificateNameTableColumn;
 
 	@FXML
 	private TableColumn<AbstractProduct, String> keystoreTypeTableColumn;
@@ -72,6 +75,8 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	private final ObservableList<AbstractProduct> observableKeystores;
 
 	private NexuAPI api;
+
+	private List<AbstractProduct> filtered;
 
 	public ManageKeystoresController() {
 		super();
@@ -85,10 +90,19 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoreNameTableColumn.setCellValueFactory((param) ->
 			new ReadOnlyStringWrapper(param.getValue().getLabel())
 		);
-		keystoreKeyAliasTableColumn.setCellValueFactory((param) -> {
-			final String keyAlias = param.getValue().getKeyAlias();
-			return new ReadOnlyStringWrapper(keyAlias);
-		});
+    keystoreCertificateNameTableColumn.setCellValueFactory((param) -> {
+      String cn = "";
+      try {
+        String certBase64 = param.getValue().getCertificate();
+        byte[] cert = Base64.decodeBase64(certBase64);
+        CertificateFactory factory = CertificateFactory.getInstance("X509");
+        X509Certificate x509Certificate = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(cert));
+        cn = DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, x509Certificate.getSubjectX500Principal());
+      } catch (CertificateException e) {
+        logger.error(e.getMessage(), e);
+      }
+      return new ReadOnlyStringWrapper(cn);
+    });
 		keystoreTypeTableColumn.setCellValueFactory((param) -> {
 			final String type = param.getValue().getType().getLabel();
 			return new ReadOnlyStringWrapper(type);
@@ -132,8 +146,17 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	@Override
 	public void init(Object... params) {
 		api = (NexuAPI) params[0];
+		if(params.length > 1) {
+      filtered = (List<AbstractProduct>) params[1];
+    }
 		Platform.runLater(() -> {
-			observableKeystores.setAll(ProductsMap.getMap().getAllProducts());
+		  if(filtered != null && !filtered.isEmpty()) {
+		    // show only this subset
+        observableKeystores.setAll(filtered);
+      } else {
+		    // show all
+        observableKeystores.setAll(RegisteredProducts.getMap().getAllProducts());
+      }
 		});
 	}
 

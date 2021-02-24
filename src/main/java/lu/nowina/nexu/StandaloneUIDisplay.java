@@ -26,7 +26,6 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
-import lu.nowina.nexu.generic.PasswordManager;
 import lu.nowina.nexu.view.core.ExtensionFilter;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -136,33 +135,28 @@ public class StandaloneUIDisplay implements UIDisplay {
 		}
 
 		@Override
+    @SuppressWarnings("unchecked")
 		public char[] getPassword() {
 			LOGGER.info("Request password");
-			char[] password = PasswordManager.getInstance().getPasswordForProduct(product);
-			if (password == null) {
-				@SuppressWarnings("unchecked")
-				final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
-						UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
-						NexuLauncher.getConfig().getApplicationName(), product).perform();
-				if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-					password = (char[]) passwordResult.getResult(); // get password
-				} else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-					throw new CancelledOperationException();
-				} else if(passwordResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
-					final Exception e = passwordResult.getException();
-					if(e instanceof RuntimeException) {
-						// Throw exception as is
-						throw (RuntimeException) e;
-					} else {
-						// Wrap in a runtime exception
-						throw new NexuException(e);
-					}
-				} else {
-					throw new IllegalArgumentException("Not managed operation status: " + passwordResult.getStatus().getCode());
-				}
-			}
-			PasswordManager.getInstance().setProductPassword(product, password); // set password to manager
-			return password;
+      final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
+              UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
+              NexuLauncher.getConfig().getApplicationName(), product).perform();
+      if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+        return (char[]) passwordResult.getResult(); // get password
+      } else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+        throw new CancelledOperationException();
+      } else if(passwordResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
+        final Exception e = passwordResult.getException();
+        if(e instanceof RuntimeException) {
+          // Throw exception as is
+          throw (RuntimeException) e;
+        } else {
+          // Wrap in a runtime exception
+          throw new NexuException(e);
+        }
+      } else {
+        throw new IllegalArgumentException("Not managed operation status: " + passwordResult.getStatus().getCode());
+      }
 		}
 
 		@Override

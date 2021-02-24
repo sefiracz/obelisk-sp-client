@@ -14,7 +14,7 @@
 package lu.nowina.nexu.api;
 
 import iaik.pkcs.pkcs11.TokenException;
-import lu.nowina.nexu.generic.PasswordManager;
+import lu.nowina.nexu.generic.TokenManager;
 import lu.nowina.nexu.pkcs11.PKCS11Module;
 import lu.nowina.nexu.pkcs11.TokenHandler;
 
@@ -301,18 +301,21 @@ public class DetectedCard extends AbstractProduct {
 
 	public void openToken() {
 		if (initialized) {
-			tokenHandler.openSession();
-			opened = true;
+		  // open session
+		  if (tokenHandler.openSession() > -1) {
+        opened = true;
+      }
 		}
 	}
 
 	public void closeToken() {
+    TokenManager.getManager().destroy(this);
 		if (initialized && opened) {
+		  // close session
 			tokenHandler.closeSession();
-			opened = false;
-			initialized = false;
 		}
-		PasswordManager.getInstance().destroy(this);
+    opened = false;
+    initialized = false;
 	}
 
 	public boolean match(Object o) {

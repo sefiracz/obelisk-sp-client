@@ -13,17 +13,10 @@
  */
 package lu.nowina.nexu;
 
-import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import lu.nowina.nexu.NexUPreLoader.PreloaderMessage;
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.NexuAPI;
@@ -33,8 +26,8 @@ import lu.nowina.nexu.flow.BasicFlowRegistry;
 import lu.nowina.nexu.flow.Flow;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.BasicOperationFactory;
-import lu.nowina.nexu.generic.PasswordManager;
 import lu.nowina.nexu.generic.SCDatabase;
+import lu.nowina.nexu.generic.TokenManager;
 import lu.nowina.nexu.generic.SmartcardInfoDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
@@ -169,7 +162,7 @@ public class NexUApp extends Application {
 		logger.info("Stopping application...");
 		try {
 			// TODO - finalize all PKCS11 ???
-			PasswordManager.getInstance().destroy();
+      TokenManager.getManager().destroy();
 			if(server != null) {
 				server.stop();
 				server = null;

@@ -55,8 +55,9 @@ public class TokenHandler {
 
   /**
    * Open new session
+   * @return Returns session handle or -1 if session has not been opened
    */
-  public void openSession() {
+  public long openSession() {
     if(sessionHandle < 0) {
       try {
         this.sessionHandle = pkcs11Module.openSession(tokenHandle);
@@ -64,6 +65,7 @@ public class TokenHandler {
         log.error("Unable to open session: "+e.getMessage(), e);
       }
     }
+    return sessionHandle;
   }
 
   /**

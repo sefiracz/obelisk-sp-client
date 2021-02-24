@@ -15,13 +15,22 @@ package lu.nowina.nexu.api;
 
 public class Match {
 
-	private ProductAdapter adapter;
-	private Product product;
+	private final ProductAdapter adapter;
+	private final Product product;
+  private ScAPI scAPI;
+  private String apiParameters;
 
 	public Match(ProductAdapter adapter, Product product) {
 		this.adapter = adapter;
 		this.product = product;
 	}
+
+  public Match(ProductAdapter adapter, Product product, ScAPI scAPI, String apiParameters) {
+    this.adapter = adapter;
+    this.product = product;
+    this.scAPI = scAPI;
+    this.apiParameters = apiParameters;
+  }
 
 	public ProductAdapter getAdapter() {
 		return adapter;
@@ -31,4 +40,11 @@ public class Match {
 		return product;
 	}
 
+  public ScAPI getScAPI() {
+    return scAPI;
+  }
+
+  public String getApiParameters() {
+    return apiParameters;
+  }
 }

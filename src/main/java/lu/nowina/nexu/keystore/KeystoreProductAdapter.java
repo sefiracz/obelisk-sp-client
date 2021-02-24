@@ -19,7 +19,10 @@ import lu.nowina.nexu.NexuException;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
+import lu.nowina.nexu.flow.exceptions.KeystoreNotFoundException;
+import lu.nowina.nexu.flow.exceptions.UnsupportedKeystoreTypeException;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
+import lu.nowina.nexu.generic.TokenManager;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.io.FileNotFoundException;
@@ -192,34 +195,32 @@ public class KeystoreProductAdapter implements ProductAdapter {
 		}
 
 		private void initSignatureTokenConnection() {
-			if(proxied != null) {
-				return;
-			}
-			try {
-				switch(configuredKeystore.getType()) {
-				case PKCS12:
-					proxied = new Pkcs12SignatureToken(new URL(configuredKeystore.getUrl()).openStream(),
-							new PasswordProtection(callback.getPassword()));
-					break;
-				case JKS:
-					proxied = new JKSSignatureToken(new URL(configuredKeystore.getUrl()).openStream(),
-							new PasswordProtection(callback.getPassword()));
-					break;
-				case JCEKS:
-					proxied = new KeyStoreSignatureTokenConnection(new URL(configuredKeystore.getUrl()).openStream(),
-							"JCEKS", new PasswordProtection(callback.getPassword()));
-				  break;
-				default:
-					throw new UnsupportedKeystoreTypeException("Unsupported keystore type: " + configuredKeystore.getUrl(),
-							configuredKeystore.getUrl());
-				}
-			}
-			catch (FileNotFoundException e) {
-				throw new KeystoreNotFoundException(configuredKeystore.getUrl());
-			}
-			catch (IOException e) {
-				throw new NexuException(e);
-			}
+      proxied = TokenManager.getManager().getInitializedTokenForProduct(configuredKeystore);
+      if(proxied == null) {
+        try {
+          switch (configuredKeystore.getType()) {
+            case PKCS12:
+              proxied = new Pkcs12SignatureToken(new URL(configuredKeystore.getUrl()).openStream(),
+                      new PasswordProtection(callback.getPassword()));
+              break;
+            case JKS:
+              proxied = new JKSSignatureToken(new URL(configuredKeystore.getUrl()).openStream(),
+                      new PasswordProtection(callback.getPassword()));
+              break;
+            case JCEKS:
+              proxied = new KeyStoreSignatureTokenConnection(new URL(configuredKeystore.getUrl()).openStream(),
+                      "JCEKS", new PasswordProtection(callback.getPassword()));
+              break;
+            default:
+              throw new UnsupportedKeystoreTypeException("Unsupported keystore type", configuredKeystore.getUrl());
+          }
+        } catch (FileNotFoundException e) {
+          throw new KeystoreNotFoundException("Keystore file not found", configuredKeystore.getUrl());
+        } catch (IOException e) {
+          throw new NexuException(e);
+        }
+      }
+      TokenManager.getManager().setToken(configuredKeystore, proxied);
 		}
 
 		@Override

@@ -18,13 +18,14 @@ import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
 import lu.nowina.nexu.CancelledOperationException;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
+import lu.nowina.nexu.flow.exceptions.PKCS11ModuleException;
+import lu.nowina.nexu.flow.exceptions.PKCS11TokenException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.smartcardio.CardException;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -34,9 +35,9 @@ import java.util.List;
 /**
  * PKCS11 Token Adapter (using IAIK PKCS11 Wrapper)
  */
-public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureTokenAdapter {
+public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureTokenAdapter {
 
-  private static final Logger logger = LoggerFactory.getLogger(IaikPkcs11SignatureTokenAdapter.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(IAIKPkcs11SignatureTokenAdapter.class.getName());
 
   private final String pkcs11Path;
   private final PasswordInputCallback callback;
@@ -44,29 +45,30 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
 
   private boolean loggedIn = false;
 
-  public IaikPkcs11SignatureTokenAdapter(final NexuAPI api, final File pkcs11Lib, final PasswordInputCallback callback,
-                                         final DetectedCard card) {
+  public IAIKPkcs11SignatureTokenAdapter(final NexuAPI api, final File pkcs11Lib, final PasswordInputCallback callback,
+                                         final DetectedCard detectedCard) {
     super(pkcs11Lib.getAbsolutePath());
     this.pkcs11Path = pkcs11Lib.getAbsolutePath();
     logger.info("Module library: " + pkcs11Path);
     this.callback = callback;
-    // get present card
     try {
-      DetectedCard detectedCard = api.getPresentCard(card);
       // check state
       if(!detectedCard.isInitialized()) {
         detectedCard.initializeToken(api, pkcs11Path);
       }
       // check session
-      if(!detectedCard.isOpened())
+      if(!detectedCard.isOpened()) {
         detectedCard.openToken();
+      }
       this.token = detectedCard.getTokenHandler();
-    } catch (IOException | TokenException | CardException e) {
-      throw new PKCS11RuntimeException("Token not present or unable to connect"); // TODO lepsi exceptions / rozlisit odpojeni a spatny DLL
+    } catch (TokenException e) {
+      throw new PKCS11TokenException("Token not present or unable to connect", e);
+    } catch (IOException e) {
+      throw new PKCS11ModuleException("Unable to initialize module", e);
     }
   }
 
-  public void open() throws PKCS11Exception {
+  public void login() throws PKCS11Exception {
     if(!loggedIn) {
       token.login(callback);
       loggedIn = true;
@@ -89,7 +91,7 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
   @Override
   public List<DSSPrivateKeyEntry> getKeys() throws DSSException {
     try {
-      open();
+      login();
       List<DSSPrivateKeyEntry> keys = new ArrayList<>();
       List<String> labels = token.getPrivateKeyLabels();
       for (String label : labels) {
@@ -99,8 +101,6 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     }
     catch (Exception e) {
       throw processTokenExceptions(e);
-    } finally {
-      close();
     }
   }
 
@@ -114,7 +114,7 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
   public SignatureValue sign(ToBeSigned toBeSigned, DigestAlgorithm digestAlgorithm, MaskGenerationFunction mgf,
                              DSSPrivateKeyEntry keyEntry) throws DSSException {
     try {
-      open();
+      login();
       final EncryptionAlgorithm encryptionAlgorithm = keyEntry.getEncryptionAlgorithm();
       final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
           .getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
@@ -135,8 +135,6 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     }
     catch (Exception e) {
       throw processTokenExceptions(e);
-    } finally {
-      close();
     }
   }
 
@@ -148,7 +146,7 @@ public class IaikPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     if ("CKR_TOKEN_NOT_PRESENT".equals(e.getMessage()) || "CKR_SESSION_HANDLE_INVALID".equals(e.getMessage()) ||
             "CKR_DEVICE_REMOVED".equals(e.getMessage()) || "CKR_SESSION_CLOSED".equals(e.getMessage()) ||
             "CKR_SLOT_ID_INVALID".equals(e.getMessage())) {
-      return new PKCS11RuntimeException(e);
+      return new PKCS11TokenException(e);
     }
     return new DSSException(e);
   }

@@ -314,7 +314,8 @@ public class HttpsPlugin implements NexuPlugin {
 					"firefox_add-certs-mac-1.1" + File.separator + "bin"));
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
-			if(!p.waitFor(180, TimeUnit.SECONDS)) {
+      // TODO - password protected firefox !!!
+			if(!p.waitFor(4, TimeUnit.SECONDS)) {
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Firefox");
 			}
 			if(p.exitValue() != 0) {
@@ -399,7 +400,8 @@ public class HttpsPlugin implements NexuPlugin {
 					caCert.getAbsolutePath());
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
-			if(!p.waitFor(180, TimeUnit.SECONDS)) {
+      // TODO ???
+			if(!p.waitFor(4, TimeUnit.SECONDS)) {
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Mac user keychain");
 			}
 			if(p.exitValue() != 0) {
@@ -444,7 +446,8 @@ public class HttpsPlugin implements NexuPlugin {
 					caCert.getName().substring(0, caCert.getName().lastIndexOf('.')), caCert.getAbsolutePath());
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
-			if(!p.waitFor(180, TimeUnit.SECONDS)) {
+      // TODO - password protected firefox !!! - TODO chrome?
+			if(!p.waitFor(4, TimeUnit.SECONDS)) {
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Linux FF and Chrome/Chromium stores.");
 			}
 			if(p.exitValue() != 0) {

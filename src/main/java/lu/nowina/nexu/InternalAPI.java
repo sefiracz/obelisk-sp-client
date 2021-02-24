@@ -133,7 +133,7 @@ public class InternalAPI implements NexuAPI {
 			SCInfo info = smartcardDatabase.getInfo(d);
 			if (info == null) {
 				logger.warn("Card " + d.getAtr() + " is not in the personal database");
-				matches.addAll(checkKnownTokens(d));
+				matches.addAll(checkKnownPKCS11Tokens(d));
 			} else {
 				matches.add(new Match(new GenericCardAdapter(info, this), d));
 			}
@@ -141,10 +141,9 @@ public class InternalAPI implements NexuAPI {
 		return matches;
 	}
 
-	private List<Match> checkKnownTokens(DetectedCard d) {
+	private List<Match> checkKnownPKCS11Tokens(DetectedCard d) {
 		logger.info("Check if "+d.getAtr()+" has known and present PKCS11 library.");
 		List<Match> matches = new ArrayList<>();
-		// TODO - lepsi zpusob nez rucne sestavovat SCInfo ?
 		String pkcs11 = pkcs11Manager.getAvailablePkcs11Library(d.getAtr());
 		if(pkcs11 != null) {
 			SCInfo info = new SCInfo(d);
@@ -155,7 +154,7 @@ public class InternalAPI implements NexuAPI {
 			cInfo.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
 			info.setInfos(Collections.singletonList(cInfo));
 			// return smartcard adapter
-			matches.add(new Match(new GenericCardAdapter(info, this), d));
+			matches.add(new Match(new GenericCardAdapter(info, this), d, ScAPI.PKCS_11, pkcs11));
 		}
 		return matches;
 	}

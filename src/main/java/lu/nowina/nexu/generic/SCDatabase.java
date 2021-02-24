@@ -13,7 +13,6 @@
  */
 package lu.nowina.nexu.generic;
 
-import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.DatabaseEventHandler;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.api.AbstractProduct;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.annotation.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,14 +63,14 @@ public class SCDatabase implements ProductDatabase {
 			getSmartcards().add(info);
 			info.getInfos().add(cInfo);
 		}
-		ProductsMap.getMap().put(detectedCard.getCertificateId(), info);
+		RegisteredProducts.getMap().put(detectedCard.getCertificateId(), info);
     api.getPKCS11Manager().registerCard(info);
 		onAddRemove();
 	}
 
 	public final void remove(NexuAPI api, final AbstractProduct keystore) {
 		getSmartcards().remove(keystore);
-		ProductsMap.getMap().remove(keystore.getCertificateId(), keystore);
+		RegisteredProducts.getMap().remove(keystore.getCertificateId(), keystore);
     onAddRemove();
 		api.getPKCS11Manager().unregisterCard((SCInfo) keystore);
 	}
@@ -137,7 +135,7 @@ public class SCDatabase implements ProductDatabase {
 	 */
 	public void initialize() {
 		for (SCInfo keystore : getSmartcards()) {
-			ProductsMap.getMap().put(keystore.getCertificateId(), keystore);
+			RegisteredProducts.getMap().put(keystore.getCertificateId(), keystore);
 		}
 	}
 

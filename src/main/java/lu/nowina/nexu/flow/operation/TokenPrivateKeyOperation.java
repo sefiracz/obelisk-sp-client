@@ -15,9 +15,7 @@ import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationResult;
-import lu.nowina.nexu.keystore.KeystoreNotFoundException;
-import lu.nowina.nexu.keystore.UnsupportedKeystoreTypeException;
-import lu.nowina.nexu.pkcs11.PKCS11RuntimeException;
+import lu.nowina.nexu.flow.exceptions.*;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.util.List;
@@ -57,20 +55,9 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
       else {
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       }
-    } catch (KeystoreNotFoundException e) {
+    } catch (AbstractTokenRuntimeException e) {
       this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-          "key.selection.keystore.not.found", api.getAppConfig().getApplicationName(), 370, 150, e.getMessage()
-      }).perform();
-      return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-    } catch(PKCS11RuntimeException e) {
-      this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-          "key.selection.pkcs11.not.found", api.getAppConfig().getApplicationName(), 370, 150
-      }).perform();
-      return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-    } catch (UnsupportedKeystoreTypeException e) {
-      this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-          "key.selection.keystore.unsupported.type", api.getAppConfig().getApplicationName(), 370, 150,
-          e.getFilePath()
+              e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
       }).perform();
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {
