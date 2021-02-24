@@ -24,7 +24,7 @@ public class TokenManager {
   }
 
   public SignatureTokenConnection getInitializedTokenForProduct(AbstractProduct product) {
-    if(this.sessionId != null && (!this.sessionId.equals(product.getSessionId()) || !product.equals(this.product))) {
+    if(this.sessionId != null && !this.sessionId.equals(product.getSessionId()) || !product.equals(this.product)) {
       destroy(); // close previous product
       return null; // different browser session or product
     }
