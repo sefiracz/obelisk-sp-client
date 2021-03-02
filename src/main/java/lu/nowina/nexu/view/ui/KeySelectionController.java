@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -20,15 +21,12 @@ import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.x509.CertificateToken;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -42,9 +40,6 @@ import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -102,10 +97,14 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
                         lSubject.setText(DSSASN1Utils.getSubjectCommonName(certificateToken));
                         lSubject.setStyle("-fx-font-weight: bold;");
 
-                        final Label lEmitter = new Label();
-                        lEmitter.setText(MessageFormat.format(resources.getString("key.selection.issuer.usage"),
-                                DSSASN1Utils.get(certificateToken.getIssuerX500Principal()).get("2.5.4.3"),
+                        final Label lIssuer = new Label();
+                        lIssuer.setText(MessageFormat.format(resources.getString("key.selection.issuer"),
+                                DSSASN1Utils.get(certificateToken.getIssuerX500Principal()).get("2.5.4.3")));
+
+                        final Label lUsage = new Label();
+                        lUsage.setText(MessageFormat.format(resources.getString("key.selection.keyusage"),
                                 KeySelectionController.this.createKeyUsageString(certificateToken, resources)));
+
                         final Label lValidity = new Label();
                         final SimpleDateFormat format = new SimpleDateFormat("dd MMMMMM yyyy");
                         final String startDate = format.format(certificateToken.getNotBefore());
@@ -117,7 +116,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         link.setOnAction(actionEvent -> Utils.openCertificate(DSSUtils.convertToPEM(certificateToken)));
 
-                        final VBox vBox = new VBox(lSubject, lEmitter, lValidity, link);
+                        final VBox vBox = new VBox(lSubject, lIssuer, lUsage, lValidity, link);
 
                         VBox vBoxLeft;
                         try {
@@ -198,33 +197,42 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
             return "";
         }
         final StringBuilder builder = new StringBuilder();
+        final List<String> keyUsageList = new ArrayList<>();
         if (keyUsages[0]) {
-            builder.append(resources.getString("keyUsage.digitalSignature")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.digitalSignature"));
         }
         if (keyUsages[1]) {
-            builder.append(resources.getString("keyUsage.nonRepudiation")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.nonRepudiation"));
         }
         if (keyUsages[2]) {
-            builder.append(resources.getString("keyUsage.keyEncipherment")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.keyEncipherment"));
         }
         if (keyUsages[3]) {
-            builder.append(resources.getString("keyUsage.dataEncipherment")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.dataEncipherment"));
         }
         if (keyUsages[4]) {
-            builder.append(resources.getString("keyUsage.keyAgreement")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.keyAgreement"));
         }
         if (keyUsages[5]) {
-            builder.append(resources.getString("keyUsage.keyCertSign")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.keyCertSign"));
         }
         if (keyUsages[6]) {
-            builder.append(resources.getString("keyUsage.crlSign")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.crlSign"));
         }
         if (keyUsages[7]) {
-            builder.append(resources.getString("keyUsage.encipherOnly")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.encipherOnly"));
         }
         if (keyUsages[8]) {
-            builder.append(resources.getString("keyUsage.decipherOnly")).append("\n");
+          keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
         }
+        // comma separated list
+        for(int i=0; i<keyUsageList.size(); i++) {
+          builder.append(keyUsageList.get(i));
+          if(i + 1 < keyUsageList.size()) {
+            builder.append(", ");
+          }
+        }
+
         return builder.toString();
     }
 

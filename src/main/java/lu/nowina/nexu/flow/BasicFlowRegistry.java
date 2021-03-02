@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -32,6 +33,8 @@ public class BasicFlowRegistry implements FlowRegistry {
 			return new GetCertificateFlow(display, api);
 		case SIGNATURE_FLOW:
 			return new SignatureFlow(display, api);
+    case SMARTCARD_LIST_FLOW:
+        return new SmartcardsInfoFlow(display, api);
 		default:
 			logger.warn("Unknown flow code " + code);
 			throw new NullPointerException("Flow not recognized/not implemented in this version.");

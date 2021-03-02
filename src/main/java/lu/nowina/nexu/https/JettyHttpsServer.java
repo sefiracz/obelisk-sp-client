@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -45,15 +46,15 @@ public class JettyHttpsServer extends AbstractJettyServer {
 		https.addCustomizer(new SecureRequestCustomizer());
 
 		// Configuring SSL
-		final SslContextFactory sslContextFactory = new SslContextFactory();
-		// Generate keystore
-		sslContextFactory.setKeyStore(openKeyStore(getApi().getAppConfig().getNexuHome(),
-				getApi().getAppConfig().getApplicationName()));
-		sslContextFactory.setKeyStorePassword("password");
-		sslContextFactory.setKeyManagerPassword("password");
+    SslContextFactory.Server server = new SslContextFactory.Server.Server();
+    // Generate keystore
+    server.setKeyStore(openKeyStore(getApi().getAppConfig().getNexuHome(),
+            getApi().getAppConfig().getApplicationName()));
+    server.setKeyStorePassword("password");
+    server.setKeyManagerPassword("password");
 		// Configuring the connector
 		final JettyListAwareServerConnector sslConnector = new JettyListAwareServerConnector(getServer(),
-				new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+				new SslConnectionFactory(server, "http/1.1"), new HttpConnectionFactory(https));
 		sslConnector.setPorts((getApi().getAppConfig()).getBindingPortsHttps());
 		sslConnector.setHost(InetAddress.getLoopbackAddress().getCanonicalHostName());
 

@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -14,8 +15,6 @@
 package lu.nowina.nexu.jetty;
 
 import freemarker.template.Configuration;
-import freemarker.template.Template;
-import lu.nowina.nexu.ConfigurationException;
 import lu.nowina.nexu.TechnicalException;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.Execution;
@@ -39,9 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RequestProcessor extends AbstractHandler {
 
@@ -49,29 +45,18 @@ public class RequestProcessor extends AbstractHandler {
 
 	private static final String UTF8 = "UTF-8";
 
-	private static final String TEXT_JAVASCRIPT = "text/javascript";
 	private static final String TEXT_PLAIN = "text/plain";
 	private static final String APPLICATION_JSON = "application/json";
 	private static final String IMAGE_PNG = "image/png";
-
-	private static final String NEXUJS_TEMPLATE = "nexu.ftl.js";
 
 	private NexuAPI api;
 
 	private String nexuHostname;
 
-	private Template template;
-
 	public RequestProcessor() {
-		try {
-			Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-			cfg.setClassForTemplateLoading(getClass(), "/");
-			this.template = cfg.getTemplate(NEXUJS_TEMPLATE, UTF8);
-		} catch (IOException e) {
-			logger.error("Cannot find template for nexu", e);
-			throw new ConfigurationException("Cannot find template for nexu");
-		}
-	}
+    Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+    cfg.setClassForTemplateLoading(getClass(), "/");
+  }
 
 	public void setConfig(NexuAPI api) {
 		this.api = api;
@@ -131,13 +116,9 @@ public class RequestProcessor extends AbstractHandler {
 
 		try {
 			if ("/favicon.ico".equals(target)) {
-				favIcon(response);
-			/* TODO remove
-			} else if ("/nexu.js".equals(target)) {
-				nexuJs(request, response);
-				*/
-			} else if ("/".equals(target) || "/clientInfo".equals(target)) {
-				clientInfo(response);
+        favIcon(response);
+      } else if ("/".equals(target) || "/clientInfo".equals(target)) {
+        clientInfo(response);
 			} else {
 				httpPlugin(target, request, response);
 			}
@@ -163,7 +144,7 @@ public class RequestProcessor extends AbstractHandler {
 		}
 	}
 
-	/**
+  /**
 	 * This method checks the validity of the given request.
 	 * <p>This implementation returns <code>null</code> by contract.
 	 * @param request The request to check.
@@ -221,24 +202,4 @@ public class RequestProcessor extends AbstractHandler {
 		out.close();
 	}
 
-	private void nexuJs(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		final StringWriter writer = new StringWriter();
-		final Map<String, String> model = new HashMap<>();
-		model.put("scheme", request.getScheme());
-		model.put("nexu_hostname", nexuHostname);
-		model.put("nexu_port", Integer.toString(request.getLocalPort()));
-
-		try {
-			template.process(model, writer);
-		} catch (Exception e) {
-			logger.error("Cannot process template", e);
-			throw new TechnicalException("Cannot process template", e);
-		}
-
-		response.setCharacterEncoding(UTF8);
-		response.setContentType(TEXT_JAVASCRIPT);
-		PrintWriter out = response.getWriter();
-		out.println(writer.toString());
-		out.close();
-	}
 }

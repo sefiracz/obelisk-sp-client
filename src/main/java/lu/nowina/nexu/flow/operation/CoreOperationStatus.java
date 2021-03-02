@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -22,6 +23,7 @@ import lu.nowina.nexu.api.flow.OperationStatus;
  */
 public enum CoreOperationStatus implements OperationStatus {
 
+  INVALID_SESSION("invalid.session","Session is invalid."),
 	UNSUPPORTED_PRODUCT("unsupported.product", "The provided product is not supported by this version."),
 	NO_TOKEN("no.token", "The product adapter did not return any token."),
 	NO_TOKEN_ID("no.token.id", "No token ID was returned after having registered the token."),

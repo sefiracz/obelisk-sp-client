@@ -24,30 +24,26 @@
 <StackPane prefHeight="300.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="lu.nowina.nexu.view.ui.ProductSelectionController">
 
-	<BorderPane>
+	<BorderPane fx:id="borderPane">
 
-			<top>
-			<VBox BorderPane.alignment="CENTER">
-				<children>
-					<Label styleClass="message" fx:id="message" wrapText="true" />
-				</children>
-			</VBox>
-			</top>
+    <top>
+      <VBox BorderPane.alignment="CENTER" styleClass="top">
+        <Label styleClass="message" fx:id="message" wrapText="true"/>
+      </VBox>
+    </top>
 
 		<center>
-			<ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
-				<VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
-			</ScrollPane>
+      <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="center">
+        <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
+      </ScrollPane>
 		</center>
 
 		<bottom>
-			<HBox styleClass="btn-container" fx:id="bottom" BorderPane.alignment="CENTER">
-				<children>
-					<Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
-					<Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-green" text="%button.refresh" />
-					<Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next" />
-				</children>
-			</HBox>
+      <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+        <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
+        <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
+        <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
+      </HBox>
 		</bottom>
 
 	</BorderPane>

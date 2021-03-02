@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -19,7 +20,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
-import lu.nowina.nexu.cache.FIFOCache;
+import lu.nowina.nexu.cache.TokenCache;
 import lu.nowina.nexu.flow.Flow;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.CoreOperationStatus;
@@ -86,7 +87,7 @@ public class InternalAPI implements NexuAPI {
 		this.operationFactory = operationFactory;
 		this.appConfig = appConfig;
 		this.pkcs11Manager = new PKCS11Manager(this, scInfoDatabase);
-		this.connections = new FIFOCache<>(this.appConfig.getConnectionsCacheMaxSize());
+		this.connections = new TokenCache<>(this.appConfig.getConnectionsCacheMaxSize());
 		this.executor = Executors.newSingleThreadExecutor(r -> {
 			final Thread t = new Thread(EXECUTOR_THREAD_GROUP, r);
 			t.setDaemon(true);
@@ -132,10 +133,11 @@ public class InternalAPI implements NexuAPI {
 			smartcardDatabase = loadDatabase(SCDatabase.class, "database-smartcard.xml");
 			SCInfo info = smartcardDatabase.getInfo(d);
 			if (info == null) {
-				logger.warn("Card " + d.getAtr() + " is not in the personal database");
+				logger.info("Card " + d.getAtr() + " is not in the personal database");
 				matches.addAll(checkKnownPKCS11Tokens(d));
 			} else {
-				matches.add(new Match(new GenericCardAdapter(info, this), d));
+			  ConnectionInfo cInfo = info.getInfos().get(0);
+				matches.add(new Match(new GenericCardAdapter(info, this), d, cInfo.getSelectedApi(), cInfo.getApiParam()));
 			}
 		}
 		return matches;
@@ -152,7 +154,7 @@ public class InternalAPI implements NexuAPI {
 			cInfo.setApiParam(pkcs11);
 			cInfo.setSelectedApi(ScAPI.PKCS_11);
 			cInfo.setEnv(EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
-			info.setInfos(Collections.singletonList(cInfo));
+			info.getInfos().add(cInfo);
 			// return smartcard adapter
 			matches.add(new Match(new GenericCardAdapter(info, this), d, ScAPI.PKCS_11, pkcs11));
 		}
@@ -251,7 +253,15 @@ public class InternalAPI implements NexuAPI {
 		return executeRequest(flow, request);
 	}
 
-	@Override
+  @Override
+  public Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request) {
+    Flow<SmartcardListRequest, SmartcardListResponse> flow =
+            flowRegistry.getFlow(FlowRegistry.SMARTCARD_LIST_FLOW, display, this);
+    flow.setOperationFactory(operationFactory);
+    return executeRequest(flow, request);
+	}
+
+  @Override
 	public Execution<GetIdentityInfoResponse> getIdentityInfo(GetIdentityInfoRequest request) {
 		final Flow<GetIdentityInfoRequest, GetIdentityInfoResponse> flow =
 				flowRegistry.getFlow(FlowRegistry.GET_IDENTITY_INFO_FLOW, display, this);
@@ -273,8 +283,8 @@ public class InternalAPI implements NexuAPI {
 	}
 
 	@Override
-	public void registerSmartcardInfos(List<SmartcardInfo> infos, byte[] digest) {
-		pkcs11Manager.registerSmartcardInfos(infos, digest);
+	public void supportedSmartcardInfos(List<SmartcardInfo> infos, byte[] digest) {
+		pkcs11Manager.supportedSmartcardInfos(infos, digest);
 	}
 
 	@Override
@@ -282,27 +292,12 @@ public class InternalAPI implements NexuAPI {
 		return pkcs11Manager;
 	}
 
-	public <T extends EntityDatabase> T loadDatabase(Class<T> c, String filename) {
-    return EntityDatabaseLoader.load(c, new File(getAppConfig().getNexuHome(), filename));
+	public <T extends EntityDatabase> T loadDatabase(Class<T> entityClass, String filename) {
+    return EntityDatabaseLoader.load(entityClass, new File(getAppConfig().getNexuHome(), filename));
   }
 
 	public void registerHttpContext(String context, HttpPlugin plugin) {
 		httpPlugins.put(context, plugin);
-	}
-
-	// TODO - store cards and info
-	@Deprecated
-	public void store(DetectedCard detectedCard, ScAPI selectedApi, String apiParam) {
-		if (smartcardDatabase != null) {
-
-			EnvironmentInfo env = getEnvironmentInfo();
-			ConnectionInfo cInfo = new ConnectionInfo();
-			cInfo.setSelectedApi(selectedApi);
-			cInfo.setEnv(env);
-			cInfo.setApiParam(apiParam);
-
-			smartcardDatabase.add(this, detectedCard, cInfo);
-		}
 	}
 
 	@Override
@@ -369,9 +364,9 @@ public class InternalAPI implements NexuAPI {
 		} else {
 			final ProductAdapter adapter = matches.iterator().next().getAdapter();
 			if(adapter.supportMessageDisplayCallback(p)) {
-				label = adapter.getLabel(this, p, display.getPasswordInputCallback(), display.getMessageDisplayCallback());
+				label = adapter.getLabel(this, p, display.getPasswordInputCallback(p), display.getMessageDisplayCallback());
 			} else {
-				label = adapter.getLabel(this, p, display.getPasswordInputCallback());
+				label = adapter.getLabel(this, p, display.getPasswordInputCallback(p));
 			}
 		}
 		if(p instanceof DetectedCard) {

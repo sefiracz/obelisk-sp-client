@@ -23,13 +23,10 @@ public abstract class AbstractProduct implements Product {
   protected String certificate;
   protected KeystoreType type;
   protected String keyAlias;
-  @XmlTransient
-  protected boolean toBeSaved;
-  @XmlTransient
+  @XmlTransient   // TODO remove session id from product
   protected String sessionId;
 
   public AbstractProduct() {
-    this.toBeSaved = false;
   }
 
   /**
@@ -104,26 +101,7 @@ public abstract class AbstractProduct implements Product {
     this.keyAlias = keyAlias;
   }
 
-  /**
-   * Returns <code>true</code> if the <code>Product</code> must be saved and
-   * <code>false</code> otherwise.
-   *
-   * @return <code>true</code> if the <code>Product</code> must be saved and
-   * <code>false</code> otherwise.
-   */
-  public boolean isToBeSaved() {
-    return toBeSaved;
-  }
-
-  /**
-   * Sets the value of the <code>toBeSaved</code> property.
-   *
-   * @param toBeSaved The new value for the <code>toBeSaved</code> property.
-   */
-  public void setToBeSaved(boolean toBeSaved) {
-    this.toBeSaved = toBeSaved;
-  }
-
+  // TODO remove session id from product
   /**
    * Returns session identification
    *

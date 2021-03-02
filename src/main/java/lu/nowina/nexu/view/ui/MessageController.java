@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -18,7 +19,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
@@ -30,6 +34,9 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
 	@FXML
 	private BorderPane messagePane;
+
+	@FXML
+  private Region icon;
 
 	@FXML
 	private Label message;
@@ -46,31 +53,44 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 		if (ok != null) {
 			ok.setOnAction(e -> signalEnd(null));
 		}
-		defaultErrorText = resources.getString("error");
+		this.defaultErrorText = resources.getString("error");
 		this.resources = resources;
 	}
 
 	@Override
 	public void init(Object... params) {
-		if (params.length >= 2) {
-			final String value = (String) params[0];
-			StageHelper.getInstance().setTitle((String) params[1], "message.title");
-			if(params.length == 4) {
-				int width = (int) params[2];
-				int height = (int) params[3];
-				this.messagePane.setPrefSize(width, height);
-			}
-			Object[] textParams = new Object[0];
-			if(params.length > 4) {
-				textParams = Arrays.copyOfRange(params, 4, params.length);
-			}
-			if (value != null) {
-				message.setText(MessageFormat.format(resources.getString(value), textParams));
-			}
-		} else {
-			StageHelper.getInstance().setTitle("", "message.title");
-			message.setText(defaultErrorText);
-		}
+    NexuAPI api = (NexuAPI) params[0];
+    DialogMessage dialogMessage = (DialogMessage) params[1];
+    // set title
+    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), dialogMessage.getLevel().getTitleCode());
+
+    // set message
+    String messageText = MessageFormat.format(resources.getString(dialogMessage.getMessageProperty()),
+            dialogMessage.getMessageParameters());
+    if(!messageText.isEmpty())
+      message.setText(messageText);
+    else
+      message.setText(defaultErrorText);
+
+    // set size
+    this.messagePane.setPrefSize(dialogMessage.getWidth(), dialogMessage.getHeight());
+
+    // set dialog icon
+    switch (dialogMessage.getLevel()) {
+      case INFORMATION:
+        icon.getStyleClass().add("icon-information");
+        icon.setPrefSize(50, 50);
+        break;
+      case WARNING:
+        icon.getStyleClass().add("icon-warning");
+        icon.setPrefSize(54, 50);
+        break;
+      case ERROR:
+        icon.getStyleClass().add("icon-error");
+        icon.setPrefSize(50, 50);
+        break;
+    }
+
 	}
 
 }

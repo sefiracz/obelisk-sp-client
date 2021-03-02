@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -12,6 +13,9 @@
  * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
  */
 package lu.nowina.nexu.api.flow;
+
+import lu.nowina.nexu.api.NexuAPI;
+import lu.nowina.nexu.view.DialogMessage;
 
 /**
  * Allows to get instances of {@link Operation}.
@@ -29,5 +33,8 @@ public interface OperationFactory {
 	 * @return An instance of {@link Operation} initialized with <code>params</code>.
 	 */
 	<R, T extends Operation<R>> Operation<R> getOperation(Class<T> clazz, Object... params);
+
+
+  void getMessageDialog(NexuAPI api, DialogMessage message, boolean blockingUI);
 	
 }

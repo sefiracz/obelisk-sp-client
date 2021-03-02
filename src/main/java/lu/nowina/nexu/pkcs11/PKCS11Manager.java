@@ -1,3 +1,16 @@
+/**
+ * © SEFIRA spol. s r.o., 2020-2021
+ *
+ * Licensed under EUPL Version 1.1 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
+ *
+ * http://ec.europa.eu/idabc/eupl5
+ *
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
+ */
 package lu.nowina.nexu.pkcs11;
 
 import iaik.pkcs.pkcs11.TokenException;
@@ -48,11 +61,11 @@ public class PKCS11Manager {
   }
 
   /**
-   * Register smartcard informations
-   * @param infos Collection of smartcard informations
+   * Loads known supported smartcards information list
+   * @param infos Collection of known supported smartcard informations
    * @param infosDigest Digest of smartcard informations data
    */
-  public void registerSmartcardInfos(List<SmartcardInfo> infos, byte[] infosDigest) {
+  public void supportedSmartcardInfos(List<SmartcardInfo> infos, byte[] infosDigest) {
     // check digest and update only if new informations
     if(infos != null && infosDigest != null && !Arrays.equals(databaseDigest, infosDigest)) {
       this.databaseDigest = infosDigest;
@@ -182,7 +195,7 @@ public class PKCS11Manager {
     modules = new ConcurrentHashMap<>();
   }
 
-  private SmartcardInfo getAvailableSmartcardInfo(String atr) {
+  public SmartcardInfo getAvailableSmartcardInfo(String atr) {
     SmartcardInfo info = registered.get(atr);
     return info == null ? supported.get(atr) : info;
   }

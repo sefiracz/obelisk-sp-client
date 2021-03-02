@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -20,6 +21,7 @@ import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.AbstractTokenRuntimeException;
 import lu.nowina.nexu.generic.*;
 import lu.nowina.nexu.model.Pkcs11Params;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,25 +73,31 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
         if (!this.matchingProductAdapters.isEmpty()) {
           return this.createTokenAuto(); // automatic token configuration
         } else {
-          // TODO if pkcs11 library is known but NOT present - custom unsupported-product dialog with download link?
-          // TODO - nepodporovan vs podporovan ale drivery chybi
-          final OperationResult<Object> result =
-                  this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
-                          new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
+          // unavailable/unsupported configuration - want to continue?
+          OperationResult<Object> result;
+          if(product instanceof DetectedCard && ((DetectedCard) product).isKnownToken() != null) {
+            result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unavailable-config.fxml",
+                    new Object[]{this.api.getAppConfig().getApplicationName(),
+                            ((DetectedCard) product).isKnownToken()}).perform();
+          } else {
+            result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
+                            new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
+          }
+          // advanced config?
           if (result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
             return this.createTokenAdvanced(); // manual token configuration
+          } else if (result.getStatus().equals(CoreOperationStatus.BACK)) {
+            return new OperationResult<>(CoreOperationStatus.BACK); // go back
           } else {
-            // TODO - uzivatel zrusil konfigurace => nevi jak se pripojit
-            this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml",
-                    "unsuported.product.message", this.api.getAppConfig().getApplicationName()).perform();
-            // TODO - co tak misto toho vratit status BACK a poslat uzivatele zpet do vyberu?
-            return new OperationResult<Map<TokenOperationResultKey, Object>>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
+            // TODO remove ???
+            this.operationFactory.getMessageDialog(api, new DialogMessage("unsupported.product.message",
+                    DialogMessage.Level.ERROR, 400, 150), true);
+            return new OperationResult<>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
           }
         }
       } catch (AbstractTokenRuntimeException e) {
-        this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-                e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
-        }).perform();
+        this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
+                e.getMessageParams()), true);
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       } catch (Exception e) {
         throw e;
@@ -124,13 +132,16 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     map.put(TokenOperationResultKey.ADVANCED_CREATION, true);
     map.put(TokenOperationResultKey.SELECTED_PRODUCT, product);
 
-    // select token API
+    // select token API - TODO - only when it makes sense and MSCAPI is usable
+    ScAPI scAPI = ScAPI.PKCS_11;
+    /*
     final OperationResult<Object> apiSelection = this.operationFactory.getOperation(UIOperation.class,
             "/fxml/api-selection.fxml", this.api.getAppConfig().getApplicationName()).perform();
     if(apiSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     }
-    ScAPI scAPI = (ScAPI) apiSelection.getResult();
+    scAPI = (ScAPI) apiSelection.getResult();
+    */
     map.put(TokenOperationResultKey.SELECTED_API, scAPI);
 
     // select PKCS11 parameters
@@ -169,12 +180,11 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
    */
   private OperationResult<Map<TokenOperationResultKey, Object>> createToken(Product product, ProductAdapter adapter,
                                                                             Map<TokenOperationResultKey, Object> map) {
-    // createToken(Product product, ProductAdapter adapter)
     final SignatureTokenConnection connect;
     if(adapter.supportMessageDisplayCallback(product)) {
-      connect = adapter.connect(api, product, display.getPasswordInputCallback(), display.getMessageDisplayCallback());
+      connect = adapter.connect(api, product, display.getPasswordInputCallback(product), display.getMessageDisplayCallback());
     } else {
-      connect = adapter.connect(api, product, display.getPasswordInputCallback());
+      connect = adapter.connect(api, product, display.getPasswordInputCallback(product));
     }
     if (connect == null) {
       LOG.error("No connect returned");

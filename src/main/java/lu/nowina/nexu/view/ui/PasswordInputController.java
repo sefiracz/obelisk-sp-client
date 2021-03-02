@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -58,16 +59,18 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 
 	@Override
 	public void init(Object... params) {
-		StageHelper.getInstance().setTitle((String) params[1], "password.title");
-		final String passwordPrompt = (String) params[0];
+    final String passwordPrompt = (String) params[0];
+    StageHelper.getInstance().setTitle((String) params[1], "password.title");
 		if(params.length > 2) {
 			product = (AbstractProduct) params[2];
 		}
 		if (product != null) {
-			this.passwordPrompt.setText(
-					MessageFormat.format(resources.getString("password.default.prompt"), product.getSimpleLabel()));
-		} else if(StringUtils.isNotEmpty(passwordPrompt)) {
-			this.passwordPrompt.setText(passwordPrompt);
+			this.passwordPrompt.setText(MessageFormat.format(resources.getString("password.default.prompt"),
+              product.getSimpleLabel()));
+		} else if (passwordPrompt != null) {
+      this.passwordPrompt.setText(passwordPrompt);
+    } else {
+			this.passwordPrompt.setText(resources.getString("password.title"));
 		}
 
 	}

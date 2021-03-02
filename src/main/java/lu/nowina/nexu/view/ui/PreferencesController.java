@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -40,32 +41,32 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@FXML
 	private Button cancel;
 
-	@FXML
-	private Button reset;
-
-	@FXML
-	private Label useSystemProxyLabel;
-
-	@FXML
-	private CheckBox useSystemProxy;
-
-	@FXML
-	private TextField proxyServer;
-
-	@FXML
-	private TextField proxyPort;
-
-	@FXML
-	private CheckBox proxyAuthentication;
-
-	@FXML
-	private TextField proxyUsername;
-
-	@FXML
-	private CheckBox useHttps;
-
-	@FXML
-	private PasswordField proxyPassword;
+//	@FXML
+//	private Button reset;
+//
+//	@FXML
+//	private Label useSystemProxyLabel;
+//
+//	@FXML
+//	private CheckBox useSystemProxy;
+//
+//	@FXML
+//	private TextField proxyServer;
+//
+//	@FXML
+//	private TextField proxyPort;
+//
+//	@FXML
+//	private CheckBox proxyAuthentication;
+//
+//	@FXML
+//	private TextField proxyUsername;
+//
+//	@FXML
+//	private CheckBox useHttps;
+//
+//	@FXML
+//	private PasswordField proxyPassword;
 
 	@FXML
 	private ComboBox<AppLanguage> language;
@@ -84,79 +85,79 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	}
 
 	private void init(final ProxyConfigurer proxyConfigurer) {
-		if(isWindows) {
-			useSystemProxy.setSelected(proxyConfigurer.isUseSystemProxy());
-		} else {
-			useSystemProxy.setVisible(false);
-			useSystemProxy.setManaged(false);
-			useSystemProxyLabel.setVisible(false);
-			useSystemProxyLabel.setManaged(false);
-		}
-
-		useHttps.setSelected(proxyConfigurer.isProxyUseHttps());
-		proxyServer.setText(proxyConfigurer.getProxyServer());
-		final Integer proxyPortInt = proxyConfigurer.getProxyPort();
-		proxyPort.setText((proxyPortInt != null) ? proxyPortInt.toString() : "");
-		proxyAuthentication.setSelected(proxyConfigurer.isProxyAuthentication());
-		proxyUsername.setText(proxyConfigurer.getProxyUsername());
-		proxyPassword.setText(proxyConfigurer.getProxyPassword());
+//		if(isWindows) {
+//			useSystemProxy.setSelected(proxyConfigurer.isUseSystemProxy());
+//		} else {
+//			useSystemProxy.setVisible(false);
+//			useSystemProxy.setManaged(false);
+//			useSystemProxyLabel.setVisible(false);
+//			useSystemProxyLabel.setManaged(false);
+//		}
+//
+//		useHttps.setSelected(proxyConfigurer.isProxyUseHttps());
+//		proxyServer.setText(proxyConfigurer.getProxyServer());
+//		final Integer proxyPortInt = proxyConfigurer.getProxyPort();
+//		proxyPort.setText((proxyPortInt != null) ? proxyPortInt.toString() : "");
+//		proxyAuthentication.setSelected(proxyConfigurer.isProxyAuthentication());
+//		proxyUsername.setText(proxyConfigurer.getProxyUsername());
+//		proxyPassword.setText(proxyConfigurer.getProxyPassword());
 	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		readOnly = new SimpleBooleanProperty(false);
 		ok.disableProperty().bind(readOnly);
-		reset.disableProperty().bind(readOnly);
-		useSystemProxy.disableProperty().bind(readOnly);
-
-		proxyServer.disableProperty().bind(
-				readOnly.or(
-						useSystemProxy.selectedProperty()));
-
-		proxyPort.disableProperty().bind(
-				proxyServer.textProperty().length().lessThanOrEqualTo(0).or(
-						proxyServer.disabledProperty()));
-
-		proxyAuthentication.disableProperty().bind(
-				readOnly.or(
-						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
-								useSystemProxy.selectedProperty().not())));
-
-		useHttps.disableProperty().bind(
-				readOnly.or(
-						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
-								useSystemProxy.selectedProperty().not())));
-
-		proxyUsername.disableProperty().bind(proxyAuthentication.disabledProperty().or(
-						proxyAuthentication.selectedProperty().not()));
-
-		proxyPassword.disableProperty().bind(proxyAuthentication.disabledProperty().or(
-				proxyAuthentication.selectedProperty().not()));
+//		reset.disableProperty().bind(readOnly);
+//		useSystemProxy.disableProperty().bind(readOnly);
+//
+//		proxyServer.disableProperty().bind(
+//				readOnly.or(
+//						useSystemProxy.selectedProperty()));
+//
+//		proxyPort.disableProperty().bind(
+//				proxyServer.textProperty().length().lessThanOrEqualTo(0).or(
+//						proxyServer.disabledProperty()));
+//
+//		proxyAuthentication.disableProperty().bind(
+//				readOnly.or(
+//						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
+//								useSystemProxy.selectedProperty().not())));
+//
+//		useHttps.disableProperty().bind(
+//				readOnly.or(
+//						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
+//								useSystemProxy.selectedProperty().not())));
+//
+//		proxyUsername.disableProperty().bind(proxyAuthentication.disabledProperty().or(
+//						proxyAuthentication.selectedProperty().not()));
+//
+//		proxyPassword.disableProperty().bind(proxyAuthentication.disabledProperty().or(
+//				proxyAuthentication.selectedProperty().not()));
 
 		language.getItems().add(cz);
 		language.getItems().add(en);
 
 		ok.setOnAction((evt) -> {
-			final Integer port;
-			try {
-				if(proxyPort.isDisabled()) {
-					port = null;
-				} else {
-					port = Integer.parseInt(proxyPort.getText());
-				}
-			} catch(NumberFormatException e) {
-				proxyPort.setTooltip(new Tooltip(resources.getString("preferences.controller.invalid.port")));
-				proxyPort.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
-	    		return;
-			}
-
-			userPreferences.setUseSystemProxy(useSystemProxy.isDisabled() ? null : useSystemProxy.isSelected());
-			userPreferences.setProxyServer(proxyServer.isDisabled() ? null : proxyServer.getText());
-			userPreferences.setProxyPort(port);
-			userPreferences.setProxyAuthentication(proxyAuthentication.isDisabled() ? null : proxyAuthentication.isSelected());
-			userPreferences.setProxyUsername(proxyUsername.isDisabled() ? null : proxyUsername.getText());
-			userPreferences.setProxyPassword(proxyPassword.isDisabled() ? null : proxyPassword.getText());
-			userPreferences.setProxyUseHttps(useHttps.isDisabled() ? null : useHttps.isSelected());
+//			final Integer port;
+//			try {
+//				if(proxyPort.isDisabled()) {
+//					port = null;
+//				} else {
+//					port = Integer.parseInt(proxyPort.getText());
+//				}
+//			} catch(NumberFormatException e) {
+//				proxyPort.setTooltip(new Tooltip(resources.getString("preferences.controller.invalid.port")));
+//				proxyPort.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
+//	    		return;
+//			}
+//
+//			userPreferences.setUseSystemProxy(useSystemProxy.isDisabled() ? null : useSystemProxy.isSelected());
+//			userPreferences.setProxyServer(proxyServer.isDisabled() ? null : proxyServer.getText());
+//			userPreferences.setProxyPort(port);
+//			userPreferences.setProxyAuthentication(proxyAuthentication.isDisabled() ? null : proxyAuthentication.isSelected());
+//			userPreferences.setProxyUsername(proxyUsername.isDisabled() ? null : proxyUsername.getText());
+//			userPreferences.setProxyPassword(proxyPassword.isDisabled() ? null : proxyPassword.getText());
+//			userPreferences.setProxyUseHttps(useHttps.isDisabled() ? null : useHttps.isSelected());
 			userPreferences.setLanguage(language.isDisabled() ? null :
 					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
 
@@ -168,11 +169,11 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		cancel.setOnAction((e) -> {
 			signalEnd(null);
 		});
-		reset.setOnAction((e) -> {
-			userPreferences.clear();
-			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
-			signalEnd(null);
-		});
+//		reset.setOnAction((e) -> {
+//			userPreferences.clear();
+//			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
+//			signalEnd(null);
+//		});
 	}
 
 	@Override

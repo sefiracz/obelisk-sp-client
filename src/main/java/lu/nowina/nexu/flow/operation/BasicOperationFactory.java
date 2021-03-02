@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -13,9 +14,14 @@
  */
 package lu.nowina.nexu.flow.operation;
 
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationFactory;
+import lu.nowina.nexu.api.flow.OperationResult;
+import lu.nowina.nexu.view.DialogMessage;
+import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
+import lu.nowina.nexu.view.core.UIOperation;
 
 /**
  * Basic implementation of {@link OperationFactory} that uses reflection.
@@ -51,7 +57,16 @@ public class BasicOperationFactory implements OperationFactory {
         }
     }
 
-    public void setDisplay(final UIDisplay display) {
+  @Override
+  public void getMessageDialog(NexuAPI api, DialogMessage message, boolean blockingUI) {
+    if (blockingUI) {
+      getOperation(UIOperation.class, "/fxml/message.fxml", api, message).perform();
+    } else {
+      getOperation(NonBlockingUIOperation.class, "/fxml/message.fxml", api, message).perform();
+    }
+  }
+
+  public void setDisplay(final UIDisplay display) {
         this.display = display;
     }
 }

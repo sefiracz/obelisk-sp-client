@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -14,7 +15,7 @@
 package lu.nowina.nexu.api;
 
 import iaik.pkcs.pkcs11.TokenException;
-import lu.nowina.nexu.generic.TokenManager;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.pkcs11.PKCS11Module;
 import lu.nowina.nexu.pkcs11.TokenHandler;
 
@@ -86,6 +87,12 @@ public class DetectedCard extends AbstractProduct {
    */
 	@XmlTransient
 	private boolean opened = false;
+
+  /**
+   * Token has known configuration
+   */
+  @XmlTransient
+  private SmartcardInfo knownToken;
 
 	public DetectedCard(byte[] atr, CardTerminal terminal, int terminalIndex, NexuAPI api) {
 		this.terminal = terminal;
@@ -246,6 +253,10 @@ public class DetectedCard extends AbstractProduct {
     return opened;
   }
 
+  public SmartcardInfo isKnownToken() {
+    return knownToken;
+  }
+
   /**
    * Transform an ATR byte array into a string.
    *
@@ -297,6 +308,7 @@ public class DetectedCard extends AbstractProduct {
 			type = KeystoreType.PKCS11;
 			initialized = true;
 		}
+		knownToken = api.getPKCS11Manager().getAvailableSmartcardInfo(atr);
 	}
 
 	public void openToken() {
@@ -309,7 +321,7 @@ public class DetectedCard extends AbstractProduct {
 	}
 
 	public void closeToken() {
-    TokenManager.getManager().destroy(this);
+    SessionManager.getManager().destroy(this);
 		if (initialized && opened) {
 		  // close session
 			tokenHandler.closeSession();

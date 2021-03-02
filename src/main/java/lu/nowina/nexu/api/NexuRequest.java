@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -12,6 +13,8 @@
  * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
  */
 package lu.nowina.nexu.api;
+
+import lu.nowina.nexu.generic.SessionManager;
 
 /**
  * 
@@ -26,7 +29,7 @@ public class NexuRequest {
 
 	private String requestSeal;
 	
-	private String sessionId;
+	private SessionManager.SessionValue sessionValue;
 
 	public String getUserLocale() {
 		return userLocale;
@@ -52,12 +55,12 @@ public class NexuRequest {
 		this.requestSeal = requestSeal;
 	}
 
-	public String getSessionId() {
-		return sessionId;
+	public SessionManager.SessionValue getSessionValue() {
+		return sessionValue;
 	}
 
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
+	public void setSessionValue(SessionManager.SessionValue sessionValue) {
+		this.sessionValue = sessionValue;
 	}
 
 }

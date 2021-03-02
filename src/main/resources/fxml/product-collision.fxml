@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- © Nowina Solutions, 2015-2016
+ © SEFIRA spol. s r.o., 2020-2021
 
- Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
- Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
- Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
+ Licensed under EUPL Version 1.1 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ You may use this work only in accordance with the License.
+ You can obtain a copy of the License at the following address:
 
  http://ec.europa.eu/idabc/eupl5
 
- Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
- SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
- Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
+ Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ See the License for specific permissions and language restrictions under the License.
 -->
 
 <?import java.lang.*?>
@@ -21,31 +21,32 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.ScrollPane?>
 
-<BorderPane prefHeight="300.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-  fx:controller="lu.nowina.nexu.view.ui.ProductCollisionController">
+<StackPane prefHeight="300.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="lu.nowina.nexu.view.ui.ProductCollisionController">
 
-    <top>
-		<VBox BorderPane.alignment="CENTER">
-			<children>
-				<Label styleClass="message" fx:id="message" wrapText="true" />
-			</children>
-		</VBox>
-    </top>
-	
-	<center>
-		<ScrollPane hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-			<VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
-		</ScrollPane>
-	</center>
+<BorderPane fx:id="borderPane">
 
-	<bottom>
-		<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
-			<children>
-				<Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
-				<Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-green" text="%button.refresh" />
-        <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-danger" text="%systray.menu.manage.keystores" />
-				<Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next" />
-			</children>
-		</HBox>
-	</bottom>
+  <top>
+    <VBox BorderPane.alignment="CENTER" styleClass="top">
+      <Label styleClass="message" fx:id="message" wrapText="true"/>
+    </VBox>
+  </top>
+
+  <center>
+    <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="center">
+      <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
+    </ScrollPane>
+  </center>
+
+  <bottom>
+    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+      <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
+      <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
+      <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%systray.menu.manage.keystores"/>
+      <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
+    </HBox>
+  </bottom>
+
 </BorderPane>
+</StackPane>
+

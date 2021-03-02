@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -15,6 +16,7 @@ package lu.nowina.nexu.view.ui;
 
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.Feedback;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import lu.nowina.nexu.view.core.UIOperationController;
 import org.slf4j.Logger;
@@ -32,8 +34,8 @@ public abstract class AbstractFeedbackUIOperationController extends AbstractUIOp
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeedbackUIOperationController.class);
 
 	private Feedback feedback;
-	private String serverUrl;
-	private String applicationVersion;
+	private NexuAPI api;
+
 	private String applicationName;
 	// Needed by ProvideFeedbackController, in order to get JIRA's url as well as other potentially useful information
 	private AppConfig appConfig;
@@ -41,17 +43,16 @@ public abstract class AbstractFeedbackUIOperationController extends AbstractUIOp
 	@Override
 	public final void init(Object... params) {
 		try {
-			feedback = (Feedback) params[0];
-			serverUrl = (String) params[1];
-			applicationVersion = (String) params[2];
-			applicationName = (String) params[3];
-			appConfig = (AppConfig) params[4];
+      feedback = (Feedback) params[0];
+      api = (NexuAPI) params[1];
+      applicationName = api.getAppConfig().getApplicationName();
+      appConfig = api.getAppConfig();
 		} catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-			throw new IllegalArgumentException("Expected parameters: Feedback, serverUrl (String), application version (String), application name (String), and application configuration (AppConfig)");
+			throw new IllegalArgumentException("Expected parameters: Feedback, NexuAPI");
 		}
 
-		if((feedback == null) || (serverUrl == null) || (applicationVersion == null) || (applicationName == null)) {
-			throw new IllegalArgumentException("Expected parameters: Feedback, serverUrl (String), application version (String), application name (String), and application configuration (AppConfig)");
+		if((feedback == null) || (api == null)) {
+			throw new IllegalArgumentException("Expected parameters: Feedback, NexuAPI");
 		}
 
 		if(params.length > 5) {

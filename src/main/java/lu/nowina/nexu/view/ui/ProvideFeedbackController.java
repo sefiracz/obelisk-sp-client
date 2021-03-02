@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -44,7 +45,7 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProvideFeedbackController.class);
 
 	@FXML
-	private Button ok;
+	private Button report;
 
 	@FXML
 	private Button cancel;
@@ -52,13 +53,12 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 	@FXML
 	private Label message;
 
-	@FXML
-	private TextArea userComment;
+	private ResourceBundle resources;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
-		ok.setOnAction(e -> {
+    this.resources = ResourceBundle.getBundle("bundles/nexu");
+		report.setOnAction(e -> {
 			DebugHelper dh = new DebugHelper();
 			Feedback feedback = null;
 			try {
@@ -69,12 +69,10 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 			new Thread(() -> {
 				try {
 					// subject
-					String subject = MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
-							.getString("feedback.mail.subject"), getApplicationName());
+					String subject = MessageFormat.format(resources.getString("feedback.mail.subject"), getApplicationName());
 					// body
 					String stackTrace = Utils.printException(getFeedback().getException());
-					String body = MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
-							.getString("feedback.mail.body"), stackTrace);
+					String body = MessageFormat.format(resources.getString("feedback.mail.body"), stackTrace);
 					// mailto
 					String uriStr = String.format("mailto:%s?subject=%s&body=%s",
 							getAppConfig().getTicketUrl(),
@@ -92,11 +90,10 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 
 	@Override
 	protected void doInit(Object... params) {
-		StageHelper.getInstance().setTitle(getApplicationName(), "feedback.title");
+    StageHelper.getInstance().setTitle(getApplicationName(), "feedback.title");
 		Platform.runLater(() ->
-			message.setText(MessageFormat.format(
-				ResourceBundle.getBundle("bundles/nexu").getString("feedback.message"),
-				ResourceBundle.getBundle("bundles/nexu").getString("button.report.incident"), getApplicationName())));
+			message.setText(MessageFormat.format(resources.getString("feedback.message"),
+              resources.getString("button.report.incident"), getApplicationName())));
 	}
 
 	private String urlEncode(String str) {

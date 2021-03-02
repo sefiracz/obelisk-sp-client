@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -18,6 +19,7 @@ import lu.nowina.nexu.api.Feedback;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationFactory;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
 
@@ -67,21 +69,9 @@ public abstract class Flow<I, O> {
 
 	@SuppressWarnings("unchecked")
 	protected Exception handleException(final Exception e) {
-		if (api.getAppConfig().isEnablePopUps()) {
-			if (api.getAppConfig().isEnableIncidentReport()) {
-				final Feedback feedback = new Feedback(e);
-				getOperationFactory().getOperation(UIOperation.class, "/fxml/provide-feedback.fxml",
-						new Object[] { feedback, api.getAppConfig().getServerUrl(),
-								api.getAppConfig().getApplicationVersion(), api.getAppConfig().getApplicationName(),
-								api.getAppConfig() })
-						.perform();
-			} else {
-				getOperationFactory()
-						.getOperation(UIOperation.class, "/fxml/message.fxml",
-								new Object[] { "exception.failure.message", api.getAppConfig().getApplicationName() })
-						.perform();
-			}
-		}
+    final Feedback feedback = new Feedback(e);
+    getOperationFactory().getOperation(UIOperation.class, "/fxml/provide-feedback.fxml",
+            new Object[] { feedback, api }).perform();
 		return e;
 	}
 }

@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -62,6 +63,7 @@ public interface ProductAdapter {
 	 * Returns <code>true</code> if this product adapter supports {@link MessageDisplayCallback} for the given <code>product</code>.
 	 * @return <code>true</code> if this product adapter supports {@link MessageDisplayCallback} for the given <code>product</code>.
 	 */
+	@Deprecated
 	boolean supportMessageDisplayCallback(Product product);
 
 	/**
@@ -148,16 +150,6 @@ public interface ProductAdapter {
 	 * @return The specification of the operation to call to configure <code>product</code>.
 	 */
 	FutureOperationInvocation<Product> getConfigurationOperation(NexuAPI api, Product product);
-
-	/**
-	 * Returns the specification of the operation to call to save the configured <code>product</code>.
-	 * <p>Returned operation must return a boolean indicating whether save operation was successful or not.
-	 * @param api The unique instance of {@link NexuAPI}.
-	 * @param product The product for which one would like to retrieve the save {@link Operation}.
-	 * @return The specification of the operation to call to save the configured <code>product</code>.
-	 */
-  @Deprecated
-	FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product);
 
 	/**
 	 * Each <code>ProductAdapter</code> is given the capability to enrich the systray menu with an item

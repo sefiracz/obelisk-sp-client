@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -22,7 +23,7 @@ import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 import lu.nowina.nexu.flow.exceptions.KeystoreNotFoundException;
 import lu.nowina.nexu.flow.exceptions.UnsupportedKeystoreTypeException;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
-import lu.nowina.nexu.generic.TokenManager;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.io.FileNotFoundException;
@@ -71,11 +72,7 @@ public class KeystoreProductAdapter implements ProductAdapter {
 		if (product instanceof NewKeystore) {
 			throw new IllegalArgumentException("Given product was not configured!");
 		}
-		final ConfiguredKeystore configuredKeystore = (ConfiguredKeystore) product;
-		if(callback instanceof NexuPasswordInputCallback) {
-			((NexuPasswordInputCallback) callback).setProduct((AbstractProduct) product);
-		}
-		return new KeystoreTokenProxy(configuredKeystore, callback);
+		return new KeystoreTokenProxy((ConfiguredKeystore) product, callback);
 	}
 
 	@Override
@@ -139,23 +136,6 @@ public class KeystoreProductAdapter implements ProductAdapter {
 		}
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-  @Deprecated
-	public FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
-		if (product instanceof NewKeystore) {
-			throw new IllegalArgumentException("Given product was not configured!");
-		} else {
-			final ConfiguredKeystore keystore = (ConfiguredKeystore) product;
-			if(keystore.isToBeSaved()) {
-				return UIOperation.getFutureOperationInvocation(UIOperation.class, "/fxml/save-keystore.fxml",
-					api.getAppConfig().getApplicationName(), this, keystore);
-			} else {
-				return new NoOpFutureOperationInvocation<Boolean>(true);
-			}
-		}
-	}
-
   @Override
   public SystrayMenuItem getExtensionSystrayMenuItem(NexuAPI api) {
     return null;
@@ -195,7 +175,7 @@ public class KeystoreProductAdapter implements ProductAdapter {
 		}
 
 		private void initSignatureTokenConnection() {
-      proxied = TokenManager.getManager().getInitializedTokenForProduct(configuredKeystore);
+      proxied = SessionManager.getManager().getInitializedTokenForProduct(configuredKeystore);
       if(proxied == null) {
         try {
           switch (configuredKeystore.getType()) {
@@ -220,7 +200,7 @@ public class KeystoreProductAdapter implements ProductAdapter {
           throw new NexuException(e);
         }
       }
-      TokenManager.getManager().setToken(configuredKeystore, proxied);
+      SessionManager.getManager().setToken(configuredKeystore, proxied);
 		}
 
 		@Override

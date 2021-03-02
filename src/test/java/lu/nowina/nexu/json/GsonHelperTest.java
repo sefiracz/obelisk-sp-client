@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -16,6 +17,7 @@ package lu.nowina.nexu.json;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import lu.nowina.nexu.api.*;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.json.pojo.TestWithCertificate;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
@@ -32,12 +34,11 @@ public class GsonHelperTest {
         final GetCertificateRequest req = new GetCertificateRequest();
         req.setCertificateFilter(new CertificateFilter(Purpose.SIGNATURE));
         req.setExternalId("externalId");
-        req.setSessionId("sessionId");
         req.setRequestSeal("seal");
         req.setUserLocale("fr");
 
         final String json = GsonHelper.toJson(req);
-        Assert.assertEquals("{\"certificateFilter\":{\"purpose\":\"SIGNATURE\",\"nonRepudiationBit\":false},\"closeToken\":true,\"userLocale\":\"fr\",\"externalId\":\"externalId\",\"requestSeal\":\"seal\",\"sessionId\":\"sessionId\"}", json);
+        Assert.assertEquals("{\"certificateFilter\":{\"purpose\":\"SIGNATURE\",\"nonRepudiationBit\":false},\"closeToken\":true,\"userLocale\":\"fr\",\"externalId\":\"externalId\",\"requestSeal\":\"seal\"}", json);
 
     }
 

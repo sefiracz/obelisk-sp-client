@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
  © Nowina Solutions, 2015-2015
+ © SEFIRA spol. s r.o., 2020-2021
 
  Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -22,20 +23,18 @@
 <BorderPane id="AnchorPane" prefHeight="175.0" prefWidth="500.0" styleClass="unsupported-product" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.UnsupportedProductController">
 
 	<center>
-		<VBox BorderPane.alignment="CENTER">
-			<children>
-				<Label styleClass="message" wrapText="true" fx:id="message"/>
-			</children>
-		</VBox>
+    <VBox BorderPane.alignment="CENTER">
+      <Label styleClass="message" wrapText="true" fx:id="message"/>
+    </VBox>
 	</center>
 
 	<bottom>
-		<HBox styleClass="btn-container">
-			<children>
-				<Button fx:id="cancel" wrapText="true" styleClass="btn-primary" mnemonicParsing="false" text="%button.cancel" />
-				<Button fx:id="hicSuntDracones" wrapText="true" styleClass="btn-danger" mnemonicParsing="false" text="%button.warningRead" />
-			</children>
-		</HBox>
+    <HBox styleClass="btn-container">
+<!--      <Button fx:id="cancel" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.cancel"/>-->
+      <Button fx:id="back" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.back"/>
+      <Button fx:id="hicSuntDracones" wrapText="true" styleClass="btn-danger" mnemonicParsing="false"
+              text="%button.warningRead"/>
+    </HBox>
 	</bottom>
 
 </BorderPane>

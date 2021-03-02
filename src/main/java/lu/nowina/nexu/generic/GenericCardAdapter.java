@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -15,6 +16,7 @@ package lu.nowina.nexu.generic;
 
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.*;
+import eu.europa.esig.dss.token.mocca.MOCCAPrivateKeyEntry;
 import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
@@ -59,9 +61,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
 
     @Override
     protected SignatureTokenConnection connect(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback) {
-        if(callback instanceof NexuPasswordInputCallback) {
-            ((NexuPasswordInputCallback) callback).setProduct(card);
-        }
         final ConnectionInfo cInfo = this.info.getConnectionInfo(api.getEnvironmentInfo());
         final ScAPI scApi = cInfo.getSelectedApi();
         switch (scApi) {
@@ -73,11 +72,11 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
                 final String absolutePath = cInfo.getApiParam();
                 // get present card
                 DetectedCard detectedCard = api.getPresentCard(card);
-                SignatureTokenConnection token = TokenManager.getManager().getInitializedTokenForProduct(detectedCard);
+                SignatureTokenConnection token = SessionManager.getManager().getInitializedTokenForProduct(detectedCard);
                 if(token == null) {
                   token = new IAIKPkcs11SignatureTokenAdapter(api, new File(absolutePath), callback, detectedCard);
                 }
-                TokenManager.getManager().setToken(detectedCard, token);
+                SessionManager.getManager().setToken(detectedCard, token);
                 return token;
               } catch (CardException e) {
                 throw new PKCS11TokenException("Token not present or unable to connect", e);
@@ -133,7 +132,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
 
     @Override
     public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
-        // TODO - MOCCAPrivateKeyEntry ?
         List<DSSPrivateKeyEntry> keys = token.getKeys();
         for(DSSPrivateKeyEntry key : keys) {
             if(key instanceof IAIKPrivateKeyEntry && ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias)) {
@@ -141,6 +139,9 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
             }
             if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
                 return key;
+            }
+            if(key instanceof MOCCAPrivateKeyEntry) {
+              throw new UnsupportedOperationException("MOCCA not supported");
             }
         }
         return null;
@@ -153,25 +154,22 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
 
   @Override
   public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
-    saveKeystore((DetectedCard) product, map);
+    saveSmartcard((DetectedCard) product, map);
   }
 
   public SCDatabase getProductDatabase() {
     return api.loadDatabase(SCDatabase.class, "database-smartcard.xml");
   }
 
-  private void saveKeystore(final DetectedCard keystore, Map<TokenOperationResultKey, Object> map) {
+  private void saveSmartcard(final DetectedCard card, Map<TokenOperationResultKey, Object> map) {
     String apiParam = (String) map.get(TokenOperationResultKey.SELECTED_API_PARAMS);
     ScAPI selectedApi = (ScAPI) map.get(TokenOperationResultKey.SELECTED_API);
-    if(selectedApi.equals(ScAPI.MSCAPI)) {
-      keystore.setType(KeystoreType.WINDOWS);
-    }
     EnvironmentInfo env = api.getEnvironmentInfo();
     ConnectionInfo cInfo = new ConnectionInfo();
     cInfo.setSelectedApi(selectedApi);
     cInfo.setEnv(env);
     cInfo.setApiParam(apiParam);
-    getProductDatabase().add(api, keystore, cInfo);
+    getProductDatabase().add(api, card, cInfo);
   }
 
 }

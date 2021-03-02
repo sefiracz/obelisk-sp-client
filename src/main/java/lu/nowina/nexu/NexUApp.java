@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -27,7 +28,7 @@ import lu.nowina.nexu.flow.Flow;
 import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.BasicOperationFactory;
 import lu.nowina.nexu.generic.SCDatabase;
-import lu.nowina.nexu.generic.TokenManager;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.generic.SmartcardInfoDatabase;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
@@ -63,21 +64,6 @@ public class NexUApp extends Application {
 		uiDisplay.setOperationFactory(operationFactory);
 
 		final NexuAPI api = buildAPI(uiDisplay, operationFactory);
-
-		// TODO - how to fix splashscreen ?
-//		if(getConfig().isShowSplashScreen()) {
-//			logger.info("Show splash screen");
-//			final ImageView splash = new ImageView(new Image(NexUPreLoader.class.getResourceAsStream("/images/splash.png")));
-//			final StackPane background = new StackPane(splash);
-//			final Scene splashScene = new Scene(background, 600, 300);
-//			primaryStage.setTitle(getConfig().getApplicationName());
-//			primaryStage.setScene(splashScene);
-//			primaryStage.initStyle(StageStyle.UNDECORATED);
-//			primaryStage.show();
-//			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
-//			delay.setOnFinished(event -> primaryStage.close());
-//			delay.play();
-//		}
 
     logger.info("Detect all available products");
     api.detectAll();
@@ -161,8 +147,7 @@ public class NexUApp extends Application {
 	public void stop() throws Exception {
 		logger.info("Stopping application...");
 		try {
-			// TODO - finalize all PKCS11 ???
-      TokenManager.getManager().destroy();
+      SessionManager.getManager().destroy();
 			if(server != null) {
 				server.stop();
 				server = null;
