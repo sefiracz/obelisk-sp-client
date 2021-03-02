@@ -23,8 +23,6 @@ public abstract class AbstractProduct implements Product {
   protected String certificate;
   protected KeystoreType type;
   protected String keyAlias;
-  @XmlTransient   // TODO remove session id from product
-  protected String sessionId;
 
   public AbstractProduct() {
   }
@@ -99,25 +97,6 @@ public abstract class AbstractProduct implements Product {
    */
   public void setKeyAlias(String keyAlias) {
     this.keyAlias = keyAlias;
-  }
-
-  // TODO remove session id from product
-  /**
-   * Returns session identification
-   *
-   * @return Session identification
-   */
-  public String getSessionId() {
-    return sessionId;
-  }
-
-  /**
-   * Sets session identification
-   *
-   * @param sessionId Session identification value
-   */
-  public void setSessionId(String sessionId) {
-    this.sessionId = sessionId;
   }
 
   @Override

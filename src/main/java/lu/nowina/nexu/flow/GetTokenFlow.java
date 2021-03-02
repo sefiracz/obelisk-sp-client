@@ -88,6 +88,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
           }
           // manual select certificate/key
           GetCertificateRequest request = new GetCertificateRequest();
+          request.setSessionValue(req.getSessionValue());
           request.setCertificateFilter(new CertificateFilter(certificateToken.getDigest(DigestAlgorithm.SHA1)));
           Execution<GetCertificateResponse> getCertificate = api.getCertificate(request);
           if(!getCertificate.isSuccess()) {
