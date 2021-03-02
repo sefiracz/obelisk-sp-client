@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -14,7 +15,7 @@
 package lu.nowina.nexu.api.flow;
 
 /**
- * An <code>Operation</code> is an element of a {@link Flow}.
+ * An <code>Operation</code> is an element of a {@link lu.nowina.nexu.flow.Flow}.
  * 
  * <p>Each sub-class is expected to provide a no-arg constructor (parameters will
  * be provided thanks to the {@link #setParams(Object...)} method).
@@ -23,7 +24,7 @@ package lu.nowina.nexu.api.flow;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  * 
- * @see CompositeOperation
+ * @see lu.nowina.nexu.flow.operation.CompositeOperation
  */
 public interface Operation<R> {
 
