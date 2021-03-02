@@ -60,7 +60,7 @@ public class SCDatabase implements ProductDatabase {
 			info.setTokenSerial(detectedCard.getTokenSerial());
 			info.setTokenManufacturer(detectedCard.getTokenManufacturer());
 		}
-		if(!getSmartcards().contains(info)) { // TODO overit ze je toto spravne
+		if(!getSmartcards().contains(info)) {
 			getSmartcards().add(info);
 			info.getInfos().add(cInfo);
 		}

@@ -147,7 +147,6 @@ public class CardDetector {
     List<DetectedCard> detectedCards = presentCards.match(selector);
     if (detectedCards.size() == 1) {
       DetectedCard detectedCard = detectedCards.get(0);
-      detectedCard.setSessionId(selector.getSessionId());
       // set key/certificate values
       detectedCard.setCertificate(selector.getCertificate());
       detectedCard.setCertificateId(selector.getCertificateId());
@@ -185,7 +184,6 @@ public class CardDetector {
       logger.info("Detected " + detectedCardsList.size() + " card(s) that could be card " + selector.getTokenLabel());
       if (detectedCardsList.size() == 1) {
         DetectedCard detectedCard = detectedCardsList.get(0);
-        detectedCard.setSessionId(selector.getSessionId());
         detectedCard.setCertificate(selector.getCertificate());
         detectedCard.setCertificateId(selector.getCertificateId());
         detectedCard.setKeyAlias(selector.getKeyAlias());
@@ -197,12 +195,9 @@ public class CardDetector {
         logger.info("Multiple cards located. Looking for the specific card in the terminal");
         for(DetectedCard detectedCard : detectedCardsList) {
         	if(detectedCard.getTerminalLabel().equals(selector.getTerminalLabel())) {
-            detectedCard.setSessionId(selector.getSessionId());
         		return detectedCard;
 					}
 				}
-        // TODO - nutne otestovat s vice stejnymi kartami
-        // TODO specificke okno pro tuto chybu? info at uzivatel odpoji nepotrebne tokeny
         throw new CardException("Cannot conclusively determine card");
       }
     }
@@ -274,7 +269,6 @@ public class CardDetector {
 			}
 			logger.warn(MessageFormat.format("Card '{0}' is not present.", card.getSimpleLabel()));
 		} else {
-			// TODO error ?
 			logger.error("Cannot conclusively determine card terminal");
 		}
 	}

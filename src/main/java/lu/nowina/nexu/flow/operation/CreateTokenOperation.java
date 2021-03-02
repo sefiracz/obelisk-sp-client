@@ -132,7 +132,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     map.put(TokenOperationResultKey.ADVANCED_CREATION, true);
     map.put(TokenOperationResultKey.SELECTED_PRODUCT, product);
 
-    // select token API - TODO - only when it makes sense and MSCAPI is usable
+    // select token API - TODO - this selection makes sense only when another API is available (= MSCAPI is usable)
     ScAPI scAPI = ScAPI.PKCS_11;
     /*
     final OperationResult<Object> apiSelection = this.operationFactory.getOperation(UIOperation.class,
