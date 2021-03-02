@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -13,14 +14,14 @@
  */
 package lu.nowina.nexu.json;
 
-import lu.nowina.nexu.cache.FIFOCache;
+import lu.nowina.nexu.cache.TokenCache;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.TreeMap;
 
 /**
- * JUnit test for {@link FIFOCache}.
+ * JUnit test for {@link TokenCache}.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
@@ -32,7 +33,7 @@ public class FIFOCacheTest {
 
 	@Test
 	public void test1() {
-		final FIFOCache<Integer, Integer> cache = new FIFOCache<Integer, Integer>(1);
+		final TokenCache<Integer, Integer> cache = new TokenCache<Integer, Integer>(1);
 		Assert.assertEquals(0, cache.size());
 		cache.put(1, 1);
 		Assert.assertEquals(1, cache.size());
@@ -43,7 +44,7 @@ public class FIFOCacheTest {
 	
 	@Test
 	public void test2() {
-		final FIFOCache<Integer, Integer> cache = new FIFOCache<Integer, Integer>(500);
+		final TokenCache<Integer, Integer> cache = new TokenCache<Integer, Integer>(500);
 		int expectedCacheSize = 0;
 		Assert.assertEquals(expectedCacheSize, cache.size());
 		for(int i = 0; i < 500; ++i) {

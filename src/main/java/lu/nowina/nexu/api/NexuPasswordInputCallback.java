@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2017
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -27,7 +28,5 @@ public interface NexuPasswordInputCallback extends PasswordInputCallback {
 	 * @param passwordPrompt The new password prompt.
 	 */
 	void setPasswordPrompt(String passwordPrompt);
-
-	void setProduct(AbstractProduct product);
 	
 }

@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -23,6 +24,8 @@ public interface FlowRegistry {
 	static final String CERTIFICATE_FLOW = "certificate";
 
 	static final String TOKEN_FLOW = "token";
+
+	static final String SMARTCARD_LIST_FLOW = "smartcardList";
 
 	static final String GET_IDENTITY_INFO_FLOW = "getIdentityInfo";
 

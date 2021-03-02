@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -46,7 +47,7 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
     @Test
     public void testNewKeystore() throws Exception {
         final UIDisplay display = mock(UIDisplay.class);
-        when(display.getPasswordInputCallback())
+        when(display.getPasswordInputCallback(null))
         .thenReturn(new PrefilledPasswordCallback(new PasswordProtection("password".toCharArray())));
 
         final NexuAPI api = mock(NexuAPI.class);
@@ -76,7 +77,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         final ConfiguredKeystore configuredProduct = new ConfiguredKeystore();
         configuredProduct.setType(KeystoreType.JKS);
         configuredProduct.setUrl(this.getClass().getResource("/keystore.jks").toString());
-        configuredProduct.setToBeSaved(true);
         final OperationFactory operationFactory = new NoUIOperationFactory(selectedProduct, configuredProduct);
         ((NoUIOperationFactory) operationFactory).setDisplay(display);
 
@@ -150,10 +150,12 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         final Operation<Object> returnScAPIOperation = mock(Operation.class);
         when(returnScAPIOperation.perform()).thenReturn(new OperationResult<Object>(ScAPI.PKCS_11));
         when(operationFactory.getOperation(eq(UIOperation.class), eq("/fxml/api-selection.fxml"),
-                eq("unsuported.product.message"), any(String.class))).thenReturn(returnFalseOperation);
+                eq("unsupported.product.message"), any(String.class))).thenReturn(returnFalseOperation);
+
+
 
         when(operationFactory.getOperation(eq(UIOperation.class), eq("/fxml/message.fxml"),
-                eq("unsuported.product.message"), any(String.class))).thenReturn(returnFalseOperation);
+                eq("unsupported.product.message"), any(String.class))).thenReturn(returnFalseOperation);
 
 
 
@@ -201,7 +203,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         final DetectedCard detectedCard = new DetectedCard("atr", 0);
         when(adapter.getConfigurationOperation(api, detectedCard))
         .thenReturn(new NoOpFutureOperationInvocation<Product>(detectedCard));
-        when(adapter.getSaveOperation(api, detectedCard)).thenReturn(new NoOpFutureOperationInvocation<Boolean>(true));
 
         when(api.detectCards()).thenReturn(Arrays.asList(detectedCard));
         when(api.matchingProductAdapters(detectedCard)).thenReturn(Arrays.asList(new Match(adapter, detectedCard)));

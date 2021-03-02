@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -25,15 +26,15 @@ import java.util.LinkedHashMap;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class FIFOCache<K, V> extends LinkedHashMap<K, V> {
+public class TokenCache<K, V> extends LinkedHashMap<K, V> {
 
     private static final long serialVersionUID = 3868274387687593515L;
 
-    private static final Logger logger = LoggerFactory.getLogger(FIFOCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenCache.class);
 
     private final int maxSize;
 
-    public FIFOCache(final int maxSize) {
+    public TokenCache(final int maxSize) {
         super();
         this.maxSize = maxSize;
     }

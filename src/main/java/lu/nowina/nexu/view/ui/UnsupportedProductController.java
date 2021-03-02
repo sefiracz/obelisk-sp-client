@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -19,6 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -37,8 +39,11 @@ public class UnsupportedProductController extends AbstractUIOperationController<
     @FXML
     private Label message;
 
+//    @FXML
+//    private Button cancel;
+
     @FXML
-    private Button cancel;
+    private Button back;
 
     @FXML
     private Button hicSuntDracones;
@@ -46,14 +51,15 @@ public class UnsupportedProductController extends AbstractUIOperationController<
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         this.hicSuntDracones.setOnAction(ev -> this.signalEnd(null));
-        this.cancel.setOnAction(ev -> this.signalUserCancel());
+//        this.cancel.setOnAction(ev -> this.signalUserCancel());
+        this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
     }
 
     @Override
     public final void init(final Object... params) {
-        StageHelper.getInstance().setTitle((String) params[0], "unsuported.product.title");
+        StageHelper.getInstance().setTitle((String) params[0], "unsupported.product.title");
 
         Platform.runLater(() -> this.message.setText(StringEscapeUtils.unescapeJava(MessageFormat
-                .format(ResourceBundle.getBundle("bundles/nexu").getString("unsuported.product.header"), params[0]))));
+                .format(ResourceBundle.getBundle("bundles/nexu").getString("unsupported.product.header"), params[0]))));
     }
 }

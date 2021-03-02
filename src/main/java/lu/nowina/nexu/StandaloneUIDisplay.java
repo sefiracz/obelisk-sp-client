@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -19,13 +20,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lu.nowina.nexu.api.AbstractProduct;
 import lu.nowina.nexu.api.MessageDisplayCallback;
 import lu.nowina.nexu.api.NexuPasswordInputCallback;
+import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.ExtensionFilter;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -127,11 +129,12 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	private final class FlowPasswordCallback implements NexuPasswordInputCallback {
 
+    private final Product product;
 		private String passwordPrompt;
-		private AbstractProduct product;
 
-		public FlowPasswordCallback() {
-			this.passwordPrompt = null;
+		public FlowPasswordCallback(Product product) {
+		  this.product = product;
+      this.passwordPrompt = null;
 		}
 
 		@Override
@@ -164,17 +167,15 @@ public class StandaloneUIDisplay implements UIDisplay {
 			this.passwordPrompt = passwordPrompt;
 		}
 
-    @Override
-		public void setProduct(AbstractProduct product) {
-			this.product = product;
-		}
 	}
 
 	@Override
-	public PasswordInputCallback getPasswordInputCallback() {
-		return new FlowPasswordCallback();
+	public PasswordInputCallback getPasswordInputCallback(Product product) {
+		return new FlowPasswordCallback(product);
 	}
 
+	// TODO - remove?
+  @Deprecated
 	private final class FlowMessageDisplayCallback implements MessageDisplayCallback {
 		@Override
 		public void display(Message message) {

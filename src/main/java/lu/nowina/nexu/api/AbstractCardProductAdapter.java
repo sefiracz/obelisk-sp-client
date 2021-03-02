@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -133,17 +134,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	protected FutureOperationInvocation<Product> getConfigurationOperation(NexuAPI api, DetectedCard card) {
 		return new NoOpFutureOperationInvocation<Product>(card);
-	}
-
-	@Override
-  @Deprecated
-	public final FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
-		return getSaveOperation(api, (DetectedCard) product);
-	}
-
-  @Deprecated
-	protected FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, DetectedCard card) {
-		return new NoOpFutureOperationInvocation<Boolean>(true);
 	}
 
 	/**

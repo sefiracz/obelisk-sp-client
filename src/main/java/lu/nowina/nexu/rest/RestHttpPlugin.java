@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -18,6 +19,7 @@ import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.ToBeSigned;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.plugin.*;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.json.GsonHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -79,38 +81,8 @@ public class RestHttpPlugin implements HttpPlugin {
 
 	private HttpResponse signRequest(NexuAPI api, HttpRequest req, String payload) {
 		logger.info("Signature");
-		final SignatureRequest r;
-		if (StringUtils.isEmpty(payload)) {
-			r = new SignatureRequest();
-
-			String data = req.getParameter("dataToSign");
-			if (data != null) {
-				logger.info("Data to sign " + data);
-				ToBeSigned tbs = new ToBeSigned();
-				tbs.setBytes(DatatypeConverter.parseBase64Binary(data));
-				r.setToBeSigned(tbs);
-			}
-
-			String digestAlgo = req.getParameter("digestAlgo");
-			if (digestAlgo != null) {
-				logger.info("digestAlgo " + digestAlgo);
-				r.setDigestAlgorithm(DigestAlgorithm.forName(digestAlgo, DigestAlgorithm.SHA256));
-			}
-
-			String tokenIdString = req.getParameter("tokenId");
-			if (tokenIdString != null) {
-				TokenId tokenId = new TokenId(tokenIdString);
-				r.setTokenId(tokenId);
-			}
-
-			String keyId = req.getParameter("keyId");
-			if (keyId != null) {
-				r.setKeyId(keyId);
-			}
-		} else {
-			r = GsonHelper.fromJson(payload, SignatureRequest.class);
-		}
-    r.setSessionId(req.getHeader("Cookie"));
+		final SignatureRequest r = GsonHelper.fromJson(payload, SignatureRequest.class);
+    r.setSessionValue(getSessionValue(req));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -148,11 +120,10 @@ public class RestHttpPlugin implements HttpPlugin {
 					r.setCertificateFilter(certificateFilter);
 				}
 			}
-
 		} else {
 			r = GsonHelper.fromJson(payload, GetCertificateRequest.class);
 		}
-    r.setSessionId(req.getHeader("Cookie"));
+    r.setSessionValue(getSessionValue(req));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -175,7 +146,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		} else {
 			r = GsonHelper.fromJson(payload, GetTokenRequest.class);
 		}
-    r.setSessionId(req.getHeader("Cookie"));
+    r.setSessionValue(getSessionValue(req));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
 		if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
@@ -189,18 +160,16 @@ public class RestHttpPlugin implements HttpPlugin {
 	private HttpResponse smartcardList(NexuAPI api, HttpRequest req, String payload) {
 		byte[] digest = DSSUtils.digest(DigestAlgorithm.SHA256, payload.getBytes(StandardCharsets.UTF_8));
 		final SmartcardListRequest r = GsonHelper.fromJson(payload, SmartcardListRequest.class);
+		r.setDigest(digest);
 		logger.info(Base64.encodeBase64String(digest));
 		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
-		if(invalidRequestHttpResponse != null) {
+    r.setSessionValue(getSessionValue(req));
+    if(invalidRequestHttpResponse != null) {
 			return invalidRequestHttpResponse;
 		} else {
 			logger.info("Call API");
-			try {
-				api.registerSmartcardInfos(r.getSmartcardInfos(), digest);
-				return new HttpResponse("OK", "application/json;charset=UTF-8", HttpStatus.OK);
-			} catch (Exception e) {
-				return new HttpResponse(e.getMessage(), "application/json;charset=UTF-8", HttpStatus.ERROR);
-			}
+      final Execution<?> respObj = api.smartcardList(r);
+      return toHttpResponse(respObj);
 		}
 	}
 
@@ -276,4 +245,9 @@ public class RestHttpPlugin implements HttpPlugin {
 			return new HttpResponse(GsonHelper.toJson(respObj), "application/json;charset=UTF-8", HttpStatus.ERROR);
 		}
 	}
+
+	private SessionManager.SessionValue getSessionValue(HttpRequest req) {
+    return new SessionManager.SessionValue(req.getHeader("OBSP-Session-ID"),
+            req.getHeader("OBSP-Session-Signature"));
+  }
 }

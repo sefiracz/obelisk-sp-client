@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -65,6 +66,8 @@ public interface NexuAPI {
 
 	Execution<SignatureResponse> sign(SignatureRequest request);
 
+  Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request);
+
 	Execution<GetIdentityInfoResponse> getIdentityInfo(GetIdentityInfoRequest request);
 
 	Execution<AuthenticateResponse> authenticate(AuthenticateRequest request);
@@ -77,7 +80,7 @@ public interface NexuAPI {
 
 	String getLabel(Product p);
 
-	void registerSmartcardInfos(List<SmartcardInfo> infos, byte[] digest);
+	void supportedSmartcardInfos(List<SmartcardInfo> infos, byte[] digest);
 
 	PKCS11Manager getPKCS11Manager();
 

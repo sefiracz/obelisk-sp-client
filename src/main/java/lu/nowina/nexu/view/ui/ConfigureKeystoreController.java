@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -69,9 +70,7 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 			} catch (Exception e1) {
 				throw new NexuException(e1);
 			}
-			keystoreType = whichKeystoreType(keystoreFile);
 			result.setType(keystoreType);
-			result.setToBeSaved(true);
 			signalEnd(result);
 		});
 		ok.disableProperty().bind(Bindings.not(keystoreFileSpecified));
@@ -81,8 +80,11 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 					new ExtensionFilter("KeyStore files", "*.p12", "*.pfx", "*.P12", "*.PFX", "*.jks", "*.JKS", "*.jceks" ,"*.JCEKS"),
 					new ExtensionFilter("All files", "*")
 			);
-			keystoreFileSpecified.set(keystoreFile != null);
-			selectFile.setText(keystoreFile.getName());
+			if (keystoreFile != null) {
+        keystoreType = whichKeystoreType(keystoreFile);
+        selectFile.setText(keystoreFile.getName());
+        keystoreFileSpecified.set(!keystoreType.equals(KeystoreType.UNKNOWN));
+      }
 		});
 	}
 

@@ -1,3 +1,16 @@
+/**
+ * © SEFIRA spol. s r.o., 2020-2021
+ *
+ * Licensed under EUPL Version 1.1 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
+ *
+ * http://ec.europa.eu/idabc/eupl5
+ *
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
+ */
 package lu.nowina.nexu.flow.operation;
 
 /*
@@ -16,6 +29,7 @@ import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.util.List;
@@ -56,9 +70,8 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       }
     } catch (AbstractTokenRuntimeException e) {
-      this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-              e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
-      }).perform();
+      this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
+              e.getMessageParams()), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {
       if(Utils.checkWrongPasswordInput(e, operationFactory, api))

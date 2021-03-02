@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -38,55 +39,65 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Execution<SignatureResponse> process(NexuAPI api, SignatureRequest req) throws Exception {
-		if ((req.getToBeSigned() == null) || (req.getToBeSigned().getBytes() == null)) {
-			throw new NexuException("ToBeSigned is null");
-		}
+    SignatureTokenConnection token = null;
+    try {
+      // check session validity
+      final OperationResult<Boolean> sessionValidityResult = this.getOperationFactory()
+              .getOperation(CheckSessionValidityOperation.class, req.getSessionValue()).perform();
+      if(sessionValidityResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
 
-		if ((req.getDigestAlgorithm() == null)) {
-			throw new NexuException("Digest algorithm expected");
-		}
+        // check mandatory values
+        if ((req.getToBeSigned() == null) || (req.getToBeSigned().getBytes() == null)) {
+          throw new NexuException("ToBeSigned is null");
+        }
+        if ((req.getDigestAlgorithm() == null)) {
+          throw new NexuException("Digest algorithm expected");
+        }
 
-		SignatureTokenConnection token = null;
-		try {
-			final OperationResult<Map<TokenOperationResultKey, Object>> getTokenOperationResult =
-					getOperationFactory().getOperation(GetTokenOperation.class, api, req.getTokenId()).perform();
-			if (getTokenOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-				final Map<TokenOperationResultKey, Object> map = getTokenOperationResult.getResult();
-				final TokenId tokenId = (TokenId) map.get(TokenOperationResultKey.TOKEN_ID);
+        final OperationResult<Map<TokenOperationResultKey, Object>> getTokenOperationResult =
+            getOperationFactory().getOperation(GetTokenOperation.class, api, req.getTokenId()).perform();
+        if (getTokenOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+          final Map<TokenOperationResultKey, Object> map = getTokenOperationResult.getResult();
+          final TokenId tokenId = (TokenId) map.get(TokenOperationResultKey.TOKEN_ID);
 
-				final OperationResult<SignatureTokenConnection> getTokenConnectionOperationResult =
-						getOperationFactory().getOperation(GetTokenConnectionOperation.class, api, tokenId).perform();
-				if (getTokenConnectionOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-					token = getTokenConnectionOperationResult.getResult();
-					logger.info("Token " + token);
+          final OperationResult<SignatureTokenConnection> getTokenConnectionOperationResult =
+              getOperationFactory().getOperation(GetTokenConnectionOperation.class, api, tokenId).perform();
+          if (getTokenConnectionOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+            token = getTokenConnectionOperationResult.getResult();
+            logger.info("Token " + token);
 
-					final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult =
-							getOperationFactory().getOperation(
-									TokenPrivateKeyOperation.class, token, api, req.getKeyId()).perform();
-					if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-						final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
+            final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult =
+                getOperationFactory().getOperation(
+                    TokenPrivateKeyOperation.class, token, api, req.getKeyId()).perform();
+            if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+              final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 
-						logger.info("Key " + key + " " + key.getCertificate().getCertificate().getSubjectDN() + " from " + key.getCertificate().getCertificate().getIssuerDN());
-						final OperationResult<SignatureValue> signOperationResult = getOperationFactory().getOperation(
-								SignOperation.class, token, api, req.getToBeSigned(), req.getDigestAlgorithm(), key).perform();
-						if(signOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-							final SignatureValue value = signOperationResult.getResult();
-							logger.info("Signature performed " + value);
-							return new Execution<SignatureResponse>(new SignatureResponse(value, key.getCertificate(), key.getCertificateChain()));
-						} else {
-							return handleErrorOperationResult(signOperationResult);
-						}
-					} else {
-					  // key error
-						return handleErrorOperationResult(selectPrivateKeyOperationResult);
-					}
-				} else {
-				  // token error
-					return handleErrorOperationResult(getTokenConnectionOperationResult);
-				}
-			} else {
-				return handleErrorOperationResult(getTokenOperationResult);
-			}
+              logger.info("Key " + key + " " + key.getCertificate().getCertificate().getSubjectDN() + " from " + key.getCertificate().getCertificate().getIssuerDN());
+              final OperationResult<SignatureValue> signOperationResult = getOperationFactory().getOperation(
+                  SignOperation.class, token, api, req.getToBeSigned(), req.getDigestAlgorithm(), key).perform();
+              if(signOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+                final SignatureValue value = signOperationResult.getResult();
+                logger.info("Signature performed " + value);
+                return new Execution<SignatureResponse>(new SignatureResponse(value, key.getCertificate(), key.getCertificateChain()));
+              } else {
+                return handleErrorOperationResult(signOperationResult);
+              }
+            } else {
+              // key error
+              return handleErrorOperationResult(selectPrivateKeyOperationResult);
+            }
+          } else {
+            // token connection error
+            return handleErrorOperationResult(getTokenConnectionOperationResult);
+          }
+        } else {
+          // token error
+          return handleErrorOperationResult(getTokenOperationResult);
+        }
+      } else {
+        // invalid session
+        return this.handleErrorOperationResult(sessionValidityResult);
+      }
 		} catch (Exception e) {
 			logger.error("Flow error", e);
 			closeToken(token);

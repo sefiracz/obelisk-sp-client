@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -25,6 +26,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIOperation;
 
 /**
@@ -72,9 +74,8 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 			try {
 				return new OperationResult<SignatureValue>(token.sign(toBeSigned, digestAlgorithm, key));
 			} catch (AbstractTokenRuntimeException e) {
-        this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-                e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
-        }).perform();
+        this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
+                e.getMessageParams()), true);
         return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
       } catch (Exception e) {
 				if(Utils.checkWrongPasswordInput(e, operationFactory, api))

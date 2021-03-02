@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -20,8 +21,6 @@ package lu.nowina.nexu.object.model;
  */
 public class GetCertificateRequest extends NexuRequest {
 
-	private boolean closeToken;
-	
 	private CertificateFilter certificateFilter;
 
 	public GetCertificateRequest() {
@@ -39,14 +38,6 @@ public class GetCertificateRequest extends NexuRequest {
 
 	public void setCertificateFilter(CertificateFilter certificateFilter) {
 		this.certificateFilter = certificateFilter;
-	}
-
-	public boolean isCloseToken() {
-		return closeToken;
-	}
-
-	public void setCloseToken(boolean closeToken) {
-		this.closeToken = closeToken;
 	}
 
 }

@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -120,12 +121,6 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 		return new NoOpFutureOperationInvocation<Product>(product);
 	}
 
-	@Override
-  @Deprecated
-	public FutureOperationInvocation<Boolean> getSaveOperation(NexuAPI api, Product product) {
-		return new NoOpFutureOperationInvocation<Boolean>(true);
-	}
-
   @Override
   public SystrayMenuItem getExtensionSystrayMenuItem(NexuAPI api) {
     return null;
@@ -143,7 +138,7 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 		return api.loadDatabase(WindowsKeystoreDatabase.class, "database-windows.xml");
 	}
 
-	public void saveKeystore(final WindowsKeystore keystore) {
+	private void saveKeystore(final WindowsKeystore keystore) {
 		getProductDatabase().add(keystore);
 	}
 

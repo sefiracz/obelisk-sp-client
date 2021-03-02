@@ -1,23 +1,30 @@
 /**
- * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
- * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
- * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
- * Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
+ * Licensed under EUPL Version 1.1 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
  *
  * http://ec.europa.eu/idabc/eupl5
  *
- * Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
- * SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
- * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
  */
 package lu.nowina.nexu.api;
 
-import eu.europa.esig.dss.DigestAlgorithm;
+/*
+ * Copyright 2020 by SEFIRA, spol. s r. o.
+ * http://www.sefira.cz
+ *
+ * lu.nowina.nexu.api.GetTokenResponse
+ *
+ * Created: 16.12.2020
+ * Author: hlavnicka
+ */
+
 import eu.europa.esig.dss.EncryptionAlgorithm;
 import eu.europa.esig.dss.x509.CertificateToken;
-
-import java.util.List;
 
 public class GetTokenResponse {
 
@@ -30,10 +37,6 @@ public class GetTokenResponse {
 	private CertificateToken[] certificateChain;
 
 	private EncryptionAlgorithm encryptionAlgorithm;
-
-	private List<DigestAlgorithm> supportedDigests;
-
-	private DigestAlgorithm preferredDigest;
 
 	public GetTokenResponse() {
 		super();
@@ -79,19 +82,4 @@ public class GetTokenResponse {
 		this.encryptionAlgorithm = encryptionAlgorithm;
 	}
 
-	public List<DigestAlgorithm> getSupportedDigests() {
-		return supportedDigests;
-	}
-
-	public void setSupportedDigests(List<DigestAlgorithm> supportedDigests) {
-		this.supportedDigests = supportedDigests;
-	}
-
-	public DigestAlgorithm getPreferredDigest() {
-		return preferredDigest;
-	}
-
-	public void setPreferredDigest(DigestAlgorithm preferredDigest) {
-		this.preferredDigest = preferredDigest;
-	}
 }

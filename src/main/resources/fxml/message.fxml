@@ -2,6 +2,7 @@
 
 <!--
  © Nowina Solutions, 2015-2015
+ © SEFIRA spol. s r.o., 2020-2021
 
  Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -21,20 +22,25 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="messagePane" prefHeight="210.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.MessageController">
+<BorderPane fx:id="messagePane" prefHeight="210.0" prefWidth="375.0" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.MessageController">
 
-	<bottom>
-		<HBox styleClass="btn-container" BorderPane.alignment="CENTER">
-			<children>
-				<Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok" />
-			</children>
-		</HBox>
-	</bottom>
-	<center>
-		<VBox BorderPane.alignment="CENTER">
-         <children>
-            <Label text="Message dialog" fx:id="message" styleClass="message" wrapText="true"/>
-         </children>
-		</VBox>
-	</center>
+  <left>
+    <VBox BorderPane.alignment="CENTER" styleClass="icon-primary">
+      <Region fx:id="icon"/>
+    </VBox>
+  </left>
+
+  <center>
+    <VBox BorderPane.alignment="CENTER" styleClass="center">
+      <Label text="Message dialog" fx:id="message" styleClass="message" wrapText="true"/>
+    </VBox>
+  </center>
+
+  <bottom>
+    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+      <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
+    </HBox>
+  </bottom>
+
 </BorderPane>

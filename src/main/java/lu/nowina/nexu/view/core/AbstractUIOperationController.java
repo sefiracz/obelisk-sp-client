@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -13,7 +14,13 @@
  */
 package lu.nowina.nexu.view.core;
 
+import javafx.application.Platform;
 import lu.nowina.nexu.api.flow.OperationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Convenient base class for {@link UIOperationController}.
@@ -22,8 +29,12 @@ import lu.nowina.nexu.api.flow.OperationStatus;
  */
 public abstract class AbstractUIOperationController<R> implements UIOperationController<R> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUIOperationController.class.getName());
+
 	private UIOperation<R> uiOperation;
 	private UIDisplay display;
+
+	private volatile boolean update;
 
 	public AbstractUIOperationController() {
 		super();
@@ -66,4 +77,66 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 	protected final UIDisplay getDisplay() {
 		return display;
 	}
+
+  /**
+   * Offload thread for heavy workload that takes time and therefore needs to
+   * run at separate thread to not block UI rendering and user experience.
+   *
+   * @param callback Heavy workload that might take time to finish
+   * @param notifyUpdate (if true) After workload is done notify update thread that updates JavaFX UI components
+   */
+  public final void asyncWorkload(HeavyWorkload callback, boolean notifyUpdate) {
+    new Thread(() -> {
+      try {
+        callback.execute();
+        if(notifyUpdate)
+          notifyUpdate();
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }).start();
+  }
+
+  /**
+   * Notifies the update thread that updates JavaFX UI components
+   */
+  public final void notifyUpdate() {
+    update = true;
+  }
+
+  /**
+   * Updates the JavaFX UI components whenever {@code notifyUpdate()} is called
+   * @param callback Implementation of {@code UpdateCallback()} function that updates the JavaFX components
+   */
+  public final void asyncUpdate(UpdateCallback callback) {
+    Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+      if (update) {
+        Platform.runLater(() -> {
+          try {
+            callback.update();
+          } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+          } finally {
+            update = false;
+          }
+        });
+      }
+    }, 500, 500, TimeUnit.MILLISECONDS);
+  }
+
+  @FunctionalInterface
+  public interface UpdateCallback {
+
+    void update() throws Exception;
+
+  }
+
+  @FunctionalInterface
+  public interface HeavyWorkload {
+
+    void execute() throws Exception;
+
+  }
+
+
 }

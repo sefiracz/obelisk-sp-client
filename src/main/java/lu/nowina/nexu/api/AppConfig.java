@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -41,7 +42,6 @@ public class AppConfig {
     private static final String HTTP_SERVER_CLASS = "http_server_class";
     private static final String NEXU_HOSTNAME = "nexu_hostname";
     private static final String INSTALL_URL = "install_url";
-    private static final String SERVER_URL = "server_url";
     private static final String BINDING_IP = "binding_ip";
     private static final String BINDING_PORTS = "binding_ports";
     private static final String CONNECTIONS_CACHE_MAX_SIZE = "connections_cache_max_size";
@@ -171,22 +171,6 @@ public class AppConfig {
 
     public void setBindingPorts(final List<Integer> bindingPorts) {
         this.bindingPorts = Collections.unmodifiableList(bindingPorts);
-    }
-
-    public String getServerUrl() {
-        return this.serverUrl;
-    }
-
-    public void setServerUrl(final String serverUrl) {
-        this.serverUrl = serverUrl;
-    }
-
-    public String getInstallUrl() {
-        return this.installUrl;
-    }
-
-    public void setInstallUrl(final String installUrl) {
-        this.installUrl = installUrl;
     }
 
     public String getNexuHostname() {
@@ -405,13 +389,11 @@ public class AppConfig {
         }
 
         this.setBindingIP(props.getProperty(BINDING_IP, "127.0.0.1"));
-        this.setServerUrl(props.getProperty(SERVER_URL, "http://lab.nowina.solutions/nexu")); //feedback url // TODO
-        this.setInstallUrl(props.getProperty(INSTALL_URL, "http://nowina.lu/nexu/")); // TODO
         this.setNexuHostname(props.getProperty(NEXU_HOSTNAME, "localhost"));
         this.setHttpServerClass(props.getProperty(HTTP_SERVER_CLASS, "lu.nowina.nexu.jetty.JettyServer"));
         this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
         this.setAdvancedModeAvailable(Boolean.parseBoolean(props.getProperty(ADVANCED_MODE_AVAILABLE, "true")));
-        this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "1"))); // TODO zmeneno z 50 na 1 (staci nam jeden token?)
+        this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "1")));
         this.setEnablePopUps(Boolean.parseBoolean(props.getProperty(ENABLE_POP_UPS, "true")));
         this.setEnableInformativePopUps(Boolean.parseBoolean(props.getProperty(ENABLE_INFORMATIVE_POP_UPS, "true")));
         // Always set to false, just in case

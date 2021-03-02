@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -15,6 +16,7 @@ package lu.nowina.nexu.view.core;
 
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import lu.nowina.nexu.api.MessageDisplayCallback;
+import lu.nowina.nexu.api.Product;
 
 import java.io.File;
 
@@ -26,8 +28,9 @@ public interface UIDisplay {
 
 	<T> void displayAndWaitUIOperation(UIOperation<T> operation);
 
-	PasswordInputCallback getPasswordInputCallback();
+	PasswordInputCallback getPasswordInputCallback(Product p);
 
+	@Deprecated
 	MessageDisplayCallback getMessageDisplayCallback();
 
 	File displayFileChooser(ExtensionFilter...extensionFilters);

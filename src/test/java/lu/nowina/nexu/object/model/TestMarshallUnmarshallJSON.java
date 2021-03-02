@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2016
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -65,7 +66,7 @@ public class TestMarshallUnmarshallJSON {
 
 	private void assertCommonRequestFields(final lu.nowina.nexu.api.NexuRequest request) {
 		Assert.assertEquals("externalId", request.getExternalId());
-		Assert.assertEquals("nonce", request.getSessionId());
+		Assert.assertEquals("nonce", request.getSessionValue());
 		Assert.assertEquals("requestSeal", request.getRequestSeal());
 		Assert.assertEquals("userLocale", request.getUserLocale());
 	}

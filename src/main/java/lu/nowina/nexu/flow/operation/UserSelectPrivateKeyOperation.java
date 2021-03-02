@@ -1,5 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
+ * © SEFIRA spol. s r.o., 2020-2021
  *
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -24,6 +25,7 @@ import lu.nowina.nexu.api.ProductAdapter;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
+import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIOperation;
 
 import java.util.List;
@@ -44,6 +46,7 @@ import java.util.List;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
+// TODO - make this into Controller? / move this into key-selection.fxml controller
 public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPrivateKeyEntry> {
 
     private SignatureTokenConnection token;
@@ -75,13 +78,12 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         final List<DSSPrivateKeyEntry> keys;
 
         try {
-            keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
+            keys = this.productAdapter.getKeys(this.token, this.certificateFilter); // TODO - heavy load - move to key-selection and do it async
         } catch (final CancelledOperationException e) {
           return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
         } catch (AbstractTokenRuntimeException e) {
-          this.operationFactory.getOperation(UIOperation.class, "/fxml/message.fxml", new Object[] {
-                  e.getMessageCode(), api.getAppConfig().getApplicationName(), 370, 150, e.getMessageParams()
-          }).perform();
+          this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
+                  e.getMessageParams()), true);
           return new OperationResult<>(CoreOperationStatus.BACK);
         } catch (Exception e) {
             if(Utils.checkWrongPasswordInput(e, operationFactory, api))
