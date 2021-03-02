@@ -9,8 +9,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -85,9 +90,9 @@ public class SessionManager {
   /**
    * Check if session is valid
    * @param sessionId SessionID value (UUID+UnixTimestamp)
-   * @param sessionSignature Signature of SessionID
-   * @return True or false if given session value isn't correct
-   * @throws InvalidSessionException When session is invalid or unusable
+   * @param sessionSignature Base64 SignatureValue of SHA512 digest of SessionID
+   * @return True or false if given session value is valid
+   * @throws InvalidSessionException When sent session values are invalid and unusable
    */
   public boolean checkSession(String sessionId, String sessionSignature) throws InvalidSessionException {
     try {
@@ -107,14 +112,19 @@ public class SessionManager {
       // check timestamp
       String sessionTimestamp = sessionIdValues[1];
       long now = System.currentTimeMillis();
-      long timestamp = Long.parseLong(sessionTimestamp);
+      long timestamp;
+      try {
+        timestamp = Long.parseLong(sessionTimestamp);
+      } catch (NumberFormatException e) {
+        throw new InvalidSessionException("Invalid SessionID timestamp format.");
+      }
       if (now - timestamp > 45000*1000) { // 12.5 hours
         throw new InvalidSessionException("Session expired.");
       }
 
       // check signature
       byte[] signatureValue = Base64.decodeBase64(sessionSignature);
-      byte[] signedDigest = Utils.verifySignature(signatureValue, trustCert);
+      byte[] signedDigest = verifySignature(signatureValue, trustCert);
       if(signedDigest == null) // check decrypted value
         throw new InvalidSessionException("Session signature invalid.");
 
@@ -140,6 +150,25 @@ public class SessionManager {
   public void setSessionId(String sessionId) {
     if(sessionId != null)
       sessionDigest = DSSUtils.digest(DigestAlgorithm.SHA512, sessionId.getBytes(StandardCharsets.UTF_8));
+  }
+
+  /**
+   * Verify signature value with public key from certificate
+   * @param signature SignatureValue
+   * @param certificate Certificate
+   * @return Decrypted data from SignatureValue or null if unable to verify
+   */
+  private byte[] verifySignature(byte[] signature, Certificate certificate) {
+    try {
+      Cipher rsa = Cipher.getInstance("RSA");
+      rsa.init(Cipher.DECRYPT_MODE, certificate);
+      rsa.update(signature);
+      return rsa.doFinal();
+    } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException |
+            IllegalBlockSizeException | BadPaddingException e) {
+      logger.error(e.getMessage(), e);
+      return null;
+    }
   }
 
   /**

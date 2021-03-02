@@ -99,19 +99,6 @@ public class Utils {
       return null;
   }
 
-  public static byte[] verifySignature(byte[] signature, Certificate certificate) {
-    try {
-      Cipher rsa = Cipher.getInstance("RSA");
-      rsa.init(Cipher.DECRYPT_MODE, certificate);
-      rsa.update(signature);
-      return rsa.doFinal();
-    } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException |
-            IllegalBlockSizeException | BadPaddingException e) {
-      logger.error(e.getMessage(), e);
-      return null;
-    }
-  }
-
   public static void openCertificate(String certificate) {
     if (Desktop.isDesktopSupported()) {
       try {
