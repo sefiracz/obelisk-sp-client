@@ -53,7 +53,7 @@
 	</top>
 
   <center>
-    <GridPane alignment="CENTER" styleClass="form-container" vgap="5" hgap="10">
+    <GridPane alignment="CENTER" styleClass="preferences-container" vgap="5" hgap="10">
       <Label text="%preferences.language" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
       <ComboBox fx:id="language" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     </GridPane>
