@@ -14,7 +14,6 @@
  */
 package lu.nowina.nexu.flow;
 
-import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.api.Execution;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
@@ -55,13 +54,4 @@ abstract class AbstractCoreFlow<I, O> extends Flow<I, O> {
 		}
 	}
 
-	protected void closeToken(SignatureTokenConnection token) {
-		if (token != null) {
-			try {
-				token.close();
-			} catch (final Exception e) {
-				logger.error("Exception when closing token", e);
-			}
-		}
-	}
 }

@@ -22,6 +22,7 @@ import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +101,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
       }
 		} catch (Exception e) {
 			logger.error("Flow error", e);
-			closeToken(token);
+      SessionManager.getManager().destroy();
 			throw handleException(e);
 		}
 	}

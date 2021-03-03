@@ -23,6 +23,7 @@ import eu.europa.esig.dss.SignatureAlgorithm;
 import eu.europa.esig.dss.SignatureValue;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.x509.CertificateToken;
+import lu.nowina.nexu.api.SessionValue;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.json.GsonHelper;
 import org.apache.commons.codec.binary.Base64;
@@ -58,16 +59,12 @@ public class TestMarshallUnmarshallJSON {
 	}
 
 	private void setCommonRequestFields(final NexuRequest request) {
-		request.setExternalId("externalId");
-		request.setNonce("nonce");
-		request.setRequestSeal("requestSeal");
+		request.setSessionValue(new SessionValue("a+1", "a"));
 		request.setUserLocale("userLocale");
 	}
 
 	private void assertCommonRequestFields(final lu.nowina.nexu.api.NexuRequest request) {
-		Assert.assertEquals("externalId", request.getExternalId());
-		Assert.assertEquals("nonce", request.getSessionValue());
-		Assert.assertEquals("requestSeal", request.getRequestSeal());
+		Assert.assertEquals(new SessionValue("a+1", "a"), request.getSessionValue());
 		Assert.assertEquals("userLocale", request.getUserLocale());
 	}
 

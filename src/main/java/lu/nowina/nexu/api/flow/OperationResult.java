@@ -18,9 +18,11 @@ public class OperationResult<R> {
 
 	private R result;
 
-	private OperationStatus status;
+	private final OperationStatus status;
 
 	private Exception exception;
+
+	private String message;
 
 	public OperationResult(R result) {
 		this.status = BasicOperationStatus.SUCCESS;
@@ -36,6 +38,11 @@ public class OperationResult<R> {
 		this.status = status;
 	}
 
+  public OperationResult(OperationStatus status, String message) {
+    this.status = status;
+    this.message = message;
+  }
+
 	public Exception getException() {
 		return exception;
 	}
@@ -48,4 +55,7 @@ public class OperationResult<R> {
 		return status;
 	}
 
+  public String getMessage() {
+    return message;
+  }
 }

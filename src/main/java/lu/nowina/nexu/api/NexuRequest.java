@@ -14,8 +14,6 @@
  */
 package lu.nowina.nexu.api;
 
-import lu.nowina.nexu.generic.SessionManager;
-
 /**
  * 
  * @author david.naramski
@@ -24,12 +22,7 @@ import lu.nowina.nexu.generic.SessionManager;
 public class NexuRequest {
 
 	private String userLocale;
-
-	private String externalId;
-
-	private String requestSeal;
-	
-	private SessionManager.SessionValue sessionValue;
+	private SessionValue sessionValue;
 
 	public String getUserLocale() {
 		return userLocale;
@@ -39,27 +32,11 @@ public class NexuRequest {
 		this.userLocale = userLocale;
 	}
 
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getRequestSeal() {
-		return requestSeal;
-	}
-
-	public void setRequestSeal(String requestSeal) {
-		this.requestSeal = requestSeal;
-	}
-
-	public SessionManager.SessionValue getSessionValue() {
+	public SessionValue getSessionValue() {
 		return sessionValue;
 	}
 
-	public void setSessionValue(SessionManager.SessionValue sessionValue) {
+	public void setSessionValue(SessionValue sessionValue) {
 		this.sessionValue = sessionValue;
 	}
 

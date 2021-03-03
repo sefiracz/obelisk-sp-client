@@ -24,6 +24,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
@@ -159,7 +160,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
     		}
     	} catch (final Exception e) {
     		logger.error("Flow error", e);
-				closeToken(token);
+        SessionManager.getManager().destroy();
     		throw this.handleException(e);
     	}
     }

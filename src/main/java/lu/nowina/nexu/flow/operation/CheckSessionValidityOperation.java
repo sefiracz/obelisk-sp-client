@@ -23,17 +23,18 @@ package lu.nowina.nexu.flow.operation;
  * Author: hlavnicka
  */
 
+import lu.nowina.nexu.api.SessionValue;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.generic.InvalidSessionException;
 import lu.nowina.nexu.generic.SessionManager;
 
 public class CheckSessionValidityOperation extends AbstractCompositeOperation<Boolean> {
 
-  private SessionManager.SessionValue sessionValue;
+  private SessionValue sessionValue;
 
   @Override
   public void setParams(Object... params) {
-    this.sessionValue = (SessionManager.SessionValue) params[0];
+    this.sessionValue = (SessionValue) params[0];
   }
 
   @Override
@@ -46,7 +47,8 @@ public class CheckSessionValidityOperation extends AbstractCompositeOperation<Bo
         SessionManager.getManager().setSessionId(sessionValue.getSessionId());
       }
     } catch (InvalidSessionException e) {
-      return new OperationResult<>(CoreOperationStatus.INVALID_SESSION); // I don't talk to strangers, gimme proof
+      // I don't talk to strangers and dummies, gimme proof
+      return new OperationResult<>(CoreOperationStatus.INVALID_SESSION, e.getMessage());
     }
     return new OperationResult<>(Boolean.TRUE);
   }

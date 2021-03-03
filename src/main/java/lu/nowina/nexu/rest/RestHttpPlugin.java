@@ -246,8 +246,7 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
-	private SessionManager.SessionValue getSessionValue(HttpRequest req) {
-    return new SessionManager.SessionValue(req.getHeader("OBSP-Session-ID"),
-            req.getHeader("OBSP-Session-Signature"));
+	private SessionValue getSessionValue(HttpRequest req) {
+    return new SessionValue(req.getHeader("OBSP-Session-ID"), req.getHeader("OBSP-Session-Signature"));
   }
 }

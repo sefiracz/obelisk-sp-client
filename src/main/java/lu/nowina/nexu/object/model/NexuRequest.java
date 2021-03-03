@@ -14,6 +14,8 @@
  */
 package lu.nowina.nexu.object.model;
 
+import lu.nowina.nexu.api.SessionValue;
+
 /**
  * Base class of requests of NexU. 
  *
@@ -22,9 +24,7 @@ package lu.nowina.nexu.object.model;
 public class NexuRequest {
 
 	private String userLocale;
-	private String externalId;
-	private String requestSeal;
-	private String nonce;
+	private SessionValue sessionValue;
 
 	public NexuRequest() {
 		super();
@@ -38,28 +38,12 @@ public class NexuRequest {
 		this.userLocale = userLocale;
 	}
 
-	public String getExternalId() {
-		return externalId;
+	public SessionValue getSessionValue() {
+		return sessionValue;
 	}
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getRequestSeal() {
-		return requestSeal;
-	}
-
-	public void setRequestSeal(String requestSeal) {
-		this.requestSeal = requestSeal;
-	}
-
-	public String getNonce() {
-		return nonce;
-	}
-
-	public void setNonce(String nonce) {
-		this.nonce = nonce;
+	public void setSessionValue(SessionValue sessionValue) {
+		this.sessionValue = sessionValue;
 	}
 
 }
