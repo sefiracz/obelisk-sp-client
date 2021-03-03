@@ -158,7 +158,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     }
     if ("CKR_TOKEN_NOT_PRESENT".equals(e.getMessage()) || "CKR_SESSION_HANDLE_INVALID".equals(e.getMessage()) ||
             "CKR_DEVICE_REMOVED".equals(e.getMessage()) || "CKR_SESSION_CLOSED".equals(e.getMessage()) ||
-            "CKR_SLOT_ID_INVALID".equals(e.getMessage())) {
+            "CKR_SLOT_ID_INVALID".equals(e.getMessage()) || "CKR_USER_ALREADY_LOGGED_IN".equals(e.getMessage())) {
       return new PKCS11TokenException(e);
     }
     return new DSSException(e);
