@@ -91,7 +91,16 @@ RadioButton {
     -fx-background-color: white;
     -fx-padding: 10 30 10 30;
     -fx-spacing: 10;
-    -fx-alignment: left;
+    -fx-alignment: top_left;
+
+}
+
+.preferences-container {
+
+    -fx-background-color: white;
+    -fx-padding: 10 30 10 30;
+    -fx-spacing: 10;
+    -fx-alignment: center;
 
 }
 
