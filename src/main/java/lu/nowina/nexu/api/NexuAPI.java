@@ -80,7 +80,7 @@ public interface NexuAPI {
 
 	PKCS11Manager getPKCS11Manager();
 
-  void showSslWarning(String browserTypeProperty);
+  void showSslWarning(String browserTypeProperty, String certName);
 
   <T extends EntityDatabase> T loadDatabase(Class<T> c, String filename);
 }

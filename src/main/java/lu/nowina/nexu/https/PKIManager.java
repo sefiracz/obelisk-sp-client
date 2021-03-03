@@ -140,7 +140,7 @@ public class PKIManager {
 		final String[] files = nexuHome.list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.startsWith(applicationName + "-") && name.endsWith(".crt");
+				return name.startsWith("localhost-") && name.endsWith(".crt");
 			}
 		});
 		if(files.length > 0) {
