@@ -38,12 +38,12 @@
   </center>
 
   <bottom>
-    <VBox styleClass="btn-container" fx:id="bottomContainer" BorderPane.alignment="CENTER">
+    <VBox fx:id="bottomContainer" BorderPane.alignment="CENTER">
       <HBox styleClass="btn-container" fx:id="btnContainer" BorderPane.alignment="CENTER">
         <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
       </HBox>
       <VBox fx:id="doNotShowContainer">
-        <Separator/>
+        <Separator style="-fx-padding: 0 10 0 10"/>
         <HBox styleClass="do-not-show-container" BorderPane.alignment="CENTER">
           <CheckBox text="%checkbox.do.not.show"/>
         </HBox>
