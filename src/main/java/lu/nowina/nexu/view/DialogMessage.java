@@ -31,7 +31,7 @@ public class DialogMessage {
   private String[] messageParameters = new String[0];
   private double width = 400;
   private double height = 150;
-  private boolean doNotShowButton = false;
+  private boolean doNotShowCheckbox = false;
   private boolean okButton = true;
   private String message;
 
@@ -101,19 +101,19 @@ public class DialogMessage {
     return height;
   }
 
-  public boolean isDoNotShowButton() {
-    return doNotShowButton;
+  public boolean isShowDoNotShowCheckbox() {
+    return doNotShowCheckbox;
   }
 
-  public void setDoNotShowButton(boolean doNotShowButton) {
-    this.doNotShowButton = doNotShowButton;
+  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox) {
+    this.doNotShowCheckbox = doNotShowCheckbox;
   }
 
-  public boolean isOkButton() {
+  public boolean isShowOkButton() {
     return okButton;
   }
 
-  public void setOkButton(boolean okButton) {
+  public void setShowOkButton(boolean okButton) {
     this.okButton = okButton;
   }
 

@@ -30,7 +30,6 @@ import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MessageController extends AbstractUIOperationController<Void> implements Initializable {
@@ -120,12 +119,12 @@ public class MessageController extends AbstractUIOperationController<Void> imple
       }
 
       // remove ok button if not needed
-      if(!dialogMessage.isOkButton()) {
+      if(!dialogMessage.isShowOkButton()) {
         btnContainer.getChildren().remove(ok);
       }
 
       // hide do not show checkbox
-      if(!dialogMessage.isDoNotShowButton()) {
+      if(!dialogMessage.isShowDoNotShowCheckbox()) {
         bottomContainer.getChildren().remove(doNotShowContainer);
       }
     });
