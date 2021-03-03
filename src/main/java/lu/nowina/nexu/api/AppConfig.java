@@ -41,13 +41,13 @@ public class AppConfig {
     private static final String DEBUG = "debug";
     private static final String HTTP_SERVER_CLASS = "http_server_class";
     private static final String NEXU_HOSTNAME = "nexu_hostname";
-    private static final String INSTALL_URL = "install_url";
     private static final String BINDING_IP = "binding_ip";
     private static final String BINDING_PORTS = "binding_ports";
     private static final String CONNECTIONS_CACHE_MAX_SIZE = "connections_cache_max_size";
     private static final String ENABLE_POP_UPS = "enable_pop_ups";
     //This property is less restrictive than enable_pop_ups, since this one allows display of certificate selection
     private static final String ENABLE_INFORMATIVE_POP_UPS = "enable_informative_pop_ups";
+
     private static final String USE_SYSTEM_PROXY = "use_system_proxy";
     private static final String PROXY_SERVER = "proxy_server";
     private static final String PROXY_PORT = "proxy_port";
@@ -56,6 +56,7 @@ public class AppConfig {
     private static final String PROXY_USERNAME = "proxy_username";
     private static final String PROXY_PASSWORD = "proxy_password";
     private static final String USER_PREFERENCES_EDITABLE = "user_preferences_editable";
+
     private static final String REQUEST_PROCESSOR_CLASS = "request_processor_class";
 
     private static final String ROLLING_LOG_FILE_SIZE = "rolling_log_file_size";
@@ -82,10 +83,6 @@ public class AppConfig {
     private String bindingIP;
 
     private List<Integer> bindingPorts;
-
-    private String serverUrl;
-
-    private String installUrl;
 
     private String nexuHostname;
 
