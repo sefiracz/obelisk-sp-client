@@ -285,7 +285,7 @@ public class InternalAPI implements NexuAPI {
     message.setHeight(200);
     message.setWidth(400);
     message.setMessage(messageText);
-    message.setDoNotShowButton(true);
+    message.setShowDoNotShowCheckbox(true);
     // add button
     Button cert = new Button();
     cert.setText(resources.getString("install.ca.cert.button.cert.location"));
