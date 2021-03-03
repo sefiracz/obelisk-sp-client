@@ -24,29 +24,29 @@
 <StackPane prefHeight="300.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="lu.nowina.nexu.view.ui.ProductCollisionController">
 
-<BorderPane fx:id="borderPane">
+  <BorderPane fx:id="borderPane">
 
-  <top>
-    <VBox BorderPane.alignment="CENTER" styleClass="top">
-      <Label styleClass="message" fx:id="message" wrapText="true"/>
-    </VBox>
-  </top>
+    <top>
+      <VBox BorderPane.alignment="CENTER" styleClass="top">
+        <Label styleClass="message" fx:id="message" wrapText="true"/>
+      </VBox>
+    </top>
 
-  <center>
-    <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="center">
-      <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
-    </ScrollPane>
-  </center>
+    <center>
+      <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="center">
+        <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
+      </ScrollPane>
+    </center>
 
-  <bottom>
-    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
-      <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
-      <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
-      <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%systray.menu.manage.keystores"/>
-      <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
-    </HBox>
-  </bottom>
+    <bottom>
+      <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+        <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
+        <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
+        <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%systray.menu.manage.keystores"/>
+        <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
+      </HBox>
+    </bottom>
 
-</BorderPane>
+  </BorderPane>
 </StackPane>
 
