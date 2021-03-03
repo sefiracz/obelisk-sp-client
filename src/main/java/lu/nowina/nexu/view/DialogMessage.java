@@ -1,11 +1,17 @@
 package lu.nowina.nexu.view;
 
+import javafx.scene.control.Button;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class DialogMessage {
 
   public enum Level {
     INFORMATION("message.title.information"),
     WARNING("message.title.warning"),
-    ERROR("message.title.error");
+    ERROR("message.title.error"),
+    NO_LEVEL("");
 
     private final String titleCode;
 
@@ -19,11 +25,19 @@ public class DialogMessage {
   }
 
   private final Level level;
-  private final String messageProperty;
+  private final List<Button> buttons = new ArrayList<>();
 
+  private String messageProperty;
   private String[] messageParameters = new String[0];
   private double width = 400;
   private double height = 150;
+  private boolean doNotShowButton = false;
+  private boolean okButton = true;
+  private String message;
+
+  public DialogMessage(Level level) {
+    this.level = level;
+  }
 
   public DialogMessage(String messageProperty, Level level) {
     this.messageProperty = messageProperty;
@@ -63,12 +77,52 @@ public class DialogMessage {
     return messageParameters;
   }
 
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+  public void setWidth(double width) {
+    this.width = width;
+  }
+
+  public void setHeight(double height) {
+    this.height = height;
+  }
+
   public double getWidth() {
     return width;
   }
 
   public double getHeight() {
     return height;
+  }
+
+  public boolean isDoNotShowButton() {
+    return doNotShowButton;
+  }
+
+  public void setDoNotShowButton(boolean doNotShowButton) {
+    this.doNotShowButton = doNotShowButton;
+  }
+
+  public boolean isOkButton() {
+    return okButton;
+  }
+
+  public void setOkButton(boolean okButton) {
+    this.okButton = okButton;
+  }
+
+  public void addButton(Button button) {
+    buttons.add(button);
+  }
+
+  public List<Button> getButtons() {
+    return buttons;
   }
 
 }

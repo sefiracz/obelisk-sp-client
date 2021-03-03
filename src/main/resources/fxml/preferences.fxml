@@ -61,6 +61,7 @@
 
 	<bottom>
     <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+      <Button fx:id="reset" mnemonicParsing="false" styleClass="btn-danger" text="%button.reset"/>
       <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
       <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
     </HBox>

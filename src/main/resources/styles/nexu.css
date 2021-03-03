@@ -203,6 +203,13 @@ RadioButton {
 
 }
 
+.do-not-show-container {
+
+    -fx-background-color: #F5F5F5;
+    -fx-padding: 7 10 2 10;
+
+}
+
 .text-area .content{
     -fx-background-color: #C0C0C0;
 }

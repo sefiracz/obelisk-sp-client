@@ -26,7 +26,7 @@
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.MessageController">
 
   <left>
-    <VBox BorderPane.alignment="CENTER" styleClass="icon-primary">
+    <VBox BorderPane.alignment="CENTER" styleClass="icon-primary" fx:id="iconBox">
       <Region fx:id="icon"/>
     </VBox>
   </left>
@@ -38,9 +38,17 @@
   </center>
 
   <bottom>
-    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
-      <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
-    </HBox>
+    <VBox styleClass="btn-container" fx:id="bottomContainer" BorderPane.alignment="CENTER">
+      <HBox styleClass="btn-container" fx:id="btnContainer" BorderPane.alignment="CENTER">
+        <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
+      </HBox>
+      <VBox fx:id="doNotShowContainer">
+        <Separator/>
+        <HBox styleClass="do-not-show-container" BorderPane.alignment="CENTER">
+          <CheckBox text="%checkbox.do.not.show"/>
+        </HBox>
+      </VBox>
+    </VBox>
   </bottom>
 
 </BorderPane>
