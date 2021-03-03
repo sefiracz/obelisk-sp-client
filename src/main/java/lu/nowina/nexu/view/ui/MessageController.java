@@ -59,11 +59,18 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 	private Button ok;
 
 	private ResourceBundle resources;
+	private boolean hideCheckbox;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		if (ok != null) {
-			ok.setOnAction(e -> signalEnd(null));
+			ok.setOnAction(e -> {
+        if(hideCheckbox) {
+          // TODO - nastavit zobrazovani dialogu do konfigurace
+
+        }
+			  signalEnd(null);
+			});
 		}
 		this.resources = resources;
 	}
@@ -125,7 +132,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
       // hide do not show checkbox
       if(!dialogMessage.isShowDoNotShowCheckbox()) {
-        bottomContainer.getChildren().remove(doNotShowContainer);
+        hideCheckbox = bottomContainer.getChildren().remove(doNotShowContainer);
       }
     });
 

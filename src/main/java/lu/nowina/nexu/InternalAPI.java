@@ -277,10 +277,10 @@ public class InternalAPI implements NexuAPI {
 		pkcs11Manager.supportedSmartcardInfos(infos, digest);
 	}
 
-  public void showSslWarning(String browserTypeProperty) {
+  public void showSslWarning(String browserTypeProperty, String certName) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
     String messageText = MessageFormat.format(resources.getString("install.ca.cert.message"),
-            resources.getString(browserTypeProperty));
+            certName, resources.getString(browserTypeProperty));
     DialogMessage message = new DialogMessage(DialogMessage.Level.ERROR);
     message.setHeight(200);
     message.setWidth(400);
