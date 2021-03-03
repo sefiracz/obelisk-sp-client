@@ -62,22 +62,10 @@
 	<bottom>
     <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
       <Button fx:id="reset" mnemonicParsing="false" styleClass="btn-danger" text="%button.reset"/>
+      <Region HBox.hgrow="ALWAYS"/>
       <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
       <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
     </HBox>
-<!--    <BorderPane BorderPane.alignment="CENTER">-->
-<!--      <left>-->
-<!--        <HBox styleClass="btn-container" BorderPane.alignment="CENTER">-->
-<!--          <Button fx:id="reset" mnemonicParsing="false" styleClass="btn-danger" text="%button.reset"/>-->
-<!--        </HBox>-->
-<!--      </left>-->
-<!--      <right>-->
-<!--        <HBox styleClass="btn-container" BorderPane.alignment="CENTER">-->
-<!--          <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>-->
-<!--          <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>-->
-<!--        </HBox>-->
-<!--      </right>-->
-<!--    </BorderPane>-->
 	</bottom>
 
 </BorderPane>
