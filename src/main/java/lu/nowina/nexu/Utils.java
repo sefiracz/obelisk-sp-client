@@ -92,13 +92,6 @@ public class Utils {
     return false;
   }
 
-  public static char[] getDecodedValue(String base64) {
-    if (base64 != null)
-      return new String(Base64.decodeBase64(base64)).toCharArray();
-    else
-      return null;
-  }
-
   public static void openCertificate(String certificate) {
     if (Desktop.isDesktopSupported()) {
       try {
