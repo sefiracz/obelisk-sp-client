@@ -18,11 +18,13 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.DialogMessage;
@@ -55,19 +57,23 @@ public class MessageController extends AbstractUIOperationController<Void> imple
   @FXML
   private VBox doNotShowContainer;
 
+  @FXML
+  private CheckBox doNotShowCheckbox;
+
 	@FXML
 	private Button ok;
 
-	private ResourceBundle resources;
-	private boolean hideCheckbox;
+	private NexuAPI api;
+	private DialogMessage dialogMessage;
+  private ResourceBundle resources;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		if (ok != null) {
 			ok.setOnAction(e -> {
-        if(hideCheckbox) {
-          // TODO - nastavit zobrazovani dialogu do konfigurace
-
+        if(doNotShowCheckbox.selectedProperty().getValue()) {
+          UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+          prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
 			  signalEnd(null);
 			});
@@ -77,8 +83,8 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
 	@Override
 	public void init(Object... params) {
-    NexuAPI api = (NexuAPI) params[0];
-    DialogMessage dialogMessage = (DialogMessage) params[1];
+    api = (NexuAPI) params[0];
+    dialogMessage = (DialogMessage) params[1];
     // set title
     StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), dialogMessage.getLevel().getTitleCode());
 
@@ -132,7 +138,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
       // hide do not show checkbox
       if(!dialogMessage.isShowDoNotShowCheckbox()) {
-        hideCheckbox = bottomContainer.getChildren().remove(doNotShowContainer);
+        bottomContainer.getChildren().remove(doNotShowContainer);
       }
     });
 

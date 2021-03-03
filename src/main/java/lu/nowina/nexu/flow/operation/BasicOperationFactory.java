@@ -14,10 +14,10 @@
  */
 package lu.nowina.nexu.flow.operation;
 
+import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationFactory;
-import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -37,6 +37,7 @@ public class BasicOperationFactory implements OperationFactory {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R, T extends Operation<R>> Operation<R> getOperation(final Class<T> clazz, final Object... params) {
         try {
             final T operation = clazz.newInstance();
@@ -50,15 +51,19 @@ public class BasicOperationFactory implements OperationFactory {
             }
             operation.setParams(params);
             return operation;
-        } catch (final InstantiationException e) {
-            throw new IllegalArgumentException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (final InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void getMessageDialog(NexuAPI api, DialogMessage message, boolean blockingUI) {
+    UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+    String dialogId = message.getDialogId();
+    if(dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
+      return; // do not display message dialog
+    }
     if (blockingUI) {
       getOperation(UIOperation.class, "/fxml/message.fxml", api, message).perform();
     } else {

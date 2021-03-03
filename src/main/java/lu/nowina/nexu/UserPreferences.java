@@ -14,7 +14,7 @@
  */
 package lu.nowina.nexu;
 
-import java.util.Locale;
+import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -27,7 +27,9 @@ public class UserPreferences {
 	private static final String PROXY_USERNAME = "sefira.obelisk.sp.proxyUsername";
 	private static final String PROXY_PASSWORD = "sefira.obelisk.sp.proxyPassword";
 	private static final String PROXY_USE_HTTPS = "sefira.obelisk.sp.proxyHttps";
+
 	private static final String LANGUAGE = "sefira.obelisk.sp.language";
+  private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
 
 	private final Preferences prefs;
 
@@ -38,30 +40,79 @@ public class UserPreferences {
 	private Boolean proxyAuthentication;
 	private String proxyUsername;
 	private String proxyPassword;
+
 	private String language;
+	private String hiddenDialogIds;
 
 	public UserPreferences(final String applicationName) {
 		prefs = Preferences.userRoot().node(applicationName);
 		
 		final String useSystemProxyStr = prefs.get(USE_SYSTEM_PROXY, null);
 		useSystemProxy = (useSystemProxyStr != null) ? Boolean.valueOf(useSystemProxyStr) : null;
-		
 		proxyServer = prefs.get(PROXY_SERVER, null);
-		
 		final String proxyPortStr = prefs.get(PROXY_PORT, null);
 		proxyPort = (proxyPortStr != null) ? Integer.valueOf(proxyPortStr) : null;
-		
 		final String proxyHttps = prefs.get(PROXY_USE_HTTPS, null);
 		proxyUseHttps = (proxyHttps != null) ? Boolean.valueOf(proxyHttps) : null;
-		
 		final String proxyAuthenticationStr = prefs.get(PROXY_AUTHENTICATION, null);
 		proxyAuthentication = (proxyAuthenticationStr != null) ? Boolean.valueOf(proxyAuthenticationStr) : null;
-		
 		proxyUsername = prefs.get(PROXY_USERNAME, null);
 		proxyPassword = prefs.get(PROXY_PASSWORD, null);
 
 		language = prefs.get(LANGUAGE, Locale.getDefault().getLanguage());
+    hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
 	}
+
+  public void setLanguage(String language) {
+    if(language != null) {
+      prefs.put(LANGUAGE, language);
+    } else {
+      prefs.remove(LANGUAGE);
+    }
+    this.language = language;
+  }
+
+  public void addHiddenDialogId(String dialogId) {
+    List<String> list = getHiddenDialogIds();
+    list.add(dialogId);
+    this.hiddenDialogIds = String.join(",", list);
+    prefs.put(HIDDEN_DIALOGS, hiddenDialogIds);
+  }
+
+
+  public String getLanguage() {
+    return language;
+  }
+
+  public List<String> getHiddenDialogIds() {
+    if(hiddenDialogIds != null) {
+      String[] dialogIds = hiddenDialogIds.split(",");
+      return new ArrayList<>(Arrays.asList(dialogIds));
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+  public void clear() {
+    try {
+      this.prefs.clear();
+    } catch (BackingStoreException e) {
+      throw new IllegalStateException(e);
+    }
+    useSystemProxy = null;
+    proxyUseHttps = null;
+    proxyServer = null;
+    proxyPort = null;
+    proxyAuthentication = null;
+    proxyUsername = null;
+    proxyPassword = null;
+
+    language = null;
+    hiddenDialogIds = null;
+  }
+
+
+  /******  TODO remove ? ******/
 
 	public void setUseSystemProxy(Boolean useSystemProxy) {
 		if(useSystemProxy != null) {
@@ -126,15 +177,6 @@ public class UserPreferences {
 		this.proxyPassword = proxyPassword;
 	}
 
-	public void setLanguage(String language) {
-		if(language != null) {
-			prefs.put(LANGUAGE, language);
-		} else {
-			prefs.remove(LANGUAGE);
-		}
-		this.language = language;
-	}
-
 	public Boolean isUseSystemProxy() {
 		return useSystemProxy;
 	}
@@ -146,7 +188,7 @@ public class UserPreferences {
 	public Integer getProxyPort() {
 		return proxyPort;
 	}
-	
+
 	public Boolean isProxyUseHttps() {
 		return proxyUseHttps;
 	}
@@ -163,23 +205,4 @@ public class UserPreferences {
 		return proxyPassword;
 	}
 
-	public String getLanguage() {
-		return language;
-	}
-
-	public void clear() {
-		try {
-			this.prefs.clear();
-		} catch (BackingStoreException e) {
-			throw new IllegalStateException(e);
-		}
-		useSystemProxy = null;
-		proxyUseHttps = null;
-		proxyServer = null;
-		proxyPort = null;
-		proxyAuthentication = null;
-		proxyUsername = null;
-		proxyPassword = null;
-		language = null;
-	}
 }

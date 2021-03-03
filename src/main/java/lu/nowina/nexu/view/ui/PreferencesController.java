@@ -76,7 +76,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	private BooleanProperty readOnly;
 
 	private final AppLanguage cz = new AppLanguage("Čeština", new Locale("cs", "CZ"));
-	private final AppLanguage en =new AppLanguage("English", Locale.ENGLISH);
+	private final AppLanguage en = new AppLanguage("English", Locale.ENGLISH);
 
 	private static final boolean isWindows;
 
