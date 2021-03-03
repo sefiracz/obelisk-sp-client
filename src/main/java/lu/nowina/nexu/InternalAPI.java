@@ -261,22 +261,6 @@ public class InternalAPI implements NexuAPI {
     return executeRequest(flow, request);
 	}
 
-  @Override
-	public Execution<GetIdentityInfoResponse> getIdentityInfo(GetIdentityInfoRequest request) {
-		final Flow<GetIdentityInfoRequest, GetIdentityInfoResponse> flow =
-				flowRegistry.getFlow(FlowRegistry.GET_IDENTITY_INFO_FLOW, display, this);
-		flow.setOperationFactory(operationFactory);
-		return executeRequest(flow, request);
-	}
-
-	@Override
-	public Execution<AuthenticateResponse> authenticate(AuthenticateRequest request) {
-		final Flow<AuthenticateRequest, AuthenticateResponse> flow =
-				flowRegistry.getFlow(FlowRegistry.AUTHENTICATE_FLOW, display, this);
-		flow.setOperationFactory(operationFactory);
-		return executeRequest(flow, request);
-	}
-
 	@Override
 	public HttpPlugin getHttpPlugin(String context) {
 		return httpPlugins.get(context);

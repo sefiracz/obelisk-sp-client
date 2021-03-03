@@ -14,7 +14,6 @@
  */
 package lu.nowina.nexu.api;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
@@ -87,25 +86,6 @@ public interface ProductAdapter {
 			MessageDisplayCallback messageCallback);
 
 	/**
-	 * Returns <code>true</code> if this product adapter can return identity information for the given <code>product</code>.
-	 * @return <code>true</code> if this product adapter can return identity information for the given <code>product</code>.
-	 */
-	boolean canReturnIdentityInfo(Product product);
-
-	/**
-	 * Returns the identity information using the given <code>token</code>.
-	 * @param token The token to use to get the identity information.
-	 * @return The identity information using the given <code>token</code>.
-	 */
-	GetIdentityInfoResponse getIdentityInfo(SignatureTokenConnection token);
-
-	/**
-	 * Returns <code>true</code> if this product adapter supports {@link CertificateFilter} for the given <code>product</code>.
-	 * @return <code>true</code> if this product adapter supports {@link CertificateFilter} for the given <code>product</code>.
-	 */
-	boolean supportCertificateFilter(Product product);
-
-	/**
 	 * Returns the keys of <code>token</code> matching the <code>certificateFilter</code>.
 	 * @param token The token to use to retrieve the keys.
 	 * @param certificateFilter Filter that must be matched by returned keys.
@@ -120,27 +100,6 @@ public interface ProductAdapter {
 	 * @return The key from <code>token</code> matching the <code>keyAlias</code>.
 	 */
 	DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias);
-
-	/**
-	 * Returns <code>true</code> if this product adapter can return supported digest algorithms for the given <code>product</code>.
-	 * @param product The product for which one would like to retrieve the supported digest algorithms.
-	 * @return <code>true</code> if this product adapter can return supported digest algorithms for the given <code>product</code>.
-	 */
-	boolean canReturnSuportedDigestAlgorithms(Product product);
-
-	/**
-	 * Returns the list of supported digest algorithms for the given <code>product</code>.
-	 * @param product The product for which one would like to retrieve the supported digest algorithms.
-	 * @return The list of supported digest algorithms for the given <code>product</code>.
-	 */
-	List<DigestAlgorithm> getSupportedDigestAlgorithms(Product product);
-
-	/**
-	 * Returns the preferred digest algorithm for the given <code>product</code>.
-	 * @param product The product for which one would like to retrieve the preferred digest algorithm.
-	 * @return The preferred digest algorithm for the given <code>product</code>.
-	 */
-	DigestAlgorithm getPreferredDigestAlgorithm(Product product);
 
 	/**
 	 * Returns the specification of the operation to call to configure <code>product</code>.

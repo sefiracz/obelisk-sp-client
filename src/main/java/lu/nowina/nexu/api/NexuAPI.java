@@ -68,10 +68,6 @@ public interface NexuAPI {
 
   Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request);
 
-	Execution<GetIdentityInfoResponse> getIdentityInfo(GetIdentityInfoRequest request);
-
-	Execution<AuthenticateResponse> authenticate(AuthenticateRequest request);
-
 	// Utils API
 
 	AppConfig getAppConfig();

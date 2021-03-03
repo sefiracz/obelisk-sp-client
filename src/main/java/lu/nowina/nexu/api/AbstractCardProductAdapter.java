@@ -14,14 +14,11 @@
  */
 package lu.nowina.nexu.api;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -91,41 +88,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	protected abstract SignatureTokenConnection connect(NexuAPI api, DetectedCard card, PasswordInputCallback callback,
 			MessageDisplayCallback messageCallback);
-
-	@Override
-	public final boolean canReturnIdentityInfo(Product product) {
-		return (product instanceof DetectedCard) && canReturnIdentityInfo((DetectedCard) product);
-	}
-
-	protected abstract boolean canReturnIdentityInfo(DetectedCard card);
-
-	@Override
-	public final boolean supportCertificateFilter(Product product) {
-		return (product instanceof DetectedCard) && supportCertificateFilter((DetectedCard) product);
-	}
-
-	protected abstract boolean supportCertificateFilter(DetectedCard card);
-
-	@Override
-	public final boolean canReturnSuportedDigestAlgorithms(Product product) {
-		return (product instanceof DetectedCard) && canReturnSuportedDigestAlgorithms((DetectedCard) product);
-	}
-
-	protected abstract boolean canReturnSuportedDigestAlgorithms(DetectedCard card);
-
-	@Override
-	public final List<DigestAlgorithm> getSupportedDigestAlgorithms(Product product) {
-		return getSupportedDigestAlgorithms((DetectedCard) product);
-	}
-
-	protected abstract List<DigestAlgorithm> getSupportedDigestAlgorithms(DetectedCard card);
-
-	@Override
-	public final DigestAlgorithm getPreferredDigestAlgorithm(Product product) {
-		return getPreferredDigestAlgorithm((DetectedCard) product);
-	}
-
-	protected abstract DigestAlgorithm getPreferredDigestAlgorithm(DetectedCard card);
 
 	@Override
 	public final FutureOperationInvocation<Product> getConfigurationOperation(NexuAPI api, Product product) {

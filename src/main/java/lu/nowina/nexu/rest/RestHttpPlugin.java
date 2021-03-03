@@ -16,10 +16,8 @@ package lu.nowina.nexu.rest;
 
 import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.DigestAlgorithm;
-import eu.europa.esig.dss.ToBeSigned;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.plugin.*;
-import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.json.GsonHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -66,18 +63,11 @@ public class RestHttpPlugin implements HttpPlugin {
 			return getCertificate(api, req, payload);
 		case "/smartcardList":
 			return smartcardList(api, req, payload);
-//		case "/identityInfo":
-//			return getIdentityInfo(api, payload);
-//		case "/authenticate":
-//			return authenticate(api, req, payload);
 		default:
 			throw new RuntimeException("Target not recognized " + target);
 		}
 	}
 
-	protected <T> Execution<T> returnNullIfValid(NexuRequest request) {
-		return null;
-	}
 
 	private HttpResponse signRequest(NexuAPI api, HttpRequest req, String payload) {
 		logger.info("Signature");
@@ -173,51 +163,9 @@ public class RestHttpPlugin implements HttpPlugin {
 		}
 	}
 
-	private HttpResponse getIdentityInfo(NexuAPI api, String payload) {
-		logger.info("API call get identity info");
-		final GetIdentityInfoRequest r;
-		if (StringUtils.isEmpty(payload)) {
-			r = new GetIdentityInfoRequest();
-		} else {
-			r = GsonHelper.fromJson(payload, GetIdentityInfoRequest.class);
-		}
-
-		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
-		if(invalidRequestHttpResponse != null) {
-			return invalidRequestHttpResponse;
-		} else {
-			logger.info("Call API");
-			final Execution<?> respObj = api.getIdentityInfo(r);
-			return toHttpResponse(respObj);
-		}
-	}
-
-	private HttpResponse authenticate(NexuAPI api, HttpRequest req, String payload) {
-		logger.info("Authenticate");
-		final AuthenticateRequest r;
-		if (StringUtils.isEmpty(payload)) {
-			r = new AuthenticateRequest();
-
-			final String data = req.getParameter("challenge");
-			if (data != null) {
-				logger.info("Challenge " + data);
-				final ToBeSigned tbs = new ToBeSigned();
-				tbs.setBytes(DatatypeConverter.parseBase64Binary(data));
-				r.setChallenge(tbs);
-			}
-		} else {
-			r = GsonHelper.fromJson(payload, AuthenticateRequest.class);
-		}
-
-		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
-		if(invalidRequestHttpResponse != null) {
-			return invalidRequestHttpResponse;
-		} else {
-			logger.info("Call API");
-			final Execution<?> respObj = api.authenticate(r);
-			return toHttpResponse(respObj);
-		}
-	}
+  protected <T> Execution<T> returnNullIfValid(NexuRequest request) {
+    return null; // to be implemented
+  }
 
 	private HttpResponse checkRequestValidity(final NexuAPI api, final NexuRequest request) {
 		final Execution<Object> verification = returnNullIfValid(request);
