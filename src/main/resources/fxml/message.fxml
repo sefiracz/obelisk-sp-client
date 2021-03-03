@@ -45,7 +45,7 @@
       <VBox fx:id="doNotShowContainer">
         <Separator style="-fx-padding: 0 10 0 10"/>
         <HBox styleClass="do-not-show-container" BorderPane.alignment="CENTER">
-          <CheckBox text="%checkbox.do.not.show"/>
+          <CheckBox fx:id="doNotShowCheckbox" text="%checkbox.do.not.show"/>
         </HBox>
       </VBox>
     </VBox>

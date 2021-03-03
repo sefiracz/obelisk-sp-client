@@ -27,6 +27,7 @@ public class DialogMessage {
   private final Level level;
   private final List<Button> buttons = new ArrayList<>();
 
+  private String dialogId;
   private String messageProperty;
   private String[] messageParameters = new String[0];
   private double width = 400;
@@ -105,8 +106,9 @@ public class DialogMessage {
     return doNotShowCheckbox;
   }
 
-  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox) {
+  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, String dialogId) {
     this.doNotShowCheckbox = doNotShowCheckbox;
+    this.dialogId = dialogId;
   }
 
   public boolean isShowOkButton() {
@@ -123,6 +125,10 @@ public class DialogMessage {
 
   public List<Button> getButtons() {
     return buttons;
+  }
+
+  public String getDialogId() {
+    return dialogId;
   }
 
 }
