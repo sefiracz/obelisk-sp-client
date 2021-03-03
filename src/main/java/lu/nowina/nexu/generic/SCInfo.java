@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SCInfo contains information about a SmartCard, such as known ATR, label, downloadUrl for drivers, infoUrl for information, ...
+ * SCInfo contains information about a detected SmartCard, such as known ATR, label and connection information
  *
  * @author david.naramski
  *
@@ -34,10 +34,6 @@ public class SCInfo extends DetectedCard {
 	@XmlElementWrapper(name = "connectionInfos")
 	@XmlElement(name = "connectionInfo")
 	private List<ConnectionInfo> infos;
-
-	private String downloadUrl;
-
-	private String infoUrl;
 
 	public SCInfo() {}
 
@@ -69,26 +65,6 @@ public class SCInfo extends DetectedCard {
 			infos = new ArrayList<>();
 		}
 		return infos;
-	}
-
-	public void setInfos(List<ConnectionInfo> infos) {
-		this.infos = infos;
-	}
-
-	public String getDownloadUrl() {
-		return downloadUrl;
-	}
-
-	public void setDownloadUrl(String downloadUrl) {
-		this.downloadUrl = downloadUrl;
-	}
-
-	public String getInfoUrl() {
-		return infoUrl;
-	}
-
-	public void setInfoUrl(String infoUrl) {
-		this.infoUrl = infoUrl;
 	}
 
 }
