@@ -41,9 +41,9 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@FXML
 	private Button cancel;
 
-//	@FXML
-//	private Button reset;
-//
+	@FXML
+	private Button reset;
+
 //	@FXML
 //	private Label useSystemProxyLabel;
 //
@@ -107,7 +107,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	public void initialize(URL location, ResourceBundle resources) {
 		readOnly = new SimpleBooleanProperty(false);
 		ok.disableProperty().bind(readOnly);
-//		reset.disableProperty().bind(readOnly);
+		reset.disableProperty().bind(readOnly);
 //		useSystemProxy.disableProperty().bind(readOnly);
 //
 //		proxyServer.disableProperty().bind(
@@ -169,11 +169,11 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		cancel.setOnAction((e) -> {
 			signalEnd(null);
 		});
-//		reset.setOnAction((e) -> {
-//			userPreferences.clear();
-//			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
-//			signalEnd(null);
-//		});
+		reset.setOnAction((e) -> {
+			userPreferences.clear();
+			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
+			signalEnd(null);
+		});
 	}
 
 	@Override

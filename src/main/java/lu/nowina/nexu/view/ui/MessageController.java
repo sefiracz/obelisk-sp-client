@@ -14,12 +14,15 @@
  */
 package lu.nowina.nexu.view.ui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.DialogMessage;
@@ -36,15 +39,25 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 	private BorderPane messagePane;
 
 	@FXML
+  private VBox iconBox;
+
+	@FXML
   private Region icon;
 
 	@FXML
 	private Label message;
 
 	@FXML
-	private Button ok;
+  private VBox bottomContainer;
 
-	private String defaultErrorText;
+	@FXML
+	private HBox btnContainer;
+
+  @FXML
+  private VBox doNotShowContainer;
+
+	@FXML
+	private Button ok;
 
 	private ResourceBundle resources;
 
@@ -53,7 +66,6 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 		if (ok != null) {
 			ok.setOnAction(e -> signalEnd(null));
 		}
-		this.defaultErrorText = resources.getString("error");
 		this.resources = resources;
 	}
 
@@ -64,32 +76,59 @@ public class MessageController extends AbstractUIOperationController<Void> imple
     // set title
     StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), dialogMessage.getLevel().getTitleCode());
 
-    // set message
-    String messageText = MessageFormat.format(resources.getString(dialogMessage.getMessageProperty()),
-            dialogMessage.getMessageParameters());
-    if(!messageText.isEmpty())
-      message.setText(messageText);
-    else
-      message.setText(defaultErrorText);
+    Platform.runLater(() -> {
+      // set message
+      if (dialogMessage.getMessageProperty() != null) {
+        // message from property
+        String messageText = MessageFormat.format(resources.getString(dialogMessage.getMessageProperty()),
+                dialogMessage.getMessageParameters());
+        message.setText(messageText);
+      } else if (dialogMessage.getMessage() != null) {
+        // pre-set message
+        message.setText(dialogMessage.getMessage());
+      } else {
+        // default value
+        message.setText(resources.getString("error"));
+      }
 
-    // set size
-    this.messagePane.setPrefSize(dialogMessage.getWidth(), dialogMessage.getHeight());
+      // set size
+      this.messagePane.setPrefSize(dialogMessage.getWidth(), dialogMessage.getHeight());
 
-    // set dialog icon
-    switch (dialogMessage.getLevel()) {
-      case INFORMATION:
-        icon.getStyleClass().add("icon-information");
-        icon.setPrefSize(50, 50);
-        break;
-      case WARNING:
-        icon.getStyleClass().add("icon-warning");
-        icon.setPrefSize(54, 50);
-        break;
-      case ERROR:
-        icon.getStyleClass().add("icon-error");
-        icon.setPrefSize(50, 50);
-        break;
-    }
+      // set dialog icon
+      switch (dialogMessage.getLevel()) {
+        case INFORMATION:
+          icon.getStyleClass().add("icon-information");
+          icon.setPrefSize(50, 50);
+          break;
+        case WARNING:
+          icon.getStyleClass().add("icon-warning");
+          icon.setPrefSize(54, 50);
+          break;
+        case ERROR:
+          icon.getStyleClass().add("icon-error");
+          icon.setPrefSize(50, 50);
+          break;
+        default:
+          iconBox.getChildren().removeAll(); // no icon
+      }
+
+      // add additional buttons
+      int position = 0;
+      for(Button b : dialogMessage.getButtons()) {
+        btnContainer.getChildren().add(position, b);
+        position++;
+      }
+
+      // remove ok button if not needed
+      if(!dialogMessage.isOkButton()) {
+        btnContainer.getChildren().remove(ok);
+      }
+
+      // hide do not show checkbox
+      if(!dialogMessage.isDoNotShowButton()) {
+        bottomContainer.getChildren().remove(doNotShowContainer);
+      }
+    });
 
 	}
 
