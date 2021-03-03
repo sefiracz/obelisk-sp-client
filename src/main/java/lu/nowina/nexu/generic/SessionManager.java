@@ -41,7 +41,7 @@ public class SessionManager {
     try {
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("obsp-trust.jks"),
-              Utils.getDecodedValue("UHVkUnhoQ3Bucjd5amJBZQ"));
+              "PudRxhCpnr7yjbAe".toCharArray());
       trustCert = ks.getCertificate("obsp-client-session");
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
       logger.error("Unable to access session truststore and certificate: "+e.getMessage(), e);
