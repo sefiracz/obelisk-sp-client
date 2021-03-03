@@ -14,7 +14,6 @@
  */
 package lu.nowina.nexu.object.model;
 
-import lu.nowina.nexu.object.model.GetIdentityInfoResponse.Gender;
 import org.mapstruct.Mapper;
 
 import java.util.Map;
@@ -50,6 +49,4 @@ public interface FromAPIToPublicObjectModelTestMapper {
 	OS mapOS(lu.nowina.nexu.api.OS os);
 	Purpose mapPurpose(lu.nowina.nexu.api.Purpose purpose);
 	SignatureValue mapSignatureValue(eu.europa.esig.dss.SignatureValue signatureValue);
-	IdentityInfoSignatureData mapIndentityInfoSignatureData(lu.nowina.nexu.api.IdentityInfoSignatureData iisd);
-	Map<String, IdentityInfoSignatureData> mapIndentityInfoSignatureData(Map<String, lu.nowina.nexu.api.IdentityInfoSignatureData> map);
 }
