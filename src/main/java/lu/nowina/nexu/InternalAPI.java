@@ -283,7 +283,7 @@ public class InternalAPI implements NexuAPI {
             certName, resources.getString(browserTypeProperty));
     DialogMessage message = new DialogMessage(DialogMessage.Level.ERROR);
     message.setHeight(200);
-    message.setWidth(400);
+    message.setWidth(475);
     message.setMessage(messageText);
     message.setShowDoNotShowCheckbox(true, "ssl-warning");
     // add button
