@@ -213,26 +213,4 @@ public class SessionManager {
 
   }
 
-  /**
-   * Session value holder
-   */
-  public static class SessionValue {
-
-    private final String sessionId;
-    private final String sessionSignature;
-
-    public SessionValue(String sessionId, String sessionSignature) {
-      this.sessionId = sessionId;
-      this.sessionSignature = sessionSignature;
-    }
-
-    public String getSessionId() {
-      return sessionId;
-    }
-
-    public String getSessionSignature() {
-      return sessionSignature;
-    }
-  }
-
 }

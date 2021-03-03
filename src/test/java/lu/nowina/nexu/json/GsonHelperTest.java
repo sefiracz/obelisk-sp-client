@@ -33,8 +33,6 @@ public class GsonHelperTest {
 
         final GetCertificateRequest req = new GetCertificateRequest();
         req.setCertificateFilter(new CertificateFilter(Purpose.SIGNATURE));
-        req.setExternalId("externalId");
-        req.setRequestSeal("seal");
         req.setUserLocale("fr");
 
         final String json = GsonHelper.toJson(req);

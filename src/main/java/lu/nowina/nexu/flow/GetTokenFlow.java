@@ -35,6 +35,7 @@ import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.operation.*;
 import lu.nowina.nexu.generic.RegisteredProducts;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
 import org.slf4j.Logger;
@@ -184,7 +185,7 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
       }
     } catch (final Exception e) {
       logger.error("Flow error", e);
-      closeToken(token);
+      SessionManager.getManager().destroy();
       throw this.handleException(e);
     }
   }
