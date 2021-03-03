@@ -203,6 +203,8 @@ public class SessionManager {
     }
 
     public synchronized void destroy() {
+      timer.cancel();
+      timer.purge();
       if (token != null) {
         token.close();
       }
