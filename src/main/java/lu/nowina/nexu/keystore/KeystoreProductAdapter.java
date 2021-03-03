@@ -81,21 +81,6 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public boolean canReturnIdentityInfo(Product product) {
-		return false;
-	}
-
-	@Override
-	public GetIdentityInfoResponse getIdentityInfo(SignatureTokenConnection token) {
-		throw new IllegalStateException("This product adapter cannot return identity information.");
-	}
-
-	@Override
-	public boolean supportCertificateFilter(Product product) {
-		return true;
-	}
-
-	@Override
 	public List<DSSPrivateKeyEntry> getKeys(SignatureTokenConnection token, CertificateFilter certificateFilter) {
 		return new CertificateFilterHelper().filterKeys(token, certificateFilter);
 	}
@@ -109,21 +94,6 @@ public class KeystoreProductAdapter implements ProductAdapter {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public boolean canReturnSuportedDigestAlgorithms(Product product) {
-		return false;
-	}
-
-	@Override
-	public List<DigestAlgorithm> getSupportedDigestAlgorithms(Product product) {
-		throw new IllegalStateException("This product adapter cannot return list of supported digest algorithms.");
-	}
-
-	@Override
-	public DigestAlgorithm getPreferredDigestAlgorithm(Product product) {
-		throw new IllegalStateException("This product adapter cannot return list of supported digest algorithms.");
 	}
 
 	@Override

@@ -40,16 +40,6 @@ public interface FromPublicObjectModelToAPITestMapper {
 	lu.nowina.nexu.api.SignatureResponse mapSignatureResponse(SignatureResponse resp, @MappingTarget lu.nowina.nexu.api.SignatureResponse to);
 	lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.SignatureResponse> mapSignatureResponse(Execution<SignatureResponse> resp, @MappingTarget lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.SignatureResponse> to);
 
-	// Get Identity Info
-	lu.nowina.nexu.api.GetIdentityInfoRequest mapGetIdentityInfoRequest(GetIdentityInfoRequest req);
-	lu.nowina.nexu.api.GetIdentityInfoResponse mapGetIdentityInfoResponse(GetIdentityInfoResponse resp);
-	lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.GetIdentityInfoResponse> mapGetIdentityInfoResponse(Execution<GetIdentityInfoResponse> resp, @MappingTarget lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.GetIdentityInfoResponse> to);
-
-	// Authenticate
-	lu.nowina.nexu.api.AuthenticateRequest mapAuthenticateRequest(AuthenticateRequest req);
-	lu.nowina.nexu.api.AuthenticateResponse mapAuthenticateResponse(AuthenticateResponse resp, @MappingTarget lu.nowina.nexu.api.AuthenticateResponse to);
-	lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.AuthenticateResponse> mapAuthenticateResponse(Execution<AuthenticateResponse> resp, @MappingTarget lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.AuthenticateResponse> to);
-
 	// Util
 	lu.nowina.nexu.api.CertificateFilter mapCertificateFilter(CertificateFilter certificateFilter);
 	@Mapping(target="apiParameter", ignore=true)
@@ -66,7 +56,6 @@ public interface FromPublicObjectModelToAPITestMapper {
 	lu.nowina.nexu.api.Arch mapArch(Arch arch);
 	lu.nowina.nexu.api.OS mapOS(OS os);
 	lu.nowina.nexu.api.Purpose mapPurpose(Purpose purpose);
-	lu.nowina.nexu.api.GetIdentityInfoResponse.Gender mapGender(Gender gender);
 	eu.europa.esig.dss.SignatureValue mapSignatureValue(SignatureValue signatureValue);
 	lu.nowina.nexu.api.IdentityInfoSignatureData mapIndentityInfoSignatureData(IdentityInfoSignatureData iisd);
 	Map<String, lu.nowina.nexu.api.IdentityInfoSignatureData> mapIndentityInfoSignatureData(Map<String, IdentityInfoSignatureData> map);

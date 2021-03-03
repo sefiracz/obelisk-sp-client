@@ -14,7 +14,6 @@
  */
 package lu.nowina.nexu.generic;
 
-import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.*;
 import eu.europa.esig.dss.token.mocca.MOCCAPrivateKeyEntry;
 import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
@@ -93,36 +92,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
     protected SignatureTokenConnection connect(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback,
             final MessageDisplayCallback messageCallback) {
         throw new IllegalStateException("This product adapter does not support message display callback.");
-    }
-
-    @Override
-    protected boolean canReturnIdentityInfo(final DetectedCard card) {
-        return false;
-    }
-
-    @Override
-    public GetIdentityInfoResponse getIdentityInfo(final SignatureTokenConnection token) {
-        throw new IllegalStateException("This card adapter cannot return identity information.");
-    }
-
-    @Override
-    protected boolean supportCertificateFilter(final DetectedCard card) {
-        return true;
-    }
-
-    @Override
-    protected boolean canReturnSuportedDigestAlgorithms(final DetectedCard card) {
-        return false;
-    }
-
-    @Override
-    protected List<DigestAlgorithm> getSupportedDigestAlgorithms(final DetectedCard card) {
-        throw new IllegalStateException("This card adapter cannot return list of supported digest algorithms.");
-    }
-
-    @Override
-    protected DigestAlgorithm getPreferredDigestAlgorithm(final DetectedCard card) {
-        throw new IllegalStateException("This card adapter cannot return list of supported digest algorithms.");
     }
 
     @Override

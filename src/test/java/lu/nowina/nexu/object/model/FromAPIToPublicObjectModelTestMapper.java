@@ -38,16 +38,6 @@ public interface FromAPIToPublicObjectModelTestMapper {
 	SignatureResponse mapSignatureResponse(lu.nowina.nexu.api.SignatureResponse resp);
 	Execution<SignatureResponse> mapSignatureResponse(lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.SignatureResponse> resp);
 
-	// Get Identity Info
-	GetIdentityInfoRequest mapGetIdentityInfoRequest(lu.nowina.nexu.api.GetIdentityInfoRequest req);
-	GetIdentityInfoResponse mapGetIdentityInfoResponse(lu.nowina.nexu.api.GetIdentityInfoResponse resp);
-	Execution<GetIdentityInfoResponse> mapGetIdentityInfoResponse(lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.GetIdentityInfoResponse> resp);
-
-	// Authenticate
-	AuthenticateRequest mapAuthenticateRequest(lu.nowina.nexu.api.AuthenticateRequest req);
-	AuthenticateResponse mapAuthenticateResponse(lu.nowina.nexu.api.AuthenticateResponse resp);
-	Execution<AuthenticateResponse> mapAuthenticateResponse(lu.nowina.nexu.api.Execution<lu.nowina.nexu.api.AuthenticateResponse> resp);
-
 	// Util
 	CertificateFilter mapCertificateFilter(lu.nowina.nexu.api.CertificateFilter certificateFilter);
 	Feedback mapFeedback(lu.nowina.nexu.api.Feedback feedback);
@@ -59,7 +49,6 @@ public interface FromAPIToPublicObjectModelTestMapper {
 	Arch mapArch(lu.nowina.nexu.api.Arch arch);
 	OS mapOS(lu.nowina.nexu.api.OS os);
 	Purpose mapPurpose(lu.nowina.nexu.api.Purpose purpose);
-	Gender mapGender(lu.nowina.nexu.api.GetIdentityInfoResponse.Gender gender);
 	SignatureValue mapSignatureValue(eu.europa.esig.dss.SignatureValue signatureValue);
 	IdentityInfoSignatureData mapIndentityInfoSignatureData(lu.nowina.nexu.api.IdentityInfoSignatureData iisd);
 	Map<String, IdentityInfoSignatureData> mapIndentityInfoSignatureData(Map<String, lu.nowina.nexu.api.IdentityInfoSignatureData> map);
