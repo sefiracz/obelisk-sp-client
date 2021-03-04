@@ -233,7 +233,9 @@ RadioButton {
 }
 
 ScrollPane {
-	-fx-background-color:transparent;
+    -fx-background: white;
+    -fx-border-color: white;
+    -fx-background-color: white;
 }
 
 .aboutTitle {

@@ -126,17 +126,13 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
 
-      int height = 0;
       for (final AbstractProduct p : products) {
         final RadioButton button = new RadioButton(api.getLabel(p));
         button.setToggleGroup(product);
         button.setUserData(p);
         button.setMnemonicParsing(false);
         radioButtons.add(button);
-        height+=25;
       }
-      height = Math.min(height, 300);
-      productsWindow.setPrefHeight(productsWindow.getPrefHeight()+height);
 
       productsContainer.getChildren().clear();
       productsContainer.getChildren().addAll(radioButtons);
