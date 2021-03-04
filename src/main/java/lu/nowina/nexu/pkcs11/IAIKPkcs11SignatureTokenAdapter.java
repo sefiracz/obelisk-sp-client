@@ -132,8 +132,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
       final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
           .getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
       // prepare ASN1 signature structure
-      MessageDigest md = MessageDigest.getInstance(digestAlgorithm.getJavaName());
-      byte[] digest = md.digest(toBeSigned.getBytes());
+      byte[] digest = DSSUtils.digest(digestAlgorithm, toBeSigned.getBytes());
       ASN1ObjectIdentifier digestOID = new ASN1ObjectIdentifier(digestAlgorithm.getOid());
       AlgorithmIdentifier algID = new AlgorithmIdentifier(digestOID, null);
       DigestInfo digestInfo = new DigestInfo(algID, digest);
