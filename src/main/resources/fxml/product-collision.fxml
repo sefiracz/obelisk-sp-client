@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.ScrollPane?>
 
-<StackPane prefHeight="300.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane prefHeight="360.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="lu.nowina.nexu.view.ui.ProductCollisionController">
 
   <BorderPane fx:id="borderPane">
@@ -33,7 +33,7 @@
     </top>
 
     <center>
-      <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="center">
+      <ScrollPane fitToWidth="true" styleClass="center">
         <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
       </ScrollPane>
     </center>

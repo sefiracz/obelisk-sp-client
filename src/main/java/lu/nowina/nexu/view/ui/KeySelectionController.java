@@ -248,13 +248,6 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
             new Object[]{})));
         this.listView.setItems(items);
-        if(items.isEmpty()) {
-          this.listView.setPrefHeight(50);
-        } else if(items.size()<=5) {
-        	this.listView.setPrefHeight(100.0*items.size());
-        } else {
-        	this.listView.setPrefHeight(500);
-        }
 
     }
 

@@ -98,18 +98,13 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
       final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
-      int height = 0;
       for (final DetectedCard card : cards) {
         final RadioButton button = new RadioButton(api.getLabel(card));
         button.setToggleGroup(product);
         button.setUserData(card);
         button.setMnemonicParsing(false);
         radioButtons.add(button);
-        height += 50;
       }
-      height = Math.min(height, 300);
-      productsWindow.setPrefHeight(productsWindow.getPrefHeight() + height);
-
       for (final Product p : products) {
         final RadioButton button = new RadioButton(api.getLabel(p));
         button.setToggleGroup(product);
