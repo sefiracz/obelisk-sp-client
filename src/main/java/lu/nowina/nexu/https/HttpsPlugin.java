@@ -263,7 +263,6 @@ public class HttpsPlugin implements NexuPlugin {
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
 			if(!p.waitFor(4, TimeUnit.SECONDS)) {
-        api.showSslWarning("install.ca.cert.firefox", caCert.getName());
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Firefox");
 			}
 			if(p.exitValue() == -1) {
@@ -274,7 +273,8 @@ public class HttpsPlugin implements NexuPlugin {
 			}
 			return Collections.emptyList();
 		} catch(Exception e) {
-			LOGGER.warn("Exception when trying to install certificate in Firefox", e);
+      LOGGER.warn("Exception when trying to install certificate in Firefox", e);
+      api.showSslWarning("install.ca.cert.firefox", caCert.getName());
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
@@ -316,7 +316,6 @@ public class HttpsPlugin implements NexuPlugin {
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
 			if(!p.waitFor(4, TimeUnit.SECONDS)) {
-        api.showSslWarning("install.ca.cert.firefox", caCert.getName());
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Firefox");
 			}
 			if(p.exitValue() != 0) {
@@ -326,7 +325,8 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Firefox", e);
-			return Arrays.asList(new InitializationMessage(
+      api.showSslWarning("install.ca.cert.firefox", caCert.getName());
+      return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
 					MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "FireFox"),
@@ -363,8 +363,8 @@ public class HttpsPlugin implements NexuPlugin {
 			}
 			return Collections.emptyList();
 		} catch(final KeyStoreException e) {
-      api.showSslWarning("install.ca.cert.ms.keystore", caCert.getName());
 			LOGGER.warn("KeyStoreException when trying to install certificate in Windows Store", e);
+      api.showSslWarning("install.ca.cert.ms.keystore", caCert.getName());
 			// Unfortunately there is no particular exception thrown in this case
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
@@ -375,7 +375,8 @@ public class HttpsPlugin implements NexuPlugin {
 			);
 		} catch(final Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Windows Store", e);
-			return Arrays.asList(new InitializationMessage(
+      api.showSslWarning("install.ca.cert.ms.keystore", caCert.getName());
+      return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
 					MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "Windows Store"),
@@ -403,7 +404,6 @@ public class HttpsPlugin implements NexuPlugin {
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
 			if(!p.waitFor(4, TimeUnit.SECONDS)) {
-        api.showSslWarning("install.ca.cert.mac.keychain", caCert.getName());
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Mac user keychain");
 			}
 			if(p.exitValue() != 0) {
@@ -413,7 +413,8 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Mac user keychain", e);
-			return Arrays.asList(new InitializationMessage(
+      api.showSslWarning("install.ca.cert.mac.keychain", caCert.getName());
+      return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
 					MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "Mac user keychain"),
@@ -449,7 +450,6 @@ public class HttpsPlugin implements NexuPlugin {
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
 			if(!p.waitFor(4, TimeUnit.SECONDS)) {
-        api.showSslWarning("install.ca.cert.browsers", caCert.getName());
 				throw new NexuException("Timeout occurred when trying to install CA certificate in Linux FF and Chrome/Chromium stores.");
 			}
 			if(p.exitValue() != 0) {
@@ -459,6 +459,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Linux FF and Chrome/Chromium stores", e);
+      api.showSslWarning("install.ca.cert.browsers", caCert.getName());
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
