@@ -90,34 +90,6 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       // asynchronous heavy workload
       asyncWorkload(() -> cards = api.detectCards(), true);
     });
-
-    // asynchronous window content update
-    asyncUpdate(() -> {
-      message.setText(MessageFormat
-              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), title));
-
-      final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
-
-      for (final DetectedCard card : cards) {
-        final RadioButton button = new RadioButton(api.getLabel(card));
-        button.setToggleGroup(product);
-        button.setUserData(card);
-        button.setMnemonicParsing(false);
-        radioButtons.add(button);
-      }
-      for (final Product p : products) {
-        final RadioButton button = new RadioButton(api.getLabel(p));
-        button.setToggleGroup(product);
-        button.setUserData(p);
-        button.setMnemonicParsing(false);
-        radioButtons.add(button);
-      }
-
-      productsContainer.getChildren().clear();
-      productsContainer.getChildren().addAll(radioButtons);
-
-      progressIndicatorVisible(false);
-    });
   }
 
   private Product getSelectedProduct() {
@@ -154,6 +126,34 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       }
 
       productsContainer.getChildren().addAll(radioButtons);
+    });
+
+    // asynchronous window content update
+    asyncUpdate(() -> {
+      message.setText(MessageFormat
+              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), title));
+
+      final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
+
+      for (final DetectedCard card : cards) {
+        final RadioButton button = new RadioButton(api.getLabel(card));
+        button.setToggleGroup(product);
+        button.setUserData(card);
+        button.setMnemonicParsing(false);
+        radioButtons.add(button);
+      }
+      for (final Product p : products) {
+        final RadioButton button = new RadioButton(api.getLabel(p));
+        button.setToggleGroup(product);
+        button.setUserData(p);
+        button.setMnemonicParsing(false);
+        radioButtons.add(button);
+      }
+
+      productsContainer.getChildren().clear();
+      productsContainer.getChildren().addAll(radioButtons);
+
+      progressIndicatorVisible(false);
     });
 
   }
