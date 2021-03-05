@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * An <code>UIOperation</code> controls the user interaction with the {@link Flow}.
@@ -56,6 +58,8 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 	private transient Parent root;
 	private transient UIOperationController<R> controller;
 
+  private ScheduledExecutorService executorService;
+
 	public UIOperation() {
 		super();
 	}
@@ -83,20 +87,22 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		LOGGER.info("Loading " + fxml + " view");
 		final FXMLLoader loader = new FXMLLoader();
 		try {
+      executorService = Executors.newSingleThreadScheduledExecutor();
 			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
 			loader.load(getClass().getResourceAsStream(fxml));
 		} catch(final IOException e) {
 			throw new RuntimeException(e);
 		}
 
-	    root = loader.getRoot();
+	  root = loader.getRoot();
 		controller = loader.getController();
+    controller.setUIOperation(this);
 		controller.init(params);
-		controller.setUIOperation(this);
 		controller.setDisplay(display);
 
 		display();
 
+    executorService.shutdown();
 		return result;
 	}
 
@@ -200,7 +206,11 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		return new UIFutureOperationInvocation<>(operationClass, fxml, controllerParams);
 	}
 
-	private static class UIFutureOperationInvocation<R, T extends UIOperation<R>> extends AbstractFutureOperationInvocation<R> {
+  public ScheduledExecutorService getUpdateExecutorService() {
+    return executorService;
+  }
+
+  private static class UIFutureOperationInvocation<R, T extends UIOperation<R>> extends AbstractFutureOperationInvocation<R> {
 		private final Class<T> operationClass;
 		private final String fxml;
 		private final Object[] controllerParams;

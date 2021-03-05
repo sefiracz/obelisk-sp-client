@@ -119,26 +119,6 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
     });
 
-    // asynchronous window update
-    asyncUpdate(() -> {
-      message.setText(MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
-                      .getString("product.collision.selection.header"), new Object[]{}));
-
-      final List<RadioButton> radioButtons = new ArrayList<>(products.size());
-
-      for (final AbstractProduct p : products) {
-        final RadioButton button = new RadioButton(api.getLabel(p));
-        button.setToggleGroup(product);
-        button.setUserData(p);
-        button.setMnemonicParsing(false);
-        radioButtons.add(button);
-      }
-
-      productsContainer.getChildren().clear();
-      productsContainer.getChildren().addAll(radioButtons);
-
-      progressIndicatorVisible(false);
-    });
   }
 
   private AbstractProduct getSelectedProduct() {
@@ -165,6 +145,27 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       message.setText(MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
                       .getString("product.collision.selection.header"), new Object[]{}));
 
+    });
+
+    // asynchronous window update
+    asyncUpdate(() -> {
+      message.setText(MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
+              .getString("product.collision.selection.header"), new Object[]{}));
+
+      final List<RadioButton> radioButtons = new ArrayList<>(products.size());
+
+      for (final AbstractProduct p : products) {
+        final RadioButton button = new RadioButton(api.getLabel(p));
+        button.setToggleGroup(product);
+        button.setUserData(p);
+        button.setMnemonicParsing(false);
+        radioButtons.add(button);
+      }
+
+      productsContainer.getChildren().clear();
+      productsContainer.getChildren().addAll(radioButtons);
+
+      progressIndicatorVisible(false);
     });
   }
 
