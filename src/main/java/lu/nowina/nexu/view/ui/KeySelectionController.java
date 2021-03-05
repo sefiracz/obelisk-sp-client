@@ -240,15 +240,11 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
     @SuppressWarnings("unchecked")
     public void init(final Object... params) {
         StageHelper.getInstance().setTitle((String) params[1], "key.selection.title");
-        final Boolean displayBackButton = (Boolean) params[2];
-        this.back.setManaged(displayBackButton);
-        this.back.setVisible(displayBackButton);
         final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
         final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
         this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
             new Object[]{})));
         this.listView.setItems(items);
-
     }
 
 }

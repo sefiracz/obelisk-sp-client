@@ -26,17 +26,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Properties;
 
 public class NexuLauncher {
@@ -58,9 +53,6 @@ public class NexuLauncher {
 		loadAppConfig(props);
 
 		configureLogger(config);
-
-		// Perform this work in a separate method to have the logger well configured.
-		config.initDefaultProduct(props);
 
 		proxyConfigurer = new ProxyConfigurer(config, new UserPreferences(config.getApplicationName()));
 
@@ -153,7 +145,7 @@ public class NexuLauncher {
 	}
 
 	private void loadPropertiesFromClasspath(Properties props) throws IOException {
-		InputStream configFile = NexUApp.class.getClassLoader().getResourceAsStream("nexu-config.properties");
+		InputStream configFile = NexUApp.class.getClassLoader().getResourceAsStream("app-config.properties");
 		if (configFile != null) {
 			props.load(configFile);
 		}
@@ -162,8 +154,7 @@ public class NexuLauncher {
 	/**
 	 * Load the properties from the properties file.
 	 *
-	 * @param props
-	 * @return
+	 * @param props Properties with configuration
 	 */
 	public final void loadAppConfig(Properties props) {
 		config = createAppConfig();

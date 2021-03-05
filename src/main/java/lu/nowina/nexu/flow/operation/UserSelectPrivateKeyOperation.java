@@ -78,7 +78,8 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         final List<DSSPrivateKeyEntry> keys;
 
         try {
-            keys = this.productAdapter.getKeys(this.token, this.certificateFilter); // TODO - heavy load - move to key-selection and do it async
+          // TODO - heavy load - move to key-selection and do it async ?
+            keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
         } catch (final CancelledOperationException e) {
           return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
         } catch (AbstractTokenRuntimeException e) {
@@ -99,8 +100,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         // let user select private key
         final OperationResult<Object> op =
             this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
-                new Object[]{keys, this.api.getAppConfig().getApplicationName(),
-                    this.api.getAppConfig().isDisplayBackButton()}).perform();
+                new Object[]{keys, this.api.getAppConfig().getApplicationName()}).perform();
         if(op.getStatus().equals(CoreOperationStatus.BACK)) {
             return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
         }
