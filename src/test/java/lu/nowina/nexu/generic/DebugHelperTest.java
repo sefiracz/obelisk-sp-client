@@ -44,7 +44,6 @@ public class DebugHelperTest {
 		assertTrue(dummyNexuHome.mkdirs());
 		assertTrue(dummyNexuHome.isDirectory());
 		when(appConfig.getNexuHome()).thenReturn(dummyNexuHome);
-		when(appConfig.isEnablePopUps()).thenReturn(true);
 		dh = spy(new DebugHelper());
 		when(dh.getConfig()).thenReturn(appConfig);
 		when(dh.getProperties()).thenReturn(properties);

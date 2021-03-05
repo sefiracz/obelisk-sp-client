@@ -57,7 +57,6 @@ public class SignatureFlowTest extends AbstractConfigureLoggerTest {
 		when(api.registerTokenConnection(token)).thenReturn(new TokenId("id"));
 		when(api.getTokenConnection(new TokenId("id"))).thenReturn(token);
 		final AppConfig appConfig = new AppConfig();
-		appConfig.setEnablePopUps(true);
 		when(api.getAppConfig()).thenReturn(appConfig);
 
 		when(adapter.connect(eq(api), eq(detectedCard), any())).thenReturn(token);

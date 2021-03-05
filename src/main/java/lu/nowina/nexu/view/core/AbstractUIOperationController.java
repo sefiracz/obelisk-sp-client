@@ -19,7 +19,6 @@ import lu.nowina.nexu.api.flow.OperationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -79,7 +78,7 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 	}
 
   /**
-   * Offload thread for heavy workload that takes time and therefore needs to
+   * Offload thread to be run apart from JavaFX thread for heavy workload that takes time and therefore needs to
    * run at separate thread to not block UI rendering and user experience.
    *
    * @param callback Heavy workload that might take time to finish
@@ -109,7 +108,9 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
    * @param callback Implementation of {@code UpdateCallback()} function that updates the JavaFX components
    */
   public final void asyncUpdate(UpdateCallback callback) {
-    Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+    if(uiOperation == null)
+      return;
+    uiOperation.getUpdateExecutorService().scheduleAtFixedRate(() -> {
       if (update) {
         Platform.runLater(() -> {
           try {
@@ -121,7 +122,7 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
           }
         });
       }
-    }, 500, 500, TimeUnit.MILLISECONDS);
+    }, 100, 500, TimeUnit.MILLISECONDS);
   }
 
   @FunctionalInterface

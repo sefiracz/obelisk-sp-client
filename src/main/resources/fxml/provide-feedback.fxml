@@ -31,7 +31,7 @@
     </top>
 
 	<bottom>
-    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+    <HBox styleClass="btn-container" fx:id="btnContainer" BorderPane.alignment="CENTER">
       <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
       <Button fx:id="report" mnemonicParsing="false" styleClass="btn-primary" text="%button.report.incident"/>
     </HBox>

@@ -52,7 +52,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
 
         final NexuAPI api = mock(NexuAPI.class);
         final AppConfig appConfig = new AppConfig();
-        appConfig.setEnablePopUps(true);
         when(api.getAppConfig()).thenReturn(appConfig);
 
         final Product selectedProduct = new NewKeystore();
@@ -110,7 +109,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
 
         final AppConfig appConfig = new AppConfig();
         appConfig.setAdvancedModeAvailable(true);
-        appConfig.setEnablePopUps(true);
         appConfig.setTicketUrl("http://random.url");
         appConfig.setApplicationName("Dummy App");
         when(api.getAppConfig()).thenReturn(appConfig);
@@ -198,7 +196,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
 
         final NexuAPI api = mock(NexuAPI.class);
         final AppConfig appConfig = new AppConfig();
-        appConfig.setEnablePopUps(true);
         when(api.getAppConfig()).thenReturn(appConfig);
         final DetectedCard detectedCard = new DetectedCard("atr", 0);
         when(adapter.getConfigurationOperation(api, detectedCard))

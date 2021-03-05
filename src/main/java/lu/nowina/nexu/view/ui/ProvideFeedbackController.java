@@ -19,7 +19,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 import lu.nowina.nexu.NexuException;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.Feedback;
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -43,6 +42,9 @@ import java.util.ResourceBundle;
 public class ProvideFeedbackController extends AbstractFeedbackUIOperationController implements Initializable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProvideFeedbackController.class);
+
+	@FXML
+  private HBox btnContainer;
 
 	@FXML
 	private Button report;
@@ -91,10 +93,12 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 	@Override
 	protected void doInit(Object... params) {
     StageHelper.getInstance().setTitle(getApplicationName(), "feedback.title");
-		Platform.runLater(() ->
-			message.setText(MessageFormat.format(resources.getString("feedback.message"),
-              resources.getString("button.report.incident"), getApplicationName())));
-	}
+    Platform.runLater(() -> {
+      message.setText(MessageFormat.format(resources.getString("feedback.message"),
+              resources.getString("button.report.incident"), getApplicationName()));
+      btnContainer.getChildren().removeIf(b -> !getAppConfig().isEnableIncidentReport() && b.getId().equals("report"));
+    });
+  }
 
 	private String urlEncode(String str) {
 		try {
