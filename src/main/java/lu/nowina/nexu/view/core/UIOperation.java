@@ -48,7 +48,7 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIOperation.class.getName());
 
-	private transient Object lock = new Object();
+	private final transient Object lock = new Object();
 	private transient volatile OperationResult<R> result = null;
 
 	private UIDisplay display;
@@ -87,23 +87,27 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		LOGGER.info("Loading " + fxml + " view");
 		final FXMLLoader loader = new FXMLLoader();
 		try {
-      executorService = Executors.newSingleThreadScheduledExecutor();
 			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
 			loader.load(getClass().getResourceAsStream(fxml));
-		} catch(final IOException e) {
-			throw new RuntimeException(e);
-		}
+    } catch(final IOException e) {
+      throw new RuntimeException(e);
+    }
 
-	  root = loader.getRoot();
-		controller = loader.getController();
-    controller.setUIOperation(this);
-		controller.init(params);
-		controller.setDisplay(display);
+		try {
+      executorService = Executors.newSingleThreadScheduledExecutor();
+      root = loader.getRoot();
+      controller = loader.getController();
+      controller.setUIOperation(this);
+      controller.init(params);
+      controller.setDisplay(display);
 
-		display();
+      display();
 
-    executorService.shutdown();
-		return result;
+      return result;
+    } finally {
+		  if(executorService != null)
+        executorService.shutdown();
+    }
 	}
 
 	public void waitEnd() throws InterruptedException {
