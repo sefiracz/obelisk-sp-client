@@ -87,9 +87,9 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		LOGGER.info("Loading " + fxml + " view");
 		final FXMLLoader loader = new FXMLLoader();
 		try {
-      executorService = Executors.newSingleThreadScheduledExecutor();
 			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
 			loader.load(getClass().getResourceAsStream(fxml));
+      executorService = Executors.newSingleThreadScheduledExecutor();
 		} catch(final IOException e) {
 			throw new RuntimeException(e);
 		}
