@@ -89,21 +89,25 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		try {
 			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
 			loader.load(getClass().getResourceAsStream(fxml));
+    } catch(final IOException e) {
+      throw new RuntimeException(e);
+    }
+
+		try {
       executorService = Executors.newSingleThreadScheduledExecutor();
-		} catch(final IOException e) {
-			throw new RuntimeException(e);
-		}
+      root = loader.getRoot();
+      controller = loader.getController();
+      controller.setUIOperation(this);
+      controller.init(params);
+      controller.setDisplay(display);
 
-	  root = loader.getRoot();
-		controller = loader.getController();
-    controller.setUIOperation(this);
-		controller.init(params);
-		controller.setDisplay(display);
+      display();
 
-		display();
-
-    executorService.shutdown();
-		return result;
+      return result;
+    } finally {
+		  if(executorService != null)
+        executorService.shutdown();
+    }
 	}
 
 	public void waitEnd() throws InterruptedException {
