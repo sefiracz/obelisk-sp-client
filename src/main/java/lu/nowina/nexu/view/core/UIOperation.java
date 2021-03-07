@@ -48,7 +48,7 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIOperation.class.getName());
 
-	private transient Object lock = new Object();
+	private final transient Object lock = new Object();
 	private transient volatile OperationResult<R> result = null;
 
 	private UIDisplay display;
