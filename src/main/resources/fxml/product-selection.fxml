@@ -40,6 +40,8 @@
 
 		<bottom>
       <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+        <MenuButton fx:id="menuButton"/>
+        <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
         <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
         <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>

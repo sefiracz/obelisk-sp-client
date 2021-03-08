@@ -78,7 +78,7 @@ public class SystrayMenu {
 		}
 	}
 
-	private SystrayMenuItem createAboutSystrayMenuItem(final OperationFactory operationFactory, final NexuAPI api,
+	public static SystrayMenuItem createAboutSystrayMenuItem(final OperationFactory operationFactory, final NexuAPI api,
 			final ResourceBundle resources) {
 		return new SystrayMenuItem() {
 
@@ -106,7 +106,7 @@ public class SystrayMenu {
 		};
 	}
 
-	private SystrayMenuItem createPreferencesSystrayMenuItem(final OperationFactory operationFactory,
+	public static SystrayMenuItem createPreferencesSystrayMenuItem(final OperationFactory operationFactory,
 			final NexuAPI api, final UserPreferences prefs) {
 		return new SystrayMenuItem() {
 
@@ -135,7 +135,7 @@ public class SystrayMenu {
 		};
 	}
 
-	private SystrayMenuItem createExitSystrayMenuItem() {
+	public static SystrayMenuItem createExitSystrayMenuItem() {
 		return new SystrayMenuItem() {
 
 			@Override

@@ -83,6 +83,9 @@ public class NexuLauncher extends Preloader {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		if(getConfig().isShowSplashScreen()) {
+			final String appName = getConfig().getApplicationName();
+			primaryStage.setTitle(appName);
+			primaryStage.getIcons().add(new Image(StandaloneUIDisplay.class.getResourceAsStream("/tray-icon.png")));
 			final ImageView splash = new ImageView(new Image(NexuLauncher.class.getResourceAsStream("/images/splash.png")));
 			final StackPane background = new StackPane(splash);
 			final Scene splashScene = new Scene(background, 600, 300);
