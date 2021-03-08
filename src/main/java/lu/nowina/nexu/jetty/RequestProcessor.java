@@ -105,7 +105,7 @@ public class RequestProcessor extends AbstractHandler {
 		}
 		response.setHeader("Vary", "Origin");
 		response.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
-		response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		response.setHeader("Access-Control-Allow-Headers", "Content-Type, OBSP-Session-ID, OBSP-Session-Signature");
 
 		if ("OPTIONS".equals(request.getMethod())) {
 			response.setStatus(HttpStatus.OK.getHttpCode());

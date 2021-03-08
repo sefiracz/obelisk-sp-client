@@ -108,7 +108,6 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         when(api.detectCards()).thenReturn(Arrays.asList(product));
 
         final AppConfig appConfig = new AppConfig();
-        appConfig.setAdvancedModeAvailable(true);
         appConfig.setTicketUrl("http://random.url");
         appConfig.setApplicationName("Dummy App");
         when(api.getAppConfig()).thenReturn(appConfig);
