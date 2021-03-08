@@ -18,6 +18,7 @@ import eu.europa.esig.dss.token.PasswordInputCallback;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lu.nowina.nexu.api.MessageDisplayCallback;
@@ -27,7 +28,6 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
-import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.ExtensionFilter;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
@@ -83,6 +83,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	private Stage createStage(final boolean blockingStage, String title) {
 		final Stage newStage = new Stage();
+		newStage.getIcons().add(new Image(StandaloneUIDisplay.class.getResourceAsStream("/tray-icon.png")));
 		newStage.setTitle(title);
 		newStage.setAlwaysOnTop(true);
 		newStage.setOnCloseRequest((e) -> {
