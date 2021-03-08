@@ -18,7 +18,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-import lu.nowina.nexu.NexUPreLoader.PreloaderMessage;
+import lu.nowina.nexu.NexuLauncher.PreloaderMessage;
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationFactory;

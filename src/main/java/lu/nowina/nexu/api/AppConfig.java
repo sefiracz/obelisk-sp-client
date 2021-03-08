@@ -36,7 +36,6 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class AppConfig {
 
-    private static final String ADVANCED_MODE_AVAILABLE = "advanced_mode_available";
     private static final String APPLICATION_NAME = "application_name";
     private static final String DEBUG = "debug";
     private static final String HTTP_SERVER_CLASS = "http_server_class";
@@ -71,8 +70,6 @@ public class AppConfig {
 
     private static final String SHOW_SPLASH_SCREEN = "show_splash_screen";
 
-    private static final String DEFAULT_PRODUCT = "default_product_";
-
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class.getName());
 
     private String bindingIP;
@@ -84,8 +81,6 @@ public class AppConfig {
     private String httpServerClass;
 
     private boolean debug;
-
-    private boolean advancedModeAvailable;
 
     private String applicationName;
 
@@ -178,14 +173,6 @@ public class AppConfig {
 
     public void setDebug(final boolean debug) {
         this.debug = debug;
-    }
-
-    public boolean isAdvancedModeAvailable() {
-        return this.advancedModeAvailable;
-    }
-
-    public void setAdvancedModeAvailable(final boolean advancedModeAvailable) {
-        this.advancedModeAvailable = advancedModeAvailable;
     }
 
     public String getApplicationName() {
@@ -359,7 +346,6 @@ public class AppConfig {
         this.setNexuHostname(props.getProperty(NEXU_HOSTNAME, "localhost"));
         this.setHttpServerClass(props.getProperty(HTTP_SERVER_CLASS, "lu.nowina.nexu.jetty.JettyServer"));
         this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
-        this.setAdvancedModeAvailable(Boolean.parseBoolean(props.getProperty(ADVANCED_MODE_AVAILABLE, "true")));
         this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "1")));
 
         this.setUseSystemProxy(Boolean.parseBoolean(props.getProperty(USE_SYSTEM_PROXY, "false")));
