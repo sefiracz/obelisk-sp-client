@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
@@ -34,12 +35,6 @@ public class AboutController extends AbstractUIOperationController<Void> impleme
 	@FXML
 	private Label applicationVersion;
 
-	@FXML
-	private Label dbVersion;
-
-	@FXML
-	private Label dbFile;
-
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		ok.setOnAction(e -> signalEnd(null));
@@ -49,6 +44,7 @@ public class AboutController extends AbstractUIOperationController<Void> impleme
 	public void init(Object... params) {
 		final String applicationName = (String) params[0];
 		this.aboutTitle.setText(aboutTitle.getText() + " " + applicationName);
+		StageHelper.getInstance().setTitle("", "about.header");
 
 		final String applicationVersion = (String) params[1];
 		this.applicationVersion.setText(applicationVersion);

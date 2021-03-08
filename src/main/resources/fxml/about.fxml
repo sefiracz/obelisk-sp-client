@@ -30,27 +30,19 @@
       </BorderPane.margin>
       <Label styleClass="aboutTitle" text="%about.header" wrapText="true"
              GridPane.columnIndex="0" GridPane.rowIndex="0" fx:id="aboutTitle"/>
-
       <Label text="%about.appVersion" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
       <Label fx:id="applicationVersion" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-      <Label text="Copyright:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-      <Label text="SEFIRA spol. s r.o." GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-      <Label text="License:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-      <Label text="EUPL 1.1" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-      <Label text="Derivative work of:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-      <Label text="NexU v1.2.3 (forked and modified @ 2021-03-01)" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-      <Label text="3rd party licenses:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-      <Label text="IAIK PKCS#11 Wrapper License" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-      <Label text="                   " GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-      <Label text="https://fontawesome.com/license" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+      <Label text="%about.copyright" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+      <Label text="%about.copyright.value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+      <Label text="%about.license" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+      <Label text="%about.license.value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+      <Label text="%about.forked" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+      <Label text="%about.forked.value" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+      <Label text="%about.3rd.licenses" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+      <Label text="%about.3rd.licenses.1" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+      <Label text="%about.3rd.licenses.2" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
     </GridPane>
 	</top>
-
-<!--  <center>-->
-<!--    <VBox styleClass="form-container" BorderPane.alignment="CENTER">-->
-
-<!--    </VBox>-->
-<!--  </center>-->
 
 	<bottom>
     <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
