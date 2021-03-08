@@ -225,7 +225,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
           keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
         }
         // comma separated list
-        return String.join(",", keyUsageList);
+        return String.join(", ", keyUsageList);
     }
 
     @Override
