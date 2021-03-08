@@ -14,7 +14,18 @@
  */
 package lu.nowina.nexu;
 
+import com.sun.javafx.application.LauncherImpl;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Preloader;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import lu.nowina.nexu.api.AppConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.ConsoleAppender;
@@ -32,9 +43,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
-public class NexuLauncher {
+public class NexuLauncher extends Preloader {
 	private static final Logger logger = LoggerFactory.getLogger(NexuLauncher.class.getName());
 
 	private static AppConfig config;
@@ -45,10 +58,10 @@ public class NexuLauncher {
 
 	public static void main(String[] args) throws Exception {
 		NexuLauncher launcher = new NexuLauncher();
-		launcher.launch(args);
+		launcher.launchApp(args);
 	}
 
-	protected void launch(String[] args) throws IOException {
+	private void launchApp(String[] args) throws IOException {
 		props = loadProperties();
 		loadAppConfig(props);
 
@@ -60,7 +73,25 @@ public class NexuLauncher {
 
 		boolean started = checkAlreadyStarted();
 		if (!started) {
-			NexUApp.launch(getApplicationClass(), args);
+			LauncherImpl.launchApplication(getApplicationClass(), NexuLauncher.class, args);
+		}
+	}
+
+	/**
+	 * Displays splash screen at startup.
+	 */
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		if(getConfig().isShowSplashScreen()) {
+			final ImageView splash = new ImageView(new Image(NexuLauncher.class.getResourceAsStream("/images/splash.png")));
+			final StackPane background = new StackPane(splash);
+			final Scene splashScene = new Scene(background, 600, 300);
+			primaryStage.setScene(splashScene);
+			primaryStage.initStyle(StageStyle.UNDECORATED);
+			primaryStage.show();
+			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
+			delay.setOnFinished(event -> primaryStage.close());
+			delay.play();
 		}
 	}
 
@@ -78,7 +109,7 @@ public class NexuLauncher {
 		RollingFileAppender rfa = new RollingFileAppender();
 		rfa.setName("FileLogger");
 		File nexuHome = config.getNexuHome();
-		rfa.setFile(new File(nexuHome, "OB-SP-Client.log").getAbsolutePath());
+		rfa.setFile(new File(nexuHome, "obelisk-sp-client.log").getAbsolutePath());
 		rfa.setLayout(new PatternLayout("%d %-5p [%c{1}] %m%n"));
 		rfa.setThreshold(config.isDebug() ? Level.DEBUG : Level.INFO);
 		rfa.setAppend(true);
@@ -172,5 +203,67 @@ public class NexuLauncher {
 	 */
 	protected Class<? extends Application> getApplicationClass() {
 		return NexUApp.class;
+	}
+
+	@Override
+	public void handleApplicationNotification(PreloaderNotification info) {
+		if(info instanceof PreloaderMessage) {
+			final PreloaderMessage preloaderMessage = (PreloaderMessage) info;
+			logger.warn("PreLoaderMessage: type = " + preloaderMessage.getMessageType() + ", title = " + preloaderMessage.getTitle()
+					+", header = " + preloaderMessage.getHeaderText() + ", content = " + preloaderMessage.getContentText());
+		} else {
+			logger.error("Unknown preloader notification class: " + info.getClass().getName());
+		}
+	}
+
+	@Override
+	public boolean handleErrorNotification(ErrorNotification info) {
+		// Log error messages
+		logger.error("An error has occurred during startup", info.getCause());
+
+		// Display dialog
+		ResourceBundle resourceBundle = ResourceBundle.getBundle("bundles/nexu");
+		final Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle(resourceBundle.getString("preloader.error"));
+		alert.setHeaderText(MessageFormat.format(resourceBundle.getString("preloader.error.occurred"), getConfig().getApplicationName()));
+		alert.setContentText(resourceBundle.getString("contact.application.provider"));
+		alert.showAndWait();
+		return true;
+	}
+
+	/**
+	 * POJO that holds information about a message that get returned to preloader.
+	 *
+	 * @author Jean Lepropre (jean.lepropre@nowina.lu)
+	 */
+	static class PreloaderMessage implements PreloaderNotification {
+		private final Alert.AlertType messageType;
+		private final String title;
+		private final String headerText;
+		private final String contentText;
+
+		public PreloaderMessage(Alert.AlertType messageType, String title, String headerText, String contentText) {
+			super();
+			this.messageType = messageType;
+			this.title = title;
+			this.headerText = headerText;
+			this.contentText = contentText;
+		}
+
+		public Alert.AlertType getMessageType() {
+			return messageType;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public String getHeaderText() {
+			return headerText;
+		}
+
+		public String getContentText() {
+			return contentText;
+		}
 	}
 }
