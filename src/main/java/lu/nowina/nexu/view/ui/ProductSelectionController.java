@@ -31,7 +31,9 @@ import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.SystrayMenuItem;
+import lu.nowina.nexu.api.flow.FutureOperationInvocation;
 import lu.nowina.nexu.api.flow.OperationFactory;
+import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
@@ -186,7 +188,26 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
         menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(operationFactory, api,
             new UserPreferences(api.getAppConfig().getApplicationName())));
         menuItems.addAll(api.getExtensionSystrayMenuItem());
-        menuItems.add(SystrayMenu.createExitSystrayMenuItem());
+        menuItems.add(new SystrayMenuItem() {
+
+          @Override
+          public String getName() {
+            return "systray.menu.exit";
+          }
+
+          @Override
+          public String getLabel() {
+            return ResourceBundle.getBundle("bundles/nexu").getString(getName());
+          }
+
+          @Override
+          public FutureOperationInvocation<Void> getFutureOperationInvocation() {
+            return operationFactory -> {
+              System.exit(0); // force exit
+              return new OperationResult<>((Void) null);
+            };
+          }
+        });
         for(SystrayMenuItem item : menuItems) {
           MenuItem menuItem = new MenuItem(item.getLabel());
           menuItem.setOnAction(a -> item.getFutureOperationInvocation().call(operationFactory));
