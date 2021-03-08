@@ -20,15 +20,24 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import lu.nowina.nexu.SystrayMenu;
+import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.Product;
+import lu.nowina.nexu.api.SystrayMenuItem;
+import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -36,6 +45,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class ProductSelectionController extends AbstractUIOperationController<Product> implements Initializable {
+
+  private static final Logger logger = LoggerFactory.getLogger(ProductSelectionController.class.getName());
 
   @FXML
   private StackPane productsWindow;
@@ -50,6 +61,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   private VBox productsContainer;
 
   @FXML
+  private MenuButton menuButton;
+
+  @FXML
   private Button select;
 
   @FXML
@@ -60,8 +74,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
   private ToggleGroup product;
 
-  private String title;
+  private String appName;
   private NexuAPI api;
+  private OperationFactory operationFactory;
 
   private VBox overlay;
   private VBox progressIndicator;
@@ -99,10 +114,10 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   @Override
   @SuppressWarnings("unchecked")
   public final void init(Object... params) {
-    title = (String) params[0];
-    api = (NexuAPI) params[1];
-    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(),
-            "product.selection.title");
+    api = (NexuAPI) params[0];
+    operationFactory = (OperationFactory) params[1];
+    appName = api.getAppConfig().getApplicationName();
+    StageHelper.getInstance().setTitle(appName, "product.selection.title");
 
     // add progress indicator
     progressIndicatorVisible(true);
@@ -112,7 +127,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // show initial content before load
     Platform.runLater(() -> {
       message.setText(MessageFormat
-              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), title));
+              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
       products = api.detectProducts();
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
@@ -131,7 +146,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // asynchronous window content update
     asyncUpdate(() -> {
       message.setText(MessageFormat
-              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), title));
+              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
 
       final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
@@ -154,6 +169,33 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       productsContainer.getChildren().addAll(radioButtons);
 
       progressIndicatorVisible(false);
+    });
+
+    // create context menu
+    Platform.runLater(() -> {
+      try {
+        // menu button
+        ImageView img = new ImageView(new Image(this.getClass().getResource("/images/cog-solid.png").openStream()));
+        menuButton.setGraphic(img);
+        menuButton.getStyleClass().add("mButton");
+
+        // menu items
+        final List<SystrayMenuItem> menuItems = new ArrayList<>();
+        menuItems.add(SystrayMenu.createAboutSystrayMenuItem(operationFactory, api,
+            ResourceBundle.getBundle("bundles/nexu")));
+        menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(operationFactory, api,
+            new UserPreferences(api.getAppConfig().getApplicationName())));
+        menuItems.addAll(api.getExtensionSystrayMenuItem());
+        menuItems.add(SystrayMenu.createExitSystrayMenuItem());
+        for(SystrayMenuItem item : menuItems) {
+          MenuItem menuItem = new MenuItem(item.getLabel());
+          menuItem.setOnAction(a -> item.getFutureOperationInvocation().call(operationFactory));
+          menuItem.getStyleClass().add("mItem");
+          menuButton.getItems().add(menuItem);
+        }
+      } catch (IOException e) {
+        logger.error(e.getMessage(), e);
+      }
     });
 
   }

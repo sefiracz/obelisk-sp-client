@@ -13,8 +13,15 @@
  * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
  */
 
-ProgressIndicator {
+ScrollPane {
 
+    -fx-background: white;
+    -fx-border-color: white;
+    -fx-background-color: white;
+
+}
+
+ProgressIndicator {
 
     -fx-progress-color: #222;
 
@@ -109,6 +116,59 @@ RadioButton {
     -fx-text-alignment: left;
     -fx-font-size: 14px;
     -fx-padding: 15 15 15 15;
+
+}
+
+.mButton {
+
+    -fx-background-color: white;
+    -fx-border-radius: 50;
+    -fx-background-radius: 50;
+    -fx-border-color: #D0D0D0;
+
+}
+
+.mButton > .arrow-button {
+
+    -fx-padding: 0;
+
+}
+
+.mButton > .arrow-button > .arrow {
+
+    -fx-padding: 0;
+
+}
+
+.mButton:hover {
+
+    -fx-background-color: #CED3D8;
+
+}
+
+.mButton:pressed {
+
+    -fx-background-color: #AFB7C1;
+
+}
+
+.mItem {
+
+    -fx-background-color: white;
+    -fx-border-color: white;
+    -fx-text-fill: black;
+
+}
+
+.mItem:focused {
+
+    -fx-background-color: #0078D7;
+
+}
+
+.mItem:focused .label {
+
+    -fx-text-fill: white;
 
 }
 
@@ -220,25 +280,27 @@ RadioButton {
 }
 
 .text-area .content{
+
     -fx-background-color: #C0C0C0;
+
 }
 
 .label-left-align {
+
     -fx-padding: 0 0 0 10;
+
 }
 
 .label-left-align-bold {
+
     -fx-padding: 0 0 0 10;
 	-fx-font-weight: bold;
-}
 
-ScrollPane {
-    -fx-background: white;
-    -fx-border-color: white;
-    -fx-background-color: white;
 }
 
 .aboutTitle {
+
 	-fx-margin: 5px;
 	-fx-font-weight: bold;
+
 }
