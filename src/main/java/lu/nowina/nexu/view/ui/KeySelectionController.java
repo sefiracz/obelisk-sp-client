@@ -196,7 +196,6 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         if (keyUsages == null) {
             return "";
         }
-        final StringBuilder builder = new StringBuilder();
         final List<String> keyUsageList = new ArrayList<>();
         if (keyUsages[0]) {
           keyUsageList.add(resources.getString("keyUsage.digitalSignature"));
@@ -226,14 +225,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
           keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
         }
         // comma separated list
-        for(int i=0; i<keyUsageList.size(); i++) {
-          builder.append(keyUsageList.get(i));
-          if(i + 1 < keyUsageList.size()) {
-            builder.append(", ");
-          }
-        }
-
-        return builder.toString();
+        return String.join(",", keyUsageList);
     }
 
     @Override

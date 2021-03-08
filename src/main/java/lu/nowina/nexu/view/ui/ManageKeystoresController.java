@@ -28,6 +28,7 @@ import javafx.scene.control.Label;
 import lu.nowina.nexu.ProductDatabase;
 import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.*;
+import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.generic.RegisteredProducts;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.apache.commons.codec.binary.Base64;
@@ -147,6 +148,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	@Override
 	public void init(Object... params) {
 		api = (NexuAPI) params[0];
+		StageHelper.getInstance().setTitle("", "systray.menu.manage.keystores");
 		if(params.length > 1) {
       filtered = (List<AbstractProduct>) params[1];
     }
