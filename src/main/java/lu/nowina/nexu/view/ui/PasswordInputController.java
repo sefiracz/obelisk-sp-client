@@ -22,9 +22,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import lu.nowina.nexu.api.AbstractProduct;
+import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
-import org.apache.commons.lang.StringUtils;
 
 import java.net.URL;
 import java.text.MessageFormat;
@@ -60,18 +60,22 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 	@Override
 	public void init(Object... params) {
     final String passwordPrompt = (String) params[0];
-    StageHelper.getInstance().setTitle((String) params[1], "password.title");
 		if(params.length > 2) {
 			product = (AbstractProduct) params[2];
 		}
-		if (product != null) {
-			this.passwordPrompt.setText(MessageFormat.format(resources.getString("password.default.prompt"),
-              product.getSimpleLabel()));
-		} else if (passwordPrompt != null) {
+		String titleKey = "password.title";
+    String promptKey = "password.default.prompt";
+    if (passwordPrompt != null) {
       this.passwordPrompt.setText(passwordPrompt);
+    } else if (product != null) {
+      if(product instanceof DetectedCard) {
+        titleKey = "password.title.pin";
+        promptKey = "password.smartcard.prompt";
+      }
+      this.passwordPrompt.setText(MessageFormat.format(resources.getString(promptKey), product.getSimpleLabel()));
     } else {
-			this.passwordPrompt.setText(resources.getString("password.title"));
+			this.passwordPrompt.setText(resources.getString(titleKey));
 		}
-
+    StageHelper.getInstance().setTitle((String) params[1], titleKey);
 	}
 }
