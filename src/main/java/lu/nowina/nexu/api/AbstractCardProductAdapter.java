@@ -33,14 +33,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 	public AbstractCardProductAdapter() {
 	}
 
-	private void setPasswordPrompt(final PasswordInputCallback callback) {
-		if(callback instanceof NexuPasswordInputCallback) {
-			final ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu-api");
-			((NexuPasswordInputCallback) callback).setPasswordPrompt(
-					resources.getString("card.product.adapter.password.prompt"));
-		}
-	}
-
 	@Override
 	public final boolean accept(Product product) {
 		return (product instanceof DetectedCard) && accept((DetectedCard) product);
@@ -50,7 +42,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	@Override
 	public String getLabel(NexuAPI api, Product product, PasswordInputCallback callback) {
-		setPasswordPrompt(callback);
 		return getLabel(api, (DetectedCard) product, callback);
 	}
 
@@ -58,7 +49,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	@Override
 	public String getLabel(NexuAPI api, Product product, PasswordInputCallback callback, MessageDisplayCallback messageCallback) {
-		setPasswordPrompt(callback);
 		return getLabel(api, (DetectedCard) product, callback, messageCallback);
 	}
 
@@ -73,7 +63,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 
 	@Override
 	public final SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback) {
-		setPasswordPrompt(callback);
 		return connect(api, (DetectedCard) product, callback);
 	}
 
@@ -82,7 +71,6 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 	@Override
 	public final SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback,
 			MessageDisplayCallback messageCallback) {
-		setPasswordPrompt(callback);
 		return connect(api, (DetectedCard) product, callback, messageCallback);
 	}
 
