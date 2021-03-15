@@ -279,7 +279,7 @@ public class InternalAPI implements NexuAPI {
 
   public void showSslWarning(String browserTypeProperty, String certName) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
-    String messageText = MessageFormat.format(resources.getString("install.ca.cert.message"),
+    String messageText = MessageFormat.format(resources.getString("install.ca.cert.fail.message"),
             certName, resources.getString(browserTypeProperty));
     DialogMessage message = new DialogMessage(DialogMessage.Level.ERROR);
     message.setHeight(200);
