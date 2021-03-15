@@ -107,6 +107,8 @@ public class DialogMessage {
   }
 
   public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, String dialogId) {
+    if(dialogId == null || dialogId.isEmpty())
+      throw new IllegalArgumentException("DialogID must have proper value");
     this.doNotShowCheckbox = doNotShowCheckbox;
     this.dialogId = dialogId;
   }
