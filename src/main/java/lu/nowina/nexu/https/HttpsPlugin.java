@@ -20,6 +20,7 @@ import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.plugin.InitializationMessage;
 import lu.nowina.nexu.api.plugin.InitializationMessage.MessageType;
 import lu.nowina.nexu.api.plugin.NexuPlugin;
+import lu.nowina.nexu.view.StandaloneDialog;
 import net.lingala.zip4j.core.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -216,6 +217,8 @@ public class HttpsPlugin implements NexuPlugin {
 	}
 
 	private List<InitializationMessage> installCaCert(final NexuAPI api, final File caCert, final ResourceBundle resourceBundle, final ResourceBundle baseResourceBundle) {
+    StandaloneDialog.showWelcomeMessage(api); // show information about SSL installation
+
 		final List<InitializationMessage> messages = new ArrayList<>();
 		final EnvironmentInfo envInfo = EnvironmentInfo.buildFromSystemProperties(System.getProperties());
 		switch(envInfo.getOs()) {
@@ -274,7 +277,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
       LOGGER.warn("Exception when trying to install certificate in Firefox", e);
-      api.showSslWarning("install.ca.cert.firefox", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.firefox", caCert.getName());
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
@@ -325,7 +328,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Firefox", e);
-      api.showSslWarning("install.ca.cert.firefox", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.firefox", caCert.getName());
       return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
@@ -364,7 +367,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(final KeyStoreException e) {
 			LOGGER.warn("KeyStoreException when trying to install certificate in Windows Store", e);
-      api.showSslWarning("install.ca.cert.ms.keystore", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.ms.keystore", caCert.getName());
 			// Unfortunately there is no particular exception thrown in this case
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
@@ -375,7 +378,7 @@ public class HttpsPlugin implements NexuPlugin {
 			);
 		} catch(final Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Windows Store", e);
-      api.showSslWarning("install.ca.cert.ms.keystore", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.ms.keystore", caCert.getName());
       return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
@@ -413,7 +416,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Mac user keychain", e);
-      api.showSslWarning("install.ca.cert.mac.keychain", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.mac.keychain", caCert.getName());
       return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),
@@ -459,7 +462,7 @@ public class HttpsPlugin implements NexuPlugin {
 			return Collections.emptyList();
 		} catch(Exception e) {
 			LOGGER.warn("Exception when trying to install certificate in Linux FF and Chrome/Chromium stores", e);
-      api.showSslWarning("install.ca.cert.browsers", caCert.getName());
+      StandaloneDialog.showSslError(api, "install.ca.cert.browsers", caCert.getName());
 			return Arrays.asList(new InitializationMessage(
 					MessageType.WARNING,
 					resourceBundle.getString("warn.install.cert.title"),

@@ -15,7 +15,6 @@
 package lu.nowina.nexu;
 
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import javafx.scene.control.Button;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.FutureOperationInvocation;
@@ -27,7 +26,6 @@ import lu.nowina.nexu.flow.FlowRegistry;
 import lu.nowina.nexu.flow.operation.CoreOperationStatus;
 import lu.nowina.nexu.generic.*;
 import lu.nowina.nexu.pkcs11.PKCS11Manager;
-import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
@@ -36,13 +34,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Implementation of the NexuAPI
@@ -277,30 +274,6 @@ public class InternalAPI implements NexuAPI {
 		pkcs11Manager.supportedSmartcardInfos(infos, digest);
 	}
 
-  public void showSslWarning(String browserTypeProperty, String certName) {
-    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
-    String messageText = MessageFormat.format(resources.getString("install.ca.cert.fail.message"),
-            certName, resources.getString(browserTypeProperty));
-    DialogMessage message = new DialogMessage(DialogMessage.Level.ERROR);
-    message.setHeight(200);
-    message.setWidth(475);
-    message.setMessage(messageText);
-    message.setShowDoNotShowCheckbox(true, "ssl-warning");
-    // add button
-    Button cert = new Button();
-    cert.setText(resources.getString("install.ca.cert.button.cert.location"));
-    cert.getStyleClass().add("btn-secondary");
-    cert.setOnAction(e -> {
-      try {
-        Desktop.getDesktop().open(this.getAppConfig().getNexuHome());
-      } catch (IOException io) {
-        logger.error(io.getMessage(), io);
-      }
-    });
-    message.addButton(cert);
-    operationFactory.getMessageDialog(this, message, false);
-  }
-
 	@Override
 	public PKCS11Manager getPKCS11Manager() {
 		return pkcs11Manager;
@@ -318,6 +291,10 @@ public class InternalAPI implements NexuAPI {
 	public AppConfig getAppConfig() {
 		return appConfig;
 	}
+
+  public OperationFactory getOperationFactory() {
+    return operationFactory;
+  }
 
 	@Override
 	public List<SystrayMenuItem> getExtensionSystrayMenuItem() {
