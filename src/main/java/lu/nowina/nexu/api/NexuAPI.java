@@ -16,6 +16,7 @@ package lu.nowina.nexu.api;
 
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import lu.nowina.nexu.EntityDatabase;
+import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
 import lu.nowina.nexu.pkcs11.PKCS11Manager;
 
@@ -80,7 +81,7 @@ public interface NexuAPI {
 
 	PKCS11Manager getPKCS11Manager();
 
-  void showSslWarning(String browserTypeProperty, String certName);
+  OperationFactory getOperationFactory();
 
   <T extends EntityDatabase> T loadDatabase(Class<T> c, String filename);
 }
