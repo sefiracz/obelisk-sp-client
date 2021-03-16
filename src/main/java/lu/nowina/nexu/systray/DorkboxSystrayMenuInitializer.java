@@ -45,7 +45,7 @@ public class DorkboxSystrayMenuInitializer implements SystrayMenuInitializer {
 	@Override
 	public void init(final String tooltip, final URL trayIconURL, final OperationFactory operationFactory,
 			final SystrayMenuItem exitMenuItem, final SystrayMenuItem... systrayMenuItems) {
-		final SystemTray systemTray = SystemTray.getNative();
+		final SystemTray systemTray = SystemTray.get();
 		if (systemTray == null) {
 			LOGGER.warn("System tray is currently not supported.");
 			return;
@@ -67,7 +67,7 @@ public class DorkboxSystrayMenuInitializer implements SystrayMenuInitializer {
 
 	public void refreshLabels() {
 		for (int i = 0; i < menuItems; i++) {
-			LocalizedMenuItem entry = (LocalizedMenuItem) SystemTray.getNative().getMenu().get(i);
+			LocalizedMenuItem entry = (LocalizedMenuItem) SystemTray.get().getMenu().get(i);
 			entry.setText(ResourceBundle.getBundle("bundles/nexu").getString(entry.getName()));
 		}
 	}
