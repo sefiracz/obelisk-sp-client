@@ -105,7 +105,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       progressIndicatorVisible(true);
       product.getToggles().clear();
       // asynchronous heavy workload
-      asyncWorkload(() -> cards = api.detectCards(), true);
+      asyncTask(() -> cards = api.detectCards(), true);
     });
   }
 
@@ -124,7 +124,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // add progress indicator
     progressIndicatorVisible(true);
     // asynchronous heavy workload
-    asyncWorkload(() -> cards = api.detectCards(), true);
+    asyncTask(() -> cards = api.detectCards(), true);
 
     // show initial content before load
     Platform.runLater(() -> {
