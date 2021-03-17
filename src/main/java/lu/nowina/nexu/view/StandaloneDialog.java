@@ -3,9 +3,8 @@ package lu.nowina.nexu.view;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -14,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.NexuAPI;
+import lu.nowina.nexu.view.core.AbstractUIOperationController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class StandaloneDialog {
    * @param api API instance
    */
   public static void showWelcomeMessage(NexuAPI api) {
-    DialogMessage dialogMessage = new DialogMessage("welcome.message", DialogMessage.Level.INFORMATION,
+    DialogMessage dialogMessage = new DialogMessage("welcome.message", DialogMessage.Level.TIMER,
             new String[]{api.getAppConfig().getApplicationName()}, 475, 220);
     dialogMessage.setShowDoNotShowCheckbox(true, "ssl-install");
     showDialog(api, dialogMessage, true);
@@ -86,6 +86,7 @@ public class StandaloneDialog {
 
     // setup stage
     Stage dialogStage = new Stage();
+    dialogStage.setAlwaysOnTop(true);
     dialogStage.setTitle(api.getAppConfig().getApplicationName()+" - "+resources.getString(dialogMessage.getLevel().getTitleCode()));
     dialogStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/tray-icon.png")));
     // setup scene
@@ -98,23 +99,35 @@ public class StandaloneDialog {
     leftBox.setAlignment(Pos.CENTER);
     leftBox.getStyleClass().add("icon-primary");
     Region icon = new Region();
-    leftBox.getChildren().add(icon);
     // set dialog icon
     switch (dialogMessage.getLevel()) {
       case INFORMATION:
         icon.getStyleClass().add("icon-information");
         icon.setPrefSize(50, 50);
+        leftBox.getChildren().add(icon);
         break;
       case WARNING:
         icon.getStyleClass().add("icon-warning");
         icon.setPrefSize(54, 50);
+        leftBox.getChildren().add(icon);
         break;
       case ERROR:
         icon.getStyleClass().add("icon-error");
         icon.setPrefSize(50, 50);
+        leftBox.getChildren().add(icon);
         break;
+      case TIMER:
+        ProgressIndicator pi = new ProgressIndicator(0.99);
+        pi.getStyleClass().add("timerProgress");
+        pi.setPrefSize(50, 50);
+        leftBox.getChildren().add(pi);
+        AbstractUIOperationController.TimerService service =
+            new AbstractUIOperationController.TimerService(dialogMessage.getTimerLength());
+        service.setOnSucceeded(e -> dialogStage.hide());
+        pi.progressProperty().bind(service.progressProperty());
+        service.start();
       default:
-        leftBox.getChildren().removeAll(); // no icon
+        // no icon
     }
     borderPane.setLeft(leftBox);
 

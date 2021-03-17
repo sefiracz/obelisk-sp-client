@@ -20,6 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -119,6 +120,16 @@ public class MessageController extends AbstractUIOperationController<Void> imple
         case ERROR:
           icon.getStyleClass().add("icon-error");
           icon.setPrefSize(50, 50);
+          break;
+        case TIMER:
+          ProgressIndicator timer = new ProgressIndicator();
+          timer.getStyleClass().add("timerProgress");
+          timer.setPrefSize(50, 50);
+          iconBox.getChildren().add(timer);
+          TimerService service = new TimerService(dialogMessage.getTimerLength());
+          service.setOnSucceeded(e -> signalEnd(null));
+          timer.progressProperty().bind(service.progressProperty());
+          service.start();
           break;
         default:
           iconBox.getChildren().removeAll(); // no icon
