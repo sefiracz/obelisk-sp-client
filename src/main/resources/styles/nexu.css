@@ -304,3 +304,28 @@ RadioButton {
 	-fx-font-weight: bold;
 
 }
+
+.timerProgress {
+
+    -fx-progress-color: #4AA9E7;
+    -fx-fill :null;
+
+}
+
+.timerProgress .percentage {
+
+    -fx-fill: null;
+
+}
+
+.timerProgress {
+    -fx-padding: 0 0 -16 0;
+}
+
+.timerProgress > .determinate-indicator > .indicator {
+
+    -fx-background-color: transparent;
+    -fx-background-insets: 0, 1, 5 2 1 2;
+    -fx-padding: 2px;
+
+}

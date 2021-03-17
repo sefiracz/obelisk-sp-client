@@ -11,6 +11,7 @@ public class DialogMessage {
     INFORMATION("message.title.information"),
     WARNING("message.title.warning"),
     ERROR("message.title.error"),
+    TIMER("message.title.information"),
     NO_LEVEL("");
 
     private final String titleCode;
@@ -34,6 +35,7 @@ public class DialogMessage {
   private double height = 150;
   private boolean doNotShowCheckbox = false;
   private boolean okButton = true;
+  private long timerLength = 30; // 30s
   private String message;
 
   public DialogMessage(Level level) {
@@ -100,6 +102,14 @@ public class DialogMessage {
 
   public double getHeight() {
     return height;
+  }
+
+  public long getTimerLength() {
+    return timerLength;
+  }
+
+  public void setTimerLength(long seconds) {
+    this.timerLength = seconds;
   }
 
   public boolean isShowDoNotShowCheckbox() {

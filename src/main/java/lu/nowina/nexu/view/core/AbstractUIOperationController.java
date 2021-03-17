@@ -15,6 +15,8 @@
 package lu.nowina.nexu.view.core;
 
 import javafx.application.Platform;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import lu.nowina.nexu.api.flow.OperationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +139,33 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 
     void execute() throws Exception;
 
+  }
+
+  public static class TimerService extends Service<Void> {
+
+    private final long seconds;
+
+    public TimerService(long seconds) {
+      if (seconds <= 0)
+        throw new IllegalArgumentException("Invalid value. Positive value only.");
+      this.seconds = seconds;
+    }
+
+    @Override
+    protected Task<Void> createTask() {
+      return new Task<Void>() {
+
+        @Override
+        protected Void call() throws Exception {
+          Thread.sleep(seconds * 10L);
+          for (int p = 99; p > 0; p--) {
+            Thread.sleep(seconds * 10L);
+            updateProgress(p, 100);
+          }
+          return null;
+        }
+      };
+    }
   }
 
 
