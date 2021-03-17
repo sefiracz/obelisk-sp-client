@@ -84,7 +84,7 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
    * @param callback Heavy workload that might take time to finish
    * @param notifyUpdate (if true) After workload is done notify update thread that updates JavaFX UI components
    */
-  public final void asyncWorkload(HeavyWorkload callback, boolean notifyUpdate) {
+  public final void asyncTask(TaskCallback callback, boolean notifyUpdate) {
     new Thread(() -> {
       try {
         callback.execute();
@@ -133,7 +133,7 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
   }
 
   @FunctionalInterface
-  public interface HeavyWorkload {
+  public interface TaskCallback {
 
     void execute() throws Exception;
 

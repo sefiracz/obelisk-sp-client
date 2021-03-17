@@ -109,7 +109,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     refresh.setOnAction(e -> {
       progressIndicatorVisible(true);
       product.getToggles().clear();
-      asyncWorkload(() -> {
+      asyncTask(() -> {
         for (final AbstractProduct p : products) {
           if (p instanceof DetectedCard) {
             api.detectCardTerminal((DetectedCard) p);
@@ -133,7 +133,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     products = (List<AbstractProduct>) params[2];
 
     progressIndicatorVisible(true);
-    asyncWorkload(() -> {
+    asyncTask(() -> {
       for (final AbstractProduct p : products) {
         if (p instanceof DetectedCard) {
           api.detectCardTerminal((DetectedCard) p);
