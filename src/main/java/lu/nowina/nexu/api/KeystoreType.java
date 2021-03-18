@@ -28,19 +28,19 @@ import java.util.ResourceBundle;
 @XmlEnum
 public enum KeystoreType {
 
-	@XmlEnumValue("JKS") JKS("JKS", "Soubor .jks "),
-	@XmlEnumValue("PKCS12") PKCS12("PKCS#12", "Soubor .pfx"),
-	@XmlEnumValue("JCEKS") JCEKS("JCEKS","Soubor .jceks"),
-	@XmlEnumValue("PKCS11") PKCS11("PKCS#11","PKCS#11 Smartcard"),
-	@XmlEnumValue("WINDOWS-MY") WINDOWS("WINDOWS-MY","Windows"),
+	@XmlEnumValue("JKS") JKS("JKS", "keystore.type.simple.keystore.jks"),
+	@XmlEnumValue("PKCS12") PKCS12("PKCS#12", "keystore.type.simple.keystore.pfx"),
+	@XmlEnumValue("JCEKS") JCEKS("JCEKS","keystore.type.simple.keystore.jceks"),
+	@XmlEnumValue("PKCS11") PKCS11("PKCS#11","keystore.type.simple.smartcard.pkcs11"),
+	@XmlEnumValue("WINDOWS-MY") WINDOWS("WINDOWS-MY","keystore.type.simple.keystore.windows"),
 	@XmlEnumValue("UNKNOWN") UNKNOWN("UNKNOWN", "");
 
-	private String label;
-	private String simpleLabel;
+	private final String label;
+	private final String simpleLabelCode;
 	
-	KeystoreType(final String label, final String simpleLabel) {
+	KeystoreType(final String label, final String simpleLabelCode) {
 		this.label = label;
-		this.simpleLabel = simpleLabel;
+		this.simpleLabelCode = simpleLabelCode;
 	}
 
 	public String getLabel() {
@@ -48,8 +48,6 @@ public enum KeystoreType {
 	}
 
 	public String getSimpleLabel() {
-		// TODO
-		ResourceBundle.getBundle("");
-		return simpleLabel;
+		return ResourceBundle.getBundle("bundles/nexu").getString(simpleLabelCode);
 	}
 }

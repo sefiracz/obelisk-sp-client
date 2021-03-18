@@ -36,6 +36,7 @@ import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import lu.nowina.nexu.windows.keystore.WindowsKeystore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +136,11 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
 
       for (final Product p : products) {
-        final RadioButton button = new RadioButton(api.getLabel(p));
+        String label = api.getLabel(p);
+        if(p instanceof WindowsKeystore) {
+          label = p.getSimpleLabel();
+        }
+        final RadioButton button = new RadioButton(label);
         button.setToggleGroup(product);
         button.setUserData(p);
         button.setMnemonicParsing(false);
@@ -160,7 +165,11 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
         radioButtons.add(button);
       }
       for (final Product p : products) {
-        final RadioButton button = new RadioButton(api.getLabel(p));
+        String label = api.getLabel(p);
+        if(p instanceof WindowsKeystore) {
+          label = p.getSimpleLabel();
+        }
+        final RadioButton button = new RadioButton(label);
         button.setToggleGroup(product);
         button.setUserData(p);
         button.setMnemonicParsing(false);
