@@ -31,6 +31,7 @@ import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.generic.RegisteredProducts;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
+import lu.nowina.nexu.windows.keystore.WindowsKeystore;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
@@ -89,9 +90,19 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	public void initialize(URL location, ResourceBundle resources) {
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-		keystoreNameTableColumn.setCellValueFactory((param) ->
-			new ReadOnlyStringWrapper(param.getValue().getLabel())
-		);
+		// double-click show certificate
+		keystoresTable.setRowFactory( tv -> {
+			TableRow<AbstractProduct> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+					Utils.openCertificate(row.getItem().getCertificate());
+				}
+			});
+			return row;
+		});
+		// keystore/device name
+		keystoreNameTableColumn.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getLabel()));
+		// certificate common name
     keystoreCertificateNameTableColumn.setCellValueFactory((param) -> {
       String cn = "";
       try {
@@ -105,10 +116,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
       }
       return new ReadOnlyStringWrapper(cn);
     });
-		keystoreTypeTableColumn.setCellValueFactory((param) -> {
-			final String type = param.getValue().getType().getLabel();
-			return new ReadOnlyStringWrapper(type);
-		});
+    // keystore type
+		keystoreTypeTableColumn
+				.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getType().getSimpleLabel()));
 		keystoresTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				if(newValue instanceof ConfiguredKeystore) {

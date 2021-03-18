@@ -41,12 +41,14 @@ public class WindowsKeystore extends AbstractProduct {
 
 	@Override
 	public String getSimpleLabel() {
-		return getLabel();
+		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
+				.getString("product.selection.add.new.windows.keystore"));
 	}
 
 	@Override
 	public String getLabel() {
-		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.windows.keystore"));
+		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
+				.getString("product.selection.windows.keystore"));
 	}
 
 }
