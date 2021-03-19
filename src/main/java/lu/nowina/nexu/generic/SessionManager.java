@@ -112,14 +112,13 @@ public class SessionManager {
       // check timestamp
       String sessionTimestamp = sessionIdValues[1];
       long now = System.currentTimeMillis();
-      long timestamp;
       try {
-        timestamp = Long.parseLong(sessionTimestamp);
+        long timestamp = Long.parseLong(sessionTimestamp);
+        if (now - timestamp > 45000*1000) { // 12.5 hours
+          throw new InvalidSessionException("Session expired.");
+        }
       } catch (NumberFormatException e) {
         throw new InvalidSessionException("Invalid SessionID timestamp format.");
-      }
-      if (now - timestamp > 45000*1000) { // 12.5 hours
-        throw new InvalidSessionException("Session expired.");
       }
 
       // check signature
