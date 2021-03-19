@@ -27,7 +27,6 @@ import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
 import lu.nowina.nexu.view.DialogMessage;
-import lu.nowina.nexu.view.core.UIOperation;
 
 /**
  * This {@link Operation} allows to perform a signature.
