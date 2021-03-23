@@ -70,20 +70,18 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 	@Override
   @SuppressWarnings("unchecked")
 	public OperationResult<SignatureValue> perform() {
-		try {
-			try {
-				return new OperationResult<SignatureValue>(token.sign(toBeSigned, digestAlgorithm, key));
-			} catch (AbstractTokenRuntimeException e) {
-        this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
-                e.getMessageParams()), true);
-        return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-      } catch (Exception e) {
-				if(Utils.checkWrongPasswordInput(e, operationFactory, api))
-					throw e;
-				return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
-			}
-		} catch(final CancelledOperationException e) {
-			return new OperationResult<SignatureValue>(BasicOperationStatus.USER_CANCEL);
-		}
+    try {
+      return new OperationResult<>(token.sign(toBeSigned, digestAlgorithm, key));
+    } catch (AbstractTokenRuntimeException e) {
+      this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
+              e.getMessageParams()), true);
+      return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
+    } catch (final CancelledOperationException e) {
+      return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
+    } catch (Exception e) {
+      if (Utils.checkWrongPasswordInput(e, operationFactory, api))
+        throw e;
+      return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
+    }
 	}
 }

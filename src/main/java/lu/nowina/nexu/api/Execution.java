@@ -47,7 +47,7 @@ public class Execution<T> {
 	public Execution(final OperationResult<?> operationResult, final OperationStatus errorOperationStatus) {
 		this.success = false;
 		this.error = errorOperationStatus.getCode();
-    if(operationResult.getMessage() != null) {
+    if(operationResult != null && operationResult.getMessage() != null) {
       this.errorMessage = operationResult.getMessage();
     } else {
       this.errorMessage = errorOperationStatus.getLabel();
