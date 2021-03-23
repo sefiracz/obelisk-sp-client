@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AbstractTokenRuntimeException extends RuntimeException {
+public abstract class AbstractTokenRuntimeException extends RuntimeException {
 
   private final DialogMessage.Level level;
   private final String messageCode;
