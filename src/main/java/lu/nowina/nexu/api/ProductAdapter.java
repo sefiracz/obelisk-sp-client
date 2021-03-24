@@ -49,23 +49,6 @@ public interface ProductAdapter {
 	String getLabel(NexuAPI api, Product product, PasswordInputCallback callback);
 
 	/**
-	 * Returns a label for the given <code>product</code>.
-	 * @param api The unique instance of {@link NexuAPI}.
-	 * @param product The target product.
-	 * @param callback Password input callback.
-	 * @param messageCallback Message display callback.
-	 * @return A label for the given <code>product</code>.
-	 */
-	String getLabel(NexuAPI api, Product product, PasswordInputCallback callback, MessageDisplayCallback messageCallback);
-
-	/**
-	 * Returns <code>true</code> if this product adapter supports {@link MessageDisplayCallback} for the given <code>product</code>.
-	 * @return <code>true</code> if this product adapter supports {@link MessageDisplayCallback} for the given <code>product</code>.
-	 */
-	@Deprecated
-	boolean supportMessageDisplayCallback(Product product);
-
-	/**
 	 * Creates a {@link SignatureTokenConnection} for the given product.
 	 * @param api The unique instance of {@link NexuAPI}.
 	 * @param product The target product.
@@ -73,17 +56,6 @@ public interface ProductAdapter {
 	 * @return A {@link SignatureTokenConnection} for the given product.
 	 */
 	SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback);
-
-	/**
-	 * Creates a {@link SignatureTokenConnection} for the given product.
-	 * @param api The unique instance of {@link NexuAPI}.
-	 * @param product The target product.
-	 * @param callback Password input callback.
-	 * @param messageCallback Message display callback.
-	 * @return A {@link SignatureTokenConnection} for the given product.
-	 */
-	SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback,
-			MessageDisplayCallback messageCallback);
 
 	/**
 	 * Returns the keys of <code>token</code> matching the <code>certificateFilter</code>.

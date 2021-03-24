@@ -15,7 +15,6 @@
 package lu.nowina.nexu.view.core;
 
 import eu.europa.esig.dss.token.PasswordInputCallback;
-import lu.nowina.nexu.api.MessageDisplayCallback;
 import lu.nowina.nexu.api.Product;
 
 import java.io.File;
@@ -30,14 +29,9 @@ public interface UIDisplay {
 
 	PasswordInputCallback getPasswordInputCallback(Product p);
 
-	@Deprecated
-	MessageDisplayCallback getMessageDisplayCallback();
-
 	File displayFileChooser(ExtensionFilter...extensionFilters);
 
 	void display(NonBlockingUIOperation operation);
-
-
 
 	void close(boolean blockingOperation);
 }

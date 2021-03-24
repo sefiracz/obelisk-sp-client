@@ -14,23 +14,20 @@
 package lu.nowina.nexu;
 
 /*
- * Copyright 2020 by SEFIRA, spol. s r. o.
+ * Copyright 2021 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * lu.nowina.nexu.LocaleConfigurer
+ * lu.nowina.nexu.AppLauncher
  *
- * Created: 29.01.2020
+ * Created: 24.03.2021
  * Author: hlavnicka
  */
 
-import java.util.Locale;
+public class AppLauncher {
 
-public class LocaleConfigurer {
-
-	public static void setUserPreferences(final UserPreferences preferences) {
-		String language = preferences.getLanguage() != null ? preferences.getLanguage() : Locale.getDefault().getLanguage();
-		Locale.setDefault(new Locale(language, ""));
-		App.refreshSystrayMenu();
-	}
+  public static void main(String[] args) throws Exception {
+    AppPreloader preloader = new AppPreloader();
+    preloader.launchApp(args);
+  }
 
 }

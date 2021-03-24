@@ -40,8 +40,8 @@ public class SystrayMenu {
 		final List<SystrayMenuItem> extensionSystrayMenuItems = api.getExtensionSystrayMenuItem();
 		final SystrayMenuItem[] systrayMenuItems = new SystrayMenuItem[extensionSystrayMenuItems.size() + 2];
 
-		systrayMenuItems[0] = createAboutSystrayMenuItem(operationFactory, api, resources);
-		systrayMenuItems[1] = createPreferencesSystrayMenuItem(operationFactory, api, prefs);
+		systrayMenuItems[0] = createAboutSystrayMenuItem(api, resources);
+		systrayMenuItems[1] = createPreferencesSystrayMenuItem(api, prefs);
 
 		int i = 2;
 		for(final SystrayMenuItem systrayMenuItem : extensionSystrayMenuItems) {
@@ -56,30 +56,31 @@ public class SystrayMenu {
 			switch(api.getEnvironmentInfo().getOs()) {
 			case WINDOWS:
 			case MACOSX:
-				// Use reflection to avoid wrong initialization issues
-				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.AWTSystrayMenuInitializer")
-					.asSubclass(SystrayMenuInitializer.class).newInstance();
-				systrayMenuInitializer.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
-				break;
 			case LINUX:
 				// Use reflection to avoid wrong initialization issues
-				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.DorkboxSystrayMenuInitializer")
-					.asSubclass(SystrayMenuInitializer.class).newInstance();
+				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.AWTSystrayMenuInitializer")
+					.asSubclass(SystrayMenuInitializer.class).getDeclaredConstructor().newInstance();
 				systrayMenuInitializer.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
 				break;
+        // TODO - waiting for SystemTray 4.0 with Java 11 support - https://github.com/dorkbox/SystemTray/milestones/Release%204.0
+//			case LINUX:
+//				// Use reflection to avoid wrong initialization issues
+//				systrayMenuInitializer = Class.forName("lu.nowina.nexu.systray.DorkboxSystrayMenuInitializer")
+//					.asSubclass(SystrayMenuInitializer.class).getDeclaredConstructor().newInstance();
+//				systrayMenuInitializer.init(tooltip, trayIconURL, operationFactory, exitMenuItem, systrayMenuItems);
+//				break;
 			case NOT_RECOGNIZED:
 				LOGGER.warn("System tray is currently not supported for NOT_RECOGNIZED OS.");
 				break;
 			default:
 				throw new IllegalArgumentException("Unhandled value: " + api.getEnvironmentInfo().getOs());
 			}
-		} catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
+		} catch (ReflectiveOperationException e) {
 			LOGGER.error("Cannot initialize systray menu", e);
 		}
 	}
 
-	public static SystrayMenuItem createAboutSystrayMenuItem(final OperationFactory operationFactory, final NexuAPI api,
-			final ResourceBundle resources) {
+	public static SystrayMenuItem createAboutSystrayMenuItem(final NexuAPI api, final ResourceBundle resources) {
 		return new SystrayMenuItem() {
 
 			@Override
@@ -94,20 +95,14 @@ public class SystrayMenu {
 
 			@Override
 			public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-				return new FutureOperationInvocation<Void>() {
-					@Override
-					public OperationResult<Void> call(OperationFactory operationFactory) {
-						return operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/about.fxml",
-								api.getAppConfig().getApplicationName(), api.getAppConfig().getApplicationVersion(),
-								resources).perform();
-					}
-				};
+				return operationFactory -> operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/about.fxml",
+            api.getAppConfig().getApplicationName(), api.getAppConfig().getApplicationVersion(),
+            resources).perform();
 			}
 		};
 	}
 
-	public static SystrayMenuItem createPreferencesSystrayMenuItem(final OperationFactory operationFactory,
-			final NexuAPI api, final UserPreferences prefs) {
+	public static SystrayMenuItem createPreferencesSystrayMenuItem(final NexuAPI api, final UserPreferences prefs) {
 		return new SystrayMenuItem() {
 
 			@Override
@@ -122,15 +117,11 @@ public class SystrayMenu {
 
 			@Override
 			public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-				return new FutureOperationInvocation<Void>() {
-					@Override
-					public OperationResult<Void> call(OperationFactory operationFactory) {
-						final ProxyConfigurer proxyConfigurer = new ProxyConfigurer(api.getAppConfig(), prefs);
-
-						return operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/preferences.fxml",
-								proxyConfigurer, prefs, !api.getAppConfig().isUserPreferencesEditable()).perform();
-					}
-				};
+				return operationFactory -> {
+          final ProxyConfigurer proxyConfigurer = new ProxyConfigurer(api.getAppConfig(), prefs);
+          return operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/preferences.fxml",
+              proxyConfigurer, prefs, !api.getAppConfig().isUserPreferencesEditable()).perform();
+        };
 			}
 		};
 	}
@@ -150,14 +141,11 @@ public class SystrayMenu {
 
 			@Override
 			public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-				return new FutureOperationInvocation<Void>() {
-					@Override
-					public OperationResult<Void> call(OperationFactory operationFactory) {
-						LOGGER.info("Exiting...");
-						Platform.exit();
-						return new OperationResult<Void>((Void) null);
-					}
-				};
+				return operationFactory -> {
+          LOGGER.info("Exiting...");
+          Platform.exit();
+          return new OperationResult<Void>((Void) null);
+        };
 			}
 		};
 	}

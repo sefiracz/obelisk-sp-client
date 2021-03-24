@@ -21,7 +21,6 @@ import lu.nowina.nexu.api.flow.NoOpFutureOperationInvocation;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
 /**
  * Convenient base class for {@link ProductAdapter}s supporting {@link DetectedCard}s.
@@ -48,34 +47,11 @@ public abstract class AbstractCardProductAdapter implements ProductAdapter {
 	protected abstract String getLabel(NexuAPI api, DetectedCard card, PasswordInputCallback callback);
 
 	@Override
-	public String getLabel(NexuAPI api, Product product, PasswordInputCallback callback, MessageDisplayCallback messageCallback) {
-		return getLabel(api, (DetectedCard) product, callback, messageCallback);
-	}
-
-	protected abstract String getLabel(NexuAPI api, DetectedCard card, PasswordInputCallback callback, MessageDisplayCallback messageCallback);
-
-	@Override
-	public final boolean supportMessageDisplayCallback(Product product) {
-		return supportMessageDisplayCallback((DetectedCard) product);
-	}
-
-	protected abstract boolean supportMessageDisplayCallback(DetectedCard product);
-
-	@Override
 	public final SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback) {
 		return connect(api, (DetectedCard) product, callback);
 	}
 
 	protected abstract SignatureTokenConnection connect(NexuAPI api, DetectedCard card, PasswordInputCallback callback);
-
-	@Override
-	public final SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback,
-			MessageDisplayCallback messageCallback) {
-		return connect(api, (DetectedCard) product, callback, messageCallback);
-	}
-
-	protected abstract SignatureTokenConnection connect(NexuAPI api, DetectedCard card, PasswordInputCallback callback,
-			MessageDisplayCallback messageCallback);
 
 	@Override
 	public final FutureOperationInvocation<Product> getConfigurationOperation(NexuAPI api, Product product) {

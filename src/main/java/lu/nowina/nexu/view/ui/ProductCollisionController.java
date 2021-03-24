@@ -94,7 +94,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     overlay = new VBox();
     overlay.getStyleClass().add("overlay");
     ProgressIndicator indicator = new ProgressIndicator();
-    indicator.setPrefSize(150,150);
+    indicator.setPrefSize(150, 150);
+    indicator.setMinHeight(150);
+    indicator.setMinWidth(150);
     progressIndicator = new VBox(indicator);
     progressIndicator.setAlignment(Pos.CENTER);
 

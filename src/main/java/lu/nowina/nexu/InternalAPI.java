@@ -354,11 +354,7 @@ public class InternalAPI implements NexuAPI {
 			label = p.getLabel();
 		} else {
 			final ProductAdapter adapter = matches.iterator().next().getAdapter();
-			if(adapter.supportMessageDisplayCallback(p)) {
-				label = adapter.getLabel(this, p, display.getPasswordInputCallback(p), display.getMessageDisplayCallback());
-			} else {
-				label = adapter.getLabel(this, p, display.getPasswordInputCallback(p));
-			}
+      label = adapter.getLabel(this, p, display.getPasswordInputCallback(p));
 		}
 		if(p instanceof DetectedCard) {
 			ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");

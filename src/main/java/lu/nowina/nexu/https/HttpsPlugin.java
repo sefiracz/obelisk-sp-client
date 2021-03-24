@@ -21,7 +21,7 @@ import lu.nowina.nexu.api.plugin.InitializationMessage;
 import lu.nowina.nexu.api.plugin.InitializationMessage.MessageType;
 import lu.nowina.nexu.api.plugin.NexuPlugin;
 import lu.nowina.nexu.view.StandaloneDialog;
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
