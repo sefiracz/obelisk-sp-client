@@ -18,7 +18,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-import lu.nowina.nexu.NexuLauncher.PreloaderMessage;
+import lu.nowina.nexu.AppPreloader.PreloaderMessage;
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationFactory;
@@ -38,20 +38,20 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
-public class NexUApp extends Application {
+public class App extends Application {
 
-	private static final Logger logger = LoggerFactory.getLogger(NexUApp.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(App.class.getName());
 
 	private static SystrayMenu systrayMenu;
 
 	private HttpServer server;
 
 	private AppConfig getConfig() {
-		return NexuLauncher.getConfig();
+		return AppPreloader.getConfig();
 	}
 
 	private Properties getProperties() {
-		return NexuLauncher.getProperties();
+		return AppPreloader.getProperties();
 	}
 
 	@Override

@@ -91,7 +91,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     overlay = new VBox();
     overlay.getStyleClass().add("overlay");
     ProgressIndicator indicator = new ProgressIndicator();
-    indicator.setPrefSize(150,150);
+    indicator.setPrefSize(150, 150);
+    indicator.setMinHeight(150);
+    indicator.setMinWidth(150);
     progressIndicator = new VBox(indicator);
     progressIndicator.setAlignment(Pos.CENTER);
 
@@ -192,10 +194,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
         // menu items
         final List<SystrayMenuItem> menuItems = new ArrayList<>();
-        menuItems.add(SystrayMenu.createAboutSystrayMenuItem(operationFactory, api,
-            ResourceBundle.getBundle("bundles/nexu")));
-        menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(operationFactory, api,
-            new UserPreferences(api.getAppConfig().getApplicationName())));
+        menuItems.add(SystrayMenu.createAboutSystrayMenuItem(api, ResourceBundle.getBundle("bundles/nexu")));
+        menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(api,
+                new UserPreferences(api.getAppConfig().getApplicationName())));
         menuItems.addAll(api.getExtensionSystrayMenuItem());
         menuItems.add(new SystrayMenuItem() {
 

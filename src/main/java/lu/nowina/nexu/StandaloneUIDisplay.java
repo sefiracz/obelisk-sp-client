@@ -21,7 +21,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lu.nowina.nexu.api.MessageDisplayCallback;
 import lu.nowina.nexu.api.NexuPasswordInputCallback;
 import lu.nowina.nexu.api.Product;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
@@ -144,7 +143,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 			LOGGER.info("Request password");
       final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
               UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
-              NexuLauncher.getConfig().getApplicationName(), product).perform();
+              AppPreloader.getConfig().getApplicationName(), product).perform();
       if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
         return (char[]) passwordResult.getResult(); // get password
       } else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
@@ -173,35 +172,6 @@ public class StandaloneUIDisplay implements UIDisplay {
 	@Override
 	public PasswordInputCallback getPasswordInputCallback(Product product) {
 		return new FlowPasswordCallback(product);
-	}
-
-	// TODO - remove?
-  @Deprecated
-	private final class FlowMessageDisplayCallback implements MessageDisplayCallback {
-		@Override
-		public void display(Message message) {
-			if(Message.INPUT_PINPAD.equals(message)) {
-				StandaloneUIDisplay.this.operationFactory.getOperation(
-						NonBlockingUIOperation.class, "/fxml/message-no-button.fxml",
-						"message.display.callback." + message.name().toLowerCase().replace('_', '.'),
-						NexuLauncher.getConfig().getApplicationName()).perform();
-			} else {
-				StandaloneUIDisplay.this.operationFactory.getOperation(
-					NonBlockingUIOperation.class, "/fxml/message.fxml",
-					"message.display.callback." + message.name().toLowerCase().replace('_', '.'),
-					NexuLauncher.getConfig().getApplicationName()).perform();
-			}
-		}
-
-		@Override
-		public void dispose() {
-			StandaloneUIDisplay.this.close(false);
-		}
-	}
-
-	@Override
-	public MessageDisplayCallback getMessageDisplayCallback() {
-		return new FlowMessageDisplayCallback();
 	}
 
 	@Override

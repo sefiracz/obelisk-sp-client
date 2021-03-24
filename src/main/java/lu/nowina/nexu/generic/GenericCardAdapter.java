@@ -49,16 +49,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
     }
 
     @Override
-    protected String getLabel(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback, final MessageDisplayCallback messageCallback) {
-        throw new IllegalStateException("This product adapter does not support message display callback.");
-    }
-
-    @Override
-    protected boolean supportMessageDisplayCallback(final DetectedCard card) {
-        return false;
-    }
-
-    @Override
     protected SignatureTokenConnection connect(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback) {
         final ConnectionInfo cInfo = this.info.getConnectionInfo(api.getEnvironmentInfo());
         final ScAPI scApi = cInfo.getSelectedApi();
@@ -86,12 +76,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
             default:
                 throw new RuntimeException("API not supported");
         }
-    }
-
-    @Override
-    protected SignatureTokenConnection connect(final NexuAPI api, final DetectedCard card, final PasswordInputCallback callback,
-            final MessageDisplayCallback messageCallback) {
-        throw new IllegalStateException("This product adapter does not support message display callback.");
     }
 
     @Override
