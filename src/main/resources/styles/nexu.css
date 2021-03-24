@@ -308,7 +308,7 @@ RadioButton {
 .timerProgress {
 
     -fx-progress-color: #4AA9E7;
-    -fx-fill :null;
+    -fx-fill: null;
 
 }
 
