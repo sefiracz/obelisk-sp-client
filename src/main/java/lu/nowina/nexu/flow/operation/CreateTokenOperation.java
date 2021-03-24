@@ -180,12 +180,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
    */
   private OperationResult<Map<TokenOperationResultKey, Object>> createToken(Product product, ProductAdapter adapter,
                                                                             Map<TokenOperationResultKey, Object> map) {
-    final SignatureTokenConnection connect;
-    if(adapter.supportMessageDisplayCallback(product)) {
-      connect = adapter.connect(api, product, display.getPasswordInputCallback(product), display.getMessageDisplayCallback());
-    } else {
-      connect = adapter.connect(api, product, display.getPasswordInputCallback(product));
-    }
+    final SignatureTokenConnection connect = adapter.connect(api, product, display.getPasswordInputCallback(product));
     if (connect == null) {
       LOG.error("No connect returned");
       return new OperationResult<>(CoreOperationStatus.NO_TOKEN);

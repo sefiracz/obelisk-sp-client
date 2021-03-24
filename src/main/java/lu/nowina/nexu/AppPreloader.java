@@ -49,8 +49,8 @@ import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-public class NexuLauncher extends Preloader {
-	private static final Logger logger = LoggerFactory.getLogger(NexuLauncher.class.getName());
+public class AppPreloader extends Preloader {
+	private static final Logger logger = LoggerFactory.getLogger(AppPreloader.class.getName());
 
 	private static AppConfig config;
 
@@ -58,12 +58,7 @@ public class NexuLauncher extends Preloader {
 
 	private static ProxyConfigurer proxyConfigurer;
 
-	public static void main(String[] args) throws Exception {
-		NexuLauncher launcher = new NexuLauncher();
-		launcher.launchApp(args);
-	}
-
-	private void launchApp(String[] args) throws IOException {
+	public void launchApp(String[] args) throws IOException {
 		props = loadProperties();
 		loadAppConfig(props);
 
@@ -75,7 +70,7 @@ public class NexuLauncher extends Preloader {
 
 		boolean started = checkAlreadyStarted();
 		if (!started) {
-			LauncherImpl.launchApplication(getApplicationClass(), NexuLauncher.class, args);
+			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
 		}
 	}
 
@@ -87,8 +82,8 @@ public class NexuLauncher extends Preloader {
 		if(getConfig().isShowSplashScreen()) {
 			final String appName = getConfig().getApplicationName();
 			primaryStage.setTitle(appName);
-			primaryStage.getIcons().add(new Image(NexuLauncher.class.getResourceAsStream("/tray-icon.png")));
-			final ImageView splash = new ImageView(new Image(NexuLauncher.class.getResourceAsStream("/images/splash.png")));
+			primaryStage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/tray-icon.png")));
+			final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash.png")));
 			double splashWidth = splash.getImage().getWidth();
 			double splashHeight = splash.getImage().getHeight();
 			final StackPane background = new StackPane(splash);
@@ -187,7 +182,7 @@ public class NexuLauncher extends Preloader {
 	}
 
 	private void loadPropertiesFromClasspath(Properties props) throws IOException {
-		InputStream configFile = NexUApp.class.getClassLoader().getResourceAsStream("app-config.properties");
+		InputStream configFile = App.class.getClassLoader().getResourceAsStream("app-config.properties");
 		if (configFile != null) {
 			props.load(configFile);
 		}
@@ -213,7 +208,7 @@ public class NexuLauncher extends Preloader {
 	 * @return The JavaFX {@link Application} class to launch.
 	 */
 	protected Class<? extends Application> getApplicationClass() {
-		return NexUApp.class;
+		return App.class;
 	}
 
 	@Override
