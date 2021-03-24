@@ -16,7 +16,7 @@
 package lu.nowina.nexu.generic;
 
 import lu.nowina.nexu.NexuException;
-import lu.nowina.nexu.NexuLauncher;
+import lu.nowina.nexu.AppPreloader;
 import lu.nowina.nexu.api.AppConfig;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.Feedback;
@@ -134,7 +134,7 @@ public class DebugHelper {
 	}
 
 	AppConfig getConfig() {
-		return NexuLauncher.getConfig();
+		return AppPreloader.getConfig();
 	}
 
 	Properties getProperties() {

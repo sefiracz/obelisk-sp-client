@@ -20,7 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import lu.nowina.nexu.LocaleConfigurer;
-import lu.nowina.nexu.NexuLauncher;
+import lu.nowina.nexu.AppPreloader;
 import lu.nowina.nexu.ProxyConfigurer;
 import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.EnvironmentInfo;
@@ -161,7 +161,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 			userPreferences.setLanguage(language.isDisabled() ? null :
 					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
 
-			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
+			AppPreloader.getProxyConfigurer().updateValues(AppPreloader.getConfig(), userPreferences);
 			LocaleConfigurer.setUserPreferences(userPreferences);
 
 			signalEnd(null);
@@ -171,7 +171,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		});
 		reset.setOnAction((e) -> {
 			userPreferences.clear();
-			NexuLauncher.getProxyConfigurer().updateValues(NexuLauncher.getConfig(), userPreferences);
+			AppPreloader.getProxyConfigurer().updateValues(AppPreloader.getConfig(), userPreferences);
 			signalEnd(null);
 		});
 	}

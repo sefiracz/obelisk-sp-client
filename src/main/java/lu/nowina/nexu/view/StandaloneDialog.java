@@ -119,7 +119,8 @@ public class StandaloneDialog {
       case TIMER:
         ProgressIndicator pi = new ProgressIndicator(0.99);
         pi.getStyleClass().add("timerProgress");
-        pi.setPrefSize(50, 50);
+        pi.setMinHeight(50);
+        pi.setMinWidth(50);
         leftBox.getChildren().add(pi);
         AbstractUIOperationController.TimerService service =
             new AbstractUIOperationController.TimerService(dialogMessage.getTimerLength());
