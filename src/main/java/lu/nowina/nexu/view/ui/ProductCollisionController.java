@@ -158,6 +158,10 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
       for (final AbstractProduct p : products) {
         final RadioButton button = new RadioButton(api.getLabel(p));
+        // disable disconnected cards
+        if (p instanceof DetectedCard && ((DetectedCard) p).getTerminal() == null) {
+          button.setDisable(true);
+        }
         button.setToggleGroup(product);
         button.setUserData(p);
         button.setMnemonicParsing(false);
