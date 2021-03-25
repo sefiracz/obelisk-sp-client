@@ -1,1 +1,1 @@
-"Obelisk SP Card Reader" 
+"Obelisk Signing Portal client application" 
