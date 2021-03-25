@@ -32,7 +32,7 @@ public enum JREVendor {
 
 	ORACLE, OPEN_JDK, NOT_RECOGNIZED;
 
-	private static Logger logger = LoggerFactory.getLogger(JREVendor.class);
+	private final static Logger logger = LoggerFactory.getLogger(JREVendor.class);
 
 	public static JREVendor forJREVendor(String jreVendor) {
 		if (jreVendor.toLowerCase().contains("oracle")) {
@@ -42,8 +42,12 @@ public enum JREVendor {
 			return OPEN_JDK;
 		}
 		else {
-			logger.warn("JRE not recognized " + jreVendor);
-			return NOT_RECOGNIZED;
+		  String jreName = System.getProperty("java.runtime.name");
+		  if(jreName != null && jreName.toLowerCase().contains("openjdk")) {
+        return OPEN_JDK;
+      }
+      logger.warn("JRE not recognized. Vendor = '" + jreVendor + "' ; Name = '" + jreName + "'");
+      return NOT_RECOGNIZED;
 		}
 	}
 
