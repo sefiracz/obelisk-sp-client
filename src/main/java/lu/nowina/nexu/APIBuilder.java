@@ -15,7 +15,6 @@
 package lu.nowina.nexu;
 
 import lu.nowina.nexu.api.AppConfig;
-import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
@@ -31,8 +30,11 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Builds an instance of {@link NexuAPI}.
@@ -72,14 +74,28 @@ public class APIBuilder {
 	 */
 	public List<InitializationMessage> initPlugins(final NexuAPI api, final Properties properties) {
 		final List<InitializationMessage> messages = new ArrayList<>();
+		final List<PluginInit> plugins = new ArrayList<>();
+		Pattern pluginRegex = Pattern.compile("plugin_(\\d+)_(\\w+)");
 		for (final String key : properties.stringPropertyNames()) {
 			if (key.startsWith("plugin_")) {
-				final String pluginClassName = properties.getProperty(key);
-				final String pluginId = key.substring("plugin_".length());
-
-				LOGGER.info(" + Plugin " + pluginClassName);
-				messages.addAll(buildAndRegisterPlugin((InternalAPI) api, pluginClassName, pluginId));
+				Matcher pluginMatch = pluginRegex.matcher(key);
+				if(pluginMatch.find()) {
+					// get plugin order
+					String pluginOrder = pluginMatch.group(1);
+					// get plugin ID name
+					String pluginId = pluginMatch.group(2);
+					// get plugin class name
+					final String pluginClassName = properties.getProperty(key);
+					plugins.add(new PluginInit(Integer.parseInt(pluginOrder), pluginId, pluginClassName));
+				}
 			}
+		}
+		// sort plugins by given order
+		plugins.sort(Comparator.comparing(PluginInit::getPluginOrder));
+		// initialize plugins in order
+		for(PluginInit plugin : plugins) {
+			LOGGER.info(" + Plugin " + plugin.getPluginClassName());
+			messages.addAll(buildAndRegisterPlugin((InternalAPI) api, plugin.getPluginClassName(), plugin.getPluginId()));
 		}
 		return messages;
 	}
@@ -103,6 +119,31 @@ public class APIBuilder {
 		if (HttpPlugin.class.equals(i)) {
 			final HttpPlugin p = (HttpPlugin) plugin;
 			api.registerHttpContext(pluginId, p);
+		}
+	}
+
+	private static class PluginInit {
+
+		private final int pluginOrder;
+		private final String pluginClassName;
+		private final String pluginId;
+
+		public PluginInit(int pluginOrder, String pluginId, String pluginClassName) {
+			this.pluginOrder = pluginOrder;
+			this.pluginClassName = pluginClassName;
+			this.pluginId = pluginId;
+		}
+
+		public int getPluginOrder() {
+			return pluginOrder;
+		}
+
+		public String getPluginClassName() {
+			return pluginClassName;
+		}
+
+		public String getPluginId() {
+			return pluginId;
 		}
 	}
 }
