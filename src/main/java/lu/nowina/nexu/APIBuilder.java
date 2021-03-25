@@ -87,7 +87,7 @@ public class APIBuilder {
 	private List<InitializationMessage> buildAndRegisterPlugin(InternalAPI api, String pluginClassName, String pluginId) {
 		try {
 			final Class<? extends NexuPlugin> clazz = Class.forName(pluginClassName).asSubclass(NexuPlugin.class);
-			final NexuPlugin plugin = clazz.newInstance();
+			final NexuPlugin plugin = clazz.getDeclaredConstructor().newInstance();
 			final List<InitializationMessage> messages = plugin.init(pluginId, api);
 			for (Object o : ClassUtils.getAllInterfaces(clazz)) {
 				registerPlugin(api, pluginId, (Class<?>) o, plugin);
