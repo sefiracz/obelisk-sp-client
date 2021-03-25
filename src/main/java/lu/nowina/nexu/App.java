@@ -30,6 +30,8 @@ import lu.nowina.nexu.flow.operation.BasicOperationFactory;
 import lu.nowina.nexu.generic.SCDatabase;
 import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.generic.SmartcardInfoDatabase;
+import lu.nowina.nexu.view.DialogMessage;
+import lu.nowina.nexu.view.StandaloneDialog;
 import lu.nowina.nexu.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,15 @@ public class App extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		Platform.setImplicitExit(false);
 
+		// show error if application is already running
+		Parameters params = getParameters();
+		if(params.getRaw().contains("alreadyRunning")) {
+			StandaloneDialog.showDialog(null, new DialogMessage("preloader.error.already.running",
+					DialogMessage.Level.ERROR, new String[] {getConfig().getApplicationName()}), true);
+			System.exit(1);
+		}
+
+		// start application
 		final StandaloneUIDisplay uiDisplay = new StandaloneUIDisplay();
 		final OperationFactory operationFactory = new BasicOperationFactory();
 		((BasicOperationFactory)operationFactory).setDisplay(uiDisplay);

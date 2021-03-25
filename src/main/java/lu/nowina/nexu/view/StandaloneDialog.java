@@ -76,18 +76,23 @@ public class StandaloneDialog {
    */
   public static void showDialog(NexuAPI api, DialogMessage dialogMessage, boolean blockingUI) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
-    UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
 
-    // check if message is suppose to be displayed
-    String dialogId = dialogMessage.getDialogId();
-    if(dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
-      return; // do not display message dialog
+    String appName = "";
+    if(api != null) {
+      appName = api.getAppConfig().getApplicationName();
+      UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+      // check if message is suppose to be displayed
+      String dialogId = dialogMessage.getDialogId();
+      if (dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
+        return; // do not display message dialog
+      }
     }
 
     // setup stage
     Stage dialogStage = new Stage();
     dialogStage.setAlwaysOnTop(true);
-    dialogStage.setTitle(api.getAppConfig().getApplicationName()+" - "+resources.getString(dialogMessage.getLevel().getTitleCode()));
+    dialogStage.setTitle((appName.isEmpty() ? "" : appName + " - ")
+        + resources.getString(dialogMessage.getLevel().getTitleCode()));
     dialogStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/tray-icon.png")));
     // setup scene
     BorderPane borderPane = new BorderPane();
@@ -183,7 +188,7 @@ public class StandaloneDialog {
     VBox bottomContainer = new VBox(btnContainer);
 
     // do not show checkbox
-    if(dialogMessage.isShowDoNotShowCheckbox()) {
+    if (api != null && dialogMessage.isShowDoNotShowCheckbox()) {
       bottomContainer.getChildren().add(doNotShowContainer);
     }
     borderPane.setBottom(bottomContainer);
@@ -191,7 +196,10 @@ public class StandaloneDialog {
     // OK button action
     okButton.setOnAction(e -> {
       if(doNotShowCheckBox.selectedProperty().getValue()) {
-        prefs.addHiddenDialogId(dialogMessage.getDialogId());
+        if (api != null) {
+          UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+          prefs.addHiddenDialogId(dialogMessage.getDialogId());
+        }
       }
       dialogStage.hide();
     });

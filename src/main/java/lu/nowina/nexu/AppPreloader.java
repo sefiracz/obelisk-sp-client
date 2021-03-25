@@ -71,6 +71,8 @@ public class AppPreloader extends Preloader {
 		boolean started = checkAlreadyStarted();
 		if (!started) {
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
+		} else {
+			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, new String[]{"alreadyRunning"});
 		}
 	}
 
@@ -166,7 +168,7 @@ public class AppPreloader extends Preloader {
 			}
 			try (InputStream in = connection.getInputStream()) {
 				final String info = IOUtils.toString(in, StandardCharsets.UTF_8);
-				logger.error("OBELISK Signing Portal already started. Version '" + info + "'");
+				logger.error(config.getApplicationName()+" is already running. Version '" + info + "'");
 				return true;
 			} catch (Exception e) {
 				logger.info("No " + url.toString() + " detected, " + e.getMessage());
