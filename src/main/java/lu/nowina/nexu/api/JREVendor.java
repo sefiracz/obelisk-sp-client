@@ -30,14 +30,18 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum JREVendor {
 
-	ORACLE, NOT_RECOGNIZED;
+	ORACLE, OPEN_JDK, NOT_RECOGNIZED;
 
 	private static Logger logger = LoggerFactory.getLogger(JREVendor.class);
 
 	public static JREVendor forJREVendor(String jreVendor) {
 		if (jreVendor.toLowerCase().contains("oracle")) {
 			return ORACLE;
-		} else {
+		}
+		else if (jreVendor.toLowerCase().contains("openjdk")) {
+			return OPEN_JDK;
+		}
+		else {
 			logger.warn("JRE not recognized " + jreVendor);
 			return NOT_RECOGNIZED;
 		}
