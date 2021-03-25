@@ -20,15 +20,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import lu.nowina.nexu.NexuException;
 import lu.nowina.nexu.Utils;
+import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.Feedback;
 import lu.nowina.nexu.flow.StageHelper;
-import lu.nowina.nexu.generic.DebugHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,6 +35,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ProvideFeedbackController extends AbstractFeedbackUIOperationController implements Initializable {
@@ -61,25 +60,38 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 	public void initialize(URL location, ResourceBundle resources) {
     this.resources = ResourceBundle.getBundle("bundles/nexu");
 		report.setOnAction(e -> {
-			DebugHelper dh = new DebugHelper();
-			Feedback feedback = null;
-			try {
-				feedback = dh.processError(new NexuException());
-			} catch (IOException |JAXBException ex) {
-				LOGGER.warn(ex.getMessage(), ex);
-			}
+      Feedback feedback = getFeedback();
 			new Thread(() -> {
 				try {
 					// subject
 					String subject = MessageFormat.format(resources.getString("feedback.mail.subject"), getApplicationName());
 					// body
-					String stackTrace = Utils.printException(getFeedback().getException());
-					String body = MessageFormat.format(resources.getString("feedback.mail.body"), stackTrace);
+          StringBuilder body = new StringBuilder();
+          body.append(resources.getString("feedback.mail.body.diagnostic.data")).append("\n\n");
+
+          // environment info
+          body.append(resources.getString("feedback.mail.body.envInfo")).append("\n");
+          body.append(EnvironmentInfo.buildDiagnosticEnvInfo());
+          body.append("\n");
+
+          // initialized pkcs11 modules
+          body.append(resources.getString("feedback.mail.body.pkcs11.modules")).append("\n");
+          List<String> initModules = getApi().getPKCS11Manager().getInitializedModules();
+          for(String module : initModules) {
+            body.append(module).append("\n");
+          }
+          body.append("\n");
+
+          // error stackstrace
+          String stackTrace = Utils.printException(feedback.getException());
+          body.append(resources.getString("feedback.mail.body.stacktrace")).append("\n");
+					body.append(stackTrace).append("\n");
+
 					// mailto
 					String uriStr = String.format("mailto:%s?subject=%s&body=%s",
 							getAppConfig().getTicketUrl(),
 							urlEncode(subject),
-							urlEncode(body));
+							urlEncode(body.toString()));
 					Desktop.getDesktop().browse(new URI(uriStr));
 				} catch (IOException | URISyntaxException ioe) {
 					LOGGER.error(ioe.getMessage());

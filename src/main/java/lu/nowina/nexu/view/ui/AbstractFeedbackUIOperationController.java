@@ -25,19 +25,18 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 /**
- * Convenient base class for {@link UIOperationController} whose result is a feedback that can be provided to {@link FeedbackClient}.
+ * Convenient base class for {@link UIOperationController} whose result is a feedback that can be provided to support.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
 public abstract class AbstractFeedbackUIOperationController extends AbstractUIOperationController<Feedback> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFeedbackUIOperationController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractFeedbackUIOperationController.class);
 
 	private Feedback feedback;
 	private NexuAPI api;
 
 	private String applicationName;
-	// Needed by ProvideFeedbackController, in order to get JIRA's url as well as other potentially useful information
 	private AppConfig appConfig;
 
 	@Override
@@ -85,4 +84,7 @@ public abstract class AbstractFeedbackUIOperationController extends AbstractUIOp
 		return appConfig;
 	}
 
+  public NexuAPI getApi() {
+    return api;
+  }
 }

@@ -73,6 +73,16 @@ public class EnvironmentInfo {
 		return info;
 	}
 
+  public static String buildDiagnosticEnvInfo() {
+    Properties systemProperties = System.getProperties();
+    return "OS name: " + systemProperties.getProperty("os.name") + "\n" +
+            "OS version: " + systemProperties.getProperty("os.version") + "\n" +
+            "JRE vendor: " + systemProperties.getProperty("java.vendor") + "\n" +
+            "JRE name: " + systemProperties.getProperty("java.runtime.name") + "\n" +
+            "JRE version: " + systemProperties.getProperty("java.runtime.version") + "\n" +
+            "Architecture: " + systemProperties.getProperty("os.arch") + "\n";
+  }
+
 	/**
 	 * Compare the filter value with the EnvironmentInfo to see if there is a match.
 	 *

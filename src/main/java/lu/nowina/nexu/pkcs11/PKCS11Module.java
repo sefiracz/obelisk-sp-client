@@ -365,6 +365,14 @@ public class PKCS11Module {
   }
 
   /**
+   * Get PKCS11 module library path
+   * @return PKCS11 module library path
+   */
+  public String getPkcs11ModulePath() {
+    return pkcs11ModulePath;
+  }
+
+  /**
    * Finalize this PKCS11 module
    * @throws Throwable
    */

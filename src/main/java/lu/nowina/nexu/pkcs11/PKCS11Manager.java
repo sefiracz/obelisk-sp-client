@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class PKCS11Manager {
 
@@ -195,11 +196,29 @@ public class PKCS11Manager {
     modules = new ConcurrentHashMap<>();
   }
 
+  /**
+   * Get available/known smartcard informations for given ATR
+   * @param atr Smartcard ATR
+   * @return Smartcard informations or null if unknown device
+   */
   public SmartcardInfo getAvailableSmartcardInfo(String atr) {
     SmartcardInfo info = registered.get(atr);
     return info == null ? supported.get(atr) : info;
   }
 
+  /**
+   * Get list of all currently initialized PKCS11 modules
+   * @return List of initialized modules
+   */
+  public List<String> getInitializedModules() {
+    return modules.values().stream().map(PKCS11Module::getPkcs11ModulePath).collect(Collectors.toList());
+  }
+
+  /**
+   * Get available PKCS11 driver path for given smartcard info
+   * @param info Smartcard information
+   * @return Path to existing PKCS11 module library
+   */
   private String getAvailableDriver(SmartcardInfo info) {
     if(info != null && info.getDrivers() != null) {
       for(String driver : info.getDrivers()) {
