@@ -95,7 +95,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 			TableRow<AbstractProduct> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-					Utils.openCertificate(row.getItem().getCertificate());
+					Utils.openCertificate(Utils.wrapPEMCertificate(row.getItem().getCertificate()));
 				}
 			});
 			return row;
@@ -135,9 +135,8 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoresTable.setItems(observableKeystores);
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
-		certificate.setOnAction(actionEvent -> {
-      Utils.openCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate());
-		});
+		certificate.setOnAction(actionEvent -> Utils.openCertificate(
+		        Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		remove.setOnAction((event) -> observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem()));
