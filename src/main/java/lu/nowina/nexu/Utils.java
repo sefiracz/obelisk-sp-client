@@ -28,19 +28,14 @@ import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.DialogMessage;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.awt.*;
 import java.io.*;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.util.Arrays;
+import java.security.UnrecoverableKeyException;
 import java.util.Date;
 
 public class Utils {
@@ -80,7 +75,7 @@ public class Utils {
     } else if (exception.contains("keystore password was incorrect")) {
       msg = "key.selection.error.password.incorrect";
     } else if(e.getCause() instanceof UnrecoverableKeyException) {
-      msg = "key.selection.error.password.incorrect"; // TODO - muze byt jine heslo ke klici nez keystore/jiny technicky problem/???
+      msg = "key.selection.error.password.incorrect"; // TODO - different key x keystore password, other issues???
     }  else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
     } else {
@@ -95,6 +90,7 @@ public class Utils {
   public static void openCertificate(String certificate) {
     if (Desktop.isDesktopSupported()) {
       try {
+        // TODO - macOS cant just open certificate? Can it even write to /tmp?
         final File tmpFile = File.createTempFile("certificate", ".crt");
         tmpFile.deleteOnExit();
         final FileWriter writer = new FileWriter(tmpFile);
@@ -110,8 +106,23 @@ public class Utils {
       } catch (final Exception e) {
         logger.error(e.getMessage(), e);
       }
+    } else {
+      logger.warn("Desktop not supported");
     }
   }
 
+  public static String wrapPEMCertificate(String certificate) {
+    byte[] encoded = Base64.decodeBase64(certificate);
+    certificate = StringUtils.newStringUtf8(Base64.encodeBase64Chunked(encoded));
+    String begin = "-----BEGIN CERTIFICATE-----";
+    String end = "-----END CERTIFICATE-----";
+    if(!certificate.startsWith(begin)) {
+      certificate = begin + "\n" + certificate;
+    }
+    if(!certificate.endsWith(end)) {
+      certificate = certificate + end;
+    }
+    return certificate;
+  }
 
 }
