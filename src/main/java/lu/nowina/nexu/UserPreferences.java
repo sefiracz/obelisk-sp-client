@@ -45,7 +45,7 @@ public class UserPreferences {
 	private String hiddenDialogIds;
 
 	public UserPreferences(final String applicationName) {
-		prefs = Preferences.userRoot().node(applicationName);
+		prefs = Preferences.userRoot().node(applicationName.toLowerCase());
 		
 		final String useSystemProxyStr = prefs.get(USE_SYSTEM_PROXY, null);
 		useSystemProxy = (useSystemProxyStr != null) ? Boolean.valueOf(useSystemProxyStr) : null;
