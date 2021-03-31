@@ -40,7 +40,7 @@ public class BasicOperationFactory implements OperationFactory {
     @SuppressWarnings("unchecked")
     public <R, T extends Operation<R>> Operation<R> getOperation(final Class<T> clazz, final Object... params) {
         try {
-            final T operation = clazz.newInstance();
+            final T operation = clazz.getDeclaredConstructor().newInstance();
             if (operation instanceof CompositeOperation) {
                 final CompositeOperation<R> compositeOperation = (CompositeOperation<R>) operation;
                 compositeOperation.setOperationFactory(this);
@@ -51,7 +51,7 @@ public class BasicOperationFactory implements OperationFactory {
             }
             operation.setParams(params);
             return operation;
-        } catch (final InstantiationException | IllegalAccessException e) {
+        } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(e);
         }
     }

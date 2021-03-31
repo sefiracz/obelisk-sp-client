@@ -146,7 +146,7 @@ public class App extends Application {
 		try {
 			Class<HttpServer> cla = (Class<HttpServer>) Class.forName(getConfig().getHttpServerClass());
 			logger.info("HttpServer is " + getConfig().getHttpServerClass());
-			HttpServer server = cla.newInstance();
+			HttpServer server = cla.getDeclaredConstructor().newInstance();
 			return server;
 		} catch (Exception e) {
 			logger.error("Cannot instanciate Http Server " + getConfig().getHttpServerClass(), e);

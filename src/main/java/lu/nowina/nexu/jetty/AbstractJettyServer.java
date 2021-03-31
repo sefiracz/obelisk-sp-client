@@ -46,7 +46,7 @@ public abstract class AbstractJettyServer implements HttpServer {
 
 		final Class<? extends RequestProcessor> clazz =
 				Class.forName(api.getAppConfig().getRequestProcessorClass()).asSubclass(RequestProcessor.class);
-		final RequestProcessor handler = clazz.newInstance();
+		final RequestProcessor handler = clazz.getDeclaredConstructor().newInstance();
 		handler.setConfig(api);
 		handler.setNexuHostname(api.getAppConfig().getNexuHostname());
 

@@ -19,6 +19,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -86,23 +87,27 @@ public class NativeProcessExecutor {
 	}
 
 	private static class StreamReader implements Callable<String> {
-		private InputStream is;
-		private StringWriter writer;
+		private final InputStream is;
+		private final StringWriter writer;
 
 		public StreamReader(InputStream is) {
 			this.is = is;
-			writer = new StringWriter();
+			this.writer = new StringWriter();
 		}
 
 		@Override
 		public String call() {
 			try {
-				IOUtils.copy(is, writer);
+				IOUtils.copy(is, writer, StandardCharsets.UTF_8);
 				return writer.toString();
 			} catch (IOException e) {
 				throw new RuntimeException("Unable to read InputStream", e);
 			} finally {
-				IOUtils.closeQuietly(is);
+				if (is != null) {
+					try {
+						is.close();
+					} catch (IOException ignored) {}
+				}
 			}
 		}
 	}
