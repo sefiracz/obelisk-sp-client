@@ -34,8 +34,8 @@ public class EntityDatabaseLoader {
 		final T db;
 		if (!f.exists()) {
 			try {
-				db = databaseClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				db = databaseClass.getDeclaredConstructor().newInstance();
+			} catch (ReflectiveOperationException e) {
 				throw new TechnicalException("Cannot create database", e);
 			}
 		} else {

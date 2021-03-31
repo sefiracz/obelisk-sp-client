@@ -36,16 +36,12 @@ public class CheckUserRequestProcessor extends RequestProcessor {
 			case WINDOWS:
 				// Use reflection to avoid any wrong initialization issues
 				userByPIDStrategy = Class.forName("lu.nowina.nexu.jetty.Win32JNAUserByPIDStrategy").asSubclass(
-						UserByPIDStrategy.class).newInstance();
+						UserByPIDStrategy.class).getDeclaredConstructor().newInstance();
 				break;
 			default:
 				userByPIDStrategy = null;
 			}
-		} catch (InstantiationException e) {
-			throw new IllegalStateException(e);
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		} catch (ClassNotFoundException e) {
+		} catch (ReflectiveOperationException e) {
 			throw new IllegalStateException(e);
 		}
 	}
