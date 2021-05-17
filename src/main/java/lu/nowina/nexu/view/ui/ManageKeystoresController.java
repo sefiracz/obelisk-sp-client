@@ -55,6 +55,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	private static final Logger logger = LoggerFactory.getLogger(ManageKeystoresController.class.getName());
 
 	@FXML
+	private Button cancel;
+
+  @FXML
 	private Button certificate;
 
 	@FXML
@@ -88,6 +91,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		cancel.setOnAction(e -> signalEnd(null));
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		// double-click show certificate
