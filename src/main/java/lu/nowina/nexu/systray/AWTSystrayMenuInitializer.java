@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -31,9 +33,16 @@ import java.util.ResourceBundle;
 public class AWTSystrayMenuInitializer implements SystrayMenuInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AWTSystrayMenuInitializer.class.getName());
+	private Robot robot;
 
 	public AWTSystrayMenuInitializer() {
 		super();
+		try {
+			this.robot = new Robot();
+		}
+		catch (AWTException e) {
+			LOGGER.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -52,6 +61,16 @@ public class AWTSystrayMenuInitializer implements SystrayMenuInitializer {
 			final Image image = Toolkit.getDefaultToolkit().getImage(trayIconURL);
 			final TrayIcon trayIcon = new TrayIcon(image, tooltip, popup);
 			trayIcon.setImageAutoSize(true);
+			trayIcon.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					// simulate right-click when user performs left-click to open the popup
+					if (e.getButton() == MouseEvent.BUTTON1 && robot != null) {
+						robot.mousePress(MouseEvent.BUTTON3_DOWN_MASK);
+						robot.mouseRelease(MouseEvent.BUTTON3_DOWN_MASK);
+					}
+				}
+			});
 
 			final MenuItem mi = new MenuItem(exitMenuItem.getLabel());
 			mi.setName(exitMenuItem.getName());
