@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>cz.sefira.obelisk</groupId>
-  <artifactId>obelisk-sp-card-reader</artifactId>
-  <version>1.0.0</version>
+  <artifactId>obelisk-sp-client</artifactId>
+  <version>1.0.0</version> <!-- !!! NEEDS ALSO CHANGE in resources/version.txt !!! -->
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -311,6 +311,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
         <configuration>
+          <finalName>obelisk-sp-client-${pom.version}</finalName> <!-- app bundling scripts expect this format and name of the jar file -->
           <archive>
             <manifestEntries>
               <url>${pom.url}</url>
