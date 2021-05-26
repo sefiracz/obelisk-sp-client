@@ -14,6 +14,8 @@
  */
 package lu.nowina.nexu;
 
+import lu.nowina.nexu.api.AppConfig;
+
 import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -25,13 +27,15 @@ public class UserPreferences {
   private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
 
 	private final Preferences prefs;
+	private final AppConfig appConfig;
 
 	private String language;
 	private String hiddenDialogIds;
 	private Boolean autoStart;
 
-	public UserPreferences(final String applicationName) {
-		prefs = Preferences.userRoot().node(applicationName.toLowerCase());
+	public UserPreferences(final AppConfig appConfig) {
+	  this.appConfig = appConfig;
+		prefs = Preferences.userRoot().node(appConfig.getApplicationName().toLowerCase());
 
 		language = prefs.get(LANGUAGE, Locale.getDefault().getLanguage());
     hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
@@ -81,7 +85,11 @@ public class UserPreferences {
 		return autoStart != null ? autoStart : false;
 	}
 
-	public void clear() {
+  public AppConfig getAppConfig() {
+    return appConfig;
+  }
+
+  public void clear() {
     try {
       this.prefs.clear();
     } catch (BackingStoreException e) {

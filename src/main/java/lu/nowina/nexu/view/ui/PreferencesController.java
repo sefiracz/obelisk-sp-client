@@ -18,25 +18,22 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Window;
-import lu.nowina.nexu.*;
+import lu.nowina.nexu.AppConfigurer;
+import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.OS;
-import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.object.model.AppLanguage;
 import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.StandaloneDialog;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
-import java.awt.*;
-import java.io.IOException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -94,7 +91,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		});
 		cancel.setOnAction((e) -> signalEnd(null));
 		reset.setOnAction((e) -> {
-			showConfirmDialog();
+			StandaloneDialog.showConfirmResetDialog(api, userPreferences);
 			signalEnd(null);
 		});
 	}
@@ -117,33 +114,4 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		}
 	}
 
-	private void showConfirmDialog() {
-		ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
-		DialogMessage message = new DialogMessage("preferences.reset.dialog",
-				DialogMessage.Level.WARNING, 400, 150);
-		message.setShowOkButton(false);
-
-		// add button
-		Button cancel = new Button();
-		cancel.setText(resources.getString("button.cancel"));
-		cancel.getStyleClass().add("btn-default");
-		message.addButton(new DialogMessage.MessageButton(cancel, (action, controller) -> {
-			if(action!= null)
-				action.hide();
-		}));
-
-		// add confirm button
-		Button confirm = new Button();
-		confirm.setText(resources.getString("button.ok"));
-		confirm.getStyleClass().add("btn-primary");
-		message.addButton(new DialogMessage.MessageButton(confirm, (action, controller) -> {
-			userPreferences.clear();
-			AppConfigurer.setLocalePreferences(userPreferences);
-			AppConfigurer.applyUserPreferences(userPreferences);
-			if(action!= null)
-				action.hide();
-		}));
-
-		StandaloneDialog.showDialog(api, message, true);
-	}
 }

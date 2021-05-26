@@ -24,6 +24,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import lu.nowina.nexu.AppConfigurer;
 import lu.nowina.nexu.UserPreferences;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
@@ -79,6 +80,35 @@ public class StandaloneDialog {
     api.getOperationFactory().getMessageDialog(api, message, false);
   }
 
+  public static void showConfirmResetDialog(NexuAPI api, final UserPreferences userPreferences) {
+    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+    DialogMessage message = new DialogMessage("preferences.reset.dialog",
+        DialogMessage.Level.WARNING, 400, 150);
+    message.setShowOkButton(false);
+
+    // add button
+    Button cancel = new Button();
+    cancel.setText(resources.getString("button.cancel"));
+    cancel.getStyleClass().add("btn-default");
+    message.addButton(new DialogMessage.MessageButton(cancel, (stage, controller) -> {
+      if(stage != null)
+        stage.hide();
+    }));
+
+    // add confirm button
+    Button confirm = new Button();
+    confirm.setText(resources.getString("button.ok"));
+    confirm.getStyleClass().add("btn-primary");
+    message.addButton(new DialogMessage.MessageButton(confirm, (stage, controller) -> {
+      userPreferences.clear();
+      AppConfigurer.setLocalePreferences(userPreferences);
+      AppConfigurer.applyUserPreferences(userPreferences);
+      if(stage != null)
+        stage.hide();
+    }));
+
+    showDialog(api, message, true);
+  }
 
   /**
    * Standalone message dialog implementation
@@ -92,7 +122,7 @@ public class StandaloneDialog {
     String appName = "";
     if(api != null) {
       appName = api.getAppConfig().getApplicationName();
-      UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+      UserPreferences prefs = new UserPreferences(api.getAppConfig());
       // check if message is suppose to be displayed
       String dialogId = dialogMessage.getDialogId();
       if (dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
@@ -212,7 +242,7 @@ public class StandaloneDialog {
     okButton.setOnAction(e -> {
       if(doNotShowCheckBox.selectedProperty().getValue()) {
         if (api != null) {
-          UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+          UserPreferences prefs = new UserPreferences(api.getAppConfig());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
       }

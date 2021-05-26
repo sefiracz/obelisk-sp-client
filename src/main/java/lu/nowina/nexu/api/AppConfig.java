@@ -15,7 +15,6 @@
 package lu.nowina.nexu.api;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.Map.Entry;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -37,89 +35,64 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class AppConfig {
 
     private static final String APPLICATION_NAME = "application_name";
+    private static final String SHOW_SPLASH_SCREEN = "show_splash_screen";
     private static final String DEBUG = "debug";
-    private static final String HTTP_SERVER_CLASS = "http_server_class";
+
     private static final String NEXU_HOSTNAME = "nexu_hostname";
     private static final String BINDING_IP = "binding_ip";
     private static final String BINDING_PORTS = "binding_ports";
-    private static final String CONNECTIONS_CACHE_MAX_SIZE = "connections_cache_max_size";
-
-    private static final String USE_SYSTEM_PROXY = "use_system_proxy";
-    private static final String PROXY_SERVER = "proxy_server";
-    private static final String PROXY_PORT = "proxy_port";
-    private static final String PROXY_PROTOCOLE = "proxy_use_https";
-    private static final String PROXY_AUTHENTICATION = "proxy_authentication";
-    private static final String PROXY_USERNAME = "proxy_username";
-    private static final String PROXY_PASSWORD = "proxy_password";
-    private static final String USER_PREFERENCES_EDITABLE = "user_preferences_editable";
-
-    private static final String REQUEST_PROCESSOR_CLASS = "request_processor_class";
-
-    private static final String ROLLING_LOG_FILE_SIZE = "rolling_log_file_size";
-    private static final String ROLLING_LOG_FILE_NUMBER = "rolling_log_file_number";
-
     private static final String BINDING_PORTS_HTTPS = "binding_ports_https";
 
-    private static final String ENABLE_DATABASE_WEB_LOADER = "enable_database_web_loader";
+    private static final String HTTP_SERVER_CLASS = "http_server_class";
 
-    private static final String ENABLE_SYSTRAY_MENU = "enable_systray_menu";
     private static final String CORS_ALLOWED_ORIGIN = "cors_allowed_origin";
 
     private static final String TICKET_URL = "ticket_url";
     private static final String ENABLE_INCIDENT_REPORT = "enable_incident_report";
 
-    private static final String SHOW_SPLASH_SCREEN = "show_splash_screen";
+    private static final String REQUEST_PROCESSOR_CLASS = "request_processor_class";
+    private static final String WINDOWS_INSTALLED_EXE_PATH = "windows_installed_executable_path";
+    private static final String WINDOWS_STARTUP_LINK_PATH = "windows_startup_link_path";
+
+    private static final String ROLLING_LOG_FILE_SIZE = "rolling_log_file_size";
+    private static final String ROLLING_LOG_FILE_NUMBER = "rolling_log_file_number";
+
+    private static final String ENABLE_SYSTRAY_MENU = "enable_systray_menu";
+    private static final String USER_PREFERENCES_EDITABLE = "user_preferences_editable";
+    private static final String CONNECTIONS_CACHE_MAX_SIZE = "connections_cache_max_size";
 
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class.getName());
 
-    private String bindingIP;
-
-    private List<Integer> bindingPorts;
-
-    private String nexuHostname;
-
-    private String httpServerClass;
-
-    private boolean debug;
-
-    private String applicationName;
-
     private String applicationVersion;
-
-    private int connectionsCacheMaxSize;
-
-    private boolean useSystemProxy;
-    private String proxyServer;
-    private Integer proxyPort;
-    private boolean proxyUseHttps;
-    private boolean proxyAuthentication;
-    private String proxyUsername;
-    private String proxyPassword;
-
-    private boolean userPreferencesEditable;
-
-    private String requestProcessorClass;
-
     private File nexuHome;
 
+    private String applicationName;
+    private boolean showSplashScreen;
+    private boolean debug;
+
+    private String nexuHostname;
+    private String bindingIP;
+    private List<Integer> bindingPorts;
     private List<Integer> bindingPortsHttps;
 
-    private String rollingLogMaxFileSize;
-
-    private int rollingLogMaxFileNumber;
-
-    private boolean enableDatabaseWebLoader;
-
-    private boolean enableSystrayMenu;
-
-    private String ticketUrl;
-
-    private boolean enableIncidentReport;
+    private String httpServerClass;
 
     private boolean corsAllowAllOrigins;
     private Set<String> corsAllowedOrigins;
 
-    private boolean showSplashScreen;
+    private String ticketUrl;
+    private boolean enableIncidentReport;
+
+    private String requestProcessorClass;
+    private String windowsInstalledExePath;
+    private String windowsStartupLinkPath;
+
+    private String rollingLogMaxFileSize;
+    private int rollingLogMaxFileNumber;
+
+    private boolean enableSystrayMenu;
+    private boolean userPreferencesEditable;
+    private int connectionsCacheMaxSize;
 
     public AppConfig() {
         try {
@@ -195,62 +168,6 @@ public class AppConfig {
         this.connectionsCacheMaxSize = connectionsCacheMaxSize;
     }
 
-    public boolean isUseSystemProxy() {
-        return this.useSystemProxy;
-    }
-
-    public void setUseSystemProxy(final boolean useSystemProxy) {
-        this.useSystemProxy = useSystemProxy;
-    }
-
-    public String getProxyServer() {
-        return this.proxyServer;
-    }
-
-    public void setProxyServer(final String proxyServer) {
-        this.proxyServer = proxyServer;
-    }
-
-    public Integer getProxyPort() {
-        return this.proxyPort;
-    }
-
-    public void setProxyPort(final Integer proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public boolean isProxyUseHttps() {
-        return this.proxyUseHttps;
-    }
-
-    public void setProxyUseHttps(final boolean proxyUseHttps) {
-        this.proxyUseHttps = proxyUseHttps;
-    }
-
-    public boolean isProxyAuthentication() {
-        return this.proxyAuthentication;
-    }
-
-    public void setProxyAuthentication(final boolean proxyAuthentication) {
-        this.proxyAuthentication = proxyAuthentication;
-    }
-
-    public String getProxyUsername() {
-        return this.proxyUsername;
-    }
-
-    public void setProxyUsername(final String proxyUsername) {
-        this.proxyUsername = proxyUsername;
-    }
-
-    public String getProxyPassword() {
-        return this.proxyPassword;
-    }
-
-    public void setProxyPassword(final String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-    }
-
     public boolean isUserPreferencesEditable() {
         return this.userPreferencesEditable;
     }
@@ -265,6 +182,22 @@ public class AppConfig {
 
     public void setRequestProcessorClass(final String requestProcessorClass) {
         this.requestProcessorClass = requestProcessorClass;
+    }
+
+    public String getWindowsInstalledExePath() {
+        return windowsInstalledExePath;
+    }
+
+    public void setWindowsInstalledExePath(String windowsInstalledExePath) {
+        this.windowsInstalledExePath = windowsInstalledExePath;
+    }
+
+    public String getWindowsStartupLinkPath() {
+        return windowsStartupLinkPath;
+    }
+
+    public void setWindowsStartupLinkPath(String windowsStartupLinkPath) {
+        this.windowsStartupLinkPath = windowsStartupLinkPath;
     }
 
     public List<Integer> getBindingPortsHttps() {
@@ -299,14 +232,6 @@ public class AppConfig {
      */
     public void setRollingLogMaxFileNumber(final int rollingLogMaxFileNumber) {
         this.rollingLogMaxFileNumber = rollingLogMaxFileNumber;
-    }
-
-    public boolean isEnableDatabaseWebLoader() {
-        return this.enableDatabaseWebLoader;
-    }
-
-    public void setEnableDatabaseWebLoader(final boolean enableDatabaseWebLoader) {
-        this.enableDatabaseWebLoader = enableDatabaseWebLoader;
     }
 
     public boolean isEnableSystrayMenu() {
@@ -348,27 +273,20 @@ public class AppConfig {
         this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
         this.setConnectionsCacheMaxSize(Integer.parseInt(props.getProperty(CONNECTIONS_CACHE_MAX_SIZE, "1")));
 
-        this.setUseSystemProxy(Boolean.parseBoolean(props.getProperty(USE_SYSTEM_PROXY, "false")));
-        this.setProxyServer(props.getProperty(PROXY_SERVER, ""));
-        final String proxyPortStr = props.getProperty(PROXY_PORT, null);
-        this.setProxyPort((proxyPortStr != null) ? Integer.valueOf(proxyPortStr) : null);
-        this.setProxyUseHttps(Boolean.parseBoolean(props.getProperty(PROXY_PROTOCOLE, "false")));
-        this.setProxyAuthentication(Boolean.parseBoolean(props.getProperty(PROXY_AUTHENTICATION, "false")));
-        this.setProxyUsername(props.getProperty(PROXY_USERNAME, ""));
-        this.setProxyPassword(props.getProperty(PROXY_PASSWORD, ""));
         this.setUserPreferencesEditable(Boolean.parseBoolean(props.getProperty(USER_PREFERENCES_EDITABLE, "true")));
 
         this.setRollingLogMaxFileNumber(Integer.parseInt(props.getProperty(ROLLING_LOG_FILE_NUMBER, "5")));
         this.setRollingLogMaxFileSize(props.getProperty(ROLLING_LOG_FILE_SIZE, "10MB"));
 
         this.setRequestProcessorClass(props.getProperty(REQUEST_PROCESSOR_CLASS, "lu.nowina.nexu.jetty.RequestProcessor"));
+        this.setWindowsInstalledExePath(props.getProperty(WINDOWS_INSTALLED_EXE_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\OBELISK Signing Portal.exe"));
+        this.setWindowsStartupLinkPath(props.getProperty(WINDOWS_STARTUP_LINK_PATH, "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/OBELISK Signing Portal.lnk"));
 
         final String bindingPortHttpsStr = props.getProperty(BINDING_PORTS_HTTPS, "9895");
         if (isNotEmpty(bindingPortHttpsStr)) {
             this.setBindingPortsHttps(this.toListOfInt(bindingPortHttpsStr));
         }
 
-        this.setEnableDatabaseWebLoader(Boolean.parseBoolean(props.getProperty(ENABLE_DATABASE_WEB_LOADER, "true")));
         this.setEnableSystrayMenu(Boolean.parseBoolean(props.getProperty(ENABLE_SYSTRAY_MENU, "true")));
         this.setCorsAllowedOrigins(props.getProperty(CORS_ALLOWED_ORIGIN, "*"));
         this.setTicketUrl(props.getProperty(TICKET_URL, "ob-support@sefira.cz"));

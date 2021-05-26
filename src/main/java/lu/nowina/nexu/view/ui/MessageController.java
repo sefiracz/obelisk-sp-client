@@ -73,7 +73,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 		if (ok != null) {
 			ok.setOnAction(e -> {
         if(doNotShowCheckbox.selectedProperty().getValue()) {
-          UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+          UserPreferences prefs = new UserPreferences(api.getAppConfig());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
 			  signalEnd(null);

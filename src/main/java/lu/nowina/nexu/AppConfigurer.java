@@ -53,7 +53,7 @@ public class AppConfigurer {
 	public static void applyUserPreferences(final UserPreferences preferences) {
 		if(isWindows){
 			try {
-				checkAutoStartPresent(preferences.getAutoStart());
+				checkAutoStartPresent(preferences);
 			}
 			catch (IOException e) {
 				logger.error("Unable to make startup link: "+e.getMessage(), e);
@@ -61,13 +61,15 @@ public class AppConfigurer {
 		}
 	}
 
-	// TODO - add to properties
-	private static void checkAutoStartPresent(boolean addShortcut) throws IOException {
-		Path target = Paths.get("C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\OBELISK Signing Portal.exe");
-		Path startup = Paths.get(System.getProperty("user.home"), "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/OBELISK Signing Portal.lnk");
-		if (!startup.toFile().exists() && addShortcut) { // shortcut not found and want to add it
+	private static void checkAutoStartPresent(final UserPreferences preferences) throws IOException {
+		boolean addShortcut = preferences.getAutoStart();
+		String winExePath = preferences.getAppConfig().getWindowsInstalledExePath();
+		String winStartupLinkPath = preferences.getAppConfig().getWindowsStartupLinkPath();
+		Path target = Paths.get(winExePath);
+		Path startup = Paths.get(System.getProperty("user.home"), winStartupLinkPath);
+		if (!startup.toFile().exists() && addShortcut) { // shortcut not found and is suppose to be there
 			ShellLink.createLink(target.toFile().getAbsolutePath(), startup.toFile().getAbsolutePath());
-		} else if (startup.toFile().exists() && !addShortcut) { // shortcut found and want to remove it
+		} else if (startup.toFile().exists() && !addShortcut) { // shortcut found and is not suppose to be there
 		  boolean deleted = startup.toFile().delete();
 		  logger.info("Deleted automatic app startup link: "+deleted);
 		}
