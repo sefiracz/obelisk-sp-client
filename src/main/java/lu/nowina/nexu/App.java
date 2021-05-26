@@ -84,7 +84,7 @@ public class App extends Application {
 		server = startHttpServer(api);
 
 		if(api.getAppConfig().isEnableSystrayMenu()) {
-			systrayMenu = new SystrayMenu(operationFactory, api, new UserPreferences(getConfig().getApplicationName()));
+			systrayMenu = new SystrayMenu(operationFactory, api, new UserPreferences(getConfig()));
 		} else {
 			logger.info("Systray menu is disabled.");
 		}
@@ -107,8 +107,8 @@ public class App extends Application {
 			smartcardDB = new SCDatabase();
 			scInfoDB = new SmartcardInfoDatabase();
 		}
-		AppConfigurer.setLocalePreferences(new UserPreferences(getConfig().getApplicationName()));
-		AppConfigurer.applyUserPreferences(new UserPreferences(getConfig().getApplicationName()));
+		AppConfigurer.setLocalePreferences(new UserPreferences(getConfig()));
+		AppConfigurer.applyUserPreferences(new UserPreferences(getConfig()));
 		final APIBuilder builder = new APIBuilder();
 		final NexuAPI api = builder.build(uiDisplay, getConfig(), getFlowRegistry(), smartcardDB, scInfoDB, operationFactory);
 		notifyPreloader(builder.initPlugins(api, getProperties()));

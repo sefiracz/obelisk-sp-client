@@ -59,7 +59,7 @@ public class BasicOperationFactory implements OperationFactory {
   @Override
   @SuppressWarnings("unchecked")
   public void getMessageDialog(NexuAPI api, DialogMessage message, boolean blockingUI) {
-    UserPreferences prefs = new UserPreferences(api.getAppConfig().getApplicationName());
+    UserPreferences prefs = new UserPreferences(api.getAppConfig());
     String dialogId = message.getDialogId();
     if(dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
       return; // do not display message dialog

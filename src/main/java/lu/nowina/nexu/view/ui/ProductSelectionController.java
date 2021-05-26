@@ -196,7 +196,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
         final List<SystrayMenuItem> menuItems = new ArrayList<>();
         menuItems.add(SystrayMenu.createAboutSystrayMenuItem(api, ResourceBundle.getBundle("bundles/nexu")));
         menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(api,
-                new UserPreferences(api.getAppConfig().getApplicationName())));
+                new UserPreferences(api.getAppConfig())));
         menuItems.addAll(api.getExtensionSystrayMenuItem());
         menuItems.add(new SystrayMenuItem() {
 
