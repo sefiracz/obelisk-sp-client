@@ -107,7 +107,8 @@ public class App extends Application {
 			smartcardDB = new SCDatabase();
 			scInfoDB = new SmartcardInfoDatabase();
 		}
-		LocaleConfigurer.setUserPreferences(new UserPreferences(getConfig().getApplicationName()));
+		AppConfigurer.setLocalePreferences(new UserPreferences(getConfig().getApplicationName()));
+		AppConfigurer.applyUserPreferences(new UserPreferences(getConfig().getApplicationName()));
 		final APIBuilder builder = new APIBuilder();
 		final NexuAPI api = builder.build(uiDisplay, getConfig(), getFlowRegistry(), smartcardDB, scInfoDB, operationFactory);
 		notifyPreloader(builder.initPlugins(api, getProperties()));

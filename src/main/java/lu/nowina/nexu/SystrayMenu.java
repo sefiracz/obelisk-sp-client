@@ -117,11 +117,8 @@ public class SystrayMenu {
 
 			@Override
 			public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-				return operationFactory -> {
-          final ProxyConfigurer proxyConfigurer = new ProxyConfigurer(api.getAppConfig(), prefs);
-          return operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/preferences.fxml",
-              proxyConfigurer, prefs, !api.getAppConfig().isUserPreferencesEditable()).perform();
-        };
+				return operationFactory -> operationFactory.getOperation(NonBlockingUIOperation.class, "/fxml/preferences.fxml",
+						api, prefs, !api.getAppConfig().isUserPreferencesEditable()).perform();
 			}
 		};
 	}

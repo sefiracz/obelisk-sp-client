@@ -51,7 +51,7 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 		this.display = display;
 	}
 
-	protected final void signalEnd(R result) {
+  public final void signalEnd(R result) {
 		uiOperation.signalEnd(result);
 	}
 
@@ -60,11 +60,11 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 	 * @param operationStatus
 	 * Status the flow will check before dispatching to an action.
 	 */
-	protected final void signalEndWithStatus(final OperationStatus operationStatus) {
+  public final void signalEndWithStatus(final OperationStatus operationStatus) {
 		uiOperation.signalEnd(operationStatus);
 	}
 
-	protected final void signalUserCancel() {
+  public final void signalUserCancel() {
 		uiOperation.signalUserCancel();
 	}
 

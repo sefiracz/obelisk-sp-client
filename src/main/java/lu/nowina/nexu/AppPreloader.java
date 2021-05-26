@@ -56,15 +56,11 @@ public class AppPreloader extends Preloader {
 
 	private static Properties props;
 
-	private static ProxyConfigurer proxyConfigurer;
-
 	public void launchApp(String[] args) throws IOException {
 		props = loadProperties();
 		loadAppConfig(props);
 
 		configureLogger(config);
-
-		proxyConfigurer = new ProxyConfigurer(config, new UserPreferences(config.getApplicationName()));
 
 		beforeLaunch();
 
@@ -148,10 +144,6 @@ public class AppPreloader extends Preloader {
 
 	public static Properties getProperties() {
 		return props;
-	}
-
-	public static ProxyConfigurer getProxyConfigurer() {
-		return proxyConfigurer;
 	}
 
 	private static boolean checkAlreadyStarted() throws MalformedURLException {

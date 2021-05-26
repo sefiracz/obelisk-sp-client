@@ -19,21 +19,31 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import lu.nowina.nexu.LocaleConfigurer;
-import lu.nowina.nexu.AppPreloader;
-import lu.nowina.nexu.ProxyConfigurer;
-import lu.nowina.nexu.UserPreferences;
+import javafx.scene.control.Button;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Window;
+import lu.nowina.nexu.*;
 import lu.nowina.nexu.api.EnvironmentInfo;
+import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.OS;
+import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.flow.StageHelper;
 import lu.nowina.nexu.object.model.AppLanguage;
+import lu.nowina.nexu.view.DialogMessage;
+import lu.nowina.nexu.view.StandaloneDialog;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
+import java.awt.*;
+import java.io.IOException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class PreferencesController extends AbstractUIOperationController<Void> implements Initializable {
+
+	@FXML
+	private GridPane gridPane;
 
 	@FXML
 	private Button ok;
@@ -44,32 +54,13 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@FXML
 	private Button reset;
 
-//	@FXML
-//	private Label useSystemProxyLabel;
-//
-//	@FXML
-//	private CheckBox useSystemProxy;
-//
-//	@FXML
-//	private TextField proxyServer;
-//
-//	@FXML
-//	private TextField proxyPort;
-//
-//	@FXML
-//	private CheckBox proxyAuthentication;
-//
-//	@FXML
-//	private TextField proxyUsername;
-//
-//	@FXML
-//	private CheckBox useHttps;
-//
-//	@FXML
-//	private PasswordField proxyPassword;
+	@FXML
+	private CheckBox onStartup;
 
 	@FXML
 	private ComboBox<AppLanguage> language;
+
+	private NexuAPI api;
 
 	private UserPreferences userPreferences;
 
@@ -84,94 +75,26 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		isWindows = EnvironmentInfo.buildFromSystemProperties(System.getProperties()).getOs().equals(OS.WINDOWS);
 	}
 
-	private void init(final ProxyConfigurer proxyConfigurer) {
-//		if(isWindows) {
-//			useSystemProxy.setSelected(proxyConfigurer.isUseSystemProxy());
-//		} else {
-//			useSystemProxy.setVisible(false);
-//			useSystemProxy.setManaged(false);
-//			useSystemProxyLabel.setVisible(false);
-//			useSystemProxyLabel.setManaged(false);
-//		}
-//
-//		useHttps.setSelected(proxyConfigurer.isProxyUseHttps());
-//		proxyServer.setText(proxyConfigurer.getProxyServer());
-//		final Integer proxyPortInt = proxyConfigurer.getProxyPort();
-//		proxyPort.setText((proxyPortInt != null) ? proxyPortInt.toString() : "");
-//		proxyAuthentication.setSelected(proxyConfigurer.isProxyAuthentication());
-//		proxyUsername.setText(proxyConfigurer.getProxyUsername());
-//		proxyPassword.setText(proxyConfigurer.getProxyPassword());
-	}
-
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		readOnly = new SimpleBooleanProperty(false);
 		ok.disableProperty().bind(readOnly);
 		reset.disableProperty().bind(readOnly);
-//		useSystemProxy.disableProperty().bind(readOnly);
-//
-//		proxyServer.disableProperty().bind(
-//				readOnly.or(
-//						useSystemProxy.selectedProperty()));
-//
-//		proxyPort.disableProperty().bind(
-//				proxyServer.textProperty().length().lessThanOrEqualTo(0).or(
-//						proxyServer.disabledProperty()));
-//
-//		proxyAuthentication.disableProperty().bind(
-//				readOnly.or(
-//						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
-//								useSystemProxy.selectedProperty().not())));
-//
-//		useHttps.disableProperty().bind(
-//				readOnly.or(
-//						proxyServer.textProperty().length().lessThanOrEqualTo(0).and(
-//								useSystemProxy.selectedProperty().not())));
-//
-//		proxyUsername.disableProperty().bind(proxyAuthentication.disabledProperty().or(
-//						proxyAuthentication.selectedProperty().not()));
-//
-//		proxyPassword.disableProperty().bind(proxyAuthentication.disabledProperty().or(
-//				proxyAuthentication.selectedProperty().not()));
 
 		language.getItems().add(cz);
 		language.getItems().add(en);
 
 		ok.setOnAction((evt) -> {
-//			final Integer port;
-//			try {
-//				if(proxyPort.isDisabled()) {
-//					port = null;
-//				} else {
-//					port = Integer.parseInt(proxyPort.getText());
-//				}
-//			} catch(NumberFormatException e) {
-//				proxyPort.setTooltip(new Tooltip(resources.getString("preferences.controller.invalid.port")));
-//				proxyPort.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
-//	    		return;
-//			}
-//
-//			userPreferences.setUseSystemProxy(useSystemProxy.isDisabled() ? null : useSystemProxy.isSelected());
-//			userPreferences.setProxyServer(proxyServer.isDisabled() ? null : proxyServer.getText());
-//			userPreferences.setProxyPort(port);
-//			userPreferences.setProxyAuthentication(proxyAuthentication.isDisabled() ? null : proxyAuthentication.isSelected());
-//			userPreferences.setProxyUsername(proxyUsername.isDisabled() ? null : proxyUsername.getText());
-//			userPreferences.setProxyPassword(proxyPassword.isDisabled() ? null : proxyPassword.getText());
-//			userPreferences.setProxyUseHttps(useHttps.isDisabled() ? null : useHttps.isSelected());
 			userPreferences.setLanguage(language.isDisabled() ? null :
 					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
-
-			AppPreloader.getProxyConfigurer().updateValues(AppPreloader.getConfig(), userPreferences);
-			LocaleConfigurer.setUserPreferences(userPreferences);
-
+			userPreferences.setAutoStart(onStartup.selectedProperty().getValue());
+			AppConfigurer.setLocalePreferences(userPreferences);
+			AppConfigurer.applyUserPreferences(userPreferences);
 			signalEnd(null);
 		});
-		cancel.setOnAction((e) -> {
-			signalEnd(null);
-		});
+		cancel.setOnAction((e) -> signalEnd(null));
 		reset.setOnAction((e) -> {
-			userPreferences.clear();
-			AppPreloader.getProxyConfigurer().updateValues(AppPreloader.getConfig(), userPreferences);
+			showConfirmDialog();
 			signalEnd(null);
 		});
 	}
@@ -179,14 +102,48 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@Override
 	public void init(Object... params) {
 		StageHelper.getInstance().setTitle("", "preferences.header");
-		final ProxyConfigurer proxyConfigurer = (ProxyConfigurer) params[0];
-		init(proxyConfigurer);
+		this.api = (NexuAPI) params[0];
+		this.userPreferences = (UserPreferences) params[1];
+		this.readOnly.set((boolean) params[2]);
 		if(Locale.getDefault().getLanguage().equals(cz.getLocale().getLanguage())) {
 			language.getSelectionModel().select(cz);
 		} else {
 			language.getSelectionModel().select(en);
 		}
-		this.userPreferences = (UserPreferences) params[1];
-		this.readOnly.set((boolean) params[2]);
+		if(isWindows) {
+			onStartup.selectedProperty().setValue(userPreferences.getAutoStart());
+		} else {
+			gridPane.getChildren().removeIf(node -> node.getId() != null && node.getId().startsWith("startUp"));
+		}
+	}
+
+	private void showConfirmDialog() {
+		ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+		DialogMessage message = new DialogMessage("preferences.reset.dialog",
+				DialogMessage.Level.WARNING, 400, 150);
+		message.setShowOkButton(false);
+
+		// add button
+		Button cancel = new Button();
+		cancel.setText(resources.getString("button.cancel"));
+		cancel.getStyleClass().add("btn-default");
+		message.addButton(new DialogMessage.MessageButton(cancel, (action, controller) -> {
+			if(action!= null)
+				action.hide();
+		}));
+
+		// add confirm button
+		Button confirm = new Button();
+		confirm.setText(resources.getString("button.ok"));
+		confirm.getStyleClass().add("btn-primary");
+		message.addButton(new DialogMessage.MessageButton(confirm, (action, controller) -> {
+			userPreferences.clear();
+			AppConfigurer.setLocalePreferences(userPreferences);
+			AppConfigurer.applyUserPreferences(userPreferences);
+			if(action!= null)
+				action.hide();
+		}));
+
+		StandaloneDialog.showDialog(api, message, true);
 	}
 }

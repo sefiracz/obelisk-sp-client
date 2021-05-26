@@ -69,14 +69,13 @@ public class StandaloneDialog {
     Button cert = new Button();
     cert.setText(resources.getString("install.ca.cert.button.cert.location"));
     cert.getStyleClass().add("btn-secondary");
-    cert.setOnAction(e -> {
+    message.addButton(new DialogMessage.MessageButton(cert, (action, controller) -> {
       try {
         Desktop.getDesktop().open(api.getAppConfig().getNexuHome());
       } catch (IOException io) {
         logger.error(io.getMessage(), io);
       }
-    });
-    message.addButton(cert);
+    }));
     api.getOperationFactory().getMessageDialog(api, message, false);
   }
 
@@ -180,8 +179,11 @@ public class StandaloneDialog {
     Button okButton = new Button(resources.getString("button.ok"));
     okButton.getStyleClass().add("btn-primary");
     // add additional buttons
-    for(Button b : dialogMessage.getButtons()) {
+
+    for(DialogMessage.MessageButton mb : dialogMessage.getButtons()) {
+      Button b = mb.getButton();
       btnContainer.getChildren().add(b);
+      b.setOnAction(e -> mb.getButtonAction().action(dialogStage, null));
     }
     // show ok button
     if(dialogMessage.isShowOkButton()) {
