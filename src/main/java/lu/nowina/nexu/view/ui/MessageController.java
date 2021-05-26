@@ -137,8 +137,10 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
       // add additional buttons
       int position = 0;
-      for(Button b : dialogMessage.getButtons()) {
+      for(DialogMessage.MessageButton mb : dialogMessage.getButtons()) {
+        Button b = mb.getButton();
         btnContainer.getChildren().add(position, b);
+        b.setOnAction(e -> mb.getButtonAction().action(null, this));
         position++;
       }
 

@@ -29,6 +29,7 @@
     <jna.version>5.8.0</jna.version>
     <systemtray.version>3.17</systemtray.version>
     <mocca.version>1.3.30</mocca.version>
+    <mslinks.version>1.0.6.1</mslinks.version>
 
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
@@ -182,6 +183,11 @@
       </exclusions>
     </dependency>
 
+    <dependency>
+      <groupId>com.github.vatbub</groupId>
+      <artifactId>mslinks</artifactId>
+      <version>${mslinks.version}</version>
+    </dependency>
     <dependency>
       <groupId>iaik</groupId>
       <artifactId>iaik_pkcs11wrapper</artifactId>

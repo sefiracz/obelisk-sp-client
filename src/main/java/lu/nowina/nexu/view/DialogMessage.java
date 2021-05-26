@@ -1,7 +1,11 @@
 package lu.nowina.nexu.view;
 
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
+import javax.annotation.Nullable;
+import javax.swing.plaf.basic.BasicOptionPaneUI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +30,7 @@ public class DialogMessage {
   }
 
   private final Level level;
-  private final List<Button> buttons = new ArrayList<>();
+  private final List<MessageButton> buttons = new ArrayList<>();
 
   private String dialogId;
   private String messageProperty;
@@ -131,16 +135,42 @@ public class DialogMessage {
     this.okButton = okButton;
   }
 
-  public void addButton(Button button) {
+  public void addButton(MessageButton button) {
     buttons.add(button);
   }
 
-  public List<Button> getButtons() {
+  public List<MessageButton> getButtons() {
     return buttons;
   }
 
   public String getDialogId() {
     return dialogId;
+  }
+
+  public static class MessageButton {
+
+    private final Button button;
+    private final ButtonAction buttonAction;
+
+    public MessageButton(Button button, ButtonAction buttonAction) {
+      this.button = button;
+      this.buttonAction = buttonAction;
+    }
+
+    public Button getButton() {
+      return button;
+    }
+
+    public ButtonAction getButtonAction() {
+      return buttonAction;
+    }
+  }
+
+  @FunctionalInterface
+  public interface ButtonAction {
+
+    void action(@Nullable Stage dialogStage, @Nullable AbstractUIOperationController<?> controller);
+
   }
 
 }
