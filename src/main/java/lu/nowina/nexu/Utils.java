@@ -67,6 +67,13 @@ public class Utils {
     return sw.toString();
   }
 
+  /**
+   * Checks if the exception is pertaining to wrong user password input
+   * @param e Throw exception this method analyzes
+   * @param operationFactory
+   * @param api
+   * @return True if it is wrong password, false if not and this exception is to be re-thrown
+   */
   public static boolean checkWrongPasswordInput(Exception e, OperationFactory operationFactory, NexuAPI api) {
     String exception = Utils.printException(e);
     String msg;
@@ -79,12 +86,12 @@ public class Utils {
     }  else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
     } else {
-      return true; // unknown exception - re-throw
+      return false; // unknown exception - re-throw
     }
     SessionManager.getManager().destroy();
     operationFactory.getMessageDialog(api, new DialogMessage(msg, DialogMessage.Level.WARNING,
             400, 150), true);
-    return false;
+    return true;
   }
 
   public static void openCertificate(String certificate) {

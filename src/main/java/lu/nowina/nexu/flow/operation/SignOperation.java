@@ -28,6 +28,8 @@ import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
 import lu.nowina.nexu.view.DialogMessage;
 
+import java.security.SignatureException;
+
 /**
  * This {@link Operation} allows to perform a signature.
  * 
@@ -78,7 +80,15 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
     } catch (final CancelledOperationException e) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     } catch (Exception e) {
-      if (Utils.checkWrongPasswordInput(e, operationFactory, api))
+    	// workaround for uncertain user cancellation (MSCAPI throws ambiguous exception with localized messages)
+			if(e.getCause() instanceof SignatureException) {
+				String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+				/* best guess - check for all czech variants of word "zrušit" and "cancel" for generic/english */
+				if (message.contains("zru") || message.contains("cancel")) {
+					return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
+				}
+			}
+      if (!Utils.checkWrongPasswordInput(e, operationFactory, api))
         throw e;
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     }
