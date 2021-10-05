@@ -104,7 +104,7 @@ public class SessionManager {
         throw new InvalidSessionException("Trusted certificate not initialized.");
 
       // get SessionID values
-      String[] sessionIdValues = sessionId.split("\\+");
+      String[] sessionIdValues = sessionId.split("\\+"); // sessionID+sessionTimestamp
       if (sessionIdValues.length != 2) {
         throw new InvalidSessionException("Invalid SessionID format.");
       }

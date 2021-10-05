@@ -26,6 +26,7 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
+import lu.nowina.nexu.view.BusyIndicator;
 import lu.nowina.nexu.view.DialogMessage;
 
 import java.security.SignatureException;
@@ -71,7 +72,7 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 	@Override
   @SuppressWarnings("unchecked")
 	public OperationResult<SignatureValue> perform() {
-    try {
+		try (BusyIndicator busyIndicator = new BusyIndicator()) {
       return new OperationResult<>(token.sign(toBeSigned, digestAlgorithm, key));
     } catch (AbstractTokenRuntimeException e) {
       this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),

@@ -182,9 +182,11 @@ public class PKCS11Module {
 
   /**
    * Get list of private key labels or identifications
-   * If key does not have CKA_LABEL, the CKA_ID is returned instead and the value is prefixed with {CKA_ID}
+   * Each value is Base64 encoded and prefixed with {CKA_ID}, but if key does not have CKA_ID
+   * the CKA_LABEL is returned instead
+   *
    * @param sessionHandle Session handle
-   * @return List of key labels/identifications
+   * @return List of key identifications/labels
    * @throws TokenException
    */
   public synchronized List<String> getPrivateKeyLabels(long sessionHandle) throws TokenException {
@@ -214,11 +216,13 @@ public class PKCS11Module {
   }
 
   /**
-   * Returns key label or identification for given key handle
-   * If key does not have CKA_LABEL, the CKA_ID is returned instead and the value is prefixed with {CKA_ID}
+   * Returns key identification or label for given key handle
+   * Value is Base64 encoded prefixed with {CKA_ID}, but if key does not have CKA_ID
+   * the CKA_LABEL is returned instead
+   *
    * @param sessionHandle Session handle
    * @param signatureKeyHandle Key handle
-   * @return Key label/identification
+   * @return Key identification or label
    * @throws PKCS11Exception
    */
   public synchronized String getPrivateKeyLabel(long sessionHandle, long signatureKeyHandle) throws PKCS11Exception {

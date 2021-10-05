@@ -78,25 +78,29 @@ public class AppPreloader extends Preloader {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		if(getConfig().isShowSplashScreen()) {
-			final String appName = getConfig().getApplicationName();
-			primaryStage.setTitle(appName);
-			primaryStage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/tray-icon.png")));
-			final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash.png")));
-			double splashWidth = splash.getImage().getWidth();
-			double splashHeight = splash.getImage().getHeight();
-			final StackPane background = new StackPane(splash);
-			final Scene splashScene = new Scene(background, splashWidth, splashHeight);
-			Rectangle2D screenResolution = Screen.getPrimary().getBounds();
-			primaryStage.setX((screenResolution.getWidth() / 2) - (splashWidth / 2));
-			primaryStage.setY((screenResolution.getHeight() / 2) - (splashHeight / 2));
-			primaryStage.setScene(splashScene);
-			primaryStage.setAlwaysOnTop(true);
-			primaryStage.initStyle(StageStyle.UNDECORATED);
-			primaryStage.show();
-			final PauseTransition delay = new PauseTransition(Duration.seconds(3));
-			delay.setOnFinished(event -> primaryStage.close());
-			delay.play();
+			showSplashScreen(primaryStage);
 		}
+	}
+
+	private void showSplashScreen(Stage primaryStage) {
+		final String appName = getConfig().getApplicationName();
+		primaryStage.setTitle(appName);
+		primaryStage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/tray-icon.png")));
+		final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash.png")));
+		double splashWidth = splash.getImage().getWidth();
+		double splashHeight = splash.getImage().getHeight();
+		final StackPane background = new StackPane(splash);
+		final Scene splashScene = new Scene(background, splashWidth, splashHeight);
+		Rectangle2D screenResolution = Screen.getPrimary().getBounds();
+		primaryStage.setX((screenResolution.getWidth() / 2) - (splashWidth / 2));
+		primaryStage.setY((screenResolution.getHeight() / 2) - (splashHeight / 2));
+		primaryStage.setScene(splashScene);
+		primaryStage.setAlwaysOnTop(true);
+		primaryStage.initStyle(StageStyle.UNDECORATED);
+		primaryStage.show();
+		final PauseTransition delay = new PauseTransition(Duration.seconds(3));
+		delay.setOnFinished(event -> primaryStage.close());
+		delay.play();
 	}
 
 	private void configureLogger(AppConfig config) {

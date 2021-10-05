@@ -18,6 +18,7 @@ import iaik.pkcs.pkcs11.TokenException;
 import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.pkcs11.PKCS11Module;
 import lu.nowina.nexu.pkcs11.TokenHandler;
+import lu.nowina.nexu.view.BusyIndicator;
 
 import javax.smartcardio.CardTerminal;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -300,23 +301,27 @@ public class DetectedCard extends AbstractProduct {
 	public void initializeToken(NexuAPI api, String pkcs11Path) throws IOException, TokenException {
 		PKCS11Module module = api.getPKCS11Manager().getModule(atr, pkcs11Path);
 		if (module != null) {
-			tokenHandler = new TokenHandler(module, terminalLabel);
-			tokenHandler.initialize();
-			tokenLabel = tokenHandler.getTokenLabel();
-			tokenSerial = tokenHandler.getTokenSerial();
-			tokenManufacturer = tokenHandler.getTokenManufacturer();
-			type = KeystoreType.PKCS11;
-			initialized = true;
+			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+				tokenHandler = new TokenHandler(module, terminalLabel);
+				tokenHandler.initialize();
+				tokenLabel = tokenHandler.getTokenLabel();
+				tokenSerial = tokenHandler.getTokenSerial();
+				tokenManufacturer = tokenHandler.getTokenManufacturer();
+				type = KeystoreType.PKCS11;
+				initialized = true;
+			}
 		}
 		knownToken = api.getPKCS11Manager().getAvailableSmartcardInfo(atr);
 	}
 
 	public void openToken() {
 		if (initialized) {
-		  // open session
-		  if (tokenHandler.openSession() > -1) {
-        opened = true;
-      }
+			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+				// open session
+				if (tokenHandler.openSession() > -1) {
+					opened = true;
+				}
+			}
 		}
 	}
 
