@@ -32,8 +32,8 @@ import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.AbstractTokenRuntimeException;
+import lu.nowina.nexu.view.BusyIndicator;
 import lu.nowina.nexu.view.DialogMessage;
-import lu.nowina.nexu.view.core.UIOperation;
 
 /**
  * description
@@ -75,7 +75,7 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
   @SuppressWarnings("unchecked")
   public OperationResult<DSSPrivateKeyEntry> perform() {
     DSSPrivateKeyEntry key;
-    try {
+    try (BusyIndicator busyIndicator = new BusyIndicator()){
       if((this.productAdapter != null) && (this.product != null) && (this.keyAlias != null)) {
         key = this.productAdapter.getKey(this.token, this.keyAlias);
       } else {
@@ -88,7 +88,7 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
               e.getMessageParams()), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {
-      if(Utils.checkWrongPasswordInput(e, operationFactory, api))
+      if(!Utils.checkWrongPasswordInput(e, operationFactory, api))
         throw e;
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     }

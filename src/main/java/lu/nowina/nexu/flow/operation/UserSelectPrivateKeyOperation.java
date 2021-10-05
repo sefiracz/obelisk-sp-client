@@ -25,6 +25,7 @@ import lu.nowina.nexu.api.ProductAdapter;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.*;
+import lu.nowina.nexu.view.BusyIndicator;
 import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.core.UIOperation;
 
@@ -76,20 +77,18 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
     @SuppressWarnings("unchecked")
     public OperationResult<DSSPrivateKeyEntry> perform() {
         final List<DSSPrivateKeyEntry> keys;
-
-        try {
-          // TODO - heavy load - move to key-selection and do it async ?
+        try (BusyIndicator busyIndicator = new BusyIndicator()){
             keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
         } catch (final CancelledOperationException e) {
-          return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
+          return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
         } catch (AbstractTokenRuntimeException e) {
           this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
                   e.getMessageParams()), true);
           return new OperationResult<>(CoreOperationStatus.BACK);
         } catch (Exception e) {
-            if(Utils.checkWrongPasswordInput(e, operationFactory, api))
+            if(!Utils.checkWrongPasswordInput(e, operationFactory, api))
                 throw e;
-            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
+            return new OperationResult<>(CoreOperationStatus.BACK);
         }
 
         DSSPrivateKeyEntry key = null;
@@ -102,17 +101,17 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
             this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
                 new Object[]{keys, this.api.getAppConfig().getApplicationName()}).perform();
         if(op.getStatus().equals(CoreOperationStatus.BACK)) {
-            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.BACK);
+            return new OperationResult<>(CoreOperationStatus.BACK);
         }
         if(op.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-            return new OperationResult<DSSPrivateKeyEntry>(BasicOperationStatus.USER_CANCEL);
+            return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
         }
         // get selected key
         key = (DSSPrivateKeyEntry) op.getResult();
         if(key == null) {
-            return new OperationResult<DSSPrivateKeyEntry>(CoreOperationStatus.NO_KEY_SELECTED);
+            return new OperationResult<>(CoreOperationStatus.NO_KEY_SELECTED);
         }
-        return new OperationResult<DSSPrivateKeyEntry>(key);
+        return new OperationResult<>(key);
     }
 
 

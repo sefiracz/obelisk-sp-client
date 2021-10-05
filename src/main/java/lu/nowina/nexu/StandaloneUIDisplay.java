@@ -16,10 +16,13 @@ package lu.nowina.nexu;
 
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lu.nowina.nexu.api.NexuPasswordInputCallback;
 import lu.nowina.nexu.api.Product;
@@ -74,10 +77,38 @@ public class StandaloneUIDisplay implements UIDisplay {
 			final Scene scene = new Scene(panel);
 			scene.getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
 			stage.setScene(scene);
+			// center stage on primary screen
+			centerStage(stage, ((Region)panel));
 			stage.setTitle(StageHelper.getInstance().getTitle());
 			stage.show();
 			StageHelper.getInstance().setTitle("", null);
 		});
+	}
+
+	private void centerStage(Stage stage, Region r){
+		final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
+		double width = r.getPrefWidth() <= 0 ?
+				(r.getMinWidth() <= 0 ?
+						(r.getMaxWidth() <= 0 ?
+								(r.getWidth() <= 0 ? 400 : r.getWidth())
+								: r.getMaxWidth()) : r.getMinWidth()) : r.getPrefWidth();
+		double height = r.getPrefHeight() <= 0 ?
+				(r.getMinHeight() <= 0 ?
+						(r.getMaxHeight() <= 0 ?
+								(r.getHeight() <= 0 ? 400 : r.getHeight())
+								: r.getMaxHeight()) : r.getMinHeight()) : r.getPrefHeight();
+		if(width > 0) {
+			double x = (screenResolution.getWidth() / 2) - (width / 2);
+			if (x >= 0) {
+				stage.setX(x);
+			}
+		}
+		if (height > 0) {
+			double y = (screenResolution.getHeight() / 2) - (height / 2);
+			if (y >= 0) {
+				stage.setY(y);
+			}
+		}
 	}
 
 	private Stage createStage(final boolean blockingStage, String title) {
