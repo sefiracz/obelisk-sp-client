@@ -33,7 +33,6 @@ import lu.nowina.nexu.api.flow.BasicOperationStatus;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.exceptions.AbstractTokenRuntimeException;
 import lu.nowina.nexu.view.BusyIndicator;
-import lu.nowina.nexu.view.DialogMessage;
 
 /**
  * description
@@ -84,8 +83,7 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
     } catch(final CancelledOperationException e) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     } catch (AbstractTokenRuntimeException e) {
-      this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
-              e.getMessageParams()), true);
+      this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {
       if(!Utils.checkWrongPasswordInput(e, operationFactory, api))

@@ -42,4 +42,8 @@ public class KeystoreNotFoundException extends AbstractTokenRuntimeException {
     super(cause, MSG_CODE, level, params);
   }
 
+  @Override
+  public DialogMessage getDialogMessage() {
+    return new DialogMessage(getMessageCode(), getLevel(), getMessageParams(), 600, 200);
+  }
 }

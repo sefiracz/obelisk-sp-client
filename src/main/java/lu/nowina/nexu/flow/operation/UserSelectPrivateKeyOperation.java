@@ -82,8 +82,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         } catch (final CancelledOperationException e) {
           return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
         } catch (AbstractTokenRuntimeException e) {
-          this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
-                  e.getMessageParams()), true);
+          this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
           return new OperationResult<>(CoreOperationStatus.BACK);
         } catch (Exception e) {
             if(!Utils.checkWrongPasswordInput(e, operationFactory, api))
