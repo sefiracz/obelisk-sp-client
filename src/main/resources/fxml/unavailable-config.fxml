@@ -19,7 +19,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="AnchorPane" prefHeight="175.0" prefWidth="500.0" styleClass="unsupported-product" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.UnavailableConfigController">
+<BorderPane id="AnchorPane" prefHeight="275.0" prefWidth="550.0" styleClass="unsupported-product"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.UnavailableConfigController">
 
 	<center>
     <VBox styleClass="form-container" BorderPane.alignment="CENTER" fx:id="messageContainer">
