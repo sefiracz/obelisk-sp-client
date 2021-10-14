@@ -57,4 +57,8 @@ public abstract class AbstractTokenRuntimeException extends RuntimeException {
   public DialogMessage.Level getLevel() {
     return level;
   }
+
+  public DialogMessage getDialogMessage() {
+    return new DialogMessage(getMessageCode(), getLevel(), getMessageParams());
+  }
 }

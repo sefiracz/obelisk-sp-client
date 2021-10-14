@@ -70,8 +70,7 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       }
     } catch (AbstractTokenRuntimeException e) {
-      this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
-              e.getMessageParams()), true);
+      this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
     } catch (Exception e) {
       if(!Utils.checkWrongPasswordInput(e, operationFactory, api))

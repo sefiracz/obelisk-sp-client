@@ -96,8 +96,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
           }
         }
       } catch (AbstractTokenRuntimeException e) {
-        this.operationFactory.getMessageDialog(api, new DialogMessage(e.getMessageCode(), e.getLevel(),
-                e.getMessageParams()), true);
+        this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       } catch (Exception e) {
         throw e;
