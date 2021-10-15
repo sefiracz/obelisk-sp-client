@@ -35,7 +35,7 @@ public interface NexuAPI {
   // PCSC Terminal API
 	CardTerminal getCardTerminal(DetectedCard card);
 
-	List<DetectedCard> detectCards();
+	List<DetectedCard> detectCards(boolean showBusy);
 
 	DetectedCard getPresentCard(DetectedCard selector) throws CardException;
 

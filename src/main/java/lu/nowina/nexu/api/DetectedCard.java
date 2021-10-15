@@ -298,10 +298,10 @@ public class DetectedCard extends AbstractProduct {
 		return label;
 	}
 
-	public void initializeToken(NexuAPI api, String pkcs11Path) throws IOException, TokenException {
+	public void initializeToken(NexuAPI api, String pkcs11Path, boolean showBusy) throws IOException, TokenException {
 		PKCS11Module module = api.getPKCS11Manager().getModule(atr, pkcs11Path);
 		if (module != null) {
-			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+			try (BusyIndicator busyIndicator = new BusyIndicator(showBusy)) {
 				tokenHandler = new TokenHandler(module, terminalLabel);
 				tokenHandler.initialize();
 				tokenLabel = tokenHandler.getTokenLabel();

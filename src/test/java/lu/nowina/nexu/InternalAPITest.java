@@ -52,8 +52,8 @@ public class InternalAPITest {
 	public void testDetectCards1() throws Exception {
 
 		CardDetector detector = Mockito.mock(CardDetector.class);
-    Mockito.when(detector.detectCards()).thenReturn(Arrays.asList());
-		Assert.assertEquals(0, detector.detectCards().size());
+    Mockito.when(detector.detectCards(true)).thenReturn(Arrays.asList());
+		Assert.assertEquals(0, detector.detectCards(true).size());
 
 	}
 
@@ -61,9 +61,9 @@ public class InternalAPITest {
 	public void testDetectCards2() throws Exception {
 
 		CardDetector detector = Mockito.mock(CardDetector.class);
-		Mockito.when(detector.detectCards()).thenReturn(Arrays.asList(new DetectedCard("ATR", 0)));
+		Mockito.when(detector.detectCards(true)).thenReturn(Arrays.asList(new DetectedCard("ATR", 0)));
 
-		Assert.assertEquals(1, detector.detectCards().size());
+		Assert.assertEquals(1, detector.detectCards(true).size());
 
 	}
 
@@ -72,9 +72,9 @@ public class InternalAPITest {
 
 		CardDetector detector = Mockito.mock(CardDetector.class);
 
-		Mockito.when(detector.detectCards()).thenReturn(Arrays.asList(new DetectedCard("ATR1", 0), new DetectedCard("ATR2", 0)));
+		Mockito.when(detector.detectCards(true)).thenReturn(Arrays.asList(new DetectedCard("ATR1", 0), new DetectedCard("ATR2", 0)));
 
-		Assert.assertEquals(2, detector.detectCards().size());
+		Assert.assertEquals(2, detector.detectCards(true).size());
 
 	}
 

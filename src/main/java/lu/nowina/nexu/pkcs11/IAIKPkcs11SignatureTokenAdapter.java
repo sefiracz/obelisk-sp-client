@@ -66,7 +66,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     try {
       // check state
       if(!detectedCard.isInitialized()) {
-        detectedCard.initializeToken(api, pkcs11Path);
+        detectedCard.initializeToken(api, pkcs11Path, true);
       }
       // check session
       if(!detectedCard.isOpened()) {

@@ -163,7 +163,7 @@ public class CardDetector {
           final ATR atr = card.getATR();
           DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
           if (selector.getAtr().equals(detectedCard.getAtr())) {
-						detectedCard.initializeToken(api, null);
+						detectedCard.initializeToken(api, null, true);
 						// check present cards
 						if (presentCards.get(detectedCard) == null) {
 							presentCards.add(detectedCard); // currently isn't recorded as present, add it
@@ -208,7 +208,7 @@ public class CardDetector {
 	 *
 	 * @return A list of detected smartcards.
 	 */
-	public List<DetectedCard> detectCards() {
+	public List<DetectedCard> detectCards(boolean showBusy) {
 		logger.info("Detect all cards in terminals");
 		final List<DetectedCard> listCardDetect = new ArrayList<DetectedCard>();
 		int terminalIndex = 0;
@@ -217,7 +217,7 @@ public class CardDetector {
 				final Card card = cardTerminal.connect("*");
 				final ATR atr = card.getATR();
 				DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
-				detectedCard.initializeToken(api, null);
+				detectedCard.initializeToken(api, null, showBusy);
 				// check present cards
 				if (presentCards.get(detectedCard) == null) {
 					presentCards.add(detectedCard); // currently isn't recorded as present, add it
@@ -254,7 +254,7 @@ public class CardDetector {
 					Card c = cardTerminal.connect("*");
 					final ATR atr = c.getATR();
 					DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
-					detectedCard.initializeToken(api, null);
+					detectedCard.initializeToken(api, null, false);
 					if(detectedCard.match(card)) {
 						// card is connected to this terminal
 						card.setTerminal(cardTerminal);

@@ -50,7 +50,13 @@ public class BusyIndicator implements Closeable {
   private Stage stage = null;
 
   public BusyIndicator() {
-    show();
+    this(true);
+  }
+
+  public BusyIndicator(boolean show) {
+    if (show) {
+      show();
+    }
   }
 
   /**
