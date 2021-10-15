@@ -100,8 +100,8 @@ public class InternalAPI implements NexuAPI {
 	}
 
 	@Override
-	public List<DetectedCard> detectCards() {
-		return detector.detectCards();
+	public List<DetectedCard> detectCards(boolean showBusy) {
+		return detector.detectCards(showBusy);
 	}
 
 	@Override
@@ -343,7 +343,7 @@ public class InternalAPI implements NexuAPI {
 
 	public void detectAll() {
 		detectProducts();
-		detectCards();
+		detectCards(true);
 	}
 
 	@Override

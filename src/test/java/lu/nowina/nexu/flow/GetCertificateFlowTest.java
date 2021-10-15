@@ -55,7 +55,7 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         when(api.getAppConfig()).thenReturn(appConfig);
 
         final Product selectedProduct = new NewKeystore();
-        when(api.detectCards()).thenReturn(Collections.emptyList());
+        when(api.detectCards(true)).thenReturn(Collections.emptyList());
         when(api.matchingProductAdapters(selectedProduct)).thenReturn(
                 Arrays.asList(new Match(new KeystoreProductAdapter(api), selectedProduct)));
         final Collection<SignatureTokenConnection> coll = new ArrayList<>();
@@ -105,7 +105,7 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
 
         final NexuAPI api = mock(NexuAPI.class);
         final DetectedCard product = new DetectedCard("atr", 0);
-        when(api.detectCards()).thenReturn(Arrays.asList(product));
+        when(api.detectCards(true)).thenReturn(Arrays.asList(product));
 
         final AppConfig appConfig = new AppConfig();
         appConfig.setTicketUrl("http://random.url");
@@ -200,7 +200,7 @@ public class GetCertificateFlowTest extends AbstractConfigureLoggerTest {
         when(adapter.getConfigurationOperation(api, detectedCard))
         .thenReturn(new NoOpFutureOperationInvocation<Product>(detectedCard));
 
-        when(api.detectCards()).thenReturn(Arrays.asList(detectedCard));
+        when(api.detectCards(true)).thenReturn(Arrays.asList(detectedCard));
         when(api.matchingProductAdapters(detectedCard)).thenReturn(Arrays.asList(new Match(adapter, detectedCard)));
         when(api.registerTokenConnection(token)).thenReturn(new TokenId("id"));
         when(api.getTokenConnection(new TokenId("id"))).thenReturn(token);

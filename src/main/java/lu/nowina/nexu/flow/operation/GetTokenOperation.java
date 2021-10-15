@@ -63,7 +63,7 @@ public class GetTokenOperation extends AbstractCompositeOperation<Map<TokenOpera
 			return new OperationResult<>(map);
 		} else {
 			final OperationResult<List<Match>> getMatchingProductAdaptersOperationResult =
-					operationFactory.getOperation(GetMatchingProductAdaptersOperation.class, api.detectCards(), api).perform();
+					operationFactory.getOperation(GetMatchingProductAdaptersOperation.class, api.detectCards(true), api).perform();
 			if(getMatchingProductAdaptersOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
 				final List<Match> matchingProductAdapters = getMatchingProductAdaptersOperationResult.getResult();
 				return operationFactory.getOperation(CreateTokenOperation.class, api, matchingProductAdapters).perform();
