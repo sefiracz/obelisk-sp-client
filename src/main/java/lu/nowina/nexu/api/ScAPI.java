@@ -24,9 +24,7 @@ public enum ScAPI {
 
 	@XmlEnumValue("MSCAPI") MSCAPI("MSCAPI"),
 
-	@XmlEnumValue("PKCS11") PKCS_11("PKCS11"),
-
-	@XmlEnumValue("MOCCA") MOCCA("MOCCA");
+	@XmlEnumValue("PKCS11") PKCS_11("PKCS11");
 
 	private final String value;
 

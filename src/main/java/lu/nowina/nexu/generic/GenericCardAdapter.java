@@ -15,8 +15,6 @@
 package lu.nowina.nexu.generic;
 
 import eu.europa.esig.dss.token.*;
-import eu.europa.esig.dss.token.mocca.MOCCAPrivateKeyEntry;
-import eu.europa.esig.dss.token.mocca.MOCCASignatureTokenConnection;
 import lu.nowina.nexu.api.*;
 import lu.nowina.nexu.flow.operation.TokenOperationResultKey;
 import lu.nowina.nexu.pkcs11.IAIKPrivateKeyEntry;
@@ -70,9 +68,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
               } catch (CardException e) {
                 throw new PKCS11TokenException("Token not present or unable to connect", e);
               }
-            case MOCCA:
-              // TODO - remove ?
-                return new MOCCASignatureTokenConnectionAdapter(new MOCCASignatureTokenConnection(callback), api, card);
             default:
                 throw new RuntimeException("API not supported");
         }
@@ -92,9 +87,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
             }
             if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
                 return key;
-            }
-            if(key instanceof MOCCAPrivateKeyEntry) {
-              throw new UnsupportedOperationException("MOCCA not supported");
             }
         }
         return null;

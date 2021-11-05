@@ -49,9 +49,6 @@ public class APISelectionController extends AbstractUIOperationController<ScAPI>
 	private RadioButton pkcs11;
 
 	@FXML
-	private RadioButton mocca;
-
-	@FXML
 	private ToggleGroup api;
 
 	@FXML
@@ -73,9 +70,6 @@ public class APISelectionController extends AbstractUIOperationController<ScAPI>
 			mscapi.setManaged(false);
 		}
 
-		// disable MOCCA
-		mocca.setVisible(false);
-		mocca.setManaged(false);
 	}
 
 	private ScAPI getSelectedAPI() {
@@ -86,8 +80,6 @@ public class APISelectionController extends AbstractUIOperationController<ScAPI>
 			return ScAPI.MSCAPI;
 		} else if (pkcs11.isSelected()) {
 			return ScAPI.PKCS_11;
-		} else if (mocca.isSelected()) {
-			return ScAPI.MOCCA;
 		}
 		return null;
 	}
