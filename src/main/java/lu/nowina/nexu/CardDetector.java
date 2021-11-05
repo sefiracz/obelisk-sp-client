@@ -24,16 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Detects terminals and present smartcards/tokens
@@ -60,12 +64,14 @@ public class CardDetector {
 	public CardDetector(final NexuAPI api, final EnvironmentInfo info) {
 		this.api = api;
 		if (info.getOs() == OS.LINUX) {
-			logger.info("The OS is Linux, we check for Library");
+			logger.info("Checking for PC/SC library on Linux OS.");
 			try {
-				final File libFile = at.gv.egiz.smcc.util.LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
-				if (libFile != null) {
-					logger.info("Library installed is at " + libFile.getAbsolutePath());
-					System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
+				final String library = getPCSCLibraryPath();
+				if (library != null) {
+					logger.info("PC/SC library is located at: " + library);
+					System.setProperty("sun.security.smartcardio.library", library);
+				} else {
+					throw new FileNotFoundException("PC/SC library not found.");
 				}
 			} catch (final Exception e) {
 				logger.error("Error while loading library for Linux", e);
@@ -476,4 +482,92 @@ public class CardDetector {
 			super(value);
 		}
 	}
+
+	private static String getPCSCLibraryPath() throws IOException {
+		String libname = System.mapLibraryName("pcsclite") + ".1";
+
+		// check LD_LIBRARY_PATH
+		String env = System.getenv("LD_LIBRARY_PATH");
+		if (env != null) {
+			for (String path : env.split(":")) {
+				Path libPath = Paths.get(path, libname);
+				if (libPath.toFile().canRead()) {
+					return libPath.toFile().getAbsolutePath();
+				}
+			}
+		}
+
+		// check lib cache
+		List<String> command = new ArrayList<>();
+		command.add(((Function<String, String>) executable -> {
+			String path = System.getenv().get("PATH");
+			String locations = "/usr/sbin:/sbin:";
+			path = path == null ? locations : locations + path;
+			for (String entry : path.split(":")) {
+				Path p = Paths.get(entry, executable);
+				if (p.toFile().canExecute()) {
+					return p.toFile().getAbsolutePath();
+				}
+			}
+			return executable;
+		}).apply("ldconfig"));
+		command.add("-p");
+		Process process = null;
+		ProcessBuilder processBuilder;
+		try {
+			processBuilder = new ProcessBuilder(command);
+			process = processBuilder.start();
+			try (InputStream stdOut = process.getInputStream()) {
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdOut));
+				String line;
+				while ((line = bufferedReader.readLine()) != null) {
+					line = line.trim();
+					if (line.endsWith(libname)) {
+						String delim = "=>";
+						int start = line.lastIndexOf(delim);
+						if (start != -1) {
+							String result = line.substring(start + delim.length());
+							File lib = new File(result.trim());
+							if (lib.canRead()) {
+								return lib.getAbsolutePath();
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (IOException ex) {
+			logger.error("Library "+libname+" not found", ex);
+		}
+		finally {
+			if (process != null) {
+				process.destroy();
+			}
+		}
+
+		// check lib directories
+		String javaArch = System.getProperty("sun.arch.data.model");
+		String arch = "64".equals(javaArch) ? "64" /* 64bit */ : "" /* 32bit */;
+		String[] basePaths = {"/usr/lib" + arch, "/lib" + arch};
+		Path lib;
+		for (String path : basePaths) {
+			lib = Paths.get(path, libname);
+			if (lib.toFile().canRead()) {
+				return lib.toFile().getAbsolutePath();
+			} else {
+				try (Stream<Path> stream = Files.list(Paths.get(path))) {
+					Iterator<Path> iterator = stream.iterator();
+					while(iterator.hasNext()) {
+						lib = iterator.next();
+						if (lib.toString().endsWith(libname) && lib.toFile().canRead()) {
+							return lib.toFile().getAbsolutePath();
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 }
