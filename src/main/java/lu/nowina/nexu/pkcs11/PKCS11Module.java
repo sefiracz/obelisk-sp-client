@@ -26,7 +26,9 @@ package lu.nowina.nexu.pkcs11;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import iaik.pkcs.pkcs11.TokenException;
 import iaik.pkcs.pkcs11.wrapper.*;
+import lu.nowina.nexu.api.ReauthCallback;
 import org.apache.commons.codec.binary.Base64;
+import org.identityconnectors.common.security.GuardedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +53,7 @@ public class PKCS11Module {
     log.info("Initialization");
 
     log.info("Trying to connect to PKCS#11 module: '" + pkcs11ModulePath + "'");
-    pkcs11Module = PKCS11Connector.connectToPKCS11Module(pkcs11ModulePath);
+    pkcs11Module = PKCS11Connector.connectToPKCS11Module(pkcs11ModulePath, System.getProperty("debug.pkcs11") != null);
     log.info("Connected");
 
     log.debug("Initializing module: '" + pkcs11ModulePath + "'");
@@ -249,15 +251,15 @@ public class PKCS11Module {
    * Returns key handle
    * @param sessionHandle Session handle
    * @param label Key label (CKA_LABEL) or identification (CKA_ID)
-   * @return Key handle
+   * @return PKCS11PrivateKey handler
    * @throws PKCS11Exception
    */
-  public synchronized long getPrivateKey(long sessionHandle, String label) throws PKCS11Exception {
+  public synchronized PKCS11PrivateKey getPrivateKey(long sessionHandle, String label) throws PKCS11Exception {
     long signatureKeyHandle = -1L;
     if (sessionHandle < 0) {
       throw new PKCS11Exception(CKR_SESSION_HANDLE_INVALID);
     }
-    log.debug("Finding signature key with label: '" + label + "'");
+    log.debug("Looking for signature key with label: '" + label + "'");
     CK_ATTRIBUTE[] attributeTemplateList = {new CK_ATTRIBUTE(), new CK_ATTRIBUTE()};
     attributeTemplateList[0].type = PKCS11Constants.CKA_CLASS;
     attributeTemplateList[0].pValue = PKCS11Constants.CKO_PRIVATE_KEY;
@@ -275,7 +277,14 @@ public class PKCS11Module {
       signatureKeyHandle = availableSignatureKeys[0];
     }
     pkcs11Module.C_FindObjectsFinal(sessionHandle);
-    return signatureKeyHandle;
+
+    // get attributes
+    CK_ATTRIBUTE[] authTemplate = {new CK_ATTRIBUTE()};
+    authTemplate[0].type = PKCS11Constants.CKA_ALWAYS_AUTHENTICATE;
+    pkcs11Module.C_GetAttributeValue(sessionHandle, signatureKeyHandle, authTemplate, true);
+    PKCS11PrivateKey key = new PKCS11PrivateKey(signatureKeyHandle, (Boolean)authTemplate[0].pValue);
+    log.debug("Found private key: "+key);
+    return key;
   }
 
   /**
@@ -344,20 +353,33 @@ public class PKCS11Module {
 
   /**
    * Sign digested data
-   * @param signatureKeyHandle Signature key handle
+   * @param key Private key handle
    * @param sessionHandle Session handle
    * @param signatureMechanism Signature mechanism
    * @param data Data digest
    * @return Signature value
    * @throws PKCS11Exception
    */
-  public synchronized byte[] signData(long signatureKeyHandle, long sessionHandle, CK_MECHANISM signatureMechanism, byte[] data) throws PKCS11Exception {
+  public synchronized byte[] signData(PKCS11PrivateKey key, long sessionHandle, CK_MECHANISM signatureMechanism,
+                                      byte[] data, ReauthCallback callback) throws PKCS11Exception {
     byte[] signature = null;
     if (sessionHandle < 0) {
       return null;
     }
     log.debug("Initialize signature operation");
-    pkcs11Module.C_SignInit(sessionHandle, signatureMechanism, signatureKeyHandle, true);
+    try {
+      pkcs11Module.C_SignInit(sessionHandle, signatureMechanism, key.getSignatureKeyHandle(), true);
+    } catch (PKCS11Exception e) {
+      // check if operation is already active (user might have cancelled re-authentication in previous attempt)
+      // and leave the sign operation active
+      if (e.getErrorCode() != CKR_OPERATION_ACTIVE) {
+        throw e;
+      }
+    }
+    if (key.isAlwaysAuthenticate()) {
+      log.info("CKA_ALWAYS_AUTHENTICATE is set to true. User needs to re-authenticate for current context.");
+      reAuthenticate(sessionHandle, callback);
+    }
     if ((data.length > 0) && (data.length < 1024)) {
       log.debug("Signing");
       signature = pkcs11Module.C_Sign(sessionHandle, data);
@@ -426,6 +448,24 @@ public class PKCS11Module {
         }
       }
     }
+  }
+
+  /**
+   * Re-authenticates user session for secure cryptographic operation
+   *
+   * @param sessionHandle Session handle
+   * @param callback Callback providing a user inputted re-authentication (Q)PIN
+   */
+  private void reAuthenticate(long sessionHandle, ReauthCallback callback) {
+    GuardedString gs = callback.getReauth();
+    gs.access(chars -> {
+      try {
+        pkcs11Module.C_Login(sessionHandle, CKU_CONTEXT_SPECIFIC, chars, true);
+      }
+      catch (PKCS11Exception e) {
+        throw new PKCS11RuntimeException(e.getMessage(), e);
+      }
+    });
   }
 
 }

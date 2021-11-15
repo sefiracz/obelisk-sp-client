@@ -15,14 +15,10 @@
  Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
 -->
 
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane minWidth="400" prefHeight="200" prefWidth="400" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.PreferencesController">
+<BorderPane minWidth="550" prefHeight="220" prefWidth="650" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.PreferencesController">
 
 	<top>
     <Label styleClass="message" text="%preferences.header" wrapText="true"/>
@@ -30,10 +26,19 @@
 
   <center>
     <GridPane fx:id="gridPane" alignment="CENTER" styleClass="preferences-container" vgap="5" hgap="10">
+      <!-- row 1 -->
       <Label id="startUpLabel" text="%preferences.onstartup" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-      <CheckBox id="startUp" fx:id="onStartup" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+      <CheckBox id="startUp" fx:id="onStartup" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+      <!-- row 2 -->
       <Label text="%preferences.language" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-      <ComboBox fx:id="language" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+      <ComboBox fx:id="language" GridPane.columnIndex="3" prefWidth="90" minWidth="90" GridPane.rowIndex="2"/>
+      <!-- row 3 -->
+      <Label text="%reauth.settings.label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+      <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+      <Button fx:id="minus" text="-" prefWidth="32" minWidth="32" styleClass="btn-default" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+      <TextField fx:id="durationTextField" promptText="0 minut" styleClass="durationTextField" prefWidth="90" minWidth="90"  GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+      <Button fx:id="plus" text="+" prefWidth="32" minWidth="32" styleClass="btn-default" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+      <!-- row n -->
     </GridPane>
   </center>
 

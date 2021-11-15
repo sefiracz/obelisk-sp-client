@@ -17,10 +17,14 @@ package lu.nowina.nexu.view.core;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import lu.nowina.nexu.api.flow.OperationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -168,5 +172,42 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
     }
   }
 
+  public static class PressedRepeatEventHandler implements EventHandler<MouseEvent> {
+
+    private final Runnable callable;
+    private final int initialDelay;
+    private final  int period;
+    private final  TimeUnit unit;
+
+    private ScheduledExecutorService executorService;
+
+    public PressedRepeatEventHandler(Runnable callable, int initialDelay, int period, TimeUnit unit) {
+      this.callable = callable;
+      this.initialDelay = initialDelay;
+      this.period = period;
+      this.unit = unit;
+    }
+
+    @Override
+    public void handle(MouseEvent event) {
+      if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
+        Platform.runLater(() -> {
+          if (executorService == null || executorService.isShutdown()) {
+            executorService = Executors.newSingleThreadScheduledExecutor();
+          }
+          executorService.scheduleAtFixedRate(callable, initialDelay, period, unit);
+        });
+      }
+      else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED) ||
+          event.getEventType().equals(MouseEvent.MOUSE_EXITED) ||
+          event.getEventType().equals(MouseEvent.DRAG_DETECTED) ||
+          event.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
+        if (executorService != null && !executorService.isShutdown()) {
+          executorService.shutdownNow();
+        }
+      }
+    }
+
+  }
 
 }

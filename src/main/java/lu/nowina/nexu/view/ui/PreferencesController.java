@@ -18,9 +18,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import lu.nowina.nexu.AppConfigurer;
 import lu.nowina.nexu.UserPreferences;
@@ -28,14 +27,15 @@ import lu.nowina.nexu.api.EnvironmentInfo;
 import lu.nowina.nexu.api.NexuAPI;
 import lu.nowina.nexu.api.OS;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.object.model.AppLanguage;
-import lu.nowina.nexu.view.DialogMessage;
 import lu.nowina.nexu.view.StandaloneDialog;
 import lu.nowina.nexu.view.core.AbstractUIOperationController;
 
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 public class PreferencesController extends AbstractUIOperationController<Void> implements Initializable {
 
@@ -57,11 +57,24 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	@FXML
 	private ComboBox<AppLanguage> language;
 
+	@FXML
+	private Button minus;
+
+	@FXML
+	private TextField durationTextField;
+
+	@FXML
+	private Button plus;
+
 	private NexuAPI api;
 
 	private UserPreferences userPreferences;
 
 	private BooleanProperty readOnly;
+
+	private ResourceBundle resources;
+
+	private int duration = 0;
 
 	private final AppLanguage cz = new AppLanguage("Čeština", new Locale("cs", "CZ"));
 	private final AppLanguage en = new AppLanguage("English", Locale.ENGLISH);
@@ -74,6 +87,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		this.resources = resources;
 		readOnly = new SimpleBooleanProperty(false);
 		ok.disableProperty().bind(readOnly);
 		reset.disableProperty().bind(readOnly);
@@ -81,10 +95,25 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		language.getItems().add(cz);
 		language.getItems().add(en);
 
+		minus.setOnAction((e) -> minusDuration());
+		minus.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::minusDuration,
+				325, 125, TimeUnit.MILLISECONDS));
+
+		plus.setOnAction((e) -> plusDuration());
+		plus.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::plusDuration,
+				325, 125, TimeUnit.MILLISECONDS));
+
+		durationTextField.setTextFormatter(new TextFormatter<>(this::filter));
+		durationTextField.setOnMouseClicked((e) -> setTextFieldDuration(true));
+
 		ok.setOnAction((evt) -> {
 			userPreferences.setLanguage(language.isDisabled() ? null :
 					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
 			userPreferences.setAutoStart(onStartup.selectedProperty().getValue());
+			if (duration == 0 || !Integer.valueOf(duration).equals(userPreferences.getCacheDuration())) {
+				SessionManager.getManager().destroySecret();
+			}
+			userPreferences.setCacheDuration(duration);
 			AppConfigurer.setLocalePreferences(userPreferences);
 			AppConfigurer.applyUserPreferences(userPreferences);
 			signalEnd(null);
@@ -112,6 +141,47 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		} else {
 			gridPane.getChildren().removeIf(node -> node.getId() != null && node.getId().startsWith("startUp"));
 		}
+		this.duration = userPreferences.getCacheDuration();
+		setTextFieldDuration(true);
 	}
+
+  private TextFormatter.Change filter(TextFormatter.Change change) {
+    if (!change.getControlNewText().matches("\\b([0-9]|[12][0-9]|30)\\b")) {
+      change.setText("");
+    }
+    else {
+      try {
+        duration = Integer.parseInt(change.getControlNewText());
+        setTextFieldDuration(false);
+      }
+      catch (NumberFormatException ignored) {
+        // not a number, ignore this input
+      }
+    }
+    return change;
+  }
+
+  void setTextFieldDuration(boolean clearText) {
+    String minutes = duration == 0 || duration > 4 ? resources.getString("preferences.minutes.universal") :
+        duration == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
+    if (clearText) {
+      durationTextField.setText("");
+    }
+    durationTextField.setPromptText(duration + " " + minutes);
+  }
+
+  private void minusDuration() {
+    if (duration > 0) {
+      duration--;
+      setTextFieldDuration(true);
+    }
+  }
+
+  private void plusDuration() {
+    if (duration < 30) {
+      duration++;
+      setTextFieldDuration(true);
+    }
+  }
 
 }

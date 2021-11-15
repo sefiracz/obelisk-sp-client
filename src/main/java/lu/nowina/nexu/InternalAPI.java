@@ -364,4 +364,9 @@ public class InternalAPI implements NexuAPI {
 		}
 		return label;
 	}
+
+	@Override
+	public UIDisplay getDisplay() {
+		return display;
+	}
 }

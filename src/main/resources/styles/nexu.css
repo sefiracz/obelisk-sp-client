@@ -190,6 +190,12 @@ RadioButton {
 
 }
 
+.durationTextField {
+
+    -fx-prompt-text-fill: black;
+
+}
+
 .btn-default:hover {
 
    -fx-background-color: #CED3D8;
@@ -273,6 +279,13 @@ RadioButton {
 }
 
 .do-not-show-container {
+
+    -fx-background-color: #F5F5F5;
+    -fx-padding: 7 15 7 15;
+
+}
+
+.store-input-container {
 
     -fx-background-color: #F5F5F5;
     -fx-padding: 7 15 7 15;

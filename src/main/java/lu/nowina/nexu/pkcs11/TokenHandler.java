@@ -29,6 +29,7 @@ import iaik.pkcs.pkcs11.wrapper.CK_MECHANISM;
 import iaik.pkcs.pkcs11.wrapper.CK_TOKEN_INFO;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Constants;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
+import lu.nowina.nexu.api.ReauthCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,8 +144,9 @@ public class TokenHandler {
    * @return Signature value
    * @throws PKCS11Exception
    */
-  public byte[] sign(String keyLabel, X509Certificate x509Certificate, byte[] data) throws PKCS11Exception {
-    long signatureKeyHandle = pkcs11Module.getPrivateKey(sessionHandle, keyLabel);
+  public byte[] sign(String keyLabel, X509Certificate x509Certificate, byte[] data, ReauthCallback callback)
+      throws PKCS11Exception {
+    PKCS11PrivateKey key = pkcs11Module.getPrivateKey(sessionHandle, keyLabel);
     CK_MECHANISM signatureMechanism;
     String algorithm = x509Certificate != null ? x509Certificate.getPublicKey().getAlgorithm() : "RSA";
     switch (algorithm) {
@@ -160,7 +162,7 @@ public class TokenHandler {
       default:
         throw new IllegalStateException("Unexpected key algorithm: "+algorithm);
     }
-    return pkcs11Module.signData(signatureKeyHandle, sessionHandle, signatureMechanism, data);
+    return pkcs11Module.signData(key, sessionHandle, signatureMechanism, data, callback);
   }
 
   /**

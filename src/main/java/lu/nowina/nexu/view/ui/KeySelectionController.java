@@ -132,7 +132,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
                         this.setGraphic(hBox);
 
                         Tooltip tooltip = new Tooltip(getQCInfo(certificateToken));
-                        hackTooltipStartTiming(tooltip, 100);
+                        tooltip.setShowDelay(new Duration(50));
                         this.setTooltip(tooltip);
                     }
                 }
@@ -167,25 +167,6 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         }
         return tooltip;
     }
-
-    /* javafx 8 tooltip delay workaround */
-    private void hackTooltipStartTiming(Tooltip tooltip, double delayMillis) {
-        try {
-            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
-            fieldBehavior.setAccessible(true);
-            Object objBehavior = fieldBehavior.get(tooltip);
-
-            Field fieldTimer = objBehavior.getClass().getDeclaredField("activationTimer");
-            fieldTimer.setAccessible(true);
-            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
-
-            objTimer.getKeyFrames().clear();
-            objTimer.getKeyFrames().add(new KeyFrame(Duration.millis(delayMillis)));
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-        }
-    }
-
 
     private ImageView fetchImage(final String imagePath) throws IOException {
         return new ImageView(new Image(this.getClass().getResource(imagePath).openStream()));

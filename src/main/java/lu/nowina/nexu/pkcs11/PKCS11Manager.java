@@ -44,20 +44,20 @@ public class PKCS11Manager {
   /**
    * Known smartcard models
    */
-  private Map<String /* ATR */, SmartcardInfo> supported;
-  private Map<String /* ATR */, SmartcardInfo> registered;
+  private final Map<String /* ATR */, SmartcardInfo> supported = new ConcurrentHashMap<>();
+  private final Map<String /* ATR */, SmartcardInfo> registered = new ConcurrentHashMap<>();
 
   /**
    * Currently initialized PKCS11 modules
    */
-  private Map<String /* PKCS11 library path */, PKCS11Module> modules;
+  private final Map<String /* PKCS11 library path */, PKCS11Module> modules = new ConcurrentHashMap<>();
 
   public PKCS11Manager(NexuAPI api, SmartcardInfoDatabase scInfoDatabase) {
     this.api = api;
     this.scInfoDatabase = scInfoDatabase;
-    this.supported = scInfoDatabase != null ? scInfoDatabase.getSmartcardInfosMap() : new ConcurrentHashMap<>();
-    this.modules = new ConcurrentHashMap<>();
-    this.registered = new ConcurrentHashMap<>();
+    if (scInfoDatabase != null) {
+      this.supported.putAll(scInfoDatabase.getSmartcardInfosMap());
+    }
     registerSavedCards();
   }
 
@@ -71,7 +71,8 @@ public class PKCS11Manager {
     if(infos != null && infosDigest != null && !Arrays.equals(databaseDigest, infosDigest)) {
       this.databaseDigest = infosDigest;
       this.scInfoDatabase.setSmartcardInfos(infos);
-      this.supported = this.scInfoDatabase.getSmartcardInfosMap();
+      this.supported.clear();
+      this.supported.putAll(this.scInfoDatabase.getSmartcardInfosMap());
     }
   }
 
@@ -193,7 +194,7 @@ public class PKCS11Manager {
         log.error("Error finalizing module: "+t.getMessage(), t);
       }
     }
-    modules = new ConcurrentHashMap<>();
+    modules.clear();
   }
 
   /**
