@@ -31,9 +31,11 @@ import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
 import lu.nowina.nexu.CancelledOperationException;
 import lu.nowina.nexu.api.DetectedCard;
 import lu.nowina.nexu.api.NexuAPI;
+import lu.nowina.nexu.api.ReauthCallback;
 import lu.nowina.nexu.flow.exceptions.PKCS11ModuleException;
 import lu.nowina.nexu.flow.exceptions.PKCS11TokenException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.slf4j.Logger;
@@ -53,6 +55,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
 
   private final String pkcs11Path;
   private final PasswordInputCallback callback;
+  private final ReauthCallback reauthCallback;
   private final TokenHandler token;
 
   private boolean loggedIn = false;
@@ -63,6 +66,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
     this.pkcs11Path = pkcs11Lib.getAbsolutePath();
     logger.info("Module library: " + pkcs11Path);
     this.callback = callback;
+    this.reauthCallback = api.getDisplay().getReauthCallback();
     try {
       // check state
       if(!detectedCard.isInitialized()) {
@@ -74,8 +78,10 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
       }
       this.token = detectedCard.getTokenHandler();
     } catch (TokenException e) {
+      logger.error(e.getMessage(), e);
       throw new PKCS11TokenException("Token not present or unable to connect", e);
     } catch (IOException e) {
+      logger.error(e.getMessage(), e);
       throw new PKCS11ModuleException("Unable to initialize module", e);
     }
   }
@@ -133,12 +139,12 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
       // prepare ASN1 signature structure
       byte[] digest = DSSUtils.digest(digestAlgorithm, toBeSigned.getBytes());
       ASN1ObjectIdentifier digestOID = new ASN1ObjectIdentifier(digestAlgorithm.getOid());
-      AlgorithmIdentifier algID = new AlgorithmIdentifier(digestOID, null);
+      AlgorithmIdentifier algID = new AlgorithmIdentifier(digestOID, DERNull.INSTANCE);
       DigestInfo digestInfo = new DigestInfo(algID, digest);
       byte[] signatureData = digestInfo.getEncoded();
       // sign data
       IAIKPrivateKeyEntry key = ((IAIKPrivateKeyEntry) keyEntry);
-      byte[] sigValue = token.sign(key.getKeyLabel(), key.getCertificate().getCertificate(), signatureData);
+      byte[] sigValue = token.sign(key.getKeyLabel(), key.getCertificate().getCertificate(), signatureData, reauthCallback);
       SignatureValue value = new SignatureValue();
       value.setAlgorithm(signatureAlgorithm);
       value.setValue(sigValue);

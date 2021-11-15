@@ -16,6 +16,7 @@ package lu.nowina.nexu.view.core;
 
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import lu.nowina.nexu.api.Product;
+import lu.nowina.nexu.api.ReauthCallback;
 
 import java.io.File;
 
@@ -28,6 +29,8 @@ public interface UIDisplay {
 	<T> void displayAndWaitUIOperation(UIOperation<T> operation);
 
 	PasswordInputCallback getPasswordInputCallback(Product p);
+
+	ReauthCallback getReauthCallback();
 
 	File displayFileChooser(ExtensionFilter...extensionFilters);
 

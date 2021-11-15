@@ -26,14 +26,18 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lu.nowina.nexu.api.NexuPasswordInputCallback;
 import lu.nowina.nexu.api.Product;
+import lu.nowina.nexu.api.ReauthCallback;
 import lu.nowina.nexu.api.flow.BasicOperationStatus;
+import lu.nowina.nexu.api.flow.Operation;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.flow.OperationResult;
 import lu.nowina.nexu.flow.StageHelper;
+import lu.nowina.nexu.generic.SessionManager;
 import lu.nowina.nexu.view.core.ExtensionFilter;
 import lu.nowina.nexu.view.core.NonBlockingUIOperation;
 import lu.nowina.nexu.view.core.UIDisplay;
 import lu.nowina.nexu.view.core.UIOperation;
+import org.identityconnectors.common.security.GuardedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,10 +204,52 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	}
 
+	private final class Pkcs11ReauthCallback implements ReauthCallback {
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public GuardedString getReauth() {
+			LOGGER.info("Request PKCS11 re-auth");
+			// check if cached
+			try {
+				GuardedString reauth = SessionManager.getManager().getSecret();
+				if (reauth != null)
+					return reauth.copy();
+			} catch (Exception e) {
+				LOGGER.warn(e.getMessage(), e);
+			}
+			// ask user for re-auth
+			final OperationResult<Object> reauthOperationResult = StandaloneUIDisplay.this.operationFactory.getOperation(
+					UIOperation.class, "/fxml/reauth-input.fxml", AppPreloader.getConfig()).perform();
+			if(reauthOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
+				return (GuardedString) reauthOperationResult.getResult();
+			} else if(reauthOperationResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+				throw new CancelledOperationException();
+			} else if(reauthOperationResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
+				final Exception e = reauthOperationResult.getException();
+				if(e instanceof RuntimeException) {
+					// Throw exception as is
+					throw (RuntimeException) e;
+				} else {
+					// Wrap in a runtime exception
+					throw new NexuException(e);
+				}
+			} else {
+				throw new IllegalArgumentException("Not managed operation status: " + reauthOperationResult.getStatus().getCode());
+			}
+		}
+	}
+
 	@Override
 	public PasswordInputCallback getPasswordInputCallback(Product product) {
 		return new FlowPasswordCallback(product);
 	}
+
+	@Override
+	public ReauthCallback getReauthCallback() {
+		return new Pkcs11ReauthCallback();
+	}
+
 
 	@Override
 	public File displayFileChooser(ExtensionFilter... extensionFilters) {

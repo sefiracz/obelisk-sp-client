@@ -3,9 +3,9 @@ package lu.nowina.nexu.generic;
 import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import lu.nowina.nexu.Utils;
 import lu.nowina.nexu.api.AbstractProduct;
 import org.apache.commons.codec.binary.Base64;
+import org.identityconnectors.common.security.GuardedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,8 @@ public class SessionManager {
   private static volatile SessionManager manager;
 
   private AbstractProduct product = null;
-  private TempStorage tokenStorage = null;
+  private TempTokenStorage tokenStorage = null;
+  private TempSecretStorage secretStorage = null;
 
   private Certificate trustCert;
   private byte[] sessionDigest;
@@ -68,8 +69,25 @@ public class SessionManager {
     if(this.tokenStorage != null) {
       this.tokenStorage.cancel(); // cancel previous timer
     }
-    this.tokenStorage = new TempStorage(token);
+    this.tokenStorage = new TempTokenStorage(token);
     this.tokenStorage.startTimer(); // start new timer
+  }
+
+  public void setSecret(GuardedString secret, int duration) {
+    if (product != null) {
+      if(this.secretStorage != null) {
+        this.secretStorage.cancel(); // cancel previous timer
+      }
+      this.secretStorage = new TempSecretStorage(secret, duration);
+      this.secretStorage.startTimer();
+    }
+  }
+
+  public GuardedString getSecret() {
+    if(this.secretStorage != null) {
+      return secretStorage.getSecret();
+    }
+    return null;
   }
 
   public void destroy() {
@@ -79,6 +97,15 @@ public class SessionManager {
     }
     this.tokenStorage = null;
     this.product = null;
+    destroySecret();
+  }
+
+  public void destroySecret() {
+    if(this.secretStorage != null) {
+      this.secretStorage.destroy();
+      this.secretStorage.cancel();
+    }
+    this.secretStorage = null;
   }
 
   public void destroy(AbstractProduct product) {
@@ -173,14 +200,14 @@ public class SessionManager {
   /**
    * Temporary token storage
    */
-  private static class TempStorage extends TimerTask {
+  private static class TempTokenStorage extends TimerTask {
 
     private final static int TIMER = 3600*1000; // 1 hour memory since last use
 
     private final Timer timer;
     private SignatureTokenConnection token;
 
-    public TempStorage(SignatureTokenConnection token) {
+    public TempTokenStorage(SignatureTokenConnection token) {
       this.token = token;
       this.timer = new Timer("TokenTimer",false);
     }
@@ -208,6 +235,42 @@ public class SessionManager {
         token.close();
       }
       token = null;
+    }
+
+  }
+
+  private static class TempSecretStorage extends TimerTask {
+
+    private final Timer timer;
+    private final int TIMER;
+
+    private GuardedString secret;
+
+    public TempSecretStorage(GuardedString secret, int duration) {
+      this.secret = secret;
+      this.TIMER = duration * 60 * 1000;
+      this.timer = new Timer("SecretTimer",false);
+    }
+
+    @Override
+    public void run() {
+      destroy();
+    }
+
+    public synchronized GuardedString getSecret() {
+      return secret;
+    }
+
+    public void startTimer() {
+      timer.schedule(this, TIMER);
+    }
+
+    public synchronized void destroy() {
+      timer.cancel();
+      timer.purge();
+      if (secret != null)
+        secret.dispose();
+      secret = null;
     }
 
   }

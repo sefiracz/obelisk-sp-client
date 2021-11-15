@@ -19,6 +19,7 @@ import lu.nowina.nexu.EntityDatabase;
 import lu.nowina.nexu.api.flow.OperationFactory;
 import lu.nowina.nexu.api.plugin.HttpPlugin;
 import lu.nowina.nexu.pkcs11.PKCS11Manager;
+import lu.nowina.nexu.view.core.UIDisplay;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
@@ -76,6 +77,8 @@ public interface NexuAPI {
 	HttpPlugin getHttpPlugin(String pluginId);
 
 	String getLabel(Product p);
+
+	UIDisplay getDisplay();
 
 	void supportedSmartcardInfos(List<SmartcardInfo> infos, byte[] digest);
 

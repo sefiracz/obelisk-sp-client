@@ -25,6 +25,7 @@ public class UserPreferences {
 	private static final String LANGUAGE = "sefira.obelisk.sp.language";
 	private static final String AUTO_START = "sefira.obelisk.sp.autoStart";
   private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
+  private static final String CACHE_DURATION = "sefira.obelisk.sp.cacheDuration";
 
 	private final Preferences prefs;
 	private final AppConfig appConfig;
@@ -32,6 +33,7 @@ public class UserPreferences {
 	private String language;
 	private String hiddenDialogIds;
 	private Boolean autoStart;
+	private Integer cacheDuration;
 
 	public UserPreferences(final AppConfig appConfig) {
 	  this.appConfig = appConfig;
@@ -41,6 +43,16 @@ public class UserPreferences {
     hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
 		final String autoStartValue = prefs.get(AUTO_START, null);
     autoStart = Boolean.parseBoolean(autoStartValue);
+
+    try {
+      final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
+      cacheDuration = Integer.parseInt(cacheDurationValue);
+      if (cacheDuration < 0 || cacheDuration > 30) {
+        cacheDuration = 0;
+      }
+    } catch (NumberFormatException e) {
+      cacheDuration = 0;
+    }
 	}
 
   public void setLanguage(String language) {
@@ -68,6 +80,15 @@ public class UserPreferences {
 		this.autoStart = autoStart;
 	}
 
+  public void setCacheDuration(Integer cacheDuration) {
+    if(cacheDuration != null) {
+      prefs.put(CACHE_DURATION, String.valueOf(cacheDuration));
+    } else {
+      prefs.remove(CACHE_DURATION);
+    }
+    this.cacheDuration = cacheDuration == null ? 0 : cacheDuration;
+  }
+
   public String getLanguage() {
     return language;
   }
@@ -85,6 +106,10 @@ public class UserPreferences {
 		return autoStart != null ? autoStart : false;
 	}
 
+  public Integer getCacheDuration() {
+    return cacheDuration;
+  }
+
   public AppConfig getAppConfig() {
     return appConfig;
   }
@@ -99,6 +124,7 @@ public class UserPreferences {
     language = null;
     hiddenDialogIds = null;
     autoStart = null;
+    cacheDuration = 0;
   }
 
 }
