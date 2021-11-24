@@ -14,15 +14,11 @@
  Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
 -->
 
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane prefHeight="80.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="lu.nowina.nexu.view.ui.ProvideFeedbackController">
+            fx:controller="cz.sefira.obelisk.view.ui.ProvideFeedbackController">
 
     <top>
       <VBox BorderPane.alignment="CENTER">

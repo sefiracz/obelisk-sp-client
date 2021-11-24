@@ -12,15 +12,11 @@
  WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  See the License for specific permissions and language restrictions under the License.
 -->
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane id="AnchorPane" prefHeight="275.0" prefWidth="550.0" styleClass="unsupported-product"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.UnavailableConfigController">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.UnavailableConfigController">
 
 	<center>
     <VBox styleClass="form-container" BorderPane.alignment="CENTER" fx:id="messageContainer">
