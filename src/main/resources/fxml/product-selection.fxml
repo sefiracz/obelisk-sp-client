@@ -13,16 +13,11 @@
  Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
 -->
 
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.ScrollPane?>
 
 <StackPane prefHeight="360.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-  fx:controller="lu.nowina.nexu.view.ui.ProductSelectionController">
+           fx:controller="cz.sefira.obelisk.view.ui.ProductSelectionController">
 
 	<BorderPane fx:id="borderPane">
 

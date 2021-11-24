@@ -13,14 +13,10 @@
  SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
  Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
 -->
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="AnchorPane" prefHeight="175.0" prefWidth="500.0" styleClass="unsupported-product" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lu.nowina.nexu.view.ui.UnsupportedProductController">
+<BorderPane id="AnchorPane" prefHeight="175.0" prefWidth="500.0" styleClass="unsupported-product" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.UnsupportedProductController">
 
 	<center>
     <VBox BorderPane.alignment="CENTER">
