@@ -91,12 +91,17 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
     StageHelper.getInstance().setTitle(appConfig.getApplicationName(), titleKey);
 
     UserPreferences prefs = new UserPreferences(appConfig);
-    boolean cacheDisabled = prefs.getCacheDuration() == null ||
-        prefs.getCacheDuration() == 0;
-    storeInputCheckbox.disableProperty().setValue(cacheDisabled);
 
+    Integer cacheDuration = prefs.getCacheDuration();
+    boolean cacheDisabled = cacheDuration == null || cacheDuration == 0;
+    if (cacheDuration == null) {
+      cacheDuration = 0;
+    }
+    storeInputCheckbox.disableProperty().setValue(cacheDisabled);
+    String minutes = cacheDuration == 0 || cacheDuration > 4 ? resources.getString("preferences.minutes.universal") :
+        cacheDuration == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
     Tooltip tooltip = new Tooltip(MessageFormat.format(resources.getString("reauth.tooltip.enabled"),
-        prefs.getCacheDuration()));
+        prefs.getCacheDuration()+" "+minutes));
     tooltip.setShowDelay(new Duration(50));
     if (cacheDisabled) {
       tooltip.setText(resources.getString("reauth.tooltip.disabled"));
