@@ -69,7 +69,9 @@ public class Pkcs11ParamsController extends AbstractUIOperationController<Pkcs11
             this.pkcs11File = this.getDisplay().displayFileChooser(new ExtensionFilter(
                     OS.getNativeLibraryFileExtensionDescription(), OS.getNativeLibraryFileExtension()));
             this.pkcs11FileSpecified.set(this.pkcs11File != null);
-            selectFile.setText(pkcs11File.getName());
+            if (pkcs11File != null) {
+                selectFile.setText(pkcs11File.getName());
+            }
         });
     }
 

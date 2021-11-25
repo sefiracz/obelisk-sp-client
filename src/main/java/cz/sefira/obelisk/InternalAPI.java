@@ -29,8 +29,6 @@ import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import cz.sefira.obelisk.view.core.UIOperation;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import cz.sefira.obelisk.api.*;
-import cz.sefira.obelisk.generic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +139,8 @@ public class InternalAPI implements NexuAPI {
 				logger.info("Card " + d.getAtr() + " is not in the personal database");
 				matches.addAll(checkKnownPKCS11Tokens(d));
 			} else {
-			  ConnectionInfo cInfo = info.getInfos().get(0);
+				d.setKnownToken(getPKCS11Manager().getAvailableSmartcardInfo(d.getAtr()));
+				ConnectionInfo cInfo = info.getInfos().get(0);
 				matches.add(new Match(new GenericCardAdapter(info, this), d, cInfo.getSelectedApi(), cInfo.getApiParam()));
 			}
 		}
