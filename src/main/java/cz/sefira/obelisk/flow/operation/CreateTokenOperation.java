@@ -25,11 +25,10 @@ import cz.sefira.obelisk.model.Pkcs11Params;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.UIOperation;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import cz.sefira.obelisk.api.*;
-import cz.sefira.obelisk.generic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     public OperationResult<Map<TokenOperationResultKey, Object>> perform() {
       LOG.info(this.matchingProductAdapters.size() + " matching product adapters");
       try {
-        if (!this.matchingProductAdapters.isEmpty()) {
+        if (!this.matchingProductAdapters.isEmpty() && availableConfiguration(matchingProductAdapters.get(0))) {
           return this.createTokenAuto(); // automatic token configuration
         } else {
           // unavailable/unsupported configuration - want to continue?
@@ -124,6 +123,19 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     return createToken(supportedProduct, adapter, map);
   }
 
+  /**
+   * Check that found match is actually viable to use for PKCS11 (that all drivers are still available)
+   * @param match Matched product
+   * @return True if usable, or false if it needs to be configured again
+   */
+  private boolean availableConfiguration(Match match) {
+    if (match.getScAPI() != null && ScAPI.PKCS_11.equals(match.getScAPI())) {
+      String driverPath = match.getApiParameters();
+      return driverPath != null && !driverPath.isEmpty() &&
+          new File(driverPath).exists() && new File(driverPath).canRead();
+    }
+    return true;
+  }
 
   /**
    * Creates token adapter given user input/configuration

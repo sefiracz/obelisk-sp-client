@@ -60,12 +60,12 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
                 final String absolutePath = cInfo.getApiParam();
                 // get present card
                 DetectedCard detectedCard = api.getPresentCard(card);
-                SignatureTokenConnection token = SessionManager.getManager().getInitializedTokenForProduct(detectedCard);
-                if(token == null) {
-                  token = new IAIKPkcs11SignatureTokenAdapter(api, new File(absolutePath), callback, detectedCard);
+                SignatureTokenConnection tokenConnection = SessionManager.getManager().getInitializedTokenForProduct(detectedCard);
+                if(tokenConnection == null) {
+                  tokenConnection = new IAIKPkcs11SignatureTokenAdapter(api, new File(absolutePath), callback, detectedCard);
                 }
-                SessionManager.getManager().setToken(detectedCard, token);
-                return token;
+                SessionManager.getManager().setToken(detectedCard, tokenConnection);
+                return tokenConnection;
               } catch (CardException e) {
                 throw new PKCS11TokenException("Token not present or unable to connect", e);
               }

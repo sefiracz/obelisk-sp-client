@@ -258,6 +258,10 @@ public class DetectedCard extends AbstractProduct {
     return knownToken;
   }
 
+	public void setKnownToken(SmartcardInfo knownToken) {
+		this.knownToken = knownToken;
+	}
+
   /**
    * Transform an ATR byte array into a string.
    *
