@@ -40,6 +40,8 @@ import java.security.spec.PSSParameterSpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Apple Keychain Token Adapter
@@ -49,6 +51,7 @@ public class KeychainSignatureTokenAdapter implements SignatureTokenConnection {
   private static final Logger logger = LoggerFactory.getLogger(KeychainSignatureTokenAdapter.class.getName());
 
   private final KeyStore keyStore;
+  private final Map<String, PrivateKey> keyCache = new ConcurrentHashMap<>();
 
   public KeychainSignatureTokenAdapter() {
     try {
@@ -98,7 +101,15 @@ public class KeychainSignatureTokenAdapter implements SignatureTokenConnection {
     logger.info("Signature algorithm: {}", javaSignatureAlgorithm);
     try {
       final Signature signature = Signature.getInstance(javaSignatureAlgorithm);
-      PrivateKey pk = ((KeychainPrivateKey) keyEntry).getPrivateKey();
+      String alias = ((KeychainPrivateKey) keyEntry).getAlias();
+      String certId = keyEntry.getCertificate().getXmlId();
+      PrivateKey pk = keyCache.get(alias+"+"+certId);
+      if (pk == null) {
+        pk = ((KeychainPrivateKey) keyEntry).getPrivateKey();
+        if (pk != null) {
+          keyCache.put(alias + "+" + certId, pk);
+        }
+      }
       if (pk == null) {
         throw new CancelledOperationException("User did not obtain private key");
       }

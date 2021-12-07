@@ -26,9 +26,15 @@ package cz.sefira.obelisk.macos.keystore;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
+import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
+import cz.sefira.obelisk.generic.ConnectionInfo;
+import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.pkcs11.IAIKPkcs11SignatureTokenAdapter;
 import eu.europa.esig.dss.token.*;
 
+import javax.smartcardio.CardException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +62,12 @@ public class KeychainProductAdapter implements ProductAdapter {
 
   @Override
   public SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback) {
-    return new KeychainSignatureTokenAdapter();
+    SignatureTokenConnection tokenConnection = SessionManager.getManager().getInitializedTokenForProduct((MacOSKeychain)product);
+    if (tokenConnection == null) {
+      tokenConnection = new KeychainSignatureTokenAdapter();
+    }
+    SessionManager.getManager().setToken((MacOSKeychain) product, tokenConnection);
+    return tokenConnection;
   }
 
   @Override

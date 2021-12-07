@@ -292,6 +292,7 @@ public class SSLPlugin implements NexuPlugin {
 		try {
 			// check if root SSL cert is in macos keychain as trusted
 			boolean present = checkCaCertPresentInMacKeychain(caCert);
+			LOGGER.info("Root SSL certificate present in keychain: "+present);
 			if (!present) {
 				DialogMessage message = new DialogMessage("install.ca.cert.missing.warning", DialogMessage.Level.WARNING, 475, 200);
 				StandaloneDialog.showDialog(api, message, true);
@@ -300,6 +301,7 @@ public class SSLPlugin implements NexuPlugin {
 			while(!present && cnt < tries) {
 				present = insertCaCertIntoAppleKeychain(caCert);
 				cnt++;
+				LOGGER.info("Root SSL certificate has been install in keychain: "+present);
 				if (!present && cnt < tries) {
 					DialogMessage message = new DialogMessage("install.ca.cert.not.install.warning", DialogMessage.Level.WARNING, 475, 200);
 					StandaloneDialog.showDialog(api, message, true);

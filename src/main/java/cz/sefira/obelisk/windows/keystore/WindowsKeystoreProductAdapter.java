@@ -18,6 +18,9 @@ import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
+import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.macos.keystore.KeychainSignatureTokenAdapter;
+import cz.sefira.obelisk.macos.keystore.MacOSKeychain;
 import eu.europa.esig.dss.token.*;
 import cz.sefira.obelisk.api.*;
 
@@ -52,7 +55,12 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 
 	@Override
 	public SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback) {
-		return new MSCAPISignatureToken();
+		SignatureTokenConnection tokenConnection = SessionManager.getManager().getInitializedTokenForProduct((WindowsKeystore)product);
+		if (tokenConnection == null) {
+			tokenConnection = new MSCAPISignatureToken();
+		}
+		SessionManager.getManager().setToken((WindowsKeystore) product, tokenConnection);
+		return tokenConnection;
 	}
 
 	@Override
