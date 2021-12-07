@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.macos.keystore.MacOSKeychain;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -139,7 +140,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
       for (final Product p : products) {
         String label = api.getLabel(p);
-        if(p instanceof WindowsKeystore) {
+        if(p instanceof WindowsKeystore || p instanceof MacOSKeychain) {
           label = p.getSimpleLabel();
         }
         final RadioButton button = new RadioButton(label);
@@ -168,7 +169,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
       }
       for (final Product p : products) {
         String label = api.getLabel(p);
-        if(p instanceof WindowsKeystore) {
+        if(p instanceof WindowsKeystore || p instanceof MacOSKeychain) {
           label = p.getSimpleLabel();
         }
         final RadioButton button = new RadioButton(label);

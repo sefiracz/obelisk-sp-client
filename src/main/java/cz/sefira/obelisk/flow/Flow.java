@@ -29,6 +29,9 @@ import cz.sefira.obelisk.view.core.UIOperation;
  */
 public abstract class Flow<I, O> {
 
+	// flag to check if user is currently in flow process execution
+	public static volatile boolean IN_EXEC = false;
+
 	private UIDisplay display;
 
 	private OperationFactory operationFactory;
@@ -53,9 +56,11 @@ public abstract class Flow<I, O> {
 
 	public final Execution<O> execute(NexuAPI api, I input) throws Exception {
 		try {
+			IN_EXEC = true;
 			final Execution<O> out = process(api, input);
 			return out;
 		} finally {
+			IN_EXEC = false;
 			display.close(true);
 		}
 	}

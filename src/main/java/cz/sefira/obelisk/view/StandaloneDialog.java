@@ -46,8 +46,8 @@ public class StandaloneDialog {
    */
   public static void showWelcomeMessage(NexuAPI api) {
     DialogMessage dialogMessage = new DialogMessage("welcome.message", DialogMessage.Level.TIMER,
-            new String[]{api.getAppConfig().getApplicationName()}, 475, 220);
-    dialogMessage.setShowDoNotShowCheckbox(true, "ssl-install");
+            new String[]{api.getAppConfig().getApplicationName()}, 450, 200);
+    dialogMessage.setShowDoNotShowCheckbox(true, "welcome-message");
     showDialog(api, dialogMessage, true);
   }
 
