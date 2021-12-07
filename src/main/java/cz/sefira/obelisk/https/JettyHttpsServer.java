@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
@@ -97,7 +98,8 @@ public class JettyHttpsServer extends AbstractJettyServer {
 	private KeyStore openKeyStore() {
 		try (InputStream sslStore = Thread.currentThread().getContextClassLoader().getResourceAsStream("ssl.jks")) {
 			final KeyStore keyStore = KeyStore.getInstance("JKS");
-			keyStore.load(sslStore, new String(Base64.decodeBase64("XyRmcGR6TS5wZUxrMWxsMSwlxaFAXw==")).toCharArray());
+			keyStore.load(sslStore, new String(Base64.decodeBase64("XyRmcGR6TS5wZUxrMWxsMSwlxaFAXw=="),
+					StandardCharsets.UTF_8).toCharArray());
 			return keyStore;
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)  {
 			throw new NexuException(e);
