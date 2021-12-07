@@ -57,7 +57,7 @@ public class SessionManager {
   }
 
   public SignatureTokenConnection getInitializedTokenForProduct(AbstractProduct product) {
-    if(!product.equals(this.product)) {
+    if(product.getCertificateId() == null || !product.equals(this.product)) {
       destroy(); // close previous token
       return null; // different product
     }

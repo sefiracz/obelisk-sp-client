@@ -13,4 +13,4 @@
 
 # Check whether certificate is already installed
 security verify-cert -c "$1" -p ssl -L
-echo $?
+exit $?
