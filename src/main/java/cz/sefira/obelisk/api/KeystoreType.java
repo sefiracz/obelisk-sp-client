@@ -33,6 +33,7 @@ public enum KeystoreType {
 	@XmlEnumValue("JCEKS") JCEKS("JCEKS","keystore.type.simple.keystore.jceks"),
 	@XmlEnumValue("PKCS11") PKCS11("PKCS#11","keystore.type.simple.smartcard.pkcs11"),
 	@XmlEnumValue("WINDOWS-MY") WINDOWS("WINDOWS-MY","keystore.type.simple.keystore.windows"),
+	@XmlEnumValue("KeychainStore") MACOSX("KeychainStore", "keystore.type.simple.keystore.macos"),
 	@XmlEnumValue("UNKNOWN") UNKNOWN("UNKNOWN", "");
 
 	private final String label;

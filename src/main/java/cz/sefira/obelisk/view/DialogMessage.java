@@ -38,7 +38,7 @@ public class DialogMessage {
   private double height = 150;
   private boolean doNotShowCheckbox = false;
   private boolean okButton = true;
-  private long timerLength = 30; // 30s
+  private long timerLength = 15; // 15s
   private String message;
 
   public DialogMessage(Level level) {

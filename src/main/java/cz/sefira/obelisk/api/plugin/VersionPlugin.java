@@ -22,8 +22,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class VersionPlugin implements NexuPlugin {
 
@@ -45,10 +49,7 @@ public class VersionPlugin implements NexuPlugin {
         // check correct version
         if (!currentVersion.equals(storedVersion)) {
           // analyze update path
-//          boolean needsUpgrade = false; // TODO analyze upgrade needs and figure out from->to upgrade path
-//          if(needsUpgrade) {
-//            // TODO - safely make data transformations step by step to current version according to upgrade path
-//          }
+          versionUpgrade(api, storedVersion, currentVersion);
           // change version number
           writeVersion(currentVersion, versionFile);
         }
@@ -60,6 +61,31 @@ public class VersionPlugin implements NexuPlugin {
       System.exit(1);
     }
     return Collections.emptyList();
+  }
+
+  private void versionUpgrade(NexuAPI api, String storedVersion, String currentVersion) {
+    final File nexuHome = api.getAppConfig().getNexuHome();
+
+    // remove old files from version 1.0.0
+    File oldSSL = new File(nexuHome, "web-server-keystore.jks");
+    if(oldSSL.exists()) {
+      boolean deleted = oldSSL.delete();
+      logger.debug("Deleting old SSL keystore - "+deleted);
+    }
+    try (Stream<Path> stream = Files.list(Paths.get(nexuHome.getAbsolutePath()))) {
+      stream.forEach(path -> {
+        if (path.getFileName().toString().startsWith("localhost-")) {
+          boolean deleted = path.toFile().delete();
+          logger.debug("Deleting old localhost root certificate - "+deleted);
+        }
+      });
+    }
+    catch (IOException e) {
+      logger.error(e.getMessage(), e);
+    }
+
+    // NEXT VERSION MIGRATION CODE
+    // TODO
   }
 
   /**

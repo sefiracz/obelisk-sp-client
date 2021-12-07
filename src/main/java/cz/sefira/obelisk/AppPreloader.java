@@ -151,8 +151,8 @@ public class AppPreloader extends Preloader {
 	}
 
 	private static boolean checkAlreadyStarted() throws MalformedURLException {
-		for (int port : config.getBindingPorts()) {
-			final URL url = new URL("http://" + config.getBindingIP() + ":" + port + "/clientInfo");
+		for (int port : config.getBindingPortsHttps()) {
+			final URL url = new URL("https://" + config.getBindingIP() + ":" + port + "/clientInfo");
 			final URLConnection connection;
 			try {
 				connection = url.openConnection();

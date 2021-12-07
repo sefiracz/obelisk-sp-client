@@ -27,6 +27,7 @@ import cz.sefira.obelisk.Utils;
 import cz.sefira.obelisk.api.Product;
 import cz.sefira.obelisk.api.ProductAdapter;
 import cz.sefira.obelisk.api.flow.OperationResult;
+import cz.sefira.obelisk.macos.keystore.KeychainPrivateKey;
 import cz.sefira.obelisk.pkcs11.IAIKPrivateKeyEntry;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
@@ -75,6 +76,9 @@ public class SaveFullSelectionOperation extends AbstractCompositeOperation<Boole
     product.setCertificateId(Utils.encodeHexString(id));
     if (key instanceof KSPrivateKeyEntry) {
       product.setKeyAlias(((KSPrivateKeyEntry) key).getAlias());
+    }
+    if (key instanceof KeychainPrivateKey) {
+      product.setKeyAlias(((KeychainPrivateKey) key).getAlias());
     }
     if (key instanceof IAIKPrivateKeyEntry) {
       product.setKeyAlias(((IAIKPrivateKeyEntry) key).getKeyLabel());

@@ -121,7 +121,7 @@ public class PKIManager {
 
     private X500Name getX500SubjectForRoot(final String applicationName) {
         final X500NameBuilder builder = new X500NameBuilder();
-        builder.addRDN(BCStyle.CN, "localhost");
+        builder.addRDN(BCStyle.CN, "OBELISK Signing Portal SSL");
         builder.addRDN(BCStyle.O, applicationName);
         builder.addRDN(BCStyle.C, "CZ");
         return builder.build();

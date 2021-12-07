@@ -59,42 +59,16 @@ public class HttpsPlugin implements NexuPlugin {
 
 		LOGGER.info("Verify if keystore is ready");
 		final File nexuHome = api.getAppConfig().getNexuHome();
-		final File keyStoreFile = new File(nexuHome, "keystore.jks");
 		final File webServerKeyStoreFile = new File(nexuHome, "web-server-keystore.jks");
 		final PKIManager pki = new PKIManager();
 		final File caCert;
-		// First test if old keystore.jks file exists
-		if (!keyStoreFile.exists()) {
-			// If not, test if new web-server-keystore.jks file exists
-			if(!webServerKeyStoreFile.exists()) {
-				// If not, it looks like a fresh install ==> create everything and delete root private key file
-				// after having generated the web-server-keystore.jks file
-				caCert = createRootCACert(nexuHome, api.getAppConfig().getApplicationName(), pki, webServerKeyStoreFile);
-			} else {
-				final File testCaCert = pki.getRootCertificate(nexuHome, api.getAppConfig().getApplicationName());
-				try {
-					// Test if root certificate fullfils requirements
-					if(!fulfillRequirements(testCaCert)) {
-						// If not, we must recreate everything like in a fresh install case
-						caCert = createRootCACert(nexuHome, api.getAppConfig().getApplicationName(), pki, webServerKeyStoreFile);
-					} else {
-						// Everything is setup, nothing to do except trying to install the certificate in
-						// various stores
-						caCert = testCaCert;
-					}
-				} catch(final IOException | CertificateException e) {
-					LOGGER.warn("Exception when trying to determine if certificate fulfills requirements.", e);
-					return Arrays.asList(new InitializationMessage(
-							InitializationMessage.MessageType.WARNING,
-							resourceBundle.getString("warn.install.cert.title"),
-							MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "requirements"),
-							baseResourceBundle.getString("contact.application.provider")
-						)
-					);
-				}
-			}
+
+		// test if new web-server-keystore.jks file exists
+		if(!webServerKeyStoreFile.exists()) {
+			// If not, it looks like a fresh install ==> create everything from beginning
+			// ???? and delete root private key file after having generated the web-server-keystore.jks file
+			caCert = createRootCACert(nexuHome, api.getAppConfig().getApplicationName(), pki, webServerKeyStoreFile);
 		} else {
-			// Old keystore.jks exists
 			final File testCaCert = pki.getRootCertificate(nexuHome, api.getAppConfig().getApplicationName());
 			try {
 				// Test if root certificate fullfils requirements
@@ -102,19 +76,18 @@ public class HttpsPlugin implements NexuPlugin {
 					// If not, we must recreate everything like in a fresh install case
 					caCert = createRootCACert(nexuHome, api.getAppConfig().getApplicationName(), pki, webServerKeyStoreFile);
 				} else {
-					// We must create the web-server-keystore.jks file and delete old keystore.jks file
-					createWebServerKeystoreAndDeleteRoot(keyStoreFile, nexuHome, api.getAppConfig().getApplicationName(),
-							webServerKeyStoreFile, pki);
+					// Everything is setup, nothing to do except trying to install the certificate in
+					// various stores
 					caCert = testCaCert;
 				}
 			} catch(final IOException | CertificateException e) {
 				LOGGER.warn("Exception when trying to determine if certificate fulfills requirements.", e);
 				return Arrays.asList(new InitializationMessage(
-						InitializationMessage.MessageType.WARNING,
-						resourceBundle.getString("warn.install.cert.title"),
-						MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "requirements"),
-						baseResourceBundle.getString("contact.application.provider")
-					)
+								InitializationMessage.MessageType.WARNING,
+								resourceBundle.getString("warn.install.cert.title"),
+								MessageFormat.format(resourceBundle.getString("warn.install.cert.header"), api.getAppConfig().getApplicationName(), "requirements"),
+								baseResourceBundle.getString("contact.application.provider")
+						)
 				);
 			}
 		}
@@ -126,7 +99,7 @@ public class HttpsPlugin implements NexuPlugin {
 				final BufferedInputStream bis = new BufferedInputStream(fis)) {
 			final CertificateFactory cf = CertificateFactory.getInstance("X.509");
 			final X509Certificate cert = (X509Certificate) cf.generateCertificate(bis);
-			if(cert.getBasicConstraints() != -1) {
+			if(cert.getBasicConstraints() != -1 && cert.getNotAfter().after(new Date())) { // TODO - validity check
 				return true;
 			} else {
 				return false;
@@ -192,7 +165,7 @@ public class HttpsPlugin implements NexuPlugin {
 			final KeyPair keyPair = pki.createKeyPair();
 			final Calendar cal = Calendar.getInstance();
 			final Date notBefore = cal.getTime();
-			cal.add(Calendar.YEAR, 10);
+			cal.add(Calendar.MONTH, 3);
 			final long notAfterMs = cal.getTime().after(rootCert.getNotAfter()) ?
 					rootCert.getNotAfter().getTime()-1 : cal.getTime().getTime();
 			final Date notAfter = new Date(notAfterMs);
@@ -222,15 +195,15 @@ public class HttpsPlugin implements NexuPlugin {
 		final EnvironmentInfo envInfo = EnvironmentInfo.buildFromSystemProperties(System.getProperties());
 		switch(envInfo.getOs()) {
 		case WINDOWS:
-			messages.addAll(installCaCertInFirefoxForWindows(api, caCert, resourceBundle, baseResourceBundle));
-			messages.addAll(installCaCertInWindowsStore(api, caCert, resourceBundle, baseResourceBundle));
+			messages.addAll(installCaCertInFirefoxForWindows(api, caCert, resourceBundle, baseResourceBundle)); // TODO - keep
+			messages.addAll(installCaCertInWindowsStore(api, caCert, resourceBundle, baseResourceBundle)); // TODO - fallback
 			break;
 		case MACOSX:
-			messages.addAll(installCaCertInFirefoxForMac(api, caCert, resourceBundle, baseResourceBundle));
-			messages.addAll(installCaCertInMacUserKeychain(api, caCert, resourceBundle, baseResourceBundle));
+			messages.addAll(installCaCertInFirefoxForMac(api, caCert, resourceBundle, baseResourceBundle)); // TODO - keep
+			messages.addAll(installCaCertInMacUserKeychain(api, caCert, resourceBundle, baseResourceBundle)); // TODO - fallback
 			break;
 		case LINUX:
-			messages.addAll(installCaCertInLinuxFFChromeStores(api, caCert, resourceBundle, baseResourceBundle));
+			messages.addAll(installCaCertInLinuxFFChromeStores(api, caCert, resourceBundle, baseResourceBundle));  // TODO - keep
 			break;
 		case NOT_RECOGNIZED:
 			LOGGER.warn("Automatic installation of CA certficate is not yet supported for NOT_RECOGNIZED.");
@@ -405,10 +378,8 @@ public class HttpsPlugin implements NexuPlugin {
 					caCert.getAbsolutePath());
 			pb.redirectErrorStream(true);
 			final Process p = pb.start();
-			if(!p.waitFor(4, TimeUnit.SECONDS)) {
-				throw new NexuException("Timeout occurred when trying to install CA certificate in Mac user keychain");
-			}
-			if(p.exitValue() != 0) {
+			int exitValue = p.waitFor();
+			if(exitValue != 0) {
 				final String output = IOUtils.toString(p.getInputStream(), Charset.defaultCharset());
 				throw new NexuException("Batch script returned " + p.exitValue() + " when trying to install CA certificate in Mac user keychain. Output: " + output);
 			}
