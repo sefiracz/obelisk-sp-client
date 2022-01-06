@@ -24,6 +24,7 @@ package cz.sefira.obelisk.flow;
  */
 
 import cz.sefira.obelisk.NexuException;
+import cz.sefira.obelisk.ProductDatabase;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.flow.operation.*;
@@ -146,7 +147,8 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
                   final Product product = (Product) map.get(TokenOperationResultKey.SELECTED_PRODUCT);
                   final ProductAdapter productAdapter = (ProductAdapter) map.get(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER);
                   final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult = this.getOperationFactory()
-                      .getOperation(AutoSelectPrivateKeyOperation.class, token, api, product, productAdapter, selectedProduct.getKeyAlias()).perform();
+                      .getOperation(AutoSelectPrivateKeyOperation.class, token, api, product, productAdapter,
+                          selectedProduct.getKeyAlias(), req.getCertificate().getCertificate()).perform();
                   if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
                     final DSSPrivateKeyEntry key = selectPrivateKeyOperationResult.getResult();
 
@@ -163,9 +165,22 @@ public class GetTokenFlow extends AbstractCoreFlow<GetTokenRequest, GetTokenResp
                       resp.setCertificateChain(certificateChain);
                     }
 
-                    return new Execution<GetTokenResponse>(resp);
+                    return new Execution<>(resp);
                   } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
                     continue;
+                  } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.NO_KEY)) {
+                    final Operation<Boolean> notFoundOperation = this.getOperationFactory().getOperation(UIOperation.class,
+                        "/fxml/certificate-not-found.fxml", api, certificateToken);
+                    final OperationResult<Boolean> notFoundOperationResult = notFoundOperation.perform();
+                    if(notFoundOperationResult.getStatus().equals(BasicOperationStatus.USER_CANCEL) ||
+                        !notFoundOperationResult.getResult()) {
+                      // user will fix profile
+                      return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
+                    } else {
+                      // repeat the process with certificate forgotten to make user find it again
+                      productAdapter.removeProduct(selectedProduct);
+                      return process(api, req);
+                    }
                   } else {
                     return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
                   }

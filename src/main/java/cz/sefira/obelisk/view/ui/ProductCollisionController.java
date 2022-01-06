@@ -55,7 +55,7 @@ import java.util.ResourceBundle;
  */
 public class ProductCollisionController extends AbstractUIOperationController<AbstractProduct> implements Initializable {
 
-  private static final Logger logger = LoggerFactory.getLogger(UnknownCertificateMessageController.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ProductCollisionController.class.getName());
 
   @FXML
   private StackPane productsWindow;

@@ -42,7 +42,7 @@ public class UserPreferences {
 		language = prefs.get(LANGUAGE, Locale.getDefault().getLanguage());
     hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
 		final String autoStartValue = prefs.get(AUTO_START, null);
-    autoStart = Boolean.parseBoolean(autoStartValue);
+    autoStart = autoStartValue != null ? Boolean.parseBoolean(autoStartValue) : null;
 
     try {
       final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
@@ -75,7 +75,7 @@ public class UserPreferences {
 		if(autoStart) {
 			prefs.put(AUTO_START, "true");
 		} else {
-			prefs.remove(AUTO_START);
+			prefs.put(AUTO_START, "false");
 		}
 		this.autoStart = autoStart;
 	}
@@ -103,7 +103,7 @@ public class UserPreferences {
   }
 
 	public Boolean getAutoStart() {
-		return autoStart != null ? autoStart : false;
+		return autoStart != null ? autoStart : true; // by default is ON
 	}
 
   public Integer getCacheDuration() {

@@ -38,13 +38,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -153,12 +160,30 @@ public class AppPreloader extends Preloader {
 	private static boolean checkAlreadyStarted() throws MalformedURLException {
 		for (int port : config.getBindingPortsHttps()) {
 			final URL url = new URL("https://" + config.getBindingIP() + ":" + port + "/clientInfo");
-			final URLConnection connection;
+			final HttpsURLConnection connection;
 			try {
-				connection = url.openConnection();
+				connection = (HttpsURLConnection) url.openConnection();
 				connection.setConnectTimeout(2000);
 				connection.setReadTimeout(2000);
-			} catch (IOException e) {
+				connection.setHostnameVerifier((hostname, session) -> true);
+				TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
+					@Override
+					public void checkClientTrusted(X509Certificate[] chain, String authType) {
+					}
+
+					@Override
+					public void checkServerTrusted(X509Certificate[] chain, String authType) {
+					}
+
+					@Override
+					public X509Certificate[] getAcceptedIssuers() {
+						return new X509Certificate[0];
+					}
+				}};
+				SSLContext context = SSLContext.getInstance("TLS");
+				context.init(null, trustManagers, new SecureRandom());
+				connection.setSSLSocketFactory(context.getSocketFactory());
+			} catch (IOException | NoSuchAlgorithmException | KeyManagementException e) {
 				logger.warn("IOException when trying to open a connection to " + url + ": " + e.getMessage(), e);
 				continue;
 			}

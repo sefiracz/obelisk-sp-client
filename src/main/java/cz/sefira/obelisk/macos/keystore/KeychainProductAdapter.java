@@ -26,15 +26,13 @@ package cz.sefira.obelisk.macos.keystore;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
-import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
-import cz.sefira.obelisk.generic.ConnectionInfo;
 import cz.sefira.obelisk.generic.SessionManager;
-import cz.sefira.obelisk.pkcs11.IAIKPkcs11SignatureTokenAdapter;
-import eu.europa.esig.dss.token.*;
+import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
+import eu.europa.esig.dss.token.PasswordInputCallback;
+import eu.europa.esig.dss.token.SignatureTokenConnection;
 
-import javax.smartcardio.CardException;
-import java.io.File;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +74,11 @@ public class KeychainProductAdapter implements ProductAdapter {
   }
 
   @Override
-  public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+  public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
     List<DSSPrivateKeyEntry> keys = token.getKeys();
     for (DSSPrivateKeyEntry key : keys) {
-      if (key instanceof KeychainPrivateKey && ((KeychainPrivateKey) key).getAlias().equalsIgnoreCase(keyAlias)) {
+      if(certificate.equals(key.getCertificate().getCertificate()) &&
+          key instanceof KeychainPrivateKey && ((KeychainPrivateKey) key).getAlias().equalsIgnoreCase(keyAlias)) {
         return key;
       }
     }
@@ -117,5 +116,10 @@ public class KeychainProductAdapter implements ProductAdapter {
   @Override
   public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
     saveKeystore((MacOSKeychain) product);
+  }
+
+  @Override
+  public void removeProduct(AbstractProduct product) {
+    getProductDatabase().remove(api, product);
   }
 }

@@ -16,14 +16,15 @@ package cz.sefira.obelisk.generic;
 
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
+import cz.sefira.obelisk.windows.keystore.WindowsSignatureTokenAdapter;
 import eu.europa.esig.dss.token.*;
-import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.pkcs11.IAIKPrivateKeyEntry;
 import cz.sefira.obelisk.pkcs11.IAIKPkcs11SignatureTokenAdapter;
 import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 
 import javax.smartcardio.CardException;
 import java.io.File;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
         switch (scApi) {
             case MSCAPI:
                 // Cannot intercept cancel and timeout for MSCAPI (too generic error).
-                return new MSCAPISignatureToken(); // TODO ? filter the token content
+                return new WindowsSignatureTokenAdapter(); // TODO ? filter the token content
             case PKCS_11:
               try {
                 final String absolutePath = cInfo.getApiParam();
@@ -80,15 +81,18 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
     }
 
     @Override
-    public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+    public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
         List<DSSPrivateKeyEntry> keys = token.getKeys();
         for(DSSPrivateKeyEntry key : keys) {
-            if(key instanceof IAIKPrivateKeyEntry && ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias)) {
-                return key;
+          if(certificate.equals(key.getCertificate().getCertificate())) {
+            if (key instanceof IAIKPrivateKeyEntry &&
+                ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias)) {
+              return key;
             }
-            if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
-                return key;
+            if (key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+              return key;
             }
+          }
         }
         return null;
     }
@@ -101,6 +105,11 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
   @Override
   public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
     saveSmartcard((DetectedCard) product, map);
+  }
+
+  @Override
+  public void removeProduct(AbstractProduct product) {
+    getProductDatabase().remove(api, product);
   }
 
   public SCDatabase getProductDatabase() {

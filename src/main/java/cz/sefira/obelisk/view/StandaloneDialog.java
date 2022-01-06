@@ -71,11 +71,14 @@ public class StandaloneDialog {
     cert.setText(resources.getString("install.ca.cert.button.cert.location"));
     cert.getStyleClass().add("btn-secondary");
     message.addButton(new DialogMessage.MessageButton(cert, (action, controller) -> {
-      try {
-        Desktop.getDesktop().open(api.getAppConfig().getNexuHome());
-      } catch (IOException io) {
-        logger.error(io.getMessage(), io);
-      }
+      new Thread(() -> {
+        try {
+          Desktop.getDesktop().open(api.getAppConfig().getNexuHome());
+        }
+        catch (IOException io) {
+          logger.error(io.getMessage(), io);
+        }
+      }).start();
     }));
     api.getOperationFactory().getMessageDialog(api, message, false);
   }
