@@ -37,6 +37,8 @@ import eu.europa.esig.dss.token.SignatureTokenConnection;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.flow.exceptions.AbstractTokenRuntimeException;
 
+import java.security.cert.X509Certificate;
+
 /**
  * description
  */
@@ -48,6 +50,7 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
   private Product product;
   private ProductAdapter productAdapter;
   private String keyAlias;
+  private X509Certificate certificate;
 
   public AutoSelectPrivateKeyOperation() {
     super();
@@ -67,6 +70,9 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
       if(params.length > 4) {
         this.keyAlias = (String) params[4];
       }
+      if(params.length > 5) {
+        this.certificate = (X509Certificate) params[5];
+      }
     } catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuAPI, Product (optional), " +
           "ProductAdapter (optional), KeyAlias (optional)");
@@ -78,8 +84,9 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
   public OperationResult<DSSPrivateKeyEntry> perform() {
     DSSPrivateKeyEntry key;
     try (BusyIndicator busyIndicator = new BusyIndicator()){
-      if((this.productAdapter != null) && (this.product != null) && (this.keyAlias != null)) {
-        key = this.productAdapter.getKey(this.token, this.keyAlias);
+      if((this.productAdapter != null) && (this.product != null) && (this.keyAlias != null) &&
+          (this.certificate != null)) {
+        key = this.productAdapter.getKey(this.token, this.keyAlias, this.certificate);
       } else {
         return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);
       }

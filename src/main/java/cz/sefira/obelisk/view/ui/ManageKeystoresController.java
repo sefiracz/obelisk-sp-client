@@ -72,6 +72,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
   private TableColumn<AbstractProduct, String> keystoreCertificateNameTableColumn;
 
 	@FXML
+	private TableColumn<AbstractProduct, String> keystoreIssuerNameTableColumn;
+
+	@FXML
 	private TableColumn<AbstractProduct, String> keystoreTypeTableColumn;
 
 	@FXML
@@ -119,6 +122,19 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
       }
       return new ReadOnlyStringWrapper(cn);
     });
+		keystoreIssuerNameTableColumn.setCellValueFactory((param) -> {
+			String cn = "";
+			try {
+				String certBase64 = param.getValue().getCertificate();
+				byte[] cert = Base64.decodeBase64(certBase64);
+				CertificateFactory factory = CertificateFactory.getInstance("X509");
+				X509Certificate x509Certificate = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(cert));
+				cn = DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, x509Certificate.getIssuerX500Principal());
+			} catch (CertificateException e) {
+				logger.error(e.getMessage(), e);
+			}
+			return new ReadOnlyStringWrapper(cn);
+		});
     // keystore type
 		keystoreTypeTableColumn
 				.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getType().getSimpleLabel()));

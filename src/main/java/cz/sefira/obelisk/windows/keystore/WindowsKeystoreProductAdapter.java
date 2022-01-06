@@ -17,13 +17,13 @@ package cz.sefira.obelisk.windows.keystore;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
+import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
+import cz.sefira.obelisk.generic.EmptyKeyEntry;
 import cz.sefira.obelisk.generic.SessionManager;
-import cz.sefira.obelisk.macos.keystore.KeychainSignatureTokenAdapter;
-import cz.sefira.obelisk.macos.keystore.MacOSKeychain;
 import eu.europa.esig.dss.token.*;
-import cz.sefira.obelisk.api.*;
 
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	public SignatureTokenConnection connect(NexuAPI api, Product product, PasswordInputCallback callback) {
 		SignatureTokenConnection tokenConnection = SessionManager.getManager().getInitializedTokenForProduct((WindowsKeystore)product);
 		if (tokenConnection == null) {
-			tokenConnection = new MSCAPISignatureToken();
+			tokenConnection = new WindowsSignatureTokenAdapter();
 		}
 		SessionManager.getManager().setToken((WindowsKeystore) product, tokenConnection);
 		return tokenConnection;
@@ -69,11 +69,16 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
-			if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
-				return key;
+			if(certificate.equals(key.getCertificate().getCertificate())) {
+				if (key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+					return key;
+				}
+				if (key instanceof EmptyKeyEntry && ((EmptyKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+					throw new PKCS11TokenException("No private key available"); // reusing exception -> minidriver use case
+				}
 			}
 		}
 		return null;
@@ -108,6 +113,11 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	@Override
 	public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
 		saveKeystore((WindowsKeystore) product);
+	}
+
+	@Override
+	public void removeProduct(AbstractProduct product) {
+		getProductDatabase().remove(api, product);
 	}
 
 }

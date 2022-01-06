@@ -41,6 +41,7 @@ import org.bouncycastle.asn1.x509.DigestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.smartcardio.CardException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
   private final PasswordInputCallback callback;
   private final ReauthCallback reauthCallback;
   private final TokenHandler token;
+  private final DetectedCard detectedCard;
 
   private boolean loggedIn = false;
 
@@ -64,6 +66,7 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
                                          final DetectedCard detectedCard) {
     super(pkcs11Lib.getAbsolutePath());
     this.pkcs11Path = pkcs11Lib.getAbsolutePath();
+    this.detectedCard = detectedCard;
     logger.info("Module library: " + pkcs11Path);
     this.callback = callback;
     this.reauthCallback = api.getDisplay().getReauthCallback();
@@ -149,6 +152,19 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
       value.setAlgorithm(signatureAlgorithm);
       value.setValue(sigValue);
       return value;
+    } catch (PKCS11Exception e) {
+      // check that the failure is not result of user disconnecting the device during signing process
+      try {
+        if (!detectedCard.isOpened() || detectedCard.getTerminal() == null ||
+            !detectedCard.getTerminal().isCardPresent()) {
+          logger.warn("Seems user disconnected device during signing: "+e.getMessage(), e);
+          throw new PKCS11TokenException(e);
+        }
+      } catch (CardException ce) {
+        logger.warn("Seems user disconnected device during signing: "+e.getMessage(), e);
+        throw new PKCS11TokenException(e);
+      }
+      throw processTokenExceptions(e);
     }
     catch (Exception e) {
       throw processTokenExceptions(e);

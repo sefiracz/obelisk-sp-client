@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyStore.PasswordProtection;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +72,11 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias) {
+	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
-			if(key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+			if(certificate.equals(key.getCertificate().getCertificate()) &&
+					key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
 				return key;
 			}
 		}
@@ -109,6 +111,11 @@ public class KeystoreProductAdapter implements ProductAdapter {
   public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
     saveKeystore((ConfiguredKeystore) product);
   }
+
+	@Override
+	public void removeProduct(AbstractProduct product) {
+		getProductDatabase().remove(api, product);
+	}
 
 	public KeystoreDatabase getProductDatabase() {
 		return api.loadDatabase(KeystoreDatabase.class, "database-keystore.xml");

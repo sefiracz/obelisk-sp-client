@@ -30,6 +30,7 @@ import eu.europa.esig.dss.token.SignatureTokenConnection;
 import cz.sefira.obelisk.flow.exceptions.*;
 
 import java.security.SignatureException;
+import java.util.Locale;
 
 /**
  * This {@link Operation} allows to perform a signature.

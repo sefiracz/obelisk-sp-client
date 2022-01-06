@@ -22,6 +22,7 @@ import cz.sefira.obelisk.ProductDatabase;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.Operation;
 
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
@@ -69,9 +70,10 @@ public interface ProductAdapter {
 	 * Returns the key from <code>token</code> matching the <code>keyAlias</code>.
 	 * @param token The token to use to retrieve the key.
 	 * @param keyAlias Key alias that we are looking for.
+	 * @param certificate Certificate that we are looking for.
 	 * @return The key from <code>token</code> matching the <code>keyAlias</code>.
 	 */
-	DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias);
+	DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate);
 
 	/**
 	 * Returns the specification of the operation to call to configure <code>product</code>.
@@ -101,6 +103,8 @@ public interface ProductAdapter {
    * @param map Token information
    */
 	void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map);
+
+	void removeProduct(AbstractProduct product);
 
 	ProductDatabase getProductDatabase();
 }
