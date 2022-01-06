@@ -37,7 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -141,7 +144,14 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoresTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
 				if(newValue instanceof ConfiguredKeystore) {
-					keystoreLabel.setText(((ConfiguredKeystore) newValue).getUrl());
+					String path = ((ConfiguredKeystore) newValue).getUrl();
+					try {
+						path = Paths.get(new URI(path)).toFile().getAbsolutePath();
+					}
+					catch (URISyntaxException e) {
+						logger.error(e.getMessage(), e);
+					}
+					keystoreLabel.setText(path);
 				} else if(newValue instanceof DetectedCard) {
 					keystoreLabel.setText(newValue.getSimpleLabel());
 				} else {
