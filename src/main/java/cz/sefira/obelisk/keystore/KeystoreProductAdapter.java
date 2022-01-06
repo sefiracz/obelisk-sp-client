@@ -25,10 +25,15 @@ import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.*;
 import cz.sefira.obelisk.flow.exceptions.KeystoreNotFoundException;
 import cz.sefira.obelisk.flow.exceptions.UnsupportedKeystoreTypeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.security.KeyStore.PasswordProtection;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -42,7 +47,9 @@ import java.util.Map;
  */
 public class KeystoreProductAdapter implements ProductAdapter {
 
-  private final NexuAPI api;
+	private static final Logger logger = LoggerFactory.getLogger(KeystoreProductAdapter.class.getName());
+
+	private final NexuAPI api;
 
 	public KeystoreProductAdapter(final NexuAPI api) {
 		this.api = api;
@@ -139,6 +146,13 @@ public class KeystoreProductAdapter implements ProductAdapter {
 
 		private void initSignatureTokenConnection() {
       proxied = SessionManager.getManager().getInitializedTokenForProduct(configuredKeystore);
+			String path = configuredKeystore.getUrl();
+			try {
+				path = Paths.get(new URI(path)).toFile().getAbsolutePath();
+			}
+			catch (URISyntaxException ex) {
+				logger.error(ex.getMessage(), ex);
+			}
       if(proxied == null) {
         try {
           switch (configuredKeystore.getType()) {
@@ -155,10 +169,10 @@ public class KeystoreProductAdapter implements ProductAdapter {
                       "JCEKS", new PasswordProtection(callback.getPassword()));
               break;
             default:
-              throw new UnsupportedKeystoreTypeException("Unsupported keystore type", configuredKeystore.getUrl());
+              throw new UnsupportedKeystoreTypeException("Unsupported keystore type", path);
           }
         } catch (FileNotFoundException e) {
-          throw new KeystoreNotFoundException("Keystore file not found", configuredKeystore.getUrl());
+          throw new KeystoreNotFoundException("Keystore file not found", path);
         } catch (IOException e) {
           throw new NexuException(e);
         }
