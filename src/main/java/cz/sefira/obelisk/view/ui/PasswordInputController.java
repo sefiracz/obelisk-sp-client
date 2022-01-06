@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.api.ConfiguredKeystore;
 import cz.sefira.obelisk.api.DetectedCard;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
@@ -25,12 +26,19 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public class PasswordInputController extends AbstractUIOperationController<char[]> implements Initializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(PasswordInputController.class.getName());
 
 	@FXML
 	private Button ok;
@@ -68,11 +76,21 @@ public class PasswordInputController extends AbstractUIOperationController<char[
     if (passwordPrompt != null) {
       this.passwordPrompt.setText(passwordPrompt);
     } else if (product != null) {
+    	String label = product.getSimpleLabel();
       if(product instanceof DetectedCard) {
         titleKey = "password.title.pin";
         promptKey = "password.smartcard.prompt";
       }
-      this.passwordPrompt.setText(MessageFormat.format(resources.getString(promptKey), product.getSimpleLabel()));
+      if (product instanceof ConfiguredKeystore) {
+				try {
+					label = Paths.get(new URI(((ConfiguredKeystore) product).getUrl())).getFileName().toString();
+					label += " ("+product.getType().getLabel()+")";
+				}
+				catch (URISyntaxException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+      this.passwordPrompt.setText(MessageFormat.format(resources.getString(promptKey), label));
     } else {
 			this.passwordPrompt.setText(resources.getString(titleKey));
 		}
