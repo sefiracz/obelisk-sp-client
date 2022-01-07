@@ -58,6 +58,9 @@ public class EnvironmentInfo {
 		EnvironmentInfo info = new EnvironmentInfo();
 
 		String osArch = systemProperties.getProperty(OS_ARCH);
+		if ("x86_64".equals(osArch)) {
+			osArch = "amd64";
+		}
 		info.setOsArch(osArch);
 		info.setArch(Arch.forOSArch(osArch)); // architecture
 
