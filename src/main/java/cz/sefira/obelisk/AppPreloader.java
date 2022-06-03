@@ -72,7 +72,9 @@ public class AppPreloader extends Preloader {
 		beforeLaunch();
 
 		boolean started = checkAlreadyStarted();
+		logger.info("App running: "+started);
 		if (!started) {
+			logger.info("Launching app");
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
 		} else {
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, new String[]{"alreadyRunning"});
@@ -85,6 +87,7 @@ public class AppPreloader extends Preloader {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		if(getConfig().isShowSplashScreen()) {
+			logger.info("Showing splashscreen");
 			showSplashScreen(primaryStage);
 		}
 	}
@@ -92,8 +95,10 @@ public class AppPreloader extends Preloader {
 	private void showSplashScreen(Stage primaryStage) {
 		final String appName = getConfig().getApplicationName();
 		primaryStage.setTitle(appName);
+		logger.info("Load resources");
 		primaryStage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/tray-icon.png")));
 		final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash.png")));
+		logger.info("Resources loaded");
 		double splashWidth = splash.getImage().getWidth();
 		double splashHeight = splash.getImage().getHeight();
 		final StackPane background = new StackPane(splash);
@@ -104,10 +109,13 @@ public class AppPreloader extends Preloader {
 		primaryStage.setScene(splashScene);
 		primaryStage.setAlwaysOnTop(true);
 		primaryStage.initStyle(StageStyle.UNDECORATED);
+		logger.info("Show stage");
 		primaryStage.show();
 		final PauseTransition delay = new PauseTransition(Duration.seconds(3));
 		delay.setOnFinished(event -> primaryStage.close());
+		logger.info("Play delay");
 		delay.play();
+		logger.info("Hide splashscreen");
 	}
 
 	private void configureLogger(AppConfig config) {

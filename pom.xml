@@ -6,7 +6,7 @@
 
   <groupId>cz.sefira.obelisk</groupId>
   <artifactId>obelisk-sp-client</artifactId>
-  <version>1.1.1</version> <!-- !!! NEEDS ALSO CHANGE in resources/version.txt !!! -->
+  <version>1.1.2</version> <!-- !!! NEEDS ALSO CHANGE in resources/version.txt !!! -->
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -14,7 +14,7 @@
     <encoding>UTF-8</encoding>
 
     <!-- libs version -->
-    <javafx.version>11.0.2</javafx.version>
+    <javafx.version>17.0.2</javafx.version>
     <jaxb.version>2.3.2</jaxb.version>
     <jetty.server.version>9.4.38.v20210224</jetty.server.version>
     <iaik.pkcs11.wrapper.version>1.6.2</iaik.pkcs11.wrapper.version>
@@ -74,89 +74,67 @@
     </repository>
   </repositories>
 
-  <profiles>
-    <profile>
-      <id>PC_platform</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <javafx.version>11.0.2</javafx.version>
-      </properties>
-      <dependencies>
-        <!-- JavaFX Windows -->
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-fxml</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>win</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-controls</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>win</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-graphics</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>win</classifier>
-        </dependency>
-
-        <!-- JavaFX Linux -->
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-controls</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-fxml</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-graphics</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>linux</classifier>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>macOS</id>
-      <properties>
-        <javafx.version>17.0.2-ea+1</javafx.version>
-      </properties>
-      <dependencies>
-        <!-- JavaFX MacOS -->
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-fxml</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>mac</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-controls</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>mac</classifier>
-        </dependency>
-        <dependency>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-graphics</artifactId>
-          <version>${javafx.version}</version>
-          <classifier>mac</classifier>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
-
   <dependencies>
     <!-- JavaFX -->
-    <!-- According to profile selection -->
+    <!-- JavaFX Windows -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
+
+    <!-- JavaFX Linux -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>linux</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>linux</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>linux</classifier>
+    </dependency>
+
+    <!-- JavaFX MacOS -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>mac</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>mac</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>mac</classifier>
+    </dependency>
 
     <!-- JAXB runtime -->
     <dependency>
