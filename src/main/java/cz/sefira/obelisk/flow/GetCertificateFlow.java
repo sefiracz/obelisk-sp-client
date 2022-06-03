@@ -132,9 +132,11 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
                       resp.setIssuerCN(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, issuerX500Principal));
                       resp.setIssuerOrg(DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.O, issuerX500Principal));
 
-                      this.getOperationFactory().getMessageDialog(api, new DialogMessage(
-                              "certificates.flow.finished", DialogMessage.Level.INFORMATION,
-                              400, 150), true);
+                      // certificate obtained dialog
+                      DialogMessage certFlowFinished = new DialogMessage("certificates.flow.finished",
+                          DialogMessage.Level.SUCCESS, 400, 165);
+                      certFlowFinished.setShowDoNotShowCheckbox(true, "cert-flow-finished");
+                      this.getOperationFactory().getMessageDialog(api, certFlowFinished, false);
 
                       return new Execution<GetCertificateResponse>(resp);
                     } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {

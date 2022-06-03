@@ -11,6 +11,7 @@ import java.util.List;
 public class DialogMessage {
 
   public enum Level {
+    SUCCESS("message.title.success"),
     INFORMATION("message.title.information"),
     WARNING("message.title.warning"),
     ERROR("message.title.error"),

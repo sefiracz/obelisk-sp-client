@@ -57,13 +57,16 @@ public class StandaloneDialog {
    * @param browserTypeProperty Property key with browser/keystore type
    * @param certName Name of the certificate file
    */
-  public static void showSslError(NexuAPI api, String browserTypeProperty, String certName) {
+  public static void showSslError(NexuAPI api, String browserTypeProperty, String browser, String certName) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
     String messageText = MessageFormat.format(resources.getString("install.ca.cert.fail.message"),
             certName, resources.getString(browserTypeProperty));
-    DialogMessage message = new DialogMessage(DialogMessage.Level.ERROR);
-    message.setHeight(200);
-    message.setWidth(475);
+    if (browser != null) {
+      messageText += "\n\n" + MessageFormat.format(resources.getString("install.ca.cert.unused.browser"), browser);
+    }
+    DialogMessage message = new DialogMessage(DialogMessage.Level.WARNING);
+    message.setHeight(250);
+    message.setWidth(500);
     message.setMessage(messageText);
     message.setShowDoNotShowCheckbox(true, "ssl-warning");
     // add button
@@ -151,6 +154,11 @@ public class StandaloneDialog {
     Region icon = new Region();
     // set dialog icon
     switch (dialogMessage.getLevel()) {
+      case SUCCESS:
+        icon.getStyleClass().add("icon-success");
+        icon.setPrefSize(50, 50);
+        leftBox.getChildren().add(icon);
+        break;
       case INFORMATION:
         icon.getStyleClass().add("icon-information");
         icon.setPrefSize(50, 50);

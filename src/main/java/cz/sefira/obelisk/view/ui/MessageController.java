@@ -109,6 +109,10 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 
       // set dialog icon
       switch (dialogMessage.getLevel()) {
+        case SUCCESS:
+          icon.getStyleClass().add("icon-success");
+          icon.setPrefSize(50, 50);
+          break;
         case INFORMATION:
           icon.getStyleClass().add("icon-information");
           icon.setPrefSize(50, 50);
