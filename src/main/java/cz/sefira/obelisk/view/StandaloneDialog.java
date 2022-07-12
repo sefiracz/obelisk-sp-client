@@ -47,7 +47,7 @@ public class StandaloneDialog {
   public static void showWelcomeMessage(NexuAPI api) {
     DialogMessage dialogMessage = new DialogMessage("welcome.message", DialogMessage.Level.TIMER,
             new String[]{api.getAppConfig().getApplicationName()}, 450, 200);
-    dialogMessage.setShowDoNotShowCheckbox(true, "welcome-message");
+    dialogMessage.setShowDoNotShowCheckbox(true, true, "welcome-message");
     showDialog(api, dialogMessage, true);
   }
 
@@ -68,7 +68,7 @@ public class StandaloneDialog {
     message.setHeight(250);
     message.setWidth(500);
     message.setMessage(messageText);
-    message.setShowDoNotShowCheckbox(true, "ssl-warning");
+    message.setShowDoNotShowCheckbox(true, false, "ssl-warning");
     // add button
     Button cert = new Button();
     cert.setText(resources.getString("install.ca.cert.button.cert.location"));
@@ -246,6 +246,10 @@ public class StandaloneDialog {
     // do not show checkbox
     if (api != null && dialogMessage.isShowDoNotShowCheckbox()) {
       bottomContainer.getChildren().add(doNotShowContainer);
+      if (dialogMessage.isShowDoNotShowCheckbox() && dialogMessage.isDoNotShowSelected()) {
+        doNotShowCheckBox.selectedProperty().setValue(true);
+        doNotShowCheckBox.setSelected(true);
+      }
     }
     borderPane.setBottom(bottomContainer);
 
