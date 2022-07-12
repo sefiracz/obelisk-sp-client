@@ -70,7 +70,9 @@ public class KeychainSignatureTokenAdapter implements SignatureTokenConnection {
       while(aliases.hasMoreElements()) {
         String alias = aliases.nextElement();
         if (keyStore.isKeyEntry(alias)) {
-          keys.add(new KeychainPrivateKey(keyStore, alias));
+          if (keyStore.getCertificate(alias) != null) {
+            keys.add(new KeychainPrivateKey(keyStore, alias));
+          }
         }
       }
       return keys;
