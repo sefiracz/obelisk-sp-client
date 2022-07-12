@@ -91,7 +91,11 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
     StageHelper.getInstance().setTitle(appConfig.getApplicationName(), titleKey);
 
     UserPreferences prefs = new UserPreferences(appConfig);
-
+    boolean cacheEnabled = prefs.getCacheDuration() != null && prefs.getCacheDuration() > 0;
+    if (cacheEnabled) {
+      storeInputCheckbox.selectedProperty().setValue(true);
+      storeInputCheckbox.setSelected(true);
+    }
     Integer cacheDuration = prefs.getCacheDuration();
     boolean cacheDisabled = cacheDuration == null || cacheDuration == 0;
     if (cacheDuration == null) {

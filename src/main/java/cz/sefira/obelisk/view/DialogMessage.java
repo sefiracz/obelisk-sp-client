@@ -38,6 +38,7 @@ public class DialogMessage {
   private double width = 400;
   private double height = 150;
   private boolean doNotShowCheckbox = false;
+  private boolean doNotShowSelected = false;
   private boolean okButton = true;
   private long timerLength = 15; // 15s
   private String message;
@@ -120,11 +121,16 @@ public class DialogMessage {
     return doNotShowCheckbox;
   }
 
-  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, String dialogId) {
+  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, boolean doNotShowSelected, String dialogId) {
     if(dialogId == null || dialogId.isEmpty())
       throw new IllegalArgumentException("DialogID must have proper value");
     this.doNotShowCheckbox = doNotShowCheckbox;
+    this.doNotShowSelected = doNotShowSelected;
     this.dialogId = dialogId;
+  }
+
+  public boolean isDoNotShowSelected() {
+    return doNotShowSelected;
   }
 
   public boolean isShowOkButton() {

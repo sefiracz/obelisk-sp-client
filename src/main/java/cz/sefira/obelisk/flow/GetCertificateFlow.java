@@ -135,7 +135,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
                       // certificate obtained dialog
                       DialogMessage certFlowFinished = new DialogMessage("certificates.flow.finished",
                           DialogMessage.Level.SUCCESS, 400, 165);
-                      certFlowFinished.setShowDoNotShowCheckbox(true, "cert-flow-finished");
+                      certFlowFinished.setShowDoNotShowCheckbox(true, false, "cert-flow-finished");
                       this.getOperationFactory().getMessageDialog(api, certFlowFinished, false);
 
                       return new Execution<GetCertificateResponse>(resp);
