@@ -73,7 +73,8 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
 			if(certificate.equals(key.getCertificate().getCertificate())) {
-				if (key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+				if (key instanceof KSPrivateKeyEntry &&
+						(keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
 					return key;
 				}
 				if (key instanceof EmptyKeyEntry && ((EmptyKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {

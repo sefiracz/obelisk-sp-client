@@ -82,8 +82,8 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
-			if(certificate.equals(key.getCertificate().getCertificate()) &&
-					key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+			if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KSPrivateKeyEntry &&
+					(keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
 				return key;
 			}
 		}

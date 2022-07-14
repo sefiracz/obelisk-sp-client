@@ -84,7 +84,8 @@ public class AutoSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
   public OperationResult<DSSPrivateKeyEntry> perform() {
     DSSPrivateKeyEntry key;
     try (BusyIndicator busyIndicator = new BusyIndicator()){
-      if((this.productAdapter != null) && (this.product != null) && (this.keyAlias != null) &&
+      // keyAlias might be null if certificate is given via certLocation without knowledge of key alias
+      if((this.productAdapter != null) && (this.product != null) && /*(this.keyAlias != null) &&*/
           (this.certificate != null)) {
         key = this.productAdapter.getKey(this.token, this.keyAlias, this.certificate);
       } else {

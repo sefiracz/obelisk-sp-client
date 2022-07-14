@@ -77,8 +77,8 @@ public class KeychainProductAdapter implements ProductAdapter {
   public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
     List<DSSPrivateKeyEntry> keys = token.getKeys();
     for (DSSPrivateKeyEntry key : keys) {
-      if(certificate.equals(key.getCertificate().getCertificate()) &&
-          key instanceof KeychainPrivateKey && ((KeychainPrivateKey) key).getAlias().equalsIgnoreCase(keyAlias)) {
+      if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KeychainPrivateKey &&
+          (keyAlias == null || ((KeychainPrivateKey) key).getAlias().equalsIgnoreCase(keyAlias))) {
         return key;
       }
     }
