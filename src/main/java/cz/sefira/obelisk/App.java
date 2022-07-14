@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -80,8 +81,21 @@ public class App extends Application {
     api.detectAll();
 
     logger.info("Start Jetty");
-
-		server = startHttpServer(api);
+		try {
+			server = startHttpServer(api);
+		} catch (Exception e) {
+			if (e instanceof IOException) {
+				for (Integer port : api.getAppConfig().getBindingPortsHttps()) {
+					if (e.getMessage().contains("" + port)) {
+						logger.error(e.getMessage(), e);
+						StandaloneDialog.showDialog(null, new DialogMessage("preloader.error.already.running.or.port.used",
+								DialogMessage.Level.ERROR, new String[] {getConfig().getApplicationName(), ""+port}, 450, 210), true);
+						System.exit(1);
+					}
+				}
+			}
+			throw e;
+		}
 
 		if(api.getAppConfig().isEnableSystrayMenu()) {
 			systrayMenu = new SystrayMenu(operationFactory, api, new UserPreferences(getConfig()));
