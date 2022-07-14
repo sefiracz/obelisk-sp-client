@@ -64,8 +64,10 @@ public class RegisteredProducts {
 
   public synchronized void remove(String certificateId, AbstractProduct keystore) {
     List<AbstractProduct> list = map.get(certificateId);
-    list.remove(keystore);
-    map.put(certificateId, list);
+    if (list != null) {
+      list.remove(keystore);
+      map.put(certificateId, list);
+    }
   }
 
   public List<AbstractProduct> get(String certificateId) {

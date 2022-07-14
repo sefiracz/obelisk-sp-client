@@ -86,10 +86,11 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
         for(DSSPrivateKeyEntry key : keys) {
           if(certificate.equals(key.getCertificate().getCertificate())) {
             if (key instanceof IAIKPrivateKeyEntry &&
-                ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias)) {
+                (keyAlias == null || ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias))) {
               return key;
             }
-            if (key instanceof KSPrivateKeyEntry && ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {
+            if (key instanceof KSPrivateKeyEntry &&
+                (keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
               return key;
             }
           }

@@ -28,6 +28,7 @@ import eu.europa.esig.dss.x509.CertificateToken;
 public class GetTokenRequest extends NexuRequest {
 
   private CertificateToken certificate;
+  private CertificateLocation certificateLocation;
 
   public CertificateToken getCertificate() {
     return certificate;
@@ -37,4 +38,11 @@ public class GetTokenRequest extends NexuRequest {
     this.certificate = certificate;
   }
 
+  public CertificateLocation getCertificateLocation() {
+    return certificateLocation;
+  }
+
+  public void setCertificateLocation(CertificateLocation certificateLocation) {
+    this.certificateLocation = certificateLocation;
+  }
 }
