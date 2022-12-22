@@ -105,8 +105,9 @@ public abstract class AbstractProduct implements Product {
 
     AbstractProduct that = (AbstractProduct) o;
 
-    if (!getCertificateId().equals(that.getCertificateId())) return false;
-    return (getKeyAlias() == null && that.getKeyAlias() == null) || (getKeyAlias().equals(that.getKeyAlias()));
+    if (getCertificateId() == null || !getCertificateId().equalsIgnoreCase(that.getCertificateId())) return false;
+    return (getCertificate() == null && that.getCertificate() == null) ||
+        (getCertificate().equals(that.getCertificate()));
   }
 
   @Override

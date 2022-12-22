@@ -29,7 +29,6 @@ public class StageHelperTest {
 		PowerMockito.when(rb.getString(KEY_DOES_NOT_EXISTS))
 				.thenThrow(new MissingResourceException("dummy1", "dummy2", "dummy3"));
 		sh = PowerMockito.spy(StageHelper.getInstance());
-		when(sh.getBundle()).thenReturn(rb);
 	}
 
 	@Test

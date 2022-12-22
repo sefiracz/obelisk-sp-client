@@ -28,6 +28,7 @@ import cz.sefira.obelisk.flow.exceptions.UnsupportedKeystoreTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
@@ -79,11 +80,14 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	}
 
 	@Override
-	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
+	public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, @Nullable String keyAlias, X509Certificate certificate) {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
-			if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KSPrivateKeyEntry &&
-					(keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
+			if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KSPrivateKeyEntry) {
+				String alias = ((KSPrivateKeyEntry) key).getAlias();
+				if (keyAlias != null && !alias.equalsIgnoreCase(keyAlias)) {
+					logger.warn("Aliases do not equal: " + alias + " != " + keyAlias);
+				}
 				return key;
 			}
 		}
@@ -97,7 +101,7 @@ public class KeystoreProductAdapter implements ProductAdapter {
 			return UIOperation
           .getFutureOperationInvocation(UIOperation.class, "/fxml/configure-keystore.fxml", api.getAppConfig().getApplicationName());
 		} else {
-			return new NoOpFutureOperationInvocation<Product>(product);
+			return new NoOpFutureOperationInvocation<>(product);
 		}
 	}
 

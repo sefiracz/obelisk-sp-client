@@ -33,6 +33,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.Region;
 import javafx.util.Duration;
 import org.identityconnectors.common.security.GuardedString;
 
@@ -41,6 +42,9 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public class Pkcs11ReauthInputController extends AbstractUIOperationController<GuardedString> implements Initializable {
+
+  @FXML
+  private Region icon;
 
   @FXML
   private Button ok;
@@ -110,6 +114,9 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
     if (cacheDisabled) {
       tooltip.setText(resources.getString("reauth.tooltip.disabled"));
     }
+    icon.getStyleClass().add("icon-qpin");
+    icon.setPrefSize(50, 40);
+
     checkboxPane.setTooltip(tooltip);
   }
 }

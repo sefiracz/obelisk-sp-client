@@ -16,6 +16,7 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.UserPreferences;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.EnvironmentInfo;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.generic.SessionManager;
@@ -55,6 +56,9 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	private CheckBox onStartup;
 
 	@FXML
+	private CheckBox firefoxSupport;
+
+	@FXML
 	private ComboBox<AppLanguage> language;
 
 	@FXML
@@ -76,13 +80,14 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 
 	private int duration = 0;
 
-	private final AppLanguage cz = new AppLanguage("Čeština", new Locale("cs", "CZ"));
-	private final AppLanguage en = new AppLanguage("English", Locale.ENGLISH);
-
 	private static final boolean isWindows;
+	private static final boolean isMac;
+	private static final boolean isLinux;
 
 	static {
 		isWindows = EnvironmentInfo.buildFromSystemProperties(System.getProperties()).getOs().equals(OS.WINDOWS);
+		isMac = EnvironmentInfo.buildFromSystemProperties(System.getProperties()).getOs().equals(OS.MACOSX);
+		isLinux = EnvironmentInfo.buildFromSystemProperties(System.getProperties()).getOs().equals(OS.LINUX);
 	}
 
 	@Override
@@ -92,8 +97,8 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		ok.disableProperty().bind(readOnly);
 		reset.disableProperty().bind(readOnly);
 
-		language.getItems().add(cz);
-		language.getItems().add(en);
+		language.getItems().add(AppConfig.CZ);
+		language.getItems().add(AppConfig.EN);
 
 		minus.setOnAction((e) -> minusDuration());
 		minus.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::minusDuration,
@@ -110,6 +115,7 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 			userPreferences.setLanguage(language.isDisabled() ? null :
 					language.getSelectionModel().getSelectedItem().getLocale().getLanguage());
 			userPreferences.setAutoStart(onStartup.selectedProperty().getValue());
+			userPreferences.setFirefoxSupport(firefoxSupport.selectedProperty().getValue());
 			if (duration == 0 || !Integer.valueOf(duration).equals(userPreferences.getCacheDuration())) {
 				SessionManager.getManager().destroySecret();
 			}
@@ -131,15 +137,22 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		this.api = (NexuAPI) params[0];
 		this.userPreferences = (UserPreferences) params[1];
 		this.readOnly.set((boolean) params[2]);
-		if(Locale.getDefault().getLanguage().equals(cz.getLocale().getLanguage())) {
-			language.getSelectionModel().select(cz);
+		if(Locale.getDefault().getLanguage().equals(AppConfig.CZ.getLocale().getLanguage())) {
+			language.getSelectionModel().select(AppConfig.CZ);
 		} else {
-			language.getSelectionModel().select(en);
+			language.getSelectionModel().select(AppConfig.EN);
 		}
+		// auto start-up only for Windows, others can do it via system
 		if(isWindows) {
 			onStartup.selectedProperty().setValue(userPreferences.getAutoStart());
 		} else {
 			gridPane.getChildren().removeIf(node -> node.getId() != null && node.getId().startsWith("startUp"));
+		}
+		// firefox is always enabled for Linux, no need for preference option
+		if(isLinux) {
+			gridPane.getChildren().removeIf(node -> node.getId() != null && node.getId().startsWith("firefoxSupport"));
+		} else {
+			firefoxSupport.selectedProperty().setValue(userPreferences.getFirefoxSupport());
 		}
 		this.duration = userPreferences.getCacheDuration();
 		setTextFieldDuration(true);

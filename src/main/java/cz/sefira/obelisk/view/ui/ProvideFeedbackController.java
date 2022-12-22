@@ -71,8 +71,8 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 
           // environment info
           body.append(resources.getString("feedback.mail.body.envInfo")).append("\n");
-          body.append(EnvironmentInfo.buildDiagnosticEnvInfo());
-          body.append("\n");
+          body.append("App version: ").append(getApi().getAppConfig().getApplicationVersion()).append("\n");
+          body.append(EnvironmentInfo.buildDiagnosticEnvInfo()).append("\n");
 
           // initialized pkcs11 modules
           body.append(resources.getString("feedback.mail.body.pkcs11.modules")).append("\n");

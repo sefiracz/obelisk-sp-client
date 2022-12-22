@@ -45,7 +45,7 @@ public class SessionManager {
           "password".toCharArray());
       trustCert = ks.getCertificate("client-session");
     } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
-      logger.error("Unable to access session truststore and certificate: "+e.getMessage(), e);
+      logger.error("Unable to access session truststore and certificate \"client-session\": "+e.getMessage(), e);
     }
   }
 

@@ -26,6 +26,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,9 @@ import java.util.ResourceBundle;
 public class PasswordInputController extends AbstractUIOperationController<char[]> implements Initializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PasswordInputController.class.getName());
+
+	@FXML
+	private Region icon;
 
 	@FXML
 	private Button ok;
@@ -90,6 +95,9 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 					logger.error(e.getMessage(), e);
 				}
 			}
+			icon.getStyleClass().add("icon-lock");
+			icon.setPrefSize(40, 50);
+
       this.passwordPrompt.setText(MessageFormat.format(resources.getString(promptKey), label));
     } else {
 			this.passwordPrompt.setText(resources.getString(titleKey));

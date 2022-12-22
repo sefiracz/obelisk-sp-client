@@ -23,20 +23,33 @@ package cz.sefira.obelisk;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.EnvironmentInfo;
+import cz.sefira.obelisk.api.OS;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.api.NexuAPI;
 import cz.sefira.obelisk.api.flow.OperationFactory;
+import cz.sefira.obelisk.view.x509.CertificateInfoDialog;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class Utils {
 
@@ -67,6 +80,12 @@ public class Utils {
     return sw.toString();
   }
 
+  public static X509Certificate getCertificateFromBase64(String base64certificate) throws CertificateException {
+    byte[] cert = Base64.decodeBase64(base64certificate);
+    CertificateFactory factory = CertificateFactory.getInstance("X509");
+    return  (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(cert));
+  }
+
   /**
    * Checks if the exception is pertaining to wrong user password input
    * @param e Throw exception this method analyzes
@@ -94,27 +113,14 @@ public class Utils {
     return true;
   }
 
-  public static void openCertificate(String certificate) {
-    if (Desktop.isDesktopSupported()) {
-      try {
-        // TODO - macOS cant just open certificate? Can it even write to /tmp?
-        final File tmpFile = File.createTempFile("certificate", ".crt");
-        tmpFile.deleteOnExit();
-        final FileWriter writer = new FileWriter(tmpFile);
-        writer.write(certificate);
-        writer.close();
-        new Thread(() -> {
-          try {
-            Desktop.getDesktop().open(tmpFile);
-          } catch (final IOException e) {
-            logger.error(e.getMessage(), e);
-          }
-        }).start();
-      } catch (final Exception e) {
-        logger.error(e.getMessage(), e);
-      }
-    } else {
-      logger.warn("Desktop not supported");
+  public static void openPEMCertificate(String pemCertificate) {
+    try {
+      Certificate certificate = CertificateFactory.getInstance("X509").generateCertificate(
+          new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
+      SwingUtilities.invokeLater(() -> new CertificateInfoDialog(certificate));
+    }
+    catch (CertificateException e) {
+      logger.error(e.getMessage(), e);
     }
   }
 
@@ -130,6 +136,43 @@ public class Utils {
       certificate = certificate + end;
     }
     return certificate;
+  }
+
+  public static String createKeyUsageString(final X509Certificate certificate, final ResourceBundle resources) {
+    final boolean[] keyUsages = certificate.getKeyUsage();
+    if (keyUsages == null) {
+      return "";
+    }
+    final List<String> keyUsageList = new ArrayList<>();
+    if (keyUsages[0]) {
+      keyUsageList.add(resources.getString("keyUsage.digitalSignature"));
+    }
+    if (keyUsages[1]) {
+      keyUsageList.add(resources.getString("keyUsage.nonRepudiation"));
+    }
+    if (keyUsages[2]) {
+      keyUsageList.add(resources.getString("keyUsage.keyEncipherment"));
+    }
+    if (keyUsages[3]) {
+      keyUsageList.add(resources.getString("keyUsage.dataEncipherment"));
+    }
+    if (keyUsages[4]) {
+      keyUsageList.add(resources.getString("keyUsage.keyAgreement"));
+    }
+    if (keyUsages[5]) {
+      keyUsageList.add(resources.getString("keyUsage.keyCertSign"));
+    }
+    if (keyUsages[6]) {
+      keyUsageList.add(resources.getString("keyUsage.crlSign"));
+    }
+    if (keyUsages[7]) {
+      keyUsageList.add(resources.getString("keyUsage.encipherOnly"));
+    }
+    if (keyUsages[8]) {
+      keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
+    }
+    // comma separated list
+    return String.join(", ", keyUsageList);
   }
 
 }

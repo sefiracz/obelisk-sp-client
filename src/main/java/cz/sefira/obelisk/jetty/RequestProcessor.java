@@ -157,10 +157,19 @@ public class RequestProcessor extends AbstractHandler {
 
 	private void httpPlugin(String target, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		int index = target.indexOf("/", 1);
+		if (index == -1) {
+			clientInfo(response);
+			return;
+		}
 		String pluginId = target.substring(target.charAt(0) == '/' ? 1 : 0, index);
 
 		logger.info("Process request " + target + " pluginId: " + pluginId);
 		HttpPlugin httpPlugin = api.getHttpPlugin(pluginId);
+		if (httpPlugin == null) {
+			logger.warn("No plugin found");
+			clientInfo(response);
+			return;
+		}
 
 		HttpResponse resp = httpPlugin.process(api, new DelegatedHttpServerRequest(request, '/' + pluginId));
 		if (resp == null || resp.getContent() == null) {

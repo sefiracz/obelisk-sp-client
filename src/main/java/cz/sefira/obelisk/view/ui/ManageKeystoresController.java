@@ -31,20 +31,22 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -81,6 +83,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	private TableColumn<AbstractProduct, String> keystoreTypeTableColumn;
 
 	@FXML
+	private TableColumn<AbstractProduct, String> keystoreNotAfterTableColumn;
+
+	@FXML
 	private Label keystoreLabel;
 
 	private final ObservableList<AbstractProduct> observableKeystores;
@@ -100,11 +105,33 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		// double-click show certificate
-		keystoresTable.setRowFactory( tv -> {
-			TableRow<AbstractProduct> row = new TableRow<>();
+		keystoresTable.setRowFactory(tv -> {
+
+		 TableRow<AbstractProduct> row = new TableRow<AbstractProduct>() {
+
+				@Override
+				protected void updateItem(AbstractProduct item, boolean empty) {
+					super.updateItem(item, empty);
+					try {
+						if (item != null) {
+							this.getStyleClass().clear();
+							this.getStyleClass().addAll("cell", "indexed-cell", "table-row-cell");
+							String certBase64 = item.getCertificate();
+							try {
+								Utils.getCertificateFromBase64(certBase64).checkValidity();
+							} catch (CertificateExpiredException | CertificateNotYetValidException e) {
+								this.getStyleClass().add("expired-row");
+							}
+						}
+					} catch (CertificateException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+		 };
+
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-					Utils.openCertificate(Utils.wrapPEMCertificate(row.getItem().getCertificate()));
+					Utils.openPEMCertificate(Utils.wrapPEMCertificate(row.getItem().getCertificate()));
 				}
 			});
 			return row;
@@ -116,9 +143,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
       String cn = "";
       try {
         String certBase64 = param.getValue().getCertificate();
-        byte[] cert = Base64.decodeBase64(certBase64);
-        CertificateFactory factory = CertificateFactory.getInstance("X509");
-        X509Certificate x509Certificate = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(cert));
+				X509Certificate x509Certificate = Utils.getCertificateFromBase64(certBase64);
         cn = DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, x509Certificate.getSubjectX500Principal());
       } catch (CertificateException e) {
         logger.error(e.getMessage(), e);
@@ -129,14 +154,30 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 			String cn = "";
 			try {
 				String certBase64 = param.getValue().getCertificate();
-				byte[] cert = Base64.decodeBase64(certBase64);
-				CertificateFactory factory = CertificateFactory.getInstance("X509");
-				X509Certificate x509Certificate = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(cert));
+				X509Certificate x509Certificate = Utils.getCertificateFromBase64(certBase64);
 				cn = DSSASN1Utils.extractAttributeFromX500Principal(BCStyle.CN, x509Certificate.getIssuerX500Principal());
 			} catch (CertificateException e) {
 				logger.error(e.getMessage(), e);
 			}
 			return new ReadOnlyStringWrapper(cn);
+		});
+		keystoreNotAfterTableColumn.setCellValueFactory((param) -> {
+			String validUntil = "";
+			try {
+				String certBase64 = param.getValue().getCertificate();
+				X509Certificate x509Certificate = Utils.getCertificateFromBase64(certBase64);
+				Date notAfter = x509Certificate.getNotAfter();
+				SimpleDateFormat sdf;
+				if(Locale.getDefault().getLanguage().equals(AppConfig.CZ.getLocale().getLanguage())) {
+					sdf = new SimpleDateFormat("dd. MM. yyyy");
+				} else {
+					sdf = new SimpleDateFormat("dd/MM/yyyy");
+				}
+				validUntil = sdf.format(notAfter);
+			} catch (CertificateException e) {
+				logger.error(e.getMessage(), e);
+			}
+			return new ReadOnlyStringWrapper(validUntil);
 		});
     // keystore type
 		keystoreTypeTableColumn
@@ -164,7 +205,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoresTable.setItems(observableKeystores);
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
-		certificate.setOnAction(actionEvent -> Utils.openCertificate(
+		certificate.setOnAction(actionEvent -> Utils.openPEMCertificate(
 		        Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());

@@ -16,10 +16,6 @@ public class StageHelper {
 
 	private String title;
 
-	private ResourceBundle bundle;
-
-	private static final String BUNDLE_NAME = "bundles/nexu";
-
 	private StageHelper() {
 	}
 
@@ -28,7 +24,6 @@ public class StageHelper {
 			synchronized (StageHelper.class) {
 				if (instance == null) {
 					instance = new StageHelper();
-					instance.setBundle(ResourceBundle.getBundle(BUNDLE_NAME));
 				}
 			}
 		}
@@ -46,7 +41,7 @@ public class StageHelper {
 		}
 		String translatedTitle = "";
 		try {
-			translatedTitle = getBundle().getString(resourceBundleKey);
+			translatedTitle = ResourceBundle.getBundle("bundles/nexu").getString(resourceBundleKey);
 		} catch (MissingResourceException mre) {
 			LOGGER.warn("Resource bundle key \"{}\" is missing.", resourceBundleKey);
 		}catch(Exception e) {
@@ -63,11 +58,4 @@ public class StageHelper {
 		}
 	}
 
-	public ResourceBundle getBundle() {
-		return bundle;
-	}
-
-	public void setBundle(ResourceBundle bundle) {
-		this.bundle = bundle;
-	}
 }

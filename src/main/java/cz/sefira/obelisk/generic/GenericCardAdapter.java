@@ -21,6 +21,8 @@ import eu.europa.esig.dss.token.*;
 import cz.sefira.obelisk.pkcs11.IAIKPrivateKeyEntry;
 import cz.sefira.obelisk.pkcs11.IAIKPkcs11SignatureTokenAdapter;
 import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.CardException;
 import java.io.File;
@@ -29,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GenericCardAdapter extends AbstractCardProductAdapter {
+
+    private static final Logger logger = LoggerFactory.getLogger(GenericCardAdapter.class.getName());
 
     private final SCInfo info;
     private final NexuAPI api;
@@ -85,12 +89,18 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
         List<DSSPrivateKeyEntry> keys = token.getKeys();
         for(DSSPrivateKeyEntry key : keys) {
           if(certificate.equals(key.getCertificate().getCertificate())) {
-            if (key instanceof IAIKPrivateKeyEntry &&
-                (keyAlias == null || ((IAIKPrivateKeyEntry) key).getKeyLabel().equalsIgnoreCase(keyAlias))) {
+            if (key instanceof IAIKPrivateKeyEntry) {
+              String label = ((IAIKPrivateKeyEntry) key).getKeyLabel();
+              if (keyAlias != null && !label.equalsIgnoreCase(keyAlias)) {
+                logger.warn("Aliases do not equal: "+label+ " != "+keyAlias);
+              }
               return key;
             }
-            if (key instanceof KSPrivateKeyEntry &&
-                (keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
+            if (key instanceof KSPrivateKeyEntry) {
+              String alias = ((KSPrivateKeyEntry) key).getAlias();
+              if (keyAlias != null && !alias.equalsIgnoreCase(keyAlias)) {
+                logger.warn("Aliases do not equal: " + alias + " != " + keyAlias);
+              }
               return key;
             }
           }

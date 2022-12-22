@@ -17,6 +17,7 @@ package cz.sefira.obelisk.api;
 import cz.sefira.obelisk.EntityDatabase;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.plugin.HttpPlugin;
+import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.pkcs11.PKCS11Manager;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
@@ -70,11 +71,15 @@ public interface NexuAPI {
 
   Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request);
 
+	Execution<NewVersionResponse> newVersion(NewVersionRequest request);
+
 	// Utils API
 
 	AppConfig getAppConfig();
 
 	HttpPlugin getHttpPlugin(String pluginId);
+
+	VersionPlugin getVersionPlugin();
 
 	String getLabel(Product p);
 

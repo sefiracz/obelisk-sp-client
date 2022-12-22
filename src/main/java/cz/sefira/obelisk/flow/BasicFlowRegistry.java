@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class BasicFlowRegistry implements FlowRegistry {
 
-	private static Logger logger = LoggerFactory.getLogger(BasicFlowRegistry.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(BasicFlowRegistry.class.getName());
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -34,7 +34,9 @@ public class BasicFlowRegistry implements FlowRegistry {
 		case SIGNATURE_FLOW:
 			return new SignatureFlow(display, api);
     case SMARTCARD_LIST_FLOW:
-        return new SmartcardsInfoFlow(display, api);
+      return new SmartcardsInfoFlow(display, api);
+		case NEW_VERSION_FLOW:
+			return new NewVersionFlow(display, api);
 		default:
 			logger.warn("Unknown flow code " + code);
 			throw new NullPointerException("Flow not recognized/not implemented in this version.");

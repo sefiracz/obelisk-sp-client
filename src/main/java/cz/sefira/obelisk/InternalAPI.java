@@ -19,6 +19,7 @@ import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.plugin.HttpPlugin;
+import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.cache.TokenCache;
 import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.FlowRegistry;
@@ -257,17 +258,29 @@ public class InternalAPI implements NexuAPI {
 		return executeRequest(flow, request);
 	}
 
-  @Override
-  public Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request) {
-    Flow<SmartcardListRequest, SmartcardListResponse> flow =
-            flowRegistry.getFlow(FlowRegistry.SMARTCARD_LIST_FLOW, display, this);
-    flow.setOperationFactory(operationFactory);
-    return executeRequest(flow, request);
+	@Override
+	public Execution<SmartcardListResponse> smartcardList(SmartcardListRequest request) {
+		Flow<SmartcardListRequest, SmartcardListResponse> flow =
+				flowRegistry.getFlow(FlowRegistry.SMARTCARD_LIST_FLOW, display, this);
+		flow.setOperationFactory(operationFactory);
+		return executeRequest(flow, request);
+	}
+
+	@Override
+	public Execution<NewVersionResponse> newVersion(NewVersionRequest request) {
+		Flow<NewVersionRequest, NewVersionResponse> flow =
+				flowRegistry.getFlow(FlowRegistry.NEW_VERSION_FLOW, display, this);
+		flow.setOperationFactory(operationFactory);
+		return executeRequest(flow, request);
 	}
 
 	@Override
 	public HttpPlugin getHttpPlugin(String context) {
 		return httpPlugins.get(context);
+	}
+
+	public VersionPlugin getVersionPlugin() {
+		return null;
 	}
 
 	@Override

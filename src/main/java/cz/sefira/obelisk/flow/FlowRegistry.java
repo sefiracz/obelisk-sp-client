@@ -26,6 +26,8 @@ public interface FlowRegistry {
 	static final String TOKEN_FLOW = "token";
 
 	static final String SMARTCARD_LIST_FLOW = "smartcardList";
+
+	static final String NEW_VERSION_FLOW = "newVersion";
 	
 	<I, O> Flow<I, O> getFlow(String code, UIDisplay display, NexuAPI api);
 

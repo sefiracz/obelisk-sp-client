@@ -18,6 +18,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.BasicFlowRegistry;
 import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.FlowRegistry;
+import cz.sefira.obelisk.generic.NewVersionDatabase;
 import cz.sefira.obelisk.generic.SCDatabase;
 import cz.sefira.obelisk.generic.SessionManager;
 import javafx.application.Application;
@@ -110,6 +111,7 @@ public class App extends Application {
 		File nexuHome = getConfig().getNexuHome();
 		SCDatabase smartcardDB;
 		SmartcardInfoDatabase scInfoDB;
+		NewVersionDatabase newVersionDatabase;
 		if (nexuHome != null) {
 			File cards = new File(nexuHome, "database-smartcard.xml");
 			logger.info("Load smartcard database from " + cards.getAbsolutePath());
@@ -117,9 +119,12 @@ public class App extends Application {
 			File infos = new File(nexuHome, "database-smartcard-info.xml");
 			logger.info("Load smartcard connections database from " + infos.getAbsolutePath());
 			scInfoDB = EntityDatabaseLoader.load(SmartcardInfoDatabase.class, infos);
+			File newVersion = new File(nexuHome, "new-version.xml");
+			newVersionDatabase = EntityDatabaseLoader.load(NewVersionDatabase.class, newVersion);
 		} else {
 			smartcardDB = new SCDatabase();
 			scInfoDB = new SmartcardInfoDatabase();
+			newVersionDatabase = new NewVersionDatabase();
 		}
 		AppConfigurer.setLocalePreferences(new UserPreferences(getConfig()));
 		AppConfigurer.applyUserPreferences(new UserPreferences(getConfig()));

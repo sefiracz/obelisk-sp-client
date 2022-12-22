@@ -42,6 +42,10 @@ public class RestHttpPlugin implements HttpPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(RestHttpPlugin.class.getName());
 
+	private final transient Object sync = new Object();
+	private volatile boolean lock = false;
+	private volatile String currentOp;
+
 	@Override
 	public List<InitializationMessage> init(String pluginId, NexuAPI api) {
 		return Collections.emptyList();
@@ -49,27 +53,40 @@ public class RestHttpPlugin implements HttpPlugin {
 
 	@Override
 	public HttpResponse process(NexuAPI api, HttpRequest req) throws Exception {
-
 		final String target = req.getTarget();
 		logger.info("PathInfo " + target);
-
-		final String payload = IOUtils.toString(req.getInputStream(), StandardCharsets.UTF_8);
-		logger.info("Payload '" + payload + "'");
-
-		switch(target) {
-		case "/sign":
-			return signRequest(api, req, payload);
-		case "/getToken":
-		  return getToken(api, req, payload);
-		case "/getCertificate":
-			return getCertificate(api, req, payload);
-		case "/smartcardList":
-			return smartcardList(api, req, payload);
-		default:
-			throw new RuntimeException("Target not recognized " + target);
+		synchronized (sync) {
+			if (!lock) {
+				lock = true;
+				currentOp = target;
+			} else {
+				logger.warn("Conflict with operation /" + currentOp);
+				return new HttpResponse("{\"success\":false," +
+						"\"error\":\"operation.conflict\"," +
+						"\"errorMessage\":\""+currentOp+"\"}", null, HttpStatus.CONFLICT);
+			}
+		}
+		try {
+			final String payload = IOUtils.toString(req.getInputStream(), StandardCharsets.UTF_8);
+			logger.debug("Payload '" + payload + "'");
+			switch (target) {
+				case "/sign":
+					return signRequest(api, req, payload);
+				case "/getToken":
+					return getToken(api, req, payload);
+				case "/getCertificate":
+					return getCertificate(api, req, payload);
+				case "/smartcardList":
+					return smartcardList(api, req, payload);
+//				case "/newVersion":
+//					return newVersion(api, req, payload);
+				default:
+					return new HttpResponse("", null, HttpStatus.NOT_FOUND);
+			}
+		} finally {
+			lock = false;
 		}
 	}
-
 
 	private HttpResponse signRequest(NexuAPI api, HttpRequest req, String payload) {
 		logger.info("Signature");
@@ -162,6 +179,20 @@ public class RestHttpPlugin implements HttpPlugin {
 			logger.info("Call API");
       final Execution<?> respObj = api.smartcardList(r);
       return toHttpResponse(respObj);
+		}
+	}
+
+	private HttpResponse newVersion(NexuAPI api, HttpRequest req, String payload) {
+		logger.info("New version notification");
+		final NewVersionRequest r = GsonHelper.fromJson(payload, NewVersionRequest.class);
+		r.setSessionValue(getSessionValue(req));
+		final HttpResponse invalidRequestHttpResponse = checkRequestValidity(api, r);
+		if(invalidRequestHttpResponse != null) {
+			return invalidRequestHttpResponse;
+		} else {
+			logger.info("Call API");
+			final Execution<?> respObj = api.newVersion(r);
+			return toHttpResponse(respObj);
 		}
 	}
 
