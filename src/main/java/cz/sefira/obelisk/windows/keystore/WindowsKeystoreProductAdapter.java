@@ -22,6 +22,8 @@ import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
 import cz.sefira.obelisk.generic.EmptyKeyEntry;
 import cz.sefira.obelisk.generic.SessionManager;
 import eu.europa.esig.dss.token.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ import java.util.Map;
  *
  */
 public class WindowsKeystoreProductAdapter implements ProductAdapter {
+
+	private static final Logger logger = LoggerFactory.getLogger(WindowsKeystoreProductAdapter.class.getName());
 
   private final NexuAPI api;
 
@@ -73,8 +77,11 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 		List<DSSPrivateKeyEntry> keys = token.getKeys();
 		for(DSSPrivateKeyEntry key : keys) {
 			if(certificate.equals(key.getCertificate().getCertificate())) {
-				if (key instanceof KSPrivateKeyEntry &&
-						(keyAlias == null || ((KSPrivateKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias))) {
+				if (key instanceof KSPrivateKeyEntry) {
+					String alias = ((KSPrivateKeyEntry) key).getAlias();
+					if (keyAlias != null && !alias.equalsIgnoreCase(keyAlias)) {
+						logger.warn("Aliases do not equal: " + alias + " != " + keyAlias);
+					}
 					return key;
 				}
 				if (key instanceof EmptyKeyEntry && ((EmptyKeyEntry) key).getAlias().equalsIgnoreCase(keyAlias)) {

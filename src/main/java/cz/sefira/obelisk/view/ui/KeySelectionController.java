@@ -101,7 +101,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         final Label lUsage = new Label();
                         lUsage.setText(MessageFormat.format(resources.getString("key.selection.keyusage"),
-                                KeySelectionController.this.createKeyUsageString(certificateToken, resources)));
+                               Utils.createKeyUsageString(certificateToken.getCertificate(), resources)));
 
                         final Label lValidity = new Label();
                         final SimpleDateFormat format = new SimpleDateFormat("dd MMMMMM yyyy");
@@ -112,7 +112,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         final Hyperlink link = new Hyperlink(resources.getString("key.selection.certificate.open"));
 
-                        link.setOnAction(actionEvent -> Utils.openCertificate(DSSUtils.convertToPEM(certificateToken)));
+                        link.setOnAction(actionEvent -> Utils.openPEMCertificate(DSSUtils.convertToPEM(certificateToken)));
 
                         final VBox vBox = new VBox(lSubject, lIssuer, lUsage, lValidity, link);
 
@@ -168,43 +168,6 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
     private ImageView fetchImage(final String imagePath) throws IOException {
         return new ImageView(new Image(this.getClass().getResource(imagePath).openStream()));
-    }
-
-    private String createKeyUsageString(final CertificateToken token, final ResourceBundle resources) {
-        final boolean[] keyUsages = token.getCertificate().getKeyUsage();
-        if (keyUsages == null) {
-            return "";
-        }
-        final List<String> keyUsageList = new ArrayList<>();
-        if (keyUsages[0]) {
-          keyUsageList.add(resources.getString("keyUsage.digitalSignature"));
-        }
-        if (keyUsages[1]) {
-          keyUsageList.add(resources.getString("keyUsage.nonRepudiation"));
-        }
-        if (keyUsages[2]) {
-          keyUsageList.add(resources.getString("keyUsage.keyEncipherment"));
-        }
-        if (keyUsages[3]) {
-          keyUsageList.add(resources.getString("keyUsage.dataEncipherment"));
-        }
-        if (keyUsages[4]) {
-          keyUsageList.add(resources.getString("keyUsage.keyAgreement"));
-        }
-        if (keyUsages[5]) {
-          keyUsageList.add(resources.getString("keyUsage.keyCertSign"));
-        }
-        if (keyUsages[6]) {
-          keyUsageList.add(resources.getString("keyUsage.crlSign"));
-        }
-        if (keyUsages[7]) {
-          keyUsageList.add(resources.getString("keyUsage.encipherOnly"));
-        }
-        if (keyUsages[8]) {
-          keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
-        }
-        // comma separated list
-        return String.join(", ", keyUsageList);
     }
 
     @Override

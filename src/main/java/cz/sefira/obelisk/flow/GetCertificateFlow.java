@@ -28,8 +28,6 @@ import eu.europa.esig.dss.DSSASN1Utils;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
 import eu.europa.esig.dss.x509.CertificateToken;
-import cz.sefira.obelisk.api.*;
-import cz.sefira.obelisk.flow.operation.*;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

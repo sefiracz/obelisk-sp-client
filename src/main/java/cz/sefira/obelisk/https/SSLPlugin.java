@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.https;
 
 import cz.sefira.obelisk.NexuException;
+import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.EnvironmentInfo;
 import cz.sefira.obelisk.api.NexuAPI;
 import cz.sefira.obelisk.api.plugin.InitializationMessage;
@@ -87,13 +88,15 @@ public class SSLPlugin implements NexuPlugin {
 		switch(envInfo.getOs()) {
 		case WINDOWS:
 			messages.addAll(installCaCertInWindowsStore(api, caCert, resourceBundle, baseResourceBundle)); // fallback
-//			if ((api.getAppConfig().getNexuHome().toPath().resolve("firefox")).toFile().exists()) {
+			if (firefoxEnabled(api)) {
 				messages.addAll(installCaCertInFirefoxForWindows(api, caCert, resourceBundle, baseResourceBundle));
-//			}
+			}
 			break;
 		case MACOSX:
 			messages.addAll(installCaCertInMacUserKeychain(api, caCert, resourceBundle, baseResourceBundle)); // fallback
-			messages.addAll(installCaCertInFirefoxForMac(api, caCert, resourceBundle, baseResourceBundle));
+			if (firefoxEnabled(api)) {
+				messages.addAll(installCaCertInFirefoxForMac(api, caCert, resourceBundle, baseResourceBundle));
+			}
 			break;
 		case LINUX:
 			messages.addAll(installCaCertInLinuxFFChromeStores(api, caCert, resourceBundle, baseResourceBundle));
@@ -431,6 +434,10 @@ public class SSLPlugin implements NexuPlugin {
 				LOGGER.error("IOException when deleting " + Paths.get(scriptPath) + ": " + e.getMessage(), e);
 			}
 		}
+	}
+
+	private boolean firefoxEnabled(NexuAPI api) {
+		return new UserPreferences(api.getAppConfig()).getFirefoxSupport();
 	}
 
 }

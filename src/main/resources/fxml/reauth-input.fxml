@@ -22,8 +22,14 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.SplitPane?>
-<BorderPane prefHeight="150.0" prefWidth="420.0" xmlns="http://javafx.com/javafx/8"
+<BorderPane prefHeight="150.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.Pkcs11ReauthInputController">
+
+  <left>
+    <VBox BorderPane.alignment="TOP_CENTER" styleClass="icon-password">
+      <Region fx:id="icon"/>
+    </VBox>
+  </left>
 
   <center>
     <VBox BorderPane.alignment="CENTER" styleClass="form-container">

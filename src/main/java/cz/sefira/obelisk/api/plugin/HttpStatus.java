@@ -16,11 +16,11 @@ package cz.sefira.obelisk.api.plugin;
 
 public enum HttpStatus {
 
-	OK(200), ERROR(500);
+	OK(200), NOT_FOUND(404), CONFLICT(409), ERROR(500);
 
-	private int httpCode;
+	private final int httpCode;
 
-	private HttpStatus(int httpCode) {
+	HttpStatus(int httpCode) {
 		this.httpCode = httpCode;
 	}
 

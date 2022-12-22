@@ -24,6 +24,7 @@ public class UserPreferences {
 
 	private static final String LANGUAGE = "sefira.obelisk.sp.language";
 	private static final String AUTO_START = "sefira.obelisk.sp.autoStart";
+	private static final String FIREFOX_SUPPORT = "sefira.obelisk.sp.firefoxSupport";
   private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
   private static final String CACHE_DURATION = "sefira.obelisk.sp.cacheDuration";
 
@@ -33,16 +34,20 @@ public class UserPreferences {
 	private String language;
 	private String hiddenDialogIds;
 	private Boolean autoStart;
+	private Boolean firefoxSupport;
 	private Integer cacheDuration;
 
 	public UserPreferences(final AppConfig appConfig) {
 	  this.appConfig = appConfig;
-		prefs = Preferences.userRoot().node(appConfig.getApplicationName().toLowerCase());
+		prefs = Preferences.userRoot().node(appConfig.getApplicationPathName().toLowerCase());
 
 		language = prefs.get(LANGUAGE, Locale.getDefault().getLanguage());
     hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
 		final String autoStartValue = prefs.get(AUTO_START, null);
     autoStart = autoStartValue != null ? Boolean.parseBoolean(autoStartValue) : null;
+
+    final String firefoxSupportValue = prefs.get(FIREFOX_SUPPORT, null);
+    firefoxSupport = firefoxSupportValue != null ? Boolean.parseBoolean(firefoxSupportValue) : null;
 
     try {
       final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
@@ -80,6 +85,15 @@ public class UserPreferences {
 		this.autoStart = autoStart;
 	}
 
+  public void setFirefoxSupport(Boolean firefoxSupport) {
+    if(firefoxSupport) {
+      prefs.put(FIREFOX_SUPPORT, "true");
+    } else {
+      prefs.put(FIREFOX_SUPPORT, "false");
+    }
+    this.firefoxSupport = firefoxSupport;
+  }
+
   public void setCacheDuration(Integer cacheDuration) {
     if(cacheDuration != null) {
       prefs.put(CACHE_DURATION, String.valueOf(cacheDuration));
@@ -105,6 +119,10 @@ public class UserPreferences {
 	public Boolean getAutoStart() {
 		return autoStart != null ? autoStart : true; // by default is ON
 	}
+
+  public Boolean getFirefoxSupport() {
+    return firefoxSupport != null ? firefoxSupport : false; // by default is OFF (Linux is always ON)
+  }
 
   public Integer getCacheDuration() {
     return cacheDuration;

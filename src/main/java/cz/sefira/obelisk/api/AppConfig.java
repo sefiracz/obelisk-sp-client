@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.api;
 
+import cz.sefira.obelisk.object.model.AppLanguage;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,11 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class AppConfig {
 
+    public static final AppLanguage CZ = new AppLanguage("Čeština", new Locale("cs", "CZ"));
+    public static final AppLanguage EN = new AppLanguage("English", Locale.ENGLISH);
+
     private static final String APPLICATION_NAME = "application_name";
+    private static final String APPLICATION_PATH_NAME = "application_path_name";
     private static final String SHOW_SPLASH_SCREEN = "show_splash_screen";
     private static final String DEBUG = "debug";
 
@@ -67,6 +72,7 @@ public class AppConfig {
     private File nexuHome;
 
     private String applicationName;
+    private String applicationPathName;
     private boolean showSplashScreen;
     private boolean debug;
 
@@ -149,11 +155,23 @@ public class AppConfig {
     }
 
     public String getApplicationName() {
-        return this.applicationName;
+        if (Locale.getDefault().getLanguage().equals(CZ.getLocale().getLanguage())) {
+            return this.applicationName + " klient";
+        } else {
+            return this.applicationName + " client";
+        }
     }
 
     public void setApplicationName(final String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public String getApplicationPathName() {
+        return applicationPathName;
+    }
+
+    public void setApplicationPathName(String applicationPathName) {
+        this.applicationPathName = applicationPathName;
     }
 
     public String getApplicationVersion() {
@@ -249,7 +267,7 @@ public class AppConfig {
 
         final ConfigurationManager configurationManager = this.getConfigurationManager();
         try {
-            this.nexuHome = configurationManager.manageConfiguration(this.getApplicationName());
+            this.nexuHome = configurationManager.manageConfiguration(this.getApplicationPathName());
         } catch (final IOException e) {
             logger.error("Error while managing Nexu config : {}", e.getMessage(), e);
             this.nexuHome = null;
@@ -260,8 +278,8 @@ public class AppConfig {
 
 
     public void loadFromProperties(final Properties props) {
-        this.setApplicationName(props.getProperty(APPLICATION_NAME, "Obelisk Signing Portal"));
-
+        this.setApplicationName(props.getProperty(APPLICATION_NAME, "Obelisk Signing Portal klient"));
+        this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "Obelisk Signing Portal"));
         final String bindingPortsStr = props.getProperty(BINDING_PORTS, "9795");
         if (isNotEmpty(bindingPortsStr)) {
             this.setBindingPorts(this.toListOfInt(bindingPortsStr));

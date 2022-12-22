@@ -137,12 +137,7 @@ public class PKIManager {
     }
 
 	public File getRootCertificate(final File nexuHome, final String applicationName) {
-		final String[] files = nexuHome.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.startsWith("localhost-") && name.endsWith(".crt");
-			}
-		});
+		final String[] files = nexuHome.list((dir, name) -> name.startsWith("localhost-") && name.endsWith(".crt"));
 		if(files.length > 0) {
 			Arrays.sort(files);
 			return new File(nexuHome, files[files.length - 1]);

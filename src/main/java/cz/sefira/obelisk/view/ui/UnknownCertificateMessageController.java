@@ -67,7 +67,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     this.resources = resources;
     this.ok.setOnAction(e -> signalEnd(null));
     this.cancel.setOnAction((e) -> this.signalUserCancel());
-    this.certificate.setOnAction(actionEvent -> Utils.openCertificate(DSSUtils.convertToPEM(certificateToken)));
+    this.certificate.setOnAction(actionEvent -> Utils.openPEMCertificate(DSSUtils.convertToPEM(certificateToken)));
   }
 
   @Override

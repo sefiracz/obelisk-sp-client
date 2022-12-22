@@ -31,6 +31,8 @@ import cz.sefira.obelisk.generic.SessionManager;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -41,6 +43,8 @@ import java.util.Map;
  * Product adapter for {@link MacOSKeychain}.
  */
 public class KeychainProductAdapter implements ProductAdapter {
+
+  private static final Logger logger = LoggerFactory.getLogger(KeychainProductAdapter.class.getName());
 
   private final NexuAPI api;
 
@@ -77,8 +81,11 @@ public class KeychainProductAdapter implements ProductAdapter {
   public DSSPrivateKeyEntry getKey(SignatureTokenConnection token, String keyAlias, X509Certificate certificate) {
     List<DSSPrivateKeyEntry> keys = token.getKeys();
     for (DSSPrivateKeyEntry key : keys) {
-      if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KeychainPrivateKey &&
-          (keyAlias == null || ((KeychainPrivateKey) key).getAlias().equalsIgnoreCase(keyAlias))) {
+      if(certificate.equals(key.getCertificate().getCertificate()) && key instanceof KeychainPrivateKey) {
+        String alias = ((KeychainPrivateKey) key).getAlias();
+        if (keyAlias != null && !alias.equalsIgnoreCase(keyAlias)) {
+          logger.warn("Aliases do not equal: " + alias + " != " + keyAlias);
+        }
         return key;
       }
     }
