@@ -24,7 +24,9 @@ package cz.sefira.obelisk.windows.keystore;
  */
 
 import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
+import cz.sefira.obelisk.flow.exceptions.GenericTokenRuntimeException;
 import cz.sefira.obelisk.generic.EmptyKeyEntry;
+import cz.sefira.obelisk.view.DialogMessage;
 import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.KSPrivateKeyEntry;
@@ -34,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -103,6 +104,11 @@ public class WindowsSignatureTokenAdapter implements SignatureTokenConnection {
     if (!(keyEntry instanceof KSPrivateKeyEntry)) {
       throw new PKCS11TokenException("Only KSPrivateKeyEntry are supported");
     }
+    // MSCAPI does not support SHA224 throw error
+    if (DigestAlgorithm.SHA224.equals(digestAlgorithm)) {
+      throw new GenericTokenRuntimeException("MSCAPI does not support "+digestAlgorithm.getName(),
+          "key.selection.keystore.unsupported.algorithm", DialogMessage.Level.ERROR, digestAlgorithm.getName());
+    }
 
     final EncryptionAlgorithm encryptionAlgorithm = keyEntry.getEncryptionAlgorithm();
     final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
@@ -110,13 +116,14 @@ public class WindowsSignatureTokenAdapter implements SignatureTokenConnection {
     logger.info("Signature algorithm : {}", javaSignatureAlgorithm);
 
     try {
-      final Signature signature = getSignatureInstance(javaSignatureAlgorithm);
-      signature.initSign(((KSPrivateKeyEntry) keyEntry).getPrivateKey());
-
-      if (mgf != null) {
+      Signature signature;
+      if (mgf != null && EncryptionAlgorithm.RSA.equals(signatureAlgorithm.getEncryptionAlgorithm())) {
+        signature = Signature.getInstance("RSASSA-PSS", "SunMSCAPI");
         signature.setParameter(createPSSParam(digestAlgorithm));
+      } else {
+        signature = Signature.getInstance(javaSignatureAlgorithm);
       }
-
+      signature.initSign(((KSPrivateKeyEntry) keyEntry).getPrivateKey());
       signature.update(toBeSigned.getBytes());
       final byte[] signatureValue = signature.sign();
       SignatureValue value = new SignatureValue();
@@ -127,10 +134,6 @@ public class WindowsSignatureTokenAdapter implements SignatureTokenConnection {
       throw new DSSException(e);
     }
 
-  }
-
-  private Signature getSignatureInstance(final String javaSignatureAlgorithm) throws NoSuchAlgorithmException {
-    return Signature.getInstance(javaSignatureAlgorithm);
   }
 
   private AlgorithmParameterSpec createPSSParam(DigestAlgorithm digestAlgo) {

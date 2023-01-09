@@ -24,8 +24,6 @@ import cz.sefira.obelisk.view.core.UIDisplay;
 import eu.europa.esig.dss.SignatureValue;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import cz.sefira.obelisk.api.*;
-import cz.sefira.obelisk.flow.operation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +75,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
 
               logger.info("Key " + key + " " + key.getCertificate().getCertificate().getSubjectDN() + " from " + key.getCertificate().getCertificate().getIssuerDN());
               final OperationResult<SignatureValue> signOperationResult = getOperationFactory().getOperation(
-                  SignOperation.class, token, api, req.getToBeSigned(), req.getDigestAlgorithm(), key).perform();
+                  SignOperation.class, token, api, req.getToBeSigned(), req.getDigestAlgorithm(), req.isUseRsaPss(), key).perform();
               if(signOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
                 final SignatureValue value = signOperationResult.getResult();
                 logger.info("Signature performed " + value);

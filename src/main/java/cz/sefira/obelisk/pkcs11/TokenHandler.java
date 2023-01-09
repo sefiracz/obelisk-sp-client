@@ -24,12 +24,11 @@ package cz.sefira.obelisk.pkcs11;
  */
 
 import cz.sefira.obelisk.api.ReauthCallback;
+import eu.europa.esig.dss.DigestAlgorithm;
+import eu.europa.esig.dss.SignatureAlgorithm;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import iaik.pkcs.pkcs11.TokenException;
-import iaik.pkcs.pkcs11.wrapper.CK_MECHANISM;
-import iaik.pkcs.pkcs11.wrapper.CK_TOKEN_INFO;
-import iaik.pkcs.pkcs11.wrapper.PKCS11Constants;
-import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
+import iaik.pkcs.pkcs11.wrapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,29 +140,16 @@ public class TokenHandler {
   /**
    * Sign data using a key with given label
    * @param keyLabel Used private key label
-   * @param x509Certificate X509 certificate that is public part of this private key
+   * @param signatureAlgorithm Used signature algorithm
    * @param data Digest data (wrapped in ASN1 structure) to be signed
    * @return Signature value
    * @throws PKCS11Exception
    */
-  public byte[] sign(String keyLabel, X509Certificate x509Certificate, byte[] data, ReauthCallback callback)
+  public byte[] sign(String keyLabel, SignatureAlgorithm signatureAlgorithm, byte[] data, ReauthCallback callback)
       throws PKCS11Exception {
     PKCS11PrivateKey key = pkcs11Module.getPrivateKey(sessionHandle, keyLabel);
-    CK_MECHANISM signatureMechanism;
-    String algorithm = x509Certificate != null ? x509Certificate.getPublicKey().getAlgorithm() : "RSA";
-    switch (algorithm) {
-      case "RSA":
-        signatureMechanism = getMechanism(PKCS11Constants.CKM_RSA_PKCS);
-        break;
-      case "EC":
-        signatureMechanism = getMechanism(PKCS11Constants.CKM_ECDSA);
-        break;
-      case "DSA":
-        signatureMechanism = getMechanism(PKCS11Constants.CKM_DSA);
-        break;
-      default:
-        throw new IllegalStateException("Unexpected key algorithm: "+algorithm);
-    }
+    // determine signature algorithm mechanism
+    CK_MECHANISM signatureMechanism = getMechanism(signatureAlgorithm);
     return pkcs11Module.signData(key, sessionHandle, signatureMechanism, data, callback);
   }
 
@@ -194,13 +180,107 @@ public class TokenHandler {
 
   /**
    * Creates CK_MECHANISM object
-   * @param mechanism PKCS11Constants mechanism constant
+   * @param signatureAlgorithm signature algorithm
    * @return CK_MECHANISM object
    */
-  private CK_MECHANISM getMechanism(long mechanism) {
+  private CK_MECHANISM getMechanism(SignatureAlgorithm signatureAlgorithm) {
+    DigestAlgorithm digestAlgorithm = signatureAlgorithm.getDigestAlgorithm();
     CK_MECHANISM signatureMechanism = new CK_MECHANISM();
-    signatureMechanism.mechanism = mechanism;
     signatureMechanism.pParameter = null;
+    switch (signatureAlgorithm.getEncryptionAlgorithm()) {
+      // RSA
+      case RSA:
+        if (signatureAlgorithm.getMaskGenerationFunction() == null) {
+          // RSA PKCS#1 v1.5
+          signatureMechanism.mechanism = PKCS11Constants.CKM_RSA_PKCS;
+        } else {
+          // RSA-PSS PKCS#1 v2.1
+          CK_RSA_PKCS_PSS_PARAMS pssParams = new CK_RSA_PKCS_PSS_PARAMS();
+          pssParams.sLen = digestAlgorithm.getSaltLength();
+          switch (digestAlgorithm) {
+            case SHA1:
+              signatureMechanism.mechanism = PKCS11Constants.CKM_SHA1_RSA_PKCS_PSS;
+              pssParams.hashAlg = PKCS11Constants.CKM_SHA_1;
+              pssParams.mgf = PKCS11Constants.CKG_MGF1_SHA1;
+              break;
+            case SHA224:
+            case SHA3_224:
+              signatureMechanism.mechanism = PKCS11Constants.CKM_SHA224_RSA_PKCS_PSS;
+              pssParams.hashAlg = PKCS11Constants.CKM_SHA224;
+              pssParams.mgf = PKCS11Constants.CKG_MGF1_SHA224;
+              break;
+            case SHA256:
+            case SHA3_256:
+              signatureMechanism.mechanism = PKCS11Constants.CKM_SHA256_RSA_PKCS_PSS;
+              pssParams.hashAlg = PKCS11Constants.CKM_SHA256;
+              pssParams.mgf = PKCS11Constants.CKG_MGF1_SHA256;
+              break;
+            case SHA384:
+            case SHA3_384:
+              signatureMechanism.mechanism = PKCS11Constants.CKM_SHA384_RSA_PKCS_PSS;
+              pssParams.hashAlg = PKCS11Constants.CKM_SHA384;
+              pssParams.mgf = PKCS11Constants.CKG_MGF1_SHA384;
+              break;
+            case SHA512:
+            case SHA3_512:
+              signatureMechanism.mechanism = PKCS11Constants.CKM_SHA512_RSA_PKCS_PSS;
+              pssParams.hashAlg = PKCS11Constants.CKM_SHA512;
+              pssParams.mgf = PKCS11Constants.CKG_MGF1_SHA512;
+              break;
+            default:
+              throw new IllegalStateException("Unexpected digest algorithm: "+digestAlgorithm.getName());
+          }
+          signatureMechanism.pParameter = pssParams;
+          break;
+        }
+        break;
+      // ECDSA
+      case ECDSA:
+        switch (digestAlgorithm) {
+          case SHA1:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_ECDSA_SHA1;
+            break;
+          case SHA224:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_ECDSA_SHA224;
+            break;
+          case SHA256:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_ECDSA_SHA256;
+            break;
+          case SHA384:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_ECDSA_SHA384;
+            break;
+          case SHA512:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_ECDSA_SHA512;
+            break;
+          default:
+            throw new IllegalStateException("Unexpected digest algorithm: "+digestAlgorithm.getName());
+        }
+        break;
+      // DSA
+      case DSA:
+        switch (digestAlgorithm) {
+          case SHA1:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_DSA_SHA1;
+            break;
+          case SHA224:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_DSA_SHA224;
+            break;
+          case SHA256:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_DSA_SHA256;
+            break;
+          case SHA384:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_DSA_SHA384;
+            break;
+          case SHA512:
+            signatureMechanism.mechanism = PKCS11Constants.CKM_DSA_SHA512;
+            break;
+          default:
+            throw new IllegalStateException("Unexpected digest algorithm: "+digestAlgorithm.getName());
+        }
+        break;
+      default:
+        throw new IllegalStateException("Unexpected key algorithm: "+signatureAlgorithm.getEncryptionAlgorithm());
+    }
     return signatureMechanism;
   }
 

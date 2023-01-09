@@ -22,15 +22,11 @@ import cz.sefira.obelisk.api.flow.Operation;
 import cz.sefira.obelisk.api.flow.OperationResult;
 import cz.sefira.obelisk.flow.exceptions.AbstractTokenRuntimeException;
 import cz.sefira.obelisk.view.BusyIndicator;
-import eu.europa.esig.dss.DigestAlgorithm;
-import eu.europa.esig.dss.SignatureValue;
-import eu.europa.esig.dss.ToBeSigned;
+import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.SignatureTokenConnection;
-import cz.sefira.obelisk.flow.exceptions.*;
 
 import java.security.SignatureException;
-import java.util.Locale;
 
 /**
  * This {@link Operation} allows to perform a signature.
@@ -51,6 +47,7 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 	 private NexuAPI api;
 	 private ToBeSigned toBeSigned;
 	 private DigestAlgorithm digestAlgorithm;
+	 private boolean rsaPss;
 	 private DSSPrivateKeyEntry key;
 
 	public SignOperation() {
@@ -64,9 +61,10 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 			this.api = (NexuAPI) params[1];
 			this.toBeSigned = (ToBeSigned) params[2];
 			this.digestAlgorithm = (DigestAlgorithm) params[3];
-			this.key = (DSSPrivateKeyEntry) params[4];
+			this.rsaPss = (boolean) params[4];
+			this.key = (DSSPrivateKeyEntry) params[5];
 		} catch(final ArrayIndexOutOfBoundsException | ClassCastException e) {
-			throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuApi, ToBeSigned, DigestAlgorithm, DSSPrivateKeyEntry");
+			throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuApi, ToBeSigned, DigestAlgorithm, RSA-PSS, DSSPrivateKeyEntry");
 		}
 	}
 
@@ -74,7 +72,10 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
   @SuppressWarnings("unchecked")
 	public OperationResult<SignatureValue> perform() {
 		try (BusyIndicator busyIndicator = new BusyIndicator()) {
-      return new OperationResult<>(token.sign(toBeSigned, digestAlgorithm, key));
+			if (!EncryptionAlgorithm.RSA.equals(key.getEncryptionAlgorithm())) {
+				rsaPss = false; // force RSA-PSS value to false for non-RSA keys
+			}
+      return new OperationResult<>(token.sign(toBeSigned, digestAlgorithm, rsaPss ? MaskGenerationFunction.MGF1 : null, key));
     } catch (AbstractTokenRuntimeException e) {
       this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);

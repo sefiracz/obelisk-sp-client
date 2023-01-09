@@ -27,13 +27,13 @@ import cz.sefira.obelisk.CancelledOperationException;
 import cz.sefira.obelisk.api.DetectedCard;
 import cz.sefira.obelisk.api.NexuAPI;
 import cz.sefira.obelisk.api.ReauthCallback;
+import cz.sefira.obelisk.flow.exceptions.PKCS11ModuleException;
+import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import eu.europa.esig.dss.*;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.PasswordInputCallback;
 import iaik.pkcs.pkcs11.TokenException;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
-import cz.sefira.obelisk.flow.exceptions.PKCS11ModuleException;
-import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -139,15 +139,30 @@ public class IAIKPkcs11SignatureTokenAdapter extends AbstractPkcs11SignatureToke
       final EncryptionAlgorithm encryptionAlgorithm = keyEntry.getEncryptionAlgorithm();
       final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
           .getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
-      // prepare ASN1 signature structure
-      byte[] digest = DSSUtils.digest(digestAlgorithm, toBeSigned.getBytes());
-      ASN1ObjectIdentifier digestOID = new ASN1ObjectIdentifier(digestAlgorithm.getOid());
-      AlgorithmIdentifier algID = new AlgorithmIdentifier(digestOID, DERNull.INSTANCE);
-      DigestInfo digestInfo = new DigestInfo(algID, digest);
-      byte[] signatureData = digestInfo.getEncoded();
+      // prepare data to be signed
+      byte[] signatureData;
+      if (EncryptionAlgorithm.RSA.equals(encryptionAlgorithm)) {
+        if (mgf != null) {
+          // RSA-PSS PKCS#1 v2.1
+          signatureData = toBeSigned.getBytes();
+        }
+        else {
+          // prepare ASN1 signature structure
+          // RSA PKCS#1 v1.5
+          byte[] digest = DSSUtils.digest(digestAlgorithm, toBeSigned.getBytes());
+          ASN1ObjectIdentifier digestOID = new ASN1ObjectIdentifier(digestAlgorithm.getOid());
+          AlgorithmIdentifier algID = new AlgorithmIdentifier(digestOID, DERNull.INSTANCE);
+          DigestInfo digestInfo = new DigestInfo(algID, digest);
+          signatureData = digestInfo.getEncoded();
+        }
+      } else {
+        // TODO ? sign for non-RSA algorithms ?
+        signatureData = toBeSigned.getBytes();
+      }
+
       // sign data
       IAIKPrivateKeyEntry key = ((IAIKPrivateKeyEntry) keyEntry);
-      byte[] sigValue = token.sign(key.getKeyLabel(), key.getCertificate().getCertificate(), signatureData, reauthCallback);
+      byte[] sigValue = token.sign(key.getKeyLabel(), signatureAlgorithm, signatureData, reauthCallback);
       SignatureValue value = new SignatureValue();
       value.setAlgorithm(signatureAlgorithm);
       value.setValue(sigValue);
