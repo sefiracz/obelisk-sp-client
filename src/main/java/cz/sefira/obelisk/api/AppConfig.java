@@ -56,6 +56,7 @@ public class AppConfig {
     private static final String ENABLE_INCIDENT_REPORT = "enable_incident_report";
 
     private static final String REQUEST_PROCESSOR_CLASS = "request_processor_class";
+    private static final String WINDOWS_INSTALLED_PATH = "windows_installed_path";
     private static final String WINDOWS_INSTALLED_EXE_PATH = "windows_installed_executable_path";
     private static final String WINDOWS_STARTUP_LINK_PATH = "windows_startup_link_path";
 
@@ -90,6 +91,7 @@ public class AppConfig {
     private boolean enableIncidentReport;
 
     private String requestProcessorClass;
+    private String windowsInstalledPath;
     private String windowsInstalledExePath;
     private String windowsStartupLinkPath;
 
@@ -202,6 +204,14 @@ public class AppConfig {
         this.requestProcessorClass = requestProcessorClass;
     }
 
+    public String getWindowsInstalledPath() {
+        return windowsInstalledPath;
+    }
+
+    public void setWindowsInstalledPath(String windowsInstalledPath) {
+        this.windowsInstalledPath = windowsInstalledPath;
+    }
+
     public String getWindowsInstalledExePath() {
         return windowsInstalledExePath;
     }
@@ -297,6 +307,7 @@ public class AppConfig {
         this.setRollingLogMaxFileSize(props.getProperty(ROLLING_LOG_FILE_SIZE, "10MB"));
 
         this.setRequestProcessorClass(props.getProperty(REQUEST_PROCESSOR_CLASS, "cz.sefira.obelisk.jetty.RequestProcessor"));
+        this.setWindowsInstalledPath(props.getProperty(WINDOWS_INSTALLED_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\"));
         this.setWindowsInstalledExePath(props.getProperty(WINDOWS_INSTALLED_EXE_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\OBELISK Signing Portal.exe"));
         this.setWindowsStartupLinkPath(props.getProperty(WINDOWS_STARTUP_LINK_PATH, "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/OBELISK Signing Portal.lnk"));
 

@@ -15,6 +15,7 @@
 package cz.sefira.obelisk;
 
 import com.sun.javafx.application.LauncherImpl;
+import com.sun.jna.Platform;
 import cz.sefira.obelisk.api.AppConfig;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -48,6 +49,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -64,15 +66,18 @@ public class AppPreloader extends Preloader {
 	private static Properties props;
 
 	public void launchApp(String[] args) throws IOException {
+		// load config properties
 		props = loadProperties();
 		loadAppConfig(props);
-
+		// set jni dispatch (needs to happen before any JNA calls)
+		String jniDispatchPath = setJNANativeLibrary();
+		// set logger
 		configureLogger(config);
-
 		beforeLaunch();
 
 		boolean started = checkAlreadyStarted();
 		logger.info("App running: "+started);
+		logger.info("JNA library path: " + (jniDispatchPath != null ? jniDispatchPath : "unpacked dll"));
 		if (!started) {
 			logger.info("Launching app");
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
@@ -112,10 +117,12 @@ public class AppPreloader extends Preloader {
 		logger.info("Show stage");
 		primaryStage.show();
 		final PauseTransition delay = new PauseTransition(Duration.seconds(3));
-		delay.setOnFinished(event -> primaryStage.close());
+		delay.setOnFinished(event -> {
+			logger.info("Hide splashscreen");
+			primaryStage.close();
+		});
 		logger.info("Play delay");
 		delay.play();
-		logger.info("Hide splashscreen");
 	}
 
 	private void configureLogger(AppConfig config) {
@@ -163,6 +170,19 @@ public class AppPreloader extends Preloader {
 
 	public static Properties getProperties() {
 		return props;
+	}
+
+	private static String setJNANativeLibrary() {
+		String jniDispatchPath = null;
+		if (Platform.isWindows()) {
+			String libName = "jnidispatch";
+			jniDispatchPath = Paths.get(config.getWindowsInstalledPath(), "app").toFile().getAbsolutePath();
+			if (Paths.get(jniDispatchPath,  System.mapLibraryName(libName)).toFile().exists()) {
+				System.setProperty("jna.boot.library.name", libName);
+				System.setProperty("jna.boot.library.path", jniDispatchPath); // dir containing jnidispatch.dll
+			}
+		}
+		return jniDispatchPath;
 	}
 
 	private static boolean checkAlreadyStarted() throws MalformedURLException {
