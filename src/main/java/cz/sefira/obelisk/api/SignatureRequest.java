@@ -25,6 +25,8 @@ public class SignatureRequest extends NexuRequest {
 
 	private DigestAlgorithm digestAlgorithm;
 
+	private boolean useRsaPss;
+
 	private String keyId;
 	
 	public SignatureRequest() {
@@ -52,6 +54,14 @@ public class SignatureRequest extends NexuRequest {
 
 	public void setDigestAlgorithm(DigestAlgorithm digestAlgorithm) {
 		this.digestAlgorithm = digestAlgorithm;
+	}
+
+	public boolean isUseRsaPss() {
+		return useRsaPss;
+	}
+
+	public void setUseRsaPss(boolean useRsaPss) {
+		this.useRsaPss = useRsaPss;
 	}
 
 	public String getKeyId() {

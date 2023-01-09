@@ -381,13 +381,9 @@ public class PKCS11Module {
       reAuthenticate(sessionHandle, callback);
     }
     try {
-      if ((data.length > 0) && (data.length < 1024)) {
-        log.debug("Signing");
-        signature = pkcs11Module.C_Sign(sessionHandle, data);
-        log.debug("Signed");
-      } else {
-        throw new PKCS11Exception(CKR_DATA_LEN_RANGE);
-      }
+      log.debug("Signing");
+      signature = pkcs11Module.C_Sign(sessionHandle, data);
+      log.debug("Signed");
     } catch (PKCS11Exception e) {
       log.error("Signature failed: "+e.getMessage());
       // redo the signature, maybe the attribute was not set properly
