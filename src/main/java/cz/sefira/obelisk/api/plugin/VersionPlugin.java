@@ -38,7 +38,7 @@ public class VersionPlugin implements NexuPlugin {
     try {
       final File nexuHome = api.getAppConfig().getNexuHome();
       final String currentVersion = api.getAppConfig().getApplicationVersion();
-
+      logger.info("Current version: "+currentVersion);
       final File versionFile = new File(nexuHome, "version");
       // first test if file exists
       if (!versionFile.exists()) {
