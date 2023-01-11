@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.smartcardio.*;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,6 +52,8 @@ public class CardDetector {
 	private static final Logger logger = LoggerFactory.getLogger(CardDetector.class.getSimpleName());
 
 	private CardTerminals cardTerminals;
+
+	private boolean contextError = false;
 
 	private final NexuAPI api;
 	private final WinscardLibrary lib;
@@ -98,46 +101,58 @@ public class CardDetector {
 	}
 
 	private List<CardTerminal> getCardTerminals() {
-		final boolean cardTerminalsCreated;
-		if(cardTerminals == null) {
-			final TerminalFactory terminalFactory = TerminalFactory.getDefault();
-			cardTerminals = terminalFactory.terminals();
-			cardTerminalsCreated = true;
-		} else {
-			cardTerminalsCreated = false;
-		}
+		boolean cardTerminalsCreated = false;
 		try {
+			if(cardTerminals == null) {
+				if (contextError) {
+					establishNewContext();
+					contextError = false;
+				}
+				final TerminalFactory terminalFactory = TerminalFactory.getDefault();
+				cardTerminals = terminalFactory.terminals();
+				cardTerminalsCreated = true;
+			}
 			return cardTerminals.list();
-		} catch(final CardException e) {
+		} catch(final Exception e) {
 			final Throwable cause = e.getCause();
 			if((cause != null) && RESET_CONTEXT_ERRORS.contains(cause.getMessage()) && !cardTerminalsCreated) {
-				logger.debug("Error class: " + cause.getClass().getName() +
-						". Message: " + cause.getMessage() +
+				logger.warn("Error class: " + cause.getClass().getName() + ". Message: " + cause.getMessage() +
 						". Re-establish a new connection.");
+				// close card terminals
 				try {
 					closeCardTerminals();
-				} catch(final Exception e1) {
+				}
+				catch (final Exception e1) {
 					logger.warn("Exception when closing cardTerminals", e1);
 				}
+				// open new context for card terminals
 				try {
 					establishNewContext();
-				} catch(final Exception e1) {
-					Throwable t = e1;
-					while (t != null) {
-						if ("SCARD_E_NO_SERVICE".equals(t.getMessage())) {
-							logger.error(e.getMessage(), e);
-						}
-						t = t.getCause();
-					}
-					// Rethrow exception as is.
-					throw new RuntimeException(e1);
 				}
+				catch (final Exception e1) {
+					// opening new context failed - re-try with delay
+					try {
+						logger.warn("Try to establish new PCSCTerminals context after delay.");
+						Thread.sleep(1500);
+						establishNewContext(); // try again to open new context for card terminals
+					} catch (final Exception retryError) {
+						// unable to re-establish connection, return empty list and raise error flag
+						logger.error("Unable to establish new PCSCTerminals context, returning empty terminals list.");
+						this.cardTerminals = null;
+						this.contextError = true;
+						return Collections.emptyList();
+					}
+				}
+				// new context connection establish
 				this.cardTerminals = null;
 				return getCardTerminals();
 			} else if((cause != null) && "SCARD_E_NO_READERS_AVAILABLE".equals(cause.getMessage())) {
+				// no terminals available or present, nothing to return
 				return Collections.emptyList();
 			} else {
-				throw new RuntimeException(e);
+				// unexpected error, log it and return nothing
+				logger.error(e.getMessage(), e);
+				return Collections.emptyList();
 			}
 		}
 	}
@@ -338,9 +353,10 @@ public class CardDetector {
 
 	private void establishNewContext() throws Exception {
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
-    	final Method initContextMethod = pcscTerminalsClass.getDeclaredMethod("initContext");
-    	initContextMethod.setAccessible(true);
-    	initContextMethod.invoke(null);
+		final Method initContextMethod = pcscTerminalsClass.getDeclaredMethod("initContext");
+		initContextMethod.setAccessible(true);
+		initContextMethod.invoke(null);
+		logger.info("New connection to PCSCTerminals context was established.");
 	}
 
 	private boolean isPresent(DetectedCard card) {
