@@ -77,7 +77,7 @@ public class AppPreloader extends Preloader {
 
 		boolean started = checkAlreadyStarted();
 		logger.info("App running: "+started);
-		logger.info("JNA library path: " + (jniDispatchPath != null ? jniDispatchPath : "unpacked dll"));
+		logger.info("JNA library path: " + (jniDispatchPath != null ? jniDispatchPath : "unpacked library"));
 		if (!started) {
 			logger.info("Launching app");
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
