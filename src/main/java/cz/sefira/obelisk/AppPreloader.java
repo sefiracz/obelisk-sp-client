@@ -69,15 +69,15 @@ public class AppPreloader extends Preloader {
 		// load config properties
 		props = loadProperties();
 		loadAppConfig(props);
-		// set jni dispatch (needs to happen before any JNA calls)
-		String jniDispatchPath = setJNANativeLibrary();
+		// set jni dispatch (needs to happen before any JNA calls) and JavaFX library cache directory
+		String libPath = setLibraryPath();
 		// set logger
 		configureLogger(config);
 		beforeLaunch();
 
 		boolean started = checkAlreadyStarted();
 		logger.info("App running: "+started);
-		logger.info("JNA library path: " + (jniDispatchPath != null ? jniDispatchPath : "unpacked library"));
+		logger.info("Native lib path: " + (libPath != null ? libPath : "unpacked libs"));
 		if (!started) {
 			logger.info("Launching app");
 			LauncherImpl.launchApplication(getApplicationClass(), AppPreloader.class, args);
@@ -172,17 +172,22 @@ public class AppPreloader extends Preloader {
 		return props;
 	}
 
-	private static String setJNANativeLibrary() {
-		String jniDispatchPath = null;
+	private static String setLibraryPath() {
 		if (Platform.isWindows()) {
-			String libName = "jnidispatch";
-			jniDispatchPath = Paths.get(config.getWindowsInstalledPath(), "app").toFile().getAbsolutePath();
-			if (Paths.get(jniDispatchPath,  System.mapLibraryName(libName)).toFile().exists()) {
-				System.setProperty("jna.boot.library.name", libName);
-				System.setProperty("jna.boot.library.path", jniDispatchPath); // dir containing jnidispatch.dll
+			String libraryPath = Paths.get(config.getWindowsInstalledPath(), "lib").toFile().getAbsolutePath();
+			if (new File(libraryPath).exists()) {
+				// set JNA native library
+				String jniDispatchName = "jnidispatch";
+				if (Paths.get(libraryPath, System.mapLibraryName(jniDispatchName)).toFile().exists()) {
+					System.setProperty("jna.boot.library.name", jniDispatchName);
+					System.setProperty("jna.boot.library.path", libraryPath); // dir containing jnidispatch.dll
+				}
+				// set java library path
+				System.setProperty("javafx.cachedir", libraryPath);
+				return libraryPath;
 			}
 		}
-		return jniDispatchPath;
+		return null;
 	}
 
 	private static boolean checkAlreadyStarted() throws MalformedURLException {
