@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ © SEFIRA spol. s r.o., 2020-2021
+
+ Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ You may use this work only in accordance with the License.
+ You can obtain a copy of the License at the following address:
+
+ https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+ Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ See the License for specific permissions and language restrictions under the License.
+-->
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane id="AnchorPane" prefHeight="275.0" prefWidth="550.0"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.UnavailableConfigController">
+
+	<center>
+    <VBox styleClass="form-container" BorderPane.alignment="CENTER" fx:id="messageContainer">
+      <Label styleClass="message" wrapText="true" fx:id="message"/>
+    </VBox>
+	</center>
+
+	<bottom>
+    <HBox styleClass="btn-container">
+<!--      <Button fx:id="cancel" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.cancel"/>-->
+      <Button fx:id="back" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.back"/>
+      <Button fx:id="hicSuntDracones" wrapText="true" styleClass="btn-danger" mnemonicParsing="false"
+              text="%button.warningRead"/>
+    </HBox>
+	</bottom>
+
+</BorderPane>

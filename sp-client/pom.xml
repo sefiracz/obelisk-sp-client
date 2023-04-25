@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>sp-client</artifactId>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>cz.sefira.obelisk</groupId>
+    <artifactId>obelisk-sp-client</artifactId>
+    <version>2.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <properties>
+    <main.class>cz.sefira.obelisk.AppLauncher</main.class>
+  </properties>
+
+  <dependencies>
+    <!-- project dependencies -->
+    <dependency>
+      <groupId>cz.sefira.obelisk</groupId>
+      <artifactId>sp-ipc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cz.sefira.obelisk</groupId>
+      <artifactId>sp-config</artifactId>
+    </dependency>
+    <!-- JavaFX -->
+    <!-- JavaFX Windows -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <classifier>win</classifier>
+    </dependency>
+
+    <!-- JavaFX Linux -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <classifier>linux</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <classifier>linux</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <classifier>linux</classifier>
+    </dependency>
+
+    <!-- JavaFX MacOS -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <classifier>mac</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <classifier>mac</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <classifier>mac</classifier>
+    </dependency>
+
+    <!-- SEFIRA MS CRYPTO -->
+    <dependency>
+      <groupId>cz.sefira.crypto</groupId>
+      <artifactId>MSCryptoStore</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <!-- Bouncycastle -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+    </dependency>
+
+    <!-- Apache HTTP client -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+    </dependency>
+
+    <!-- Database dependencies -->
+    <dependency>
+      <groupId>one.microstream</groupId>
+      <artifactId>microstream-storage-embedded</artifactId>
+    </dependency>
+
+    <!-- 3rd party -->
+    <!-- commons -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <!-- JNA -->
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna-platform</artifactId>
+    </dependency>
+    <!-- IAIK PKCS11 -->
+    <dependency>
+      <groupId>iaik</groupId>
+      <artifactId>iaik_pkcs11wrapper</artifactId>
+      <version>${iaik.pkcs11.wrapper.version}</version>
+    </dependency>
+    <!-- Systray support -->
+    <dependency>
+      <groupId>com.dorkbox</groupId>
+      <artifactId>SystemTray</artifactId>
+    </dependency>
+    <!-- 3rd party misc -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.syncope.identityconnectors</groupId>
+      <artifactId>framework</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.syncope.identityconnectors</groupId>
+      <artifactId>framework-internal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.lingala.zip4j</groupId>
+      <artifactId>zip4j</artifactId>
+    </dependency>
+
+    <!-- logging -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-jdk8</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.5</version>
+        <configuration>
+          <mainClass>${main.class}</mainClass>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <!-- app bundling scripts expect this format and name of the jar file -->
+          <finalName>obelisk-sp-client-${project.version}</finalName>
+          <archive>
+            <manifestEntries>
+              <Implementation-Version>${project.version}</Implementation-Version>
+            </manifestEntries>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${main.class}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <!-- exclude unnecessary files from final build -->
+                  <excludes>
+                    <exclude>META-INF/*</exclude>
+                    <!-- IAIK PKCS11 Wrapper unused natives -->
+                    <exclude>natives/unix/linux-x86/**</exclude>
+                    <exclude>natives/unix/solaris-*/**</exclude>
+                    <exclude>natives/windows/win-x86/**</exclude>
+                    <!-- JNA unused natives -->
+                    <exclude>com/sun/jna/*-x86/**</exclude>
+                    <exclude>com/sun/jna/sunos-*/**</exclude>
+                    <exclude>com/sun/jna/aix-*/**</exclude>
+                    <exclude>com/sun/jna/*-arm/**</exclude>
+                    <exclude>com/sun/jna/*-armel/**</exclude>
+                    <exclude>com/sun/jna/*-mips64el/**</exclude>
+                    <exclude>com/sun/jna/*-ppc/**</exclude>
+                    <exclude>com/sun/jna/*-ppc64/**</exclude>
+                    <exclude>com/sun/jna/*-ppc64le/**</exclude>
+                    <exclude>com/sun/jna/*-riscv64/**</exclude>
+                    <exclude>com/sun/jna/*-s390x/**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>${main.class}</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

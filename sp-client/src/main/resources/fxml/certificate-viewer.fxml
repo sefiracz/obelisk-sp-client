@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ © Nowina Solutions, 2015-2016
+
+ Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
+ Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
+ Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
+
+ http://ec.europa.eu/idabc/eupl5
+
+ Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
+ SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
+ Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
+-->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<?import javafx.stage.Stage?>
+
+<?import javafx.scene.Scene?>
+<Stage fx:id="stage" alwaysOnTop="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.CertificateViewerController">
+  <scene>
+    <Scene>
+      <root>
+        <BorderPane prefWidth="560.0" prefHeight="480" >
+
+          <top>
+            <BorderPane>
+              <top>
+                <VBox fx:id="certChainBox" prefHeight="95.0">
+                  <TreeView fx:id="certificateChainView"/>
+                </VBox>
+              </top>
+              <center>
+                <TableView fx:id="certDataTable" prefHeight="284.0" prefWidth="480.0" BorderPane.alignment="CENTER">
+                  <BorderPane.margin>
+                    <Insets bottom="5.0" left="0.0" right="0.0" top="0.0" />
+                  </BorderPane.margin>
+                  <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                  <columns>
+                    <TableColumn fx:id="fieldColumn" prefWidth="170.0" minWidth="170" maxWidth="170" sortable="false" text="%certificate.viewer.col.field" />
+                    <TableColumn fx:id="valueColumn" sortable="false" text="%certificate.viewer.col.value" />
+                  </columns>
+                </TableView>
+              </center>
+              <bottom>
+                <VBox>
+                  <ScrollPane prefHeight="155" maxHeight="155">
+                    <Text fx:id="valueContent" styleClass="label-left-align"/>
+                  </ScrollPane>
+                </VBox>
+              </bottom>
+            </BorderPane>
+          </top>
+
+          <bottom>
+            <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+              <Button fx:id="save" mnemonicParsing="false" styleClass="btn-secondary" text="%certificate.viewer.save.title" />
+              <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
+            </HBox>
+          </bottom>
+
+        </BorderPane>
+
+      </root>
+    </Scene>
+  </scene>
+</Stage>

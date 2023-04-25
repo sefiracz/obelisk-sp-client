@@ -1,0 +1,473 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OBELISK Signing Portal client API",
+    "description": "OBELISK Signing Portal client communicating specification with SP-API server",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://pgdev.sefira.cz/obelisk-sp-api/default/services/",
+      "description": "OBELISK Signing Portal API"
+    }
+  ],
+  "paths": {
+    "/getCertificate": {
+      "summary": "Endpoint to a work request for obtaining a certificate",
+      "get": {
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "os",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/osEnum"
+            }
+          },
+          {
+            "name": "devices",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get certificate request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sp-GetCertificateRequestType"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content, process ends"
+          },
+          "303": {
+            "description": "See other, redirection to other endpoint"
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "os",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+            }
+          },
+          {
+            "name": "devices",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/sp-GetCertificateResponseType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Get certificate request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sp-GetCertificateRequestType"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content, process ends"
+          },
+          "303": {
+            "description": "See other, redirection to other endpoint"
+          }
+        }
+      }
+    },
+    "/sign": {
+      "summary": "endpoint for requesting a verification",
+      "get": {
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "os",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+            }
+          },
+          {
+            "name": "devices",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get certificate request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sp-SignRequestType"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content, process ends"
+          },
+          "303": {
+            "description": "See other, redirection to other endpoint"
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "os",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+            }
+          },
+          {
+            "name": "devices",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/sp-SignResponseType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sign request object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sp-SignRequestType"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No content, process ends"
+          },
+          "303": {
+            "description": "See other, redirection to other endpoint"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "sp-GetCertificateRequestType": {
+        "x-xsd-type": "GetCertificateRequestType",
+        "x-xsd-full-type": "sp:GetCertificateRequestType",
+        "type": "object",
+        "properties": {
+          "operation": {
+            "$ref": "#/components/schemas/operationEnum"
+          },
+          "userInteraction": {
+            "type": "boolean"
+          },
+          "sessionValue": {
+            "$ref": "#/components/schemas/sp-SessionValueType"
+          },
+          "certificateFilter": {
+            "$ref": "#/components/schemas/sp-CertificateFilterType"
+          },
+          "smartcards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sp-KnownSmartcardType"
+            }
+          }
+        }
+      },
+      "sp-GetCertificateResponseType": {
+        "x-xsd-type": "GetCertificateResponseType",
+        "x-xsd-full-type": "sp:GetCertificateResponseType",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "response": {
+            "$ref": "#/components/schemas/sp-GetCertificateResultType"
+          },
+          "error": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          }
+        }
+      },
+      "sp-GetCertificateResultType": {
+        "x-xsd-type": "GetCertificateResponseType",
+        "x-xsd-full-type": "sp:GetCertificateResponseType",
+        "type": "object",
+        "properties": {
+          "certificate": {
+            "type": "string"
+          },
+          "certificateChain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "sp-SignRequestType": {
+        "x-xsd-type": "SignRequestType",
+        "x-xsd-full-type": "sp:SignRequestType",
+        "type": "object",
+        "properties": {
+          "operation": {
+            "$ref": "#/components/schemas/operationEnum"
+          },
+          "userInteraction": {
+            "type": "boolean"
+          },
+          "sessionValue": {
+            "$ref": "#/components/schemas/sp-SessionValueType"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "toBeSigned": {
+            "type": "string"
+          },
+          "digestAlgorithm": {
+            "type": "string"
+          },
+          "useRsaPss": {
+            "type": "boolean"
+          },
+          "smartcards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sp-KnownSmartcardType"
+            }
+          }
+        }
+      },
+      "sp-SignResponseType": {
+        "x-xsd-type": "SignResponseType",
+        "x-xsd-full-type": "sp:SignResponseType",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "response": {
+            "$ref": "#/components/schemas/sp-SignResultType"
+          },
+          "error": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          }
+        }
+      },
+      "sp-SignResultType": {
+        "x-xsd-type": "GetCertificateResponseType",
+        "x-xsd-full-type": "sp:GetCertificateResponseType",
+        "type": "object",
+        "properties": {
+          "signatureValue": {
+            "type": "string"
+          },
+          "signatureAlgorithm": {
+            "type": "string"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "certificateChain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "sp-SessionValueType": {
+        "x-xsd-type": "SessionValueType",
+        "x-xsd-full-type": "sp:SessionValueType",
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "sessionSignature": {
+            "type": "string"
+          }
+        }
+      },
+      "sp-CertificateFilterType": {
+        "x-xsd-type": "CertificateFilterType",
+        "x-xsd-full-type": "sp:CertificateFilterType",
+        "type": "object",
+        "properties": {
+          "allowExpired": {
+            "type": "boolean"
+          },
+          "nonRepudiationBit": {
+            "type": "boolean"
+          },
+          "digitalSignatureBit": {
+            "type": "boolean"
+          },
+          "certificateId": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          }
+        }
+      },
+      "sp-KnownSmartcardType": {
+        "x-xsd-type": "KnownSmartcardType",
+        "x-xsd-full-type": "sp:KnownSmartcardType",
+        "type": "object",
+        "properties": {
+          "atr": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "downloadUrl": {
+            "type": "string"
+          },
+          "drivers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "operationEnum": {
+        "required": true,
+        "type": "string",
+        "enum": [
+          "GetCertificate",
+          "Sign"
+        ]
+      },
+      "osEnum": {
+        "type": "string",
+        "enum": [
+          "WINDOWS",
+          "LINUX",
+          "MACOSX"
+        ]
+      }
+    }
+  }
+}
