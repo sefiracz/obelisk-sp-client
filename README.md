@@ -1,1 +1,1 @@
-"Obelisk Signing Portal client application" 
+"Obelisk Signing Portal client application"

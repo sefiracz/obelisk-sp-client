@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ © Nowina Solutions, 2015-2015
+ © SEFIRA spol. s r.o., 2020-2021
+
+ Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
+ Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
+ Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
+
+ http://ec.europa.eu/idabc/eupl5
+
+ Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
+ SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
+ Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
+-->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="220.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.Pkcs11ParamsController">
+
+<!--  <top>-->
+<!--    <VBox styleClass="top" BorderPane.alignment="CENTER">-->
+<!--      <Label styleClass="message" text="%pkcs11.params.header" wrapText="true"/>-->
+<!--    </VBox>-->
+<!--  </top>-->
+
+	<center>
+    <VBox fx:id="librarySelection" styleClass="form-container" BorderPane.alignment="CENTER">
+      <Label styleClass="message" text="%pkcs11.params.header" wrapText="true"/>
+      <GridPane style="-fx-padding: 0 0 0 30">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+        </rowConstraints>
+        <Label text="%pkcs11.params.library" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Button fx:id="selectFile" mnemonicParsing="false" text="%button.select.pkcs11.library"
+                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+      </GridPane>
+    </VBox>
+	</center>
+
+  <bottom>
+    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+      <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
+      <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
+    </HBox>
+  </bottom>
+
+</BorderPane>
