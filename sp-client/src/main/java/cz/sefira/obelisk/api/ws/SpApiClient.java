@@ -17,15 +17,17 @@ import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
 import cz.sefira.obelisk.json.GsonHelper;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.*;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,8 @@ import java.util.concurrent.TimeUnit;
  * description
  */
 public class SpApiClient {
+
+  private static final Logger logger = LoggerFactory.getLogger(SpApiClient.class.getName());
 
   private final HttpsClient client;
   private final PlatformAPI api;
@@ -51,7 +55,9 @@ public class SpApiClient {
     uriBuilder.addParameter(new BasicNameValuePair("platform", Platform.get()));
     uriBuilder.addParameter(new BasicNameValuePair("devices", String.valueOf(sync)));
     // execute request
-    ClassicHttpRequest request = new HttpUriRequestBase(method, uriBuilder.build());
+    URI requestUri = uriBuilder.build();
+    logger.info(method+" "+requestUri);
+    ClassicHttpRequest request = new HttpUriRequestBase(method, requestUri);
     request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
