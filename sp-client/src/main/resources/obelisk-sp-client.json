@@ -17,14 +17,6 @@
       "get": {
         "parameters": [
           {
-            "name": "lang",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "version",
             "in": "query",
             "required": true,
@@ -33,11 +25,11 @@
             }
           },
           {
-            "name": "os",
+            "name": "platform",
             "in": "query",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/osEnum"
+              "$ref": "#/components/schemas/platformEnum"
             }
           },
           {
@@ -59,6 +51,9 @@
               }
             }
           },
+          "202": {
+            "description": "Wait for a moment and try again"
+          },
           "204": {
             "description": "No content, process ends"
           },
@@ -70,14 +65,6 @@
       "post": {
         "parameters": [
           {
-            "name": "lang",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "version",
             "in": "query",
             "required": true,
@@ -86,11 +73,11 @@
             }
           },
           {
-            "name": "os",
+            "name": "platform",
             "in": "query",
             "required": true,
             "schema": {
-              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+              "$ref": "#/components/schemas/platformEnum"
             }
           },
           {
@@ -121,6 +108,9 @@
               }
             }
           },
+          "202": {
+            "description": "Wait for a moment and try again"
+          },
           "204": {
             "description": "No content, process ends"
           },
@@ -135,14 +125,6 @@
       "get": {
         "parameters": [
           {
-            "name": "lang",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "version",
             "in": "query",
             "required": true,
@@ -151,11 +133,11 @@
             }
           },
           {
-            "name": "os",
+            "name": "platform",
             "in": "query",
             "required": true,
             "schema": {
-              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+              "$ref": "#/components/schemas/platformEnum"
             }
           },
           {
@@ -177,6 +159,9 @@
               }
             }
           },
+          "202": {
+            "description": "Wait for a moment and try again"
+          },
           "204": {
             "description": "No content, process ends"
           },
@@ -188,14 +173,6 @@
       "post": {
         "parameters": [
           {
-            "name": "lang",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "version",
             "in": "query",
             "required": true,
@@ -204,11 +181,11 @@
             }
           },
           {
-            "name": "os",
+            "name": "platform",
             "in": "query",
             "required": true,
             "schema": {
-              "enum": ["WINDOWS", "LINUX", "MACOSX"]
+              "$ref": "#/components/schemas/platformEnum"
             }
           },
           {
@@ -239,6 +216,9 @@
               }
             }
           },
+          "202": {
+            "description": "Wait for a moment and try again"
+          },
           "204": {
             "description": "No content, process ends"
           },
@@ -262,7 +242,7 @@
           "userInteraction": {
             "type": "boolean"
           },
-          "sessionValue": {
+          "session": {
             "$ref": "#/components/schemas/sp-SessionValueType"
           },
           "certificateFilter": {
@@ -284,7 +264,7 @@
           "success": {
             "type": "boolean"
           },
-          "response": {
+          "result": {
             "$ref": "#/components/schemas/sp-GetCertificateResultType"
           },
           "error": {
@@ -325,8 +305,27 @@
           "userInteraction": {
             "type": "boolean"
           },
-          "sessionValue": {
+          "session": {
             "$ref": "#/components/schemas/sp-SessionValueType"
+          },
+          "signParams": {
+            "$ref": "#/components/schemas/sp-SignParametersType"
+          },
+          "smartcards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sp-KnownSmartcardType"
+            }
+          }
+        }
+      },
+      "sp-SignParametersType": {
+        "x-xsd-type": "SignParametersType",
+        "x-xsd-full-type": "sp:SignParametersType",
+        "type": "object",
+        "properties": {
+          "stepId": {
+            "type": "integer"
           },
           "certificate": {
             "type": "string"
@@ -339,12 +338,6 @@
           },
           "useRsaPss": {
             "type": "boolean"
-          },
-          "smartcards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/sp-KnownSmartcardType"
-            }
           }
         }
       },
@@ -353,10 +346,13 @@
         "x-xsd-full-type": "sp:SignResponseType",
         "type": "object",
         "properties": {
+          "stepId": {
+            "type": "integer"
+          },
           "success": {
             "type": "boolean"
           },
-          "response": {
+          "result": {
             "$ref": "#/components/schemas/sp-SignResultType"
           },
           "error": {
@@ -460,12 +456,12 @@
           "Sign"
         ]
       },
-      "osEnum": {
+      "platformEnum": {
         "type": "string",
         "enum": [
-          "WINDOWS",
-          "LINUX",
-          "MACOSX"
+          "win64",
+          "linux64",
+          "macos64"
         ]
       }
     }
