@@ -40,9 +40,6 @@ public class UnsupportedProductController extends AbstractUIOperationController<
     @FXML
     private Label message;
 
-//    @FXML
-//    private Button cancel;
-
     @FXML
     private VBox messageBox;
 
@@ -55,7 +52,6 @@ public class UnsupportedProductController extends AbstractUIOperationController<
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         this.hicSuntDracones.setOnAction(ev -> this.signalEnd(null));
-//        this.cancel.setOnAction(ev -> this.signalUserCancel());
         this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
     }
 
