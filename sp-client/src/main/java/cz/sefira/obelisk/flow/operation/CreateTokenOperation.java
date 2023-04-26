@@ -93,10 +93,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
           } else if (result.getStatus().equals(CoreOperationStatus.BACK)) {
             return new OperationResult<>(CoreOperationStatus.BACK); // go back
           } else {
-            // TODO remove ???
-            this.operationFactory.getMessageDialog(api, new DialogMessage("unsupported.product.message",
-                    DialogMessage.Level.ERROR, 400, 150), true);
-            return new OperationResult<>(CoreOperationStatus.UNSUPPORTED_PRODUCT);
+            throw new IllegalStateException("Unexpected result status: "+result.getStatus().getCode());
           }
         }
       } catch (AbstractTokenRuntimeException e) {
@@ -148,29 +145,17 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     map.put(TokenOperationResultKey.ADVANCED_CREATION, true);
     map.put(TokenOperationResultKey.SELECTED_PRODUCT, product);
 
-    // select token API - TODO - this selection makes sense only when another API is available (= MSCAPI is usable)
+    // PKCS#11
     ScAPI scAPI = ScAPI.PKCS_11;
-    /*
-    final OperationResult<Object> apiSelection = this.operationFactory.getOperation(UIOperation.class,
-            "/fxml/api-selection.fxml", this.api.getAppConfig().getApplicationName()).perform();
-    if(apiSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+    map.put(TokenOperationResultKey.SELECTED_API, scAPI);
+    final OperationResult<Object> driverSelection = operationFactory.getOperation(UIOperation.class,
+        "/fxml/pkcs11-params.fxml", this.api.getAppConfig().getApplicationName()).perform();
+    if(driverSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     }
-    scAPI = (ScAPI) apiSelection.getResult();
-    */
-    map.put(TokenOperationResultKey.SELECTED_API, scAPI);
-
-    // select PKCS11 parameters
-    if(scAPI.equals(ScAPI.PKCS_11)) {
-      final OperationResult<Object> op2 = operationFactory.getOperation(UIOperation.class,
-              "/fxml/pkcs11-params.fxml", this.api.getAppConfig().getApplicationName()).perform();
-      if(op2.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-        return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
-      }
-      final Pkcs11Params pkcs11Params = (Pkcs11Params) op2.getResult();
-      final String absolutePath = pkcs11Params.getPkcs11Lib().getAbsolutePath();
-      map.put(TokenOperationResultKey.SELECTED_API_PARAMS, absolutePath);
-    }
+    final Pkcs11Params pkcs11Params = (Pkcs11Params) driverSelection.getResult();
+    final String absolutePath = pkcs11Params.getPkcs11Lib().getAbsolutePath();
+    map.put(TokenOperationResultKey.SELECTED_API_PARAMS, absolutePath);
 
     // prepare smartcard information and generic card adapter
     final ConnectionInfo connectionInfo = new ConnectionInfo();

@@ -59,9 +59,6 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
     @FXML
     private VBox messageContainer;
 
-//    @FXML
-//    private Button cancel;
-
     @FXML
     private Button back;
 

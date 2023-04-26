@@ -26,7 +26,6 @@
 
 	<bottom>
     <HBox styleClass="btn-container">
-<!--      <Button fx:id="cancel" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.cancel"/>-->
       <Button fx:id="back" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.back"/>
       <Button fx:id="hicSuntDracones" wrapText="true" styleClass="btn-danger" mnemonicParsing="false"
               text="%button.warningRead"/>
