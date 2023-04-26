@@ -22,6 +22,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -33,6 +35,8 @@ import java.util.List;
  * Bearer token provider
  */
 public class BearerTokenProvider implements AuthenticationProvider {
+
+  private static final Logger logger = LoggerFactory.getLogger(BearerTokenProvider.class.getName());
 
   private static final String CLIENT_ID = "obelisk-sp-client";
   private static final String AUTH_TYPE = "Bearer ";
@@ -80,6 +84,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     client = new HttpsClient(api);
     parseAuthServerURL();
     // MAGIC LINK
+    logger.info("Calling magic link");
     actionToken();
     // GET BEARER TOKEN
     List<NameValuePair> params = new ArrayList<>();
@@ -88,6 +93,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     params.add(new BasicNameValuePair("grant_type", "authorization_code"));
     params.add(new BasicNameValuePair("code", code));
     params.add(new BasicNameValuePair("session_state", sessionState));
+    logger.info("Init bearer token");
     return currentToken = token(params);
   }
 
@@ -99,6 +105,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     params.add(new BasicNameValuePair("refresh_token", currentToken.getRefreshToken()));
     params.add(new BasicNameValuePair("code", code));
     params.add(new BasicNameValuePair("session_state", sessionState));
+    logger.info("Refreshing bearer token");
     return currentToken = token(params);
   }
 

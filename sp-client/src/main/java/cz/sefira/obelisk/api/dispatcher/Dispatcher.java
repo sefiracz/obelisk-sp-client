@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static cz.sefira.obelisk.api.ws.model.Operation.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
