@@ -23,7 +23,7 @@ package cz.sefira.obelisk.token.macos;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
@@ -33,7 +33,6 @@ import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.dss.token.DSSPrivateKeyEntry;
 import cz.sefira.obelisk.dss.token.PasswordInputCallback;
 import cz.sefira.obelisk.dss.token.SignatureTokenConnection;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,11 +97,6 @@ public class KeychainProductAdapter implements ProductAdapter {
   @Override
   public FutureOperationInvocation<Product> getConfigurationOperation(PlatformAPI api, Product product) {
     return new NoOpFutureOperationInvocation<Product>(product);
-  }
-
-  @Override
-  public SystrayMenuItem getExtensionSystrayMenuItem(PlatformAPI api) {
-    return null;
   }
 
   @Override

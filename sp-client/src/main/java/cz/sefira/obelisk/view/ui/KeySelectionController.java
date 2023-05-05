@@ -113,7 +113,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
 
                         final Hyperlink link = new Hyperlink(resources.getString("key.selection.certificate.open"));
 
-                        link.setOnAction(actionEvent -> X509Utils.openPEMCertificate(X509Utils.convertToPEM(certificateToken)));
+                        link.setOnAction(actionEvent -> X509Utils.openPEMCertificate(null, X509Utils.convertToPEM(certificateToken)));
 
                         final VBox vBox = new VBox(lSubject, lIssuer, lUsage, lValidity, link);
 

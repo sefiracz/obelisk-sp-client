@@ -130,7 +130,7 @@ RadioButton {
 
 }
 
-.preferences-container {
+.dash-container {
 
     -fx-background-color: white;
     -fx-padding: 10 30 10 30;
@@ -147,36 +147,100 @@ RadioButton {
 
 }
 
-.mButton {
+.timeMessage {
 
-    -fx-background-color: white;
-    -fx-border-radius: 50;
-    -fx-background-radius: 50;
-    -fx-border-color: #D0D0D0;
-
-}
-
-.mButton > .arrow-button {
-
-    -fx-padding: 0;
+    -fx-text-alignment: right;
+    -fx-font-size: 10px;
+    -fx-padding: 3 3 3 3;
 
 }
 
-.mButton > .arrow-button > .arrow {
+.plus {
 
-    -fx-padding: 0;
-
-}
-
-.mButton:hover {
-
-    -fx-background-color: #CED3D8;
+    -fx-background-color: #4AA9E7;
+    -fx-shape: "M256 32a224 224 0 1 1 0 448 224 224 0 1 1 0-448zm0 480A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM240 352c0 8.8 7.2 16 16 16s16-7.2 16-16V272h80c8.8 0 16-7.2 16-16s-7.2-16-16-16H272V160c0-8.8-7.2-16-16-16s-16 7.2-16 16v80H160c-8.8 0-16 7.2-16 16s7.2 16 16 16h80v80z";
 
 }
 
-.mButton:pressed {
+.plus:hover {
 
-    -fx-background-color: #AFB7C1;
+    -fx-background-color: #4A76E7;
+
+}
+
+.minus {
+
+    -fx-background-color: #4AA9E7;
+    -fx-shape: "M256 32a224 224 0 1 1 0 448 224 224 0 1 1 0-448zm0 480A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM160 240c-8.8 0-16 7.2-16 16s7.2 16 16 16H352c8.8 0 16-7.2 16-16s-7.2-16-16-16H160z";
+
+}
+
+.minus:hover {
+
+    -fx-background-color: #4A76E7;
+
+}
+
+.dashButton {
+
+    -fx-background-color: #001C40;
+    -fx-shape: "M0 416c0 8.8 7.2 16 16 16l65.6 0c7.4 36.5 39.7 64 78.4 64s71-27.5 78.4-64L496 432c8.8 0 16-7.2 16-16s-7.2-16-16-16l-257.6 0c-7.4-36.5-39.7-64-78.4-64s-71 27.5-78.4 64L16 400c-8.8 0-16 7.2-16 16zm112 0a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM304 256a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm48-80c-38.7 0-71 27.5-78.4 64L16 240c-8.8 0-16 7.2-16 16s7.2 16 16 16l257.6 0c7.4 36.5 39.7 64 78.4 64s71-27.5 78.4-64l65.6 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-65.6 0c-7.4-36.5-39.7-64-78.4-64zM192 144a48 48 0 1 1 0-96 48 48 0 1 1 0 96zm78.4-64C263 43.5 230.7 16 192 16s-71 27.5-78.4 64L16 80C7.2 80 0 87.2 0 96s7.2 16 16 16l97.6 0c7.4 36.5 39.7 64 78.4 64s71-27.5 78.4-64L496 112c8.8 0 16-7.2 16-16s-7.2-16-16-16L270.4 80z";
+
+}
+
+.dashButton:hover {
+
+    -fx-background-color: #00407E;
+
+}
+
+.dashButton:pressed {
+
+    -fx-background-color: #00407E;
+
+}
+
+.minimizeButton {
+
+    -fx-background-color: #001C40;
+    -fx-shape: 'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24H488c13.3 0 24-10.7 24-24s-10.7-24-24-24H24z';
+    -fx-border-insets: 20 4 0 0;
+    -fx-background-insets: 20 4 0 0;
+    -fx-padding: 4 4 0 0;
+
+}
+
+
+.minimizeButton:hover {
+
+    -fx-background-color: #0078D7;
+
+}
+
+.minimizeButton:pressed {
+
+    -fx-background-color: #00407E;
+
+}
+
+.closeButton {
+
+    -fx-background-color: #001C40;
+    -fx-shape: "M345 137c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-119 119L73 103c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l119 119L39 375c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l119-119L311 409c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-119-119L345 137z";
+    -fx-border-insets: 4 4 0 0;
+    -fx-background-insets: 4 4 0 0;
+    -fx-padding: 4 4 0 0;
+}
+
+.closeButton:hover {
+
+    -fx-background-color: #0078D7;
+
+}
+
+.closeButton:pressed {
+
+    -fx-background-color: #00407E;
 
 }
 
@@ -300,6 +364,67 @@ RadioButton {
 
 }
 
+.btn-events {
+
+    -fx-background-radius: 0;
+    -fx-padding: 7 12 7 12;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-text-alignment: center;
+    -fx-background-color: #FFF;
+    -fx-text-fill: black;
+    -fx-border-color: #4AA9E7;
+
+}
+
+.btn-events:hover {
+
+    -fx-background-color: #E0E0E0;
+
+}
+
+.btn-events:pressed {
+
+    -fx-background-color: #CED3D8;
+
+}
+
+.btn-events:selected {
+
+    -fx-background-color: #E0E0E0;
+    -fx-border-color: #D86985;
+
+}
+
+.icon-event-all {
+
+    -fx-background-color: black;
+    -fx-shape: "M64 64a32 32 0 1 0 0 64 32 32 0 1 0 0-64zm120 8H160v48h24H488h24V72H488 184zm0 160H160v48h24H488h24V232H488 184zm0 160H160v48h24H488h24V392H488 184zM96 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 384a32 32 0 1 0 0 64 32 32 0 1 0 0-64z";
+
+}
+
+.icon-event-day {
+
+    -fx-background-color: black;
+    -fx-shape: "M128 16c0-8.8-7.2-16-16-16s-16 7.2-16 16V64H64C28.7 64 0 92.7 0 128v32 32V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 160 128c0-35.3-28.7-64-64-64H352V16c0-8.8-7.2-16-16-16s-16 7.2-16 16V64H128V16zM32 192H416V448c0 17.7-14.3 32-32 32H64c-17.7 0-32-14.3-32-32V192zM64 96H384c17.7 0 32 14.3 32 32v32H32V128c0-17.7 14.3-32 32-32zm40 160h80c4.4 0 8 3.6 8 8v80c0 4.4-3.6 8-8 8H104c-4.4 0-8-3.6-8-8V264c0-4.4 3.6-8 8-8zm-40 8v80c0 22.1 17.9 40 40 40h80c22.1 0 40-17.9 40-40V264c0-22.1-17.9-40-40-40H104c-22.1 0-40 17.9-40 40z";
+
+
+}
+
+.icon-event-last {
+
+    -fx-background-color: black;
+    -fx-shape: "M48 106.7V56c0-13.3-10.7-24-24-24S0 42.7 0 56V168c0 13.3 10.7 24 24 24H136c13.3 0 24-10.7 24-24s-10.7-24-24-24H80.7c37-57.8 101.7-96 175.3-96c114.9 0 208 93.1 208 208s-93.1 208-208 208c-42.5 0-81.9-12.7-114.7-34.5c-11-7.3-25.9-4.3-33.3 6.7s-4.3 25.9 6.7 33.3C155.2 496.4 203.8 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C170.3 0 94.4 42.1 48 106.7zM256 128c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z";
+
+}
+
+.icon-event-exit {
+
+    -fx-background-color: black;
+    -fx-shape: "M272 0a48 48 0 1 1 0 96 48 48 0 1 1 0-96zM163.2 160c-14.1 0-27.5 5.6-37.5 15.5l-23.1 23.1c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l23.1-23.1C102.4 108.3 132.2 96 163.2 96c11.7 0 23.3 1.7 34.4 5.2l48.7 15c36.4 11.2 65.9 38 80.5 73.1l6.3 15c5 11.9 16.6 19.7 29.5 19.7H384c17.7 0 32 14.3 32 32s-14.3 32-32 32H362.7c-38.8 0-73.7-23.3-88.6-59.1l-5.1-12.3L238 299l56.7 35.4c18.1 11.3 26.6 33.3 20.7 53.9L286.8 488.8c-4.9 17-22.6 26.8-39.6 22s-26.8-22.6-22-39.6l25.4-88.8-86.2-53.9c-25.1-15.7-36.1-46.5-26.8-74.5l31.2-93.7c-1.9-.2-3.7-.3-5.6-.3zM109.5 310.7c7.4 18.1 20.4 33.9 37.9 44.9l9.5 6-11.5 25.9c-7.7 17.3-24.9 28.5-43.9 28.5H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H91.2l18.3-41.3zM384 48c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48V464c0 26.5-21.5 48-48 48H432c-26.5 0-48-21.5-48-48V320h0c35.3 0 64-28.7 64-64s-28.7-64-64-64h0V48z";
+
+}
+
 .overlay {
 
     -fx-background-color: rgba(0, 0, 0, 0.5);
@@ -343,6 +468,52 @@ RadioButton {
 
 	-fx-margin: 5px;
 	-fx-font-weight: bold;
+
+}
+
+.notification {
+
+    -fx-background-color: white;
+    -fx-border-style: solid;
+    -fx-border-width: 5px;
+    -fx-border-color: #0096C9;
+
+}
+
+.notification-message {
+
+    -fx-text-alignment: left;
+    -fx-font-size: 16px;
+    -fx-padding: 15 15 15 15;
+
+}
+
+.notificationTimer {
+
+    -fx-progress-color: #4AA9E7;
+    /*-fx-fill: null;*/
+    -fx-padding: 5 0 -13 0; /* t r b l*/
+
+}
+
+.notificationTimer .percentage {
+
+    -fx-fill: null;
+
+}
+
+.notificationTimer > .determinate-indicator > .indicator {
+
+    -fx-background-color: transparent;
+
+}
+
+.notificationTimer:indeterminate {
+
+    -fx-background-color: transparent;
+    -fx-fill: null;
+    -fx-progress-color: transparent;
+    -fx-padding: -50 0 0 -50;
 
 }
 

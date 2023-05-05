@@ -14,44 +14,56 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AboutController extends AbstractUIOperationController<Void> implements Initializable {
+public class AboutController extends ControllerCore implements StandaloneUIController, Initializable {
 
 	@FXML
-	private BorderPane pane;
+	private GridPane gridPane;
 
 	@FXML
 	private Label aboutTitle;
 
 	@FXML
-	private Button ok;
+	private Button cancel;
 
 	@FXML
 	private Label applicationVersion;
 
+	private Stage primaryStage;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		ok.setOnAction(e -> signalEnd(null));
+		cancel.setOnAction(e -> primaryStage.close());
 	}
 
 	@Override
-	public void init(Object... params) {
-		final String applicationName = (String) params[0];
+	public void init(Stage stage, Object... params) {
+		primaryStage = stage;
+		final String applicationName = AppConfig.get().getApplicationName();
 		this.aboutTitle.setText(aboutTitle.getText() + " " + applicationName);
 		StageHelper.getInstance().setTitle("", "about.header");
-
-		final String applicationVersion = (String) params[1];
+		final String applicationVersion = AppConfig.get().getApplicationVersion();
 		this.applicationVersion.setText(applicationVersion);
-		setLogoBackground(pane);
+		setLogoBackground(gridPane);
+	}
+
+	@Override
+	public void close() throws IOException {
+
 	}
 }

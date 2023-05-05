@@ -15,14 +15,16 @@ package cz.sefira.obelisk.view;
 
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.UserPreferences;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
-import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.core.TimerService;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -35,6 +37,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import cz.sefira.obelisk.api.PlatformAPI;
 import org.slf4j.Logger;
@@ -51,11 +54,12 @@ public class StandaloneDialog {
 
   private static final Logger logger = LoggerFactory.getLogger(StandaloneDialog.class.getName());
 
-  public static void showConfirmResetDialog(PlatformAPI api, final UserPreferences userPreferences) {
+  public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
     DialogMessage message = new DialogMessage("preferences.reset.dialog",
         DialogMessage.Level.WARNING, 400, 150);
     message.setShowOkButton(false);
+    message.setOwner(primaryStage);
 
     // add button
     Button cancel = new Button();
@@ -75,7 +79,9 @@ public class StandaloneDialog {
       AppConfigurer.applyLocale(null);
       AppConfigurer.applyUserPreferences(userPreferences);
       if(stage != null)
-        stage.hide();
+        stage.close();
+      if (primaryStage != null)
+        primaryStage.close();
     }));
 
     showDialog(api, message, true);
@@ -92,8 +98,8 @@ public class StandaloneDialog {
 
     String appName = "";
     if(api != null) {
-      appName = api.getAppConfig().getApplicationName();
-      UserPreferences prefs = new UserPreferences(api.getAppConfig());
+      appName = AppConfig.get().getApplicationName();
+      UserPreferences prefs = new UserPreferences(AppConfig.get());
       // check if message is supposed to be displayed
       String dialogId = dialogMessage.getDialogId();
       if (dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
@@ -107,6 +113,12 @@ public class StandaloneDialog {
     dialogStage.setTitle((appName.isEmpty() ? "" : appName + " - ")
         + resources.getString(dialogMessage.getLevel().getTitleCode()));
     dialogStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
+    if (dialogMessage.getOwner() != null) {
+      dialogStage.initOwner(dialogMessage.getOwner());
+      dialogStage.initModality(Modality.WINDOW_MODAL);
+    } else {
+      dialogMessage.setOwner(dialogStage);
+    }
     // setup scene
     BorderPane borderPane = new BorderPane();
     borderPane.getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
@@ -145,8 +157,7 @@ public class StandaloneDialog {
         pi.setMinHeight(50);
         pi.setMinWidth(50);
         leftBox.getChildren().add(pi);
-        AbstractUIOperationController.TimerService service =
-            new AbstractUIOperationController.TimerService(dialogMessage.getTimerLength());
+        TimerService service = new TimerService(dialogMessage.getTimerLength());
         service.setOnSucceeded(e -> dialogStage.hide());
         pi.progressProperty().bind(service.progressProperty());
         service.start();
@@ -222,7 +233,7 @@ public class StandaloneDialog {
     okButton.setOnAction(e -> {
       if(doNotShowCheckBox.selectedProperty().getValue()) {
         if (api != null) {
-          UserPreferences prefs = new UserPreferences(api.getAppConfig());
+          UserPreferences prefs = new UserPreferences(AppConfig.get());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
       }
@@ -243,22 +254,34 @@ public class StandaloneDialog {
     }
   }
 
-  public static void createDialogFromFXML(@NotNull String fxml, boolean blocking, Object... params) {
+  public static StandaloneUIController createDialogFromFXML(@NotNull String fxml, Stage owner, boolean blocking, Object... params) {
     try {
       FXMLLoader loader = new FXMLLoader();
       loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
-      Stage stage = loader.load(StandaloneDialog.class.getResourceAsStream(fxml));
-      stage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
-      StandaloneUIController controller = loader.getController();
-      controller.init(params);
-      if (blocking) {
-        stage.showAndWait();
-      } else {
-        stage.show();
+      Stage primaryStage = new Stage();
+      if (owner != null) {
+        primaryStage.initOwner(owner);
+        primaryStage.initModality(Modality.WINDOW_MODAL);
       }
+      primaryStage.setAlwaysOnTop(true);
+      Parent panel = loader.load(StandaloneDialog.class.getResourceAsStream(fxml));
+      Scene scene = new Scene(panel);
+      primaryStage.setScene(scene);
+      primaryStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
+      primaryStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
+      StandaloneUIController controller = loader.getController();
+      controller.init(primaryStage, params);
+      if (blocking) {
+        primaryStage.showAndWait();
+      } else {
+        primaryStage.show();
+      }
+      return controller;
     } catch (Throwable t) {
-      DialogMessage errMsg = new DialogMessage("dispatcher.communication.error", DialogMessage.Level.ERROR);
+      logger.error(t.getMessage(), t);
+      DialogMessage errMsg = new DialogMessage("feedback.message", DialogMessage.Level.ERROR);
       showErrorDialog(errMsg, null, t);
+      return null;
     }
   }
 
@@ -294,7 +317,7 @@ public class StandaloneDialog {
     certs.setText(resources.getString("button.show.ssl.certificates"));
     certs.getStyleClass().add("btn-default");
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
-      X509Utils.openCertificateChain(ex.getCertificateChain());
+      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain());
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
   }
@@ -328,6 +351,10 @@ public class StandaloneDialog {
         borderPane.setCenter(area);
 
         Stage detailStage = new Stage();
+        if (errMsg.getOwner() != null) {
+          detailStage.initOwner(errMsg.getOwner());
+          detailStage.initModality(Modality.WINDOW_MODAL);
+        }
         detailStage.setAlwaysOnTop(true);
         detailStage.setTitle(Objects.requireNonNullElseGet(title, () -> resources.getString("message.title.error")));
         detailStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));

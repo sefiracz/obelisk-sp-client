@@ -26,6 +26,7 @@ package cz.sefira.obelisk.util;
 import cz.sefira.obelisk.dss.DSSException;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
 import cz.sefira.obelisk.view.StandaloneDialog;
+import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
@@ -98,20 +99,20 @@ public class X509Utils {
     }
   }
 
-  public static void openPEMCertificate(String pemCertificate) {
+  public static void openPEMCertificate(Stage owner, String pemCertificate) {
     try {
       X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(
           new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
-      openCertificateChain(List.of(certificate));
+      openCertificateChain(owner, List.of(certificate));
     }
     catch (CertificateException e) {
       logger.error(e.getMessage(), e);
     }
   }
 
-  public static void openCertificateChain(List<X509Certificate> certificates) {
+  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
     try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", true, certificates);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner,true, certificates);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

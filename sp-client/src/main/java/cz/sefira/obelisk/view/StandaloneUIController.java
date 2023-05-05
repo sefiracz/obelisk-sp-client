@@ -10,11 +10,15 @@ package cz.sefira.obelisk.view;
  * Author: hlavnicka
  */
 
+import javafx.stage.Stage;
+
+import java.io.Closeable;
+
 /**
  * API for standalone FXML-backed controller
  */
-public interface StandaloneUIController {
+public interface StandaloneUIController extends Closeable {
 
- void init(Object... params);
+ void init(Stage stage, Object... params);
 
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ © SEFIRA spol. s r.o., 2020-2023
+
+ Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ You may use this work only in accordance with the License.
+ You can obtain a copy of the License at the following address:
+
+ https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+ Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ See the License for specific permissions and language restrictions under the License.
+-->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox styleClass="notification" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="cz.sefira.obelisk.view.ui.NotificationController">
+  <BorderPane fx:id="background" prefHeight="180" prefWidth="360">
+
+    <top>
+      <HBox minHeight="32" maxHeight="32" prefHeight="32">
+        <ProgressIndicator fx:id="progress" styleClass="notificationTimer" progress="0.99" visible="false"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="minimizeButton" maxWidth="24" maxHeight="4" prefWidth="24" prefHeight="4" styleClass="minimizeButton" mnemonicParsing="false"/>
+        <Button fx:id="closeButton" maxWidth="24" maxHeight="16" prefWidth="24"  prefHeight="16" styleClass="closeButton" mnemonicParsing="false"/>
+      </HBox>
+    </top>
+
+    <center>
+      <HBox style="-fx-alignment: center">
+        <Label styleClass="notification-message" fx:id="message" wrapText="true"/>
+      </HBox>
+    </center>
+
+    <bottom>
+      <HBox prefHeight="32" style="-fx-alignment: bottom-left" >
+        <Label styleClass="timeMessage" fx:id="timestamp" wrapText="true"/>
+      </HBox>
+    </bottom>
+  </BorderPane>
+</HBox>

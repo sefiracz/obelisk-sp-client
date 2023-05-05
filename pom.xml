@@ -25,7 +25,7 @@
     <javafx.version>17.0.6</javafx.version>
     <iaik.pkcs11.wrapper.version>1.6.2</iaik.pkcs11.wrapper.version>
     <apache-httpclient5.version>5.2.1</apache-httpclient5.version>
-    <bouncycastle.version>1.69</bouncycastle.version>
+    <bouncycastle.version>1.73</bouncycastle.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.7</commons-io.version>
     <commons-codec.version>1.15</commons-codec.version>
@@ -33,7 +33,6 @@
     <logback.version>1.2.11</logback.version>
     <gson.version>2.10.1</gson.version>
     <jna.version>5.8.0</jna.version>
-    <systemtray.version>3.17</systemtray.version>
     <microstream.version>07.01.00-MS-GA</microstream.version>
     <identityconnectors.framework.version>0.4.3</identityconnectors.framework.version>
     <zip4j.version>2.11.5</zip4j.version>
@@ -145,12 +144,12 @@
       <!-- Bouncycastle -->
       <dependency>
         <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
+        <artifactId>bcprov-jdk18on</artifactId>
         <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpkix-jdk15on</artifactId>
+        <artifactId>bcpkix-jdk18on</artifactId>
         <version>${bouncycastle.version}</version>
       </dependency>
 
@@ -203,11 +202,6 @@
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>${gson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.dorkbox</groupId>
-        <artifactId>SystemTray</artifactId>
-        <version>${systemtray.version}</version>
       </dependency>
       <dependency>
         <groupId>org.syncope.identityconnectors</groupId>

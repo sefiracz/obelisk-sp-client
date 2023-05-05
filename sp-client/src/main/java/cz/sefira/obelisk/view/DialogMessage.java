@@ -41,6 +41,7 @@ public class DialogMessage {
   private boolean okButton = true;
   private long timerLength = 15; // 15s
   private String message;
+  private Stage owner;
 
   public DialogMessage(Level level) {
     this.level = level;
@@ -150,6 +151,14 @@ public class DialogMessage {
 
   public String getDialogId() {
     return dialogId;
+  }
+
+  public Stage getOwner() {
+    return owner;
+  }
+
+  public void setOwner(Stage owner) {
+    this.owner = owner;
   }
 
   public static class MessageButton {

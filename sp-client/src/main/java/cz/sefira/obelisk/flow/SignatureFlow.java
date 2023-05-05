@@ -103,7 +103,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
         // private key is found on multiple devices - selection dialog
         while (true) {
           final Operation<AbstractProduct> operation = this.getOperationFactory()
-              .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, getOperationFactory(), products);
+              .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
           final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
           if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
             selectedProduct = selectProductOperationResult.getResult();

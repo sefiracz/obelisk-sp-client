@@ -25,22 +25,31 @@
 	</top>
 
   <center>
-    <GridPane fx:id="gridPane" alignment="CENTER" styleClass="preferences-container" vgap="5" hgap="10">
+    <GridPane fx:id="gridPane" alignment="CENTER" styleClass="dash-container" vgap="5" hgap="10">
       <!-- row 1 -->
       <Label text="%preferences.splashscreen" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
       <CheckBox fx:id="splashscreen" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="1"/>
       <!-- row 2 -->
-      <Label text="%reauth.settings.label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-      <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-      <Button fx:id="minus" text="-" prefWidth="35" minWidth="35" prefHeight="35" minHeight="35" styleClass="btn-default" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-      <TextField fx:id="durationTextField" promptText="0 minut" styleClass="durationTextField" prefWidth="100" minWidth="100"  GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-      <Button fx:id="plus" text="+" prefWidth="35" minWidth="35" prefHeight="35" minHeight="35" styleClass="btn-default" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
+      <Label text="%preferences.notifications" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+      <CheckBox fx:id="showNotifications" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="2"/>
       <!-- row 3 -->
-      <Label text="%preferences.debugmode" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-      <CheckBox fx:id="debugMode" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="3"/>
+      <Label text="%reauth.settings.label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+      <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+      <Button fx:id="minusDuration" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="minus" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+      <TextField fx:id="durationTextField" promptText="0 minut" styleClass="durationTextField" prefWidth="100" minWidth="100"  GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+      <Button fx:id="plusDuration" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
       <!-- row 4 -->
-<!--      <Label text="%preferences.sslStoreFile" GridPane.columnIndex="0" GridPane.rowIndex="4"/>-->
-<!--      <Button fx:id="sslStoreFile" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="4"/>-->
+      <Label text="%preferences.debugmode" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+      <CheckBox fx:id="debugMode" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="4"/>
+      <!-- row 5 -->
+<!--      <Label text="%preferences.notification.close.delay" GridPane.columnIndex="0" GridPane.rowIndex="5"/>-->
+<!--      <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="5"/>-->
+<!--      <Button fx:id="minusDelay" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="minus" GridPane.columnIndex="2" GridPane.rowIndex="5"/>-->
+<!--      <TextField fx:id="delayTextField" promptText="5 sekund" styleClass="durationTextField" prefWidth="100" minWidth="100"  GridPane.columnIndex="4" GridPane.rowIndex="5"/>-->
+<!--      <Button fx:id="plusDelay" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="5"/>-->
+      <!-- row 6 -->
+<!--      <Label text="%preferences.sslStoreFile" GridPane.columnIndex="0" GridPane.rowIndex="6"/>-->
+<!--      <Button fx:id="sslStoreFile" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="6"/>-->
       <!-- row n -->
     </GridPane>
   </center>
@@ -51,7 +60,7 @@
       <Button fx:id="export" mnemonicParsing="false" styleClass="btn-secondary" text="%button.export"/>
       <Region HBox.hgrow="ALWAYS"/>
       <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
-      <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
+      <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.save"/>
     </HBox>
 	</bottom>
 

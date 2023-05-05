@@ -26,9 +26,7 @@ import iaik.pkcs.pkcs11.TokenException;
 
 import javax.smartcardio.CardTerminal;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class DetectedCard extends AbstractProduct {
 
@@ -88,7 +86,7 @@ public class DetectedCard extends AbstractProduct {
    */
   private transient SmartcardInfo knownToken;
 
-	private List<ConnectionInfo> infos;
+	private ConnectionInfo connectionInfo;
 
 	public DetectedCard(byte[] atr, CardTerminal terminal, int terminalIndex, PlatformAPI api) {
 		this.terminal = terminal;
@@ -257,27 +255,20 @@ public class DetectedCard extends AbstractProduct {
 		this.knownToken = knownToken;
 	}
 
-	public ConnectionInfo getConnectionInfo(OS os) {
-		for (ConnectionInfo info : getInfos()) {
-			if (info.getOs().equals(os)) {
-				return info;
-			}
-		}
-		return null;
+	public ConnectionInfo getConnectionInfo() {
+		return connectionInfo;
 	}
 
-	public List<ConnectionInfo> getInfos() {
-		if (infos == null) {
-			infos = new ArrayList<>();
-		}
-		return infos;
+	public void setConnectionInfo(ConnectionInfo connectionInfo) {
+		this.connectionInfo = connectionInfo;
 	}
 
-	public void setInfos(List<ConnectionInfo> infos) {
-		this.infos = infos;
+	@Override
+	public String getTooltip() {
+		return connectionInfo.getApiParam();
 	}
 
-  /**
+	/**
    * Transform an ATR byte array into a string.
    *
    * @param b
@@ -389,6 +380,9 @@ public class DetectedCard extends AbstractProduct {
 		}
 		if(getTerminalLabel() != null && that.getTerminalLabel() != null) {
 			if (!getTerminalLabel().equalsIgnoreCase(that.getTerminalLabel())) return false;
+		}
+		if(getConnectionInfo() != null && that.getConnectionInfo() != null) {
+			if (!getConnectionInfo().equals(that.getConnectionInfo())) return false;
 		}
 		return getSimpleLabel().equalsIgnoreCase(that.getSimpleLabel());
 	}

@@ -14,13 +14,13 @@
  */
 package cz.sefira.obelisk.api;
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.EventsStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.pkcs11.PKCS11Manager;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -54,8 +54,6 @@ public interface PlatformAPI {
 
 	List<Match> matchingProductAdapters(Product p);
 
-	List<SystrayMenuItem> getExtensionSystrayMenuItem();
-
 	EnvironmentInfo getEnvironmentInfo();
 
 	void registerProductAdapter(ProductAdapter adapter);
@@ -69,8 +67,6 @@ public interface PlatformAPI {
 	Execution<Boolean> checkSession(SessionValue sessionValue);
 
 	// Utils API
-
-	AppConfig getAppConfig();
 
 	VersionPlugin getVersionPlugin();
 
@@ -86,8 +82,13 @@ public interface PlatformAPI {
 
 	<T extends AbstractProduct> ProductStorage<T> getProductStorage(Class<T> c);
 
+	EventsStorage getEventsStorage();
+
 	void setSslCertificateProvider(SSLCertificateProvider sslCertificateProvider);
 
 	SSLCertificateProvider getSslCertificateProvider();
 
+	void pushNotification(Notification notification);
+
+	void closeNotification();
 }

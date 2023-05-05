@@ -50,6 +50,11 @@ public class ConfiguredKeystore extends AbstractProduct {
 	}
 
 	@Override
+	public String getTooltip() {
+		return getSimpleLabel();
+	}
+
+	@Override
 	public String getSimpleLabel() {
 		return this.getUrl().substring(this.getUrl().lastIndexOf('/') + 1) +" ("+this.getType().getLabel()+")";
 	}

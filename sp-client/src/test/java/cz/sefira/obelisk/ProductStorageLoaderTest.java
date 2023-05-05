@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk;
 
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.token.macos.MacOSKeychain;
 import cz.sefira.obelisk.token.windows.WindowsKeystore;
 import org.junit.Assert;

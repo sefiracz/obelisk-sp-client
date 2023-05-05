@@ -14,13 +14,13 @@
  */
 package cz.sefira.obelisk.generic;
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
+import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.api.model.ScAPI;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 import cz.sefira.obelisk.token.keystore.KSPrivateKeyEntry;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.windows.WindowsSignatureTokenAdapter;
@@ -61,7 +61,10 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
 
     @Override
     protected SignatureTokenConnection connect(final PlatformAPI api, final DetectedCard card, final PasswordInputCallback callback) {
-        final ConnectionInfo cInfo = this.card.getConnectionInfo(api.getEnvironmentInfo().getOs());
+        final ConnectionInfo cInfo = this.card.getConnectionInfo();
+        if (!cInfo.getOs().equals(OS.getOS())) {
+          throw new PKCS11TokenException("Token not present or unable to connect");
+        }
         final ScAPI scApi = cInfo.getSelectedApi();
         switch (scApi) {
             case MSCAPI:
@@ -116,11 +119,6 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
     }
 
   @Override
-  public SystrayMenuItem getExtensionSystrayMenuItem(PlatformAPI api) {
-    return null;
-  }
-
-  @Override
   public void saveProduct(AbstractProduct product, Map<TokenOperationResultKey, Object> map) {
     saveSmartcard((DetectedCard) product, map);
   }
@@ -128,6 +126,7 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
   @Override
   public void removeProduct(AbstractProduct product) {
     getProductStorage().remove(product);
+    api.getPKCS11Manager().unregisterCard((DetectedCard) product);
   }
 
   public ProductStorage<DetectedCard> getProductStorage() {
@@ -135,55 +134,12 @@ public class GenericCardAdapter extends AbstractCardProductAdapter {
   }
 
   private void saveSmartcard(final DetectedCard card, Map<TokenOperationResultKey, Object> map) {
-      // TODO - refactor cards
     String apiParam = (String) map.get(TokenOperationResultKey.SELECTED_API_PARAMS);
     ScAPI selectedApi = (ScAPI) map.get(TokenOperationResultKey.SELECTED_API);
     EnvironmentInfo env = api.getEnvironmentInfo();
-    ConnectionInfo cInfo = new ConnectionInfo();
-    cInfo.setSelectedApi(selectedApi);
-    cInfo.setOs(env.getOs());
-    cInfo.setApiParam(apiParam);
-    card.getInfos().add(cInfo);
+    ConnectionInfo cInfo = new ConnectionInfo(env.getOs(), selectedApi, apiParam);
+    card.setConnectionInfo(cInfo);
     getProductStorage().add(card);
-
-//      for (AbstractProduct ap : getProductDatabase().getProducts(DetectedCard.class)) {
-//        SCInfo scInfo = (SCInfo) ap;
-//        if (scInfo.getAtr().equals(card.getAtr()) &&
-//            (card.getCertificateId() == null || scInfo.getCertificateId().equals(card.getCertificateId())) &&
-//            (card.getKeyAlias() == null || scInfo.getKeyAlias().equals(card.getKeyAlias())) &&
-//            (card.getTokenLabel() == null || scInfo.getTokenLabel().equals(card.getTokenLabel()))	) {
-//          return scInfo;
-//        }
-//      }
-//      return null;
-//    }
-//
-//
-////    public final void add(PlatformAPI api, DetectedCard detectedCard, ConnectionInfo cInfo) {
-//      SCInfo info = getInfo(detectedCard);
-//      if (info == null) {
-//        info = new SCInfo();
-//        info.setAtr(detectedCard.getAtr());
-//        info.setCertificateId(detectedCard.getCertificateId());
-//        info.setCertificate(detectedCard.getCertificate());
-//        info.setType(detectedCard.getType());
-//        info.setKeyAlias(detectedCard.getKeyAlias());
-//        info.setTerminalIndex(detectedCard.getTerminalIndex());
-//        info.setTerminalLabel(detectedCard.getTerminalLabel());
-//        info.setTokenLabel(detectedCard.getTokenLabel());
-//        info.setTokenSerial(detectedCard.getTokenSerial());
-//        info.setTokenManufacturer(detectedCard.getTokenManufacturer());
-//      }
-//      if(!getSmartcards().contains(info)) {
-//        getSmartcards().add(info);
-//        info.getInfos().add(cInfo);
-//      }
-//      QuickAccessProductsMap.access().put(detectedCard.getCertificateId(), info);
-//      api.getPKCS11Manager().registerCard(info);
-//      onAddRemove();
-//    }
-//
-//    getProductDatabase().add(api, card, cInfo);
   }
 
 }

@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.cert.CertificateExpiredException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Text utility methods
@@ -47,6 +49,20 @@ public class TextUtils {
   public static String formatXsDateTime(Date date) {
     StringBuilder sb = new StringBuilder(XS_DATE_TIME_FORMAT.format(date));
     return sb.insert(sb.length() - 2, ":").toString();
+  }
+
+  public static String localizedDatetime(Date date, boolean includeTime) {
+    if (date == null)
+      return "";
+    String timeFormat;
+    if(Locale.getDefault().getLanguage().equals("cs")) {
+      timeFormat = "dd. MM. yyyy";
+    } else {
+      timeFormat = "dd/MM/yyyy";
+    }
+    timeFormat = (includeTime ? timeFormat+" HH:mm:ss" : timeFormat);
+    SimpleDateFormat sdf = new SimpleDateFormat(timeFormat);
+    return sdf.format(date);
   }
 
   public static String encodeHexString(byte[] byteArray) {

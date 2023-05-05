@@ -24,12 +24,12 @@ package cz.sefira.obelisk.view.ui;
  */
 
 import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
-import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
-import cz.sefira.obelisk.view.core.UIOperation;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -70,6 +70,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   private Pane productsContainer;
 
   @FXML
+  private Button dashButton;
+
+  @FXML
   private Button select;
 
   @FXML
@@ -82,7 +85,6 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   private Button cancel;
 
   private ToggleGroup product;
-  private OperationFactory operationFactory;
   private PlatformAPI api;
 
   private List<AbstractProduct> products;
@@ -103,8 +105,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     select.setOnAction(e -> signalEnd(getSelectedProduct()));
     cancel.setOnAction(e -> signalUserCancel());
 
-    manage.setOnAction(e -> UIOperation.getFutureOperationInvocation(NonBlockingUIOperation.class,
-            "/fxml/manage-keystores.fxml", api, products).call(operationFactory));
+    manage.setOnAction(e ->
+        StandaloneDialog.createDialogFromFXML("/fxml/manage-keystores.fxml", null, true, api, products)
+    );
     product = new ToggleGroup();
     select.disableProperty().bind(product.selectedToggleProperty().isNull());
 
@@ -130,9 +133,8 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   @Override
   public final void init(Object... params) {
     this.api = (PlatformAPI) params[0];
-    this.operationFactory = (OperationFactory) params[1];
-    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), "product.selection.title");
-    products = (List<AbstractProduct>) params[2];
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "product.selection.title");
+    products = (List<AbstractProduct>) params[1];
 
     progressIndicatorVisible(true);
     asyncTask(() -> {
@@ -173,6 +175,8 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
 
       progressIndicatorVisible(false);
     });
+
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, false, api));
     setLogoBackground(productsContainer);
   }
 

@@ -35,6 +35,8 @@
 
     <bottom>
       <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+        <Button fx:id="dashButton" styleClass="dashButton" mnemonicParsing="false" prefWidth="32" prefHeight="32" />
+        <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
         <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
         <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%systray.menu.manage.keystores"/>

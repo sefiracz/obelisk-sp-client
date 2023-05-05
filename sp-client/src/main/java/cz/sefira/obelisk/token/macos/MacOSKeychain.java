@@ -34,6 +34,11 @@ public class MacOSKeychain extends AbstractProduct {
 	}
 
 	@Override
+	public String getTooltip() {
+		return "Apple Keychain";
+	}
+
+	@Override
 	public String getSimpleLabel() {
 		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
 				.getString("product.selection.add.new.macos.keystore"));

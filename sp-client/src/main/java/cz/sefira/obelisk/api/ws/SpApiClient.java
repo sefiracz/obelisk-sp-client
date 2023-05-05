@@ -10,6 +10,7 @@ package cz.sefira.obelisk.api.ws;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.model.Platform;
 import cz.sefira.obelisk.api.ws.auth.AuthenticationProvider;
@@ -51,7 +52,7 @@ public class SpApiClient {
           throws URISyntaxException, GeneralSecurityException, IOException {
     // URI builder
     URIBuilder uriBuilder = new URIBuilder(url);
-    uriBuilder.addParameter(new BasicNameValuePair("version", api.getAppConfig().getApplicationVersion()));
+    uriBuilder.addParameter(new BasicNameValuePair("version", AppConfig.get().getApplicationVersion()));
     uriBuilder.addParameter(new BasicNameValuePair("platform", Platform.get()));
     uriBuilder.addParameter(new BasicNameValuePair("devices", String.valueOf(sync)));
     // execute request

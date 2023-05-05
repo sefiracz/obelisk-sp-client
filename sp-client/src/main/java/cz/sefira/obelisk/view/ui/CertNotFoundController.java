@@ -10,6 +10,7 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
@@ -56,7 +57,7 @@ public class CertNotFoundController extends AbstractUIOperationController<Boolea
     api = (PlatformAPI) params[0];
 
     // set title
-    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), "message.title");
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title");
 
     Platform.runLater(() -> {
 

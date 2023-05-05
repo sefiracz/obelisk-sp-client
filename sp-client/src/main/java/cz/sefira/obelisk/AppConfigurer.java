@@ -23,6 +23,8 @@ package cz.sefira.obelisk;
  * Author: hlavnicka
  */
 
+import ch.qos.logback.classic.Level;
+import cz.sefira.obelisk.util.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +39,11 @@ public class AppConfigurer {
 		userLang = userLang.equals("cs") ? userLang : "en";
 		String language = lang != null ? lang : userLang;
 		Locale.setDefault(new Locale(language, ""));
-		App.refreshSystrayMenu();
 	}
 
-//	public static void setLocalePreferences(final UserPreferences preferences) {
-//		String language = preferences.getLanguage() != null ? preferences.getLanguage() : System.getProperty("user.language");
-//		Locale.setDefault(new Locale(language, ""));
-//		App.refreshSystrayMenu();
-//	}
-
 	public static void applyUserPreferences(final UserPreferences preferences) {
-		// nothing
+		logger.info("Applying user preferences");
+		LogUtils.setLogLevel(preferences.isDebugMode() ? Level.DEBUG : Level.INFO);
 	}
 
 }

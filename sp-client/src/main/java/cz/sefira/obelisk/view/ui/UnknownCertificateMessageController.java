@@ -23,6 +23,7 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -73,14 +74,14 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     this.resources = resources;
     this.ok.setOnAction(e -> signalEnd(null));
     this.cancel.setOnAction((e) -> this.signalUserCancel());
-    this.certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(X509Utils.convertToPEM(certificateToken)));
+    this.certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(null, X509Utils.convertToPEM(certificateToken)));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void init(final Object... params) {
     api = (PlatformAPI) params[0];
-    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), "message.title");
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title");
     certificateToken = (CertificateToken) params[1];
     message.setText(MessageFormat.format(resources.getString("certificates.flow.manual"), new Object[]{}));
     setLogoBackground(messageBox, 250, 250);

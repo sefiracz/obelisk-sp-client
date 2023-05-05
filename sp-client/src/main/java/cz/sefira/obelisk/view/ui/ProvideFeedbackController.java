@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.model.Feedback;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -71,7 +72,7 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 
           // environment info
           body.append(resources.getString("feedback.mail.body.envInfo")).append("\n");
-          body.append("App version: ").append(getApi().getAppConfig().getApplicationVersion()).append("\n");
+          body.append("App version: ").append(AppConfig.get().getApplicationVersion()).append("\n");
           body.append(EnvironmentInfo.buildDiagnosticEnvInfo()).append("\n");
 
           // initialized pkcs11 modules

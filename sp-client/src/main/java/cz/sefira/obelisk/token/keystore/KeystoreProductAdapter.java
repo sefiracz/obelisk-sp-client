@@ -15,14 +15,13 @@
 package cz.sefira.obelisk.token.keystore;
 
 import cz.sefira.obelisk.AppException;
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
 import cz.sefira.obelisk.generic.SessionManager;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 import cz.sefira.obelisk.view.core.UIOperation;
 import cz.sefira.obelisk.dss.*;
 import cz.sefira.obelisk.dss.token.*;
@@ -101,16 +100,11 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	public FutureOperationInvocation<Product> getConfigurationOperation(PlatformAPI api, Product product) {
 		if (product instanceof NewKeystore) {
 			return UIOperation
-          .getFutureOperationInvocation(UIOperation.class, "/fxml/configure-keystore.fxml", api.getAppConfig().getApplicationName());
+          .getFutureOperationInvocation(UIOperation.class, "/fxml/configure-keystore.fxml", AppConfig.get().getApplicationName());
 		} else {
 			return new NoOpFutureOperationInvocation<>(product);
 		}
 	}
-
-  @Override
-  public SystrayMenuItem getExtensionSystrayMenuItem(PlatformAPI api) {
-    return null;
-  }
 
   @Override
 	public List<Product> detectProducts() {

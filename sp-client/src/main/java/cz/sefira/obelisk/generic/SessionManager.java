@@ -92,6 +92,7 @@ public class SessionManager {
   }
 
   public void destroy() {
+    logger.info("Destroying session");
     if(this.tokenStorage != null) {
       this.tokenStorage.destroy();
       this.tokenStorage.cancel();
