@@ -23,6 +23,7 @@ import java.util.prefs.Preferences;
 public class UserPreferences {
 
   private static final String SPLASH_SCREEN = "sefira.obelisk.sp.splashScreen";
+  private static final String SHOW_NOTIFICATIONS = "sefira.obelisk.sp.showNotifications";
   private static final String DEBUG_MODE = "sefira.obelisk.sp.debugMode";
   private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
   private static final String CACHE_DURATION = "sefira.obelisk.sp.cacheDuration";
@@ -32,8 +33,9 @@ public class UserPreferences {
 
   private String hiddenDialogIds;
   private Boolean splashScreen;
-  private Boolean debugMode;
+  private Boolean showNotifications;
   private Integer cacheDuration;
+  private Boolean debugMode;
 
   public UserPreferences(final AppConfig appConfig) {
     this.appConfig = appConfig;
@@ -43,6 +45,9 @@ public class UserPreferences {
 
     final String splashScreenValue = prefs.get(SPLASH_SCREEN, null);
     splashScreen = splashScreenValue != null ? Boolean.parseBoolean(splashScreenValue) : null;
+
+    final String showNotificationsValue = prefs.get(SHOW_NOTIFICATIONS, null);
+    showNotifications = showNotificationsValue != null ? Boolean.parseBoolean(showNotificationsValue) : null;
 
     final String debugModeValue = prefs.get(DEBUG_MODE, null);
     debugMode = debugModeValue != null ? Boolean.parseBoolean(debugModeValue) : null;
@@ -83,6 +88,16 @@ public class UserPreferences {
     this.splashScreen = splashScreen;
   }
 
+
+  public void setShowNotifications(Boolean showNotifications) {
+    if(showNotifications) {
+      prefs.put(SHOW_NOTIFICATIONS, "true");
+    } else {
+      prefs.put(SHOW_NOTIFICATIONS, "false");
+    }
+    this.showNotifications = showNotifications;
+  }
+
   public void setCacheDuration(Integer cacheDuration) {
     if(cacheDuration != null) {
       prefs.put(CACHE_DURATION, String.valueOf(cacheDuration));
@@ -105,8 +120,12 @@ public class UserPreferences {
     return debugMode != null ? debugMode : false; // by default is OFF
   }
 
-  public Boolean getSplashScreen() {
+  public Boolean isSplashScreen() {
     return splashScreen != null ? splashScreen : true; // by default is ON
+  }
+
+  public Boolean isShowNotifications() {
+    return showNotifications != null ? showNotifications : true; // by default is ON
   }
 
   public Integer getCacheDuration() {

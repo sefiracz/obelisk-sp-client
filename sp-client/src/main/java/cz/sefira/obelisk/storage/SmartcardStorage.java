@@ -1,10 +1,10 @@
-package cz.sefira.obelisk;
+package cz.sefira.obelisk.storage;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.ProductStorage
+ * cz.sefira.obelisk.storage.ProductStorage
  *
  * Created: 06.03.2023
  * Author: hlavnicka

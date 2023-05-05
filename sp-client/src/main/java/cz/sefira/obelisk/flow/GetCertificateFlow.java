@@ -111,14 +111,6 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
           } else {
             return this.handleErrorOperationResult(createTokenOperationResult);
           }
-//          // connect to token
-//          final OperationResult<SignatureTokenConnection> getTokenConnectionOperationResult = this.getOperationFactory()
-//              .getOperation(GetTokenConnectionOperation.class, api, tokenId).perform();
-//          if (getTokenConnectionOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
-//            token = getTokenConnectionOperationResult.getResult();
-//          } else {
-//            return this.handleErrorOperationResult(getTokenConnectionOperationResult);
-//          }
 
           // select key/certificate
           final Product product = (Product) map.get(TokenOperationResultKey.SELECTED_PRODUCT);

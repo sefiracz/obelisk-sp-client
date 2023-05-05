@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.flow.operation;
 
 import cz.sefira.obelisk.CancelledOperationException;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
 import cz.sefira.obelisk.api.Product;
 import cz.sefira.obelisk.api.ProductAdapter;
@@ -98,7 +99,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
             // let user select private key
             final OperationResult<Object> op =
                 this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml",
-                    new Object[]{keys, this.api.getAppConfig().getApplicationName()}).perform();
+                    new Object[]{keys, AppConfig.get().getApplicationName()}).perform();
             if(op.getStatus().equals(CoreOperationStatus.BACK)) {
                 return new OperationResult<>(CoreOperationStatus.BACK);
             }

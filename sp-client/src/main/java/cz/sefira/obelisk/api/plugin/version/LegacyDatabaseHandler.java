@@ -168,7 +168,7 @@ public class LegacyDatabaseHandler extends DefaultHandler {
       connectionInfo.setOs(OS.forOSName(System.getProperty("os.name")));
       connectionInfo.setSelectedApi(ScAPI.PKCS_11);
       connectionInfo.setApiParam(apiParam);
-      card.setInfos(List.of(connectionInfo));
+      card.setConnectionInfo(connectionInfo);
       if (validateValues() && atr != null &&
           tokenLabel != null  && tokenSerial != null  && tokenManufacturer != null && apiParam != null) {
         products.add(card);

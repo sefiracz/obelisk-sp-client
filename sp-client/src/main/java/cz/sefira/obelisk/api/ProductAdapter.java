@@ -14,7 +14,7 @@
  */
 package cz.sefira.obelisk.api;
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
 import cz.sefira.obelisk.dss.token.DSSPrivateKeyEntry;
@@ -22,7 +22,6 @@ import cz.sefira.obelisk.dss.token.PasswordInputCallback;
 import cz.sefira.obelisk.dss.token.SignatureTokenConnection;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.Operation;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -85,13 +84,6 @@ public interface ProductAdapter {
 	 * @return The specification of the operation to call to configure <code>product</code>.
 	 */
 	FutureOperationInvocation<Product> getConfigurationOperation(PlatformAPI api, Product product);
-
-	/**
-	 * Each <code>ProductAdapter</code> is given the capability to enrich the systray menu with an item
-	 * specific to it. This method is used to retrieve this item.
-	 * @return The menu item specific to this <code>ProductAdapter</code> or <code>null</code> if none.
-	 */
-	SystrayMenuItem getExtensionSystrayMenuItem(final PlatformAPI api);
 
 	/**
 	 * Detects products that will <strong>maybe</strong> be accepted by this <code>ProductAdapter</code>.

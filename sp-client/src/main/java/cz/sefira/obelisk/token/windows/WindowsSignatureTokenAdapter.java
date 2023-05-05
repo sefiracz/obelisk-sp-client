@@ -62,7 +62,7 @@ public class WindowsSignatureTokenAdapter implements SignatureTokenConnection {
 
   @Override
   public List<DSSPrivateKeyEntry> getKeys() throws DSSException {
-    final List<DSSPrivateKeyEntry> list = new ArrayList<DSSPrivateKeyEntry>();
+    final List<DSSPrivateKeyEntry> list = new ArrayList<>();
     try {
       final KeyStore keyStore = getKeyStore();
       final Enumeration<String> aliases = keyStore.aliases();
@@ -75,7 +75,8 @@ public class WindowsSignatureTokenAdapter implements SignatureTokenConnection {
             list.add(new KSPrivateKeyEntry(alias, entry));
           }
           else if (keyStore.isCertificateEntry(alias)) {
-            logger.info("Only certificate found for '{}'", alias);
+            if (logger.isDebugEnabled())
+              logger.debug("Only certificate found for '{}'", alias);
             Certificate certificate = keyStore.getCertificate(alias);
             list.add(new EmptyKeyEntry(alias, (X509Certificate) certificate));
           }

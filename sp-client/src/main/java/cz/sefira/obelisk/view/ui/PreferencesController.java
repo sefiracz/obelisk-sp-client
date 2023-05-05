@@ -16,11 +16,12 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.UserPreferences;
-import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.util.ZipUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
-import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.StandaloneUIController;
+import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -30,6 +31,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import cz.sefira.obelisk.api.PlatformAPI;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-public class PreferencesController extends AbstractUIOperationController<Void> implements Initializable {
+public class PreferencesController extends ControllerCore implements StandaloneUIController, Initializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreferencesController.class.getName());
 
@@ -67,16 +69,31 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	private CheckBox splashscreen;
 
 	@FXML
-	private CheckBox debugMode;
+	private CheckBox showNotifications;
 
 	@FXML
-	private Button minus;
+	private Button minusDuration;
 
 	@FXML
 	private TextField durationTextField;
 
 	@FXML
-	private Button plus;
+	private Button plusDuration;
+
+	// TODO - notification delay?
+//	@FXML
+//	private Button minusDelay;
+//
+//	@FXML
+//	private TextField delayTextField;
+//
+//	@FXML
+//	private Button plusDelay;
+
+	@FXML
+	private CheckBox debugMode;
+
+	private Stage primaryStage;
 
 	private PlatformAPI api;
 
@@ -95,12 +112,12 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 		ok.disableProperty().bind(readOnly);
 		reset.disableProperty().bind(readOnly);
 
-		minus.setOnAction((e) -> decrementDuration());
-		minus.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::decrementDuration,
+		minusDuration.setOnAction((e) -> decrementDuration());
+		minusDuration.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::decrementDuration,
 				325, 125, TimeUnit.MILLISECONDS));
 
-		plus.setOnAction((e) -> incrementDuration());
-		plus.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::incrementDuration,
+		plusDuration.setOnAction((e) -> incrementDuration());
+		plusDuration.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::incrementDuration,
 				325, 125, TimeUnit.MILLISECONDS));
 
 		durationTextField.setTextFormatter(new TextFormatter<>(this::filter));
@@ -108,18 +125,18 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 
 		ok.setOnAction((evt) -> {
 			userPreferences.setDebugMode(debugMode.selectedProperty().getValue());
+			userPreferences.setShowNotifications(showNotifications.selectedProperty().getValue());
 			userPreferences.setSplashScreen(splashscreen.selectedProperty().getValue());
 			if (duration == 0 || !Integer.valueOf(duration).equals(userPreferences.getCacheDuration())) {
 				SessionManager.getManager().destroySecret();
 			}
 			userPreferences.setCacheDuration(duration);
 			AppConfigurer.applyUserPreferences(userPreferences);
-			signalEnd(null);
+			close();
 		});
-		cancel.setOnAction((e) -> signalEnd(null));
+		cancel.setOnAction((e) -> close());
 		reset.setOnAction((e) -> {
-			StandaloneDialog.showConfirmResetDialog(api, userPreferences);
-			signalEnd(null);
+			StandaloneDialog.showConfirmResetDialog(primaryStage, api, userPreferences);
 		});
 
 		export.setOnAction((e) -> {
@@ -128,11 +145,11 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
 			String name = "obelisk-sp-client_export-"+sdf.format(new Date())+".zip";
 			fileChooser.setInitialFileName(name);
-			File f = fileChooser.showSaveDialog(getDisplay().getStage(false));
+			File f = fileChooser.showSaveDialog(primaryStage);
 			if (f != null) {
 				logger.info("Exporting configuration: "+f.getAbsolutePath());
 				try (OutputStream out = Files.newOutputStream(f.toPath())) {
-					File userHome = api.getAppConfig().getAppUserHome();
+					File userHome = AppConfig.get().getAppUserHome();
 					out.write(ZipUtils.zipDirectory(userHome, name, userPreferences.toString(), null));
 				}
 				catch (IOException ex) {
@@ -143,13 +160,14 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
 	}
 
 	@Override
-	public void init(Object... params) {
-		StageHelper.getInstance().setTitle("", "preferences.header");
+	public void init(Stage stage, Object... params) {
+		this.primaryStage = stage;
 		this.api = (PlatformAPI) params[0];
 		this.userPreferences = (UserPreferences) params[1];
 		this.readOnly.set((boolean) params[2]);
 		this.debugMode.selectedProperty().setValue(userPreferences.isDebugMode());
-		this.splashscreen.selectedProperty().setValue(userPreferences.getSplashScreen());
+		this.showNotifications.selectedProperty().setValue(userPreferences.isShowNotifications());
+		this.splashscreen.selectedProperty().setValue(userPreferences.isSplashScreen());
 		this.duration = userPreferences.getCacheDuration();
 		setTextFieldDuration(true);
 		setLogoBackground(gridPane);
@@ -194,4 +212,8 @@ public class PreferencesController extends AbstractUIOperationController<Void> i
     }
   }
 
+	@Override
+	public void close() {
+		primaryStage.close();
+	}
 }

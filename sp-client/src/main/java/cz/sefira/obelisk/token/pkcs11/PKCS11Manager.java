@@ -13,7 +13,7 @@
  */
 package cz.sefira.obelisk.token.pkcs11;
 
-import cz.sefira.obelisk.SmartcardStorage;
+import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.api.model.KeystoreType;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
@@ -82,7 +82,7 @@ public class PKCS11Manager {
    */
   public void registerCard(DetectedCard card) {
     if(card.getType().equals(KeystoreType.PKCS11)) {
-      String pkcs11Path = card.getInfos().get(0).getApiParam();
+      String pkcs11Path = card.getConnectionInfo().getApiParam();
       String atr = card.getAtr();
       SmartcardInfo smartcardInfo = registered.get(atr);
       if(smartcardInfo == null) {

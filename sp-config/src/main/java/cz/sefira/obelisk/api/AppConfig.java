@@ -14,6 +14,8 @@
  */
 package cz.sefira.obelisk.api;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +43,6 @@ public class AppConfig {
   private static final String ACTION_TOKEN_ENDPOINT = "action_token_endpoint";
   private static final String TOKEN_ENDPOINT = "token_endpoint";
   private static final String WINDOWS_INSTALLED_PATH = "windows_installed_path";
-
-  private static final String ENABLE_SYSTRAY_MENU = "enable_systray_menu";
   private static final String USER_PREFERENCES_EDITABLE = "user_preferences_editable";
 
   private static final Logger logger = LoggerFactory.getLogger(AppConfig.class.getName());
@@ -63,9 +63,9 @@ public class AppConfig {
 
   private String windowsInstalledPath;
 
-  private boolean enableSystrayMenu;
   private boolean userPreferencesEditable;
 
+  private String backgroundLogo;
 
   private static volatile AppConfig appConfig;
   private static volatile Properties properties;
@@ -126,7 +126,6 @@ public class AppConfig {
     this.setWindowsInstalledPath(
         props.getProperty(WINDOWS_INSTALLED_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\"));
 
-    this.setEnableSystrayMenu(Boolean.parseBoolean(props.getProperty(ENABLE_SYSTRAY_MENU, "true")));
     this.setTicketUrl(props.getProperty(TICKET_URL, "ob-support@sefira.cz"));
     this.setEnableIncidentReport(Boolean.parseBoolean(props.getProperty(ENABLE_INCIDENT_REPORT, "false")));
   }
@@ -165,10 +164,6 @@ public class AppConfig {
 
   public String getWindowsInstalledPath() {
     return windowsInstalledPath;
-  }
-
-  public boolean isEnableSystrayMenu() {
-    return this.enableSystrayMenu;
   }
 
   public File getAppUserHome() {
@@ -233,6 +228,14 @@ public class AppConfig {
     return storage;
   }
 
+  public String getBackgroundLogo() throws IOException {
+    if (backgroundLogo == null) {
+      byte[] imageData = IOUtils.toByteArray(AppConfig.class.getResourceAsStream("/images/sefira_logo.png"));
+      backgroundLogo = Base64.encodeBase64String(imageData);
+    }
+    return backgroundLogo;
+  }
+
   public String getTicketUrl() {
     return this.ticketUrl;
   }
@@ -268,10 +271,6 @@ public class AppConfig {
 
   private void setWindowsInstalledPath(String windowsInstalledPath) {
     this.windowsInstalledPath = windowsInstalledPath;
-  }
-
-  private void setEnableSystrayMenu(final boolean enableSystrayMenu) {
-    this.enableSystrayMenu = enableSystrayMenu;
   }
 
   private void setTicketUrl(final String ticketUrl) {

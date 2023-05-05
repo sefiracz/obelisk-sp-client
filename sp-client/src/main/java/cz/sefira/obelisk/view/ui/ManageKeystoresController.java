@@ -14,15 +14,15 @@
  */
 package cz.sefira.obelisk.view.ui;
 
-import cz.sefira.obelisk.ProductStorage;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
+import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.api.*;
-import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.generic.QuickAccessProductsMap;
-import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.dss.DSSASN1Utils;
+import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -33,10 +33,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,10 +47,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -56,9 +56,11 @@ import java.util.ResourceBundle;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public class ManageKeystoresController extends AbstractUIOperationController<Void> implements Initializable {
+public class ManageKeystoresController extends ControllerCore implements StandaloneUIController, Initializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(ManageKeystoresController.class.getName());
+
+	// TODO - disable remove when using devices
 
 	@FXML
 	private Button cancel;
@@ -90,6 +92,8 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	@FXML
 	private Label keystoreLabel;
 
+	private Stage primaryStage;
+
 	private final ObservableList<AbstractProduct> observableKeystores;
 
 	private PlatformAPI api;
@@ -103,7 +107,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		cancel.setOnAction(e -> signalEnd(null));
+		cancel.setOnAction(e -> primaryStage.close());
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		// double-click show certificate
@@ -121,6 +125,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 							String certBase64 = item.getCertificate();
 							try {
 								X509Utils.getCertificateFromBase64(certBase64).checkValidity();
+								this.setTooltip(new Tooltip(item.getTooltip()));
 							} catch (CertificateExpiredException | CertificateNotYetValidException e) {
 								this.getStyleClass().add("expired-row");
 							}
@@ -133,7 +138,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-					X509Utils.openPEMCertificate(X509Utils.wrapPEMCertificate(row.getItem().getCertificate()));
+					X509Utils.openPEMCertificate(primaryStage, X509Utils.wrapPEMCertificate(row.getItem().getCertificate()));
 				}
 			});
 			return row;
@@ -169,13 +174,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 				String certBase64 = param.getValue().getCertificate();
 				X509Certificate x509Certificate = X509Utils.getCertificateFromBase64(certBase64);
 				Date notAfter = x509Certificate.getNotAfter();
-				SimpleDateFormat sdf;
-				if(Locale.getDefault().getLanguage().equals("cs")) {
-					sdf = new SimpleDateFormat("dd. MM. yyyy");
-				} else {
-					sdf = new SimpleDateFormat("dd/MM/yyyy");
-				}
-				validUntil = sdf.format(notAfter);
+				validUntil = TextUtils.localizedDatetime(notAfter, false);
 			} catch (CertificateException e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -207,7 +206,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		keystoresTable.setItems(observableKeystores);
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
-		certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(
+		certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(primaryStage,
 				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
@@ -218,8 +217,7 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 				for(final AbstractProduct p : c.getRemoved()) {
 					List<Match> matchList = api.matchingProductAdapters(p);
 					if(!matchList.isEmpty()) {
-						ProductStorage<?> storage = matchList.get(0).getAdapter().getProductStorage();
-						storage.remove(p);
+						matchList.get(0).getAdapter().removeProduct(p);
 					}
 				}
 			}
@@ -227,9 +225,9 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 	}
 
 	@Override
-	public void init(Object... params) {
+	public void init(Stage stage, Object... params) {
+		primaryStage = stage;
 		api = (PlatformAPI) params[0];
-		StageHelper.getInstance().setTitle("", "systray.menu.manage.keystores");
 		if(params.length > 1) {
       filtered = (List<AbstractProduct>) params[1];
     }
@@ -244,4 +242,8 @@ public class ManageKeystoresController extends AbstractUIOperationController<Voi
 		});
 	}
 
+	@Override
+	public void close() throws IOException {
+
+	}
 }

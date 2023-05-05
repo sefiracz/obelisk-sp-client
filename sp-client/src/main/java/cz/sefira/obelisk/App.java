@@ -23,6 +23,9 @@ import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.FlowRegistry;
 import cz.sefira.obelisk.flow.operation.BasicOperationFactory;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.storage.EventsStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
+import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -49,9 +52,10 @@ public class App extends Application {
 		return t;
 	});
 
-	private static SystrayMenu systrayMenu;
+	private Systray systray;
 	private ProductStorage<?> productStorage;
 	private SmartcardStorage smartcardStorage;
+	private EventsStorage eventsStorage;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -73,11 +77,7 @@ public class App extends Application {
 				final PlatformAPI api = buildAPI(uiDisplay, operationFactory);
 				logger.info("Detect all available products");
 				api.detectAll();
-				if (api.getAppConfig().isEnableSystrayMenu()) {
-					systrayMenu = new SystrayMenu(operationFactory, api, new UserPreferences(AppConfig.get()));
-				} else {
-					logger.info("Systray menu is disabled.");
-				}
+				Systray.spawnSystray(api);
 				logger.info("Initialization finished");
 			} catch (Exception e) {
 				logger.error("Initialization failed: "+e.getMessage(), e);
@@ -96,6 +96,7 @@ public class App extends Application {
 			Path storage = AppConfig.get().getAppStorageDirectory();
 			productStorage = new ProductStorage<>(storage.resolve("products"));
 			smartcardStorage = new SmartcardStorage(storage.resolve("smartcards"));
+			eventsStorage = new EventsStorage(storage.resolve("events"));
 		} catch (IOException e) {
 			StandaloneDialog.showDialog(null, new DialogMessage("preloader.error.occurred",
 					DialogMessage.Level.ERROR, new String[] {e.getMessage()}), true);
@@ -104,7 +105,7 @@ public class App extends Application {
 
 		AppConfigurer.applyUserPreferences(new UserPreferences(AppConfig.get()));
 		final APIBuilder builder = new APIBuilder();
-		final PlatformAPI api = builder.build(uiDisplay, AppConfig.get(), getFlowRegistry(), productStorage, smartcardStorage, operationFactory);
+		final PlatformAPI api = builder.build(uiDisplay, getFlowRegistry(), productStorage, smartcardStorage, eventsStorage, operationFactory);
 		notifyPreloader(builder.initPlugins(api, AppConfig.get().getProperties()));
 		return api;
 	}
@@ -122,12 +123,17 @@ public class App extends Application {
 		logger.info("Stopping application...");
 		SessionManager.getManager().destroy();
 		if (productStorage != null) {
+			logger.info("Stopping products storage");
 			productStorage.close();
 		}
 		if (smartcardStorage != null) {
+			logger.info("Stopping smartcards storage");
 			smartcardStorage.close();
 		}
-		// TODO - explicitly release file lock?
+		if (eventsStorage != null) {
+			logger.info("Stopping events storage");
+			eventsStorage.close();
+		}
 		System.exit(0);
 	}
 
@@ -139,8 +145,4 @@ public class App extends Application {
 		}
 	}
 
-	public static void refreshSystrayMenu() {
-		if(systrayMenu != null && systrayMenu.getSystrayMenuInitializer() != null)
-			systrayMenu.getSystrayMenuInitializer().refreshLabels();
-	}
 }

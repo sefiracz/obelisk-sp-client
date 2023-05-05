@@ -13,7 +13,8 @@
  */
 package cz.sefira.obelisk.api.plugin;
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.plugin.version.LegacyProductStorage;
@@ -36,8 +37,8 @@ public class VersionPlugin implements AppPlugin {
   @Override
   public List<InitErrorMessage> init(String pluginId, PlatformAPI api) {
     try {
-      final File appUserHome = api.getAppConfig().getAppUserHome();
-      final String currentVersion = api.getAppConfig().getApplicationVersion();
+      final File appUserHome = AppConfig.get().getAppUserHome();
+      final String currentVersion = AppConfig.get().getApplicationVersion();
       logger.info("Current version: "+currentVersion);
       final File versionFile = new File(appUserHome, "version");
       // first test if file exists
@@ -65,7 +66,7 @@ public class VersionPlugin implements AppPlugin {
   }
 
   private void migrateLegacyVersionDatabase(PlatformAPI api) {
-    final File legacyHome = api.getAppConfig().getLegacyAppUserHome();
+    final File legacyHome = AppConfig.get().getLegacyAppUserHome();
     if (legacyHome != null && legacyHome.exists()) {
       LegacyProductStorage legacyStorage = new LegacyProductStorage();
       ProductStorage<AbstractProduct> storage = api.getProductStorage(AbstractProduct.class);

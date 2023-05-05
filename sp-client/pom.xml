@@ -90,11 +90,11 @@
     <!-- Bouncycastle -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
+      <artifactId>bcpkix-jdk18on</artifactId>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcprov-jdk18on</artifactId>
     </dependency>
 
     <!-- Apache HTTP client -->
@@ -137,11 +137,6 @@
       <groupId>iaik</groupId>
       <artifactId>iaik_pkcs11wrapper</artifactId>
       <version>${iaik.pkcs11.wrapper.version}</version>
-    </dependency>
-    <!-- Systray support -->
-    <dependency>
-      <groupId>com.dorkbox</groupId>
-      <artifactId>SystemTray</artifactId>
     </dependency>
     <!-- 3rd party misc -->
     <dependency>

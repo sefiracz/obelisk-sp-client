@@ -30,6 +30,11 @@ public class NewKeystore extends AbstractProduct {
 	}
 
 	@Override
+	public String getTooltip() {
+		return "";
+	}
+
+	@Override
 	public String getSimpleLabel() {
 		return getLabel();
 	}

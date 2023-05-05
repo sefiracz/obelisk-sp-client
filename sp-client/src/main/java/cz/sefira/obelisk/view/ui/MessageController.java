@@ -15,9 +15,11 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.UserPreferences;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.core.TimerService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -73,7 +75,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 		if (ok != null) {
 			ok.setOnAction(e -> {
         if(doNotShowCheckbox.selectedProperty().getValue()) {
-          UserPreferences prefs = new UserPreferences(api.getAppConfig());
+          UserPreferences prefs = new UserPreferences(AppConfig.get());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
 			  signalEnd(null);
@@ -87,7 +89,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
     api = (PlatformAPI) params[0];
     dialogMessage = (DialogMessage) params[1];
     // set title
-    StageHelper.getInstance().setTitle(api.getAppConfig().getApplicationName(), dialogMessage.getLevel().getTitleCode());
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), dialogMessage.getLevel().getTitleCode());
 
     Platform.runLater(() -> {
       // set message

@@ -60,7 +60,7 @@ public class SignatureFlowTest {
 		SessionManager.getManager().setToken(detectedCard, token);
 		when(SessionManager.getManager().getInitializedTokenForProduct(detectedCard)).thenReturn(token);
 		final AppConfig appConfig = AppConfig.get();
-		when(api.getAppConfig()).thenReturn(appConfig);
+		when(AppConfig.get()).thenReturn(appConfig);
 
 		when(adapter.connect(eq(api), eq(detectedCard), any())).thenReturn(token);
 

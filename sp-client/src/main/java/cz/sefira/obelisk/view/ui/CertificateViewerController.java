@@ -46,9 +46,6 @@ public class CertificateViewerController implements StandaloneUIController, Init
   private static final Logger logger = LoggerFactory.getLogger(CertificateViewerController.class);
 
   @FXML
-  private Stage stage;
-
-  @FXML
   private Button save;
 
   @FXML
@@ -72,6 +69,8 @@ public class CertificateViewerController implements StandaloneUIController, Init
   @FXML
   private Text valueContent;
 
+  private Stage stage;
+
   final private ObservableList<String[]> observableCertificateData;
 
   private ResourceBundle resourceBundle;
@@ -81,7 +80,10 @@ public class CertificateViewerController implements StandaloneUIController, Init
     observableCertificateData = FXCollections.observableArrayList();
   }
 
-  public void init(Object... params) {
+  public void init(Stage stage, Object... params) {
+    this.stage = stage;
+    stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
+    stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];
     try {
       int fieldsCount = 0;
@@ -167,8 +169,6 @@ public class CertificateViewerController implements StandaloneUIController, Init
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
     this.resourceBundle = resourceBundle;
-    stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
-    stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
     cancel.setOnAction(e -> stage.close());
     certDataTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     certDataTable.setRowFactory(tv -> {
@@ -204,4 +204,8 @@ public class CertificateViewerController implements StandaloneUIController, Init
 
   }
 
+  @Override
+  public void close() throws IOException {
+    stage.close();
+  }
 }

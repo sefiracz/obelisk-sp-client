@@ -14,12 +14,11 @@
  */
 package cz.sefira.obelisk.token.windows;
 
-import cz.sefira.obelisk.ProductStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.NoOpFutureOperationInvocation;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
 import cz.sefira.obelisk.token.keystore.KSPrivateKeyEntry;
 import cz.sefira.obelisk.flow.exceptions.PKCS11TokenException;
 import cz.sefira.obelisk.flow.operation.TokenOperationResultKey;
@@ -100,11 +99,6 @@ public class WindowsKeystoreProductAdapter implements ProductAdapter {
 	public FutureOperationInvocation<Product> getConfigurationOperation(PlatformAPI api, Product product) {
 		return new NoOpFutureOperationInvocation<Product>(product);
 	}
-
-  @Override
-  public SystrayMenuItem getExtensionSystrayMenuItem(PlatformAPI api) {
-    return null;
-  }
 
   @Override
 	public List<Product> detectProducts() {

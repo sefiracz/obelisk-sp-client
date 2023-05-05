@@ -1,10 +1,10 @@
-package cz.sefira.obelisk;
+package cz.sefira.obelisk.util;
 
 /*
  * Copyright 2021 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.Pair
+ * cz.sefira.obelisk.util.Pair
  *
  * Created: 06.12.2021
  * Author: hlavnicka

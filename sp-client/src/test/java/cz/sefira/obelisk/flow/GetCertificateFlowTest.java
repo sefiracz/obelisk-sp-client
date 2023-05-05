@@ -59,7 +59,7 @@ public class GetCertificateFlowTest {
 
         final PlatformAPI api = mock(PlatformAPI.class);
         final AppConfig appConfig = AppConfig.get();
-        when(api.getAppConfig()).thenReturn(appConfig);
+        when(AppConfig.get()).thenReturn(appConfig);
 
         final Product selectedProduct = new NewKeystore();
         when(api.detectCards(true)).thenReturn(Collections.emptyList());
@@ -102,7 +102,7 @@ public class GetCertificateFlowTest {
         when(api.detectCards(true)).thenReturn(Arrays.asList(product));
 
         final AppConfig appConfig = AppConfig.get();
-        when(api.getAppConfig()).thenReturn(appConfig);
+        when(AppConfig.get()).thenReturn(appConfig);
 
         final OperationFactory operationFactory = mock(OperationFactory.class);
 
@@ -187,7 +187,7 @@ public class GetCertificateFlowTest {
 
         final PlatformAPI api = mock(PlatformAPI.class);
         final AppConfig appConfig = AppConfig.get();
-        when(api.getAppConfig()).thenReturn(appConfig);
+        when(AppConfig.get()).thenReturn(appConfig);
         final DetectedCard detectedCard = new DetectedCard("atr", 0);
         when(adapter.getConfigurationOperation(api, detectedCard))
         .thenReturn(new NoOpFutureOperationInvocation<Product>(detectedCard));

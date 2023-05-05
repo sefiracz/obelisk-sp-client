@@ -16,10 +16,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="360.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane prefHeight="360.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8"
+           xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="cz.sefira.obelisk.view.ui.ProductSelectionController">
 
-	<BorderPane fx:id="borderPane">
+  <BorderPane fx:id="borderPane">
 
     <top>
       <VBox BorderPane.alignment="CENTER" styleClass="top">
@@ -27,21 +28,21 @@
       </VBox>
     </top>
 
-		<center>
+    <center>
       <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true">
         <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
       </ScrollPane>
-		</center>
+    </center>
 
-		<bottom>
+    <bottom>
       <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
-        <MenuButton fx:id="menuButton"/>
+        <Button fx:id="dashButton" styleClass="dashButton" mnemonicParsing="false" prefWidth="32" prefHeight="32" />
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
         <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
         <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
       </HBox>
-		</bottom>
+    </bottom>
 
-	</BorderPane>
+  </BorderPane>
 </StackPane>

@@ -52,7 +52,7 @@ import java.util.ResourceBundle;
  */
 public class StandaloneUIDisplay implements UIDisplay {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StandaloneUIDisplay.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(StandaloneUIDisplay.class.getName());
 
 	private Stage blockingStage;
 	private Stage nonBlockingStage;
@@ -70,17 +70,17 @@ public class StandaloneUIDisplay implements UIDisplay {
 		currentOperationName = operation.getOperationName();
 		Platform.runLater(() -> {
 			Stage stage = (blockingOperation) ? blockingStage : nonBlockingStage;
-			LOGGER.info("Display " + currentOperationName + " in display " + this);
+			logger.info("Display " + currentOperationName + " in display " + this);
 			if (!stage.isShowing()) {
 				if(blockingOperation) {
 					stage = blockingStage = createStage(true);
 				} else {
 					stage = nonBlockingStage = createStage(false);
 				}
-				LOGGER.info("Loading "+(blockingOperation?"":"non-")+"blocking UI "
+				logger.info("Loading "+(blockingOperation?"":"non-")+"blocking UI "
 						+ currentOperationName + " in " + panel + " using new Stage " + stage);
 			} else {
-				LOGGER.info("Stage still showing, displaying " + currentOperationName);
+				logger.info("Stage still showing, displaying " + currentOperationName);
 			}
 			final Scene scene = new Scene(panel);
 			scene.getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
@@ -125,7 +125,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 		newStage.setAlwaysOnTop(true);
 		newStage.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
-				LOGGER.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
+				logger.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
 				newStage.close();
 				if (blockingStage && (currentBlockingOperation != null)) {
 					currentBlockingOperation.signalUserCancel();
@@ -133,7 +133,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 			}
 		});
 		newStage.setOnCloseRequest((e) -> {
-			LOGGER.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
+			logger.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
 			newStage.hide();
 			e.consume();
 
@@ -148,7 +148,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 	public void close(final boolean blockingOperation) {
 		Platform.runLater(() -> {
 			Stage oldStage = (blockingOperation) ? blockingStage : nonBlockingStage;
-			LOGGER.info("Hide "+currentOperationName+" using " + oldStage + " and create new stage");
+			logger.info("Hide "+currentOperationName+" using " + oldStage + " and create new stage");
 			if(blockingOperation) {
 				blockingStage = createStage(true);
 			} else {
@@ -170,7 +170,8 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	private <T> void waitForUser(UIOperation<T> operation) {
 		try {
-			LOGGER.info("Wait on Thread " + Thread.currentThread().getName());
+			if (logger.isDebugEnabled())
+				logger.debug("Wait on Thread " + Thread.currentThread().getName());
 			currentBlockingOperation = operation;
 			operation.waitEnd();
 			currentBlockingOperation = null;
@@ -196,14 +197,14 @@ public class StandaloneUIDisplay implements UIDisplay {
 		@Override
     @SuppressWarnings("unchecked")
 		public char[] getPassword() {
-			LOGGER.info("Request password");
+			logger.info("Request password");
       final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
               UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
               AppConfig.get().getApplicationName(), product).perform();
       if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
         return (char[]) passwordResult.getResult(); // get password
       } else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-        throw new CancelledOperationException();
+        throw new CancelledOperationException(); // TODO - ERROR?
       } else if(passwordResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
         final Exception e = passwordResult.getException();
         if(e instanceof RuntimeException) {
@@ -225,14 +226,14 @@ public class StandaloneUIDisplay implements UIDisplay {
 		@Override
 		@SuppressWarnings("unchecked")
 		public GuardedString getReauth() {
-			LOGGER.info("Request PKCS11 re-auth");
+			logger.info("Request PKCS11 re-auth");
 			// check if cached
 			try {
 				GuardedString reauth = SessionManager.getManager().getSecret();
 				if (reauth != null)
 					return reauth.copy();
 			} catch (Exception e) {
-				LOGGER.warn(e.getMessage(), e);
+				logger.warn(e.getMessage(), e);
 			}
 			// ask user for re-auth
 			final OperationResult<Object> reauthOperationResult = StandaloneUIDisplay.this.operationFactory.getOperation(

@@ -34,6 +34,12 @@ public class WindowsKeystore extends AbstractProduct {
 	}
 
 	@Override
+	public String getTooltip() {
+		return  StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
+				.getString("keystore.type.simple.keystore.windows"));
+	}
+
+	@Override
 	public String getSimpleLabel() {
 		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
 				.getString("product.selection.add.new.windows.keystore"));

@@ -14,8 +14,11 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.token.macos.MacOSKeychain;
+import cz.sefira.obelisk.view.StandaloneDialog;
+import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,26 +30,21 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import cz.sefira.obelisk.SystrayMenu;
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.Product;
-import cz.sefira.obelisk.systray.SystrayMenuItem;
-import cz.sefira.obelisk.api.flow.FutureOperationInvocation;
 import cz.sefira.obelisk.api.flow.OperationFactory;
-import cz.sefira.obelisk.api.flow.OperationResult;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import cz.sefira.obelisk.token.windows.WindowsKeystore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class ProductSelectionController extends AbstractUIOperationController<Product> implements Initializable {
 
@@ -68,7 +66,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   private VBox productsContainer;
 
   @FXML
-  private MenuButton menuButton;
+  private Button dashButton;
 
   @FXML
   private Button select;
@@ -125,7 +123,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   public final void init(Object... params) {
     api = (PlatformAPI) params[0];
     operationFactory = (OperationFactory) params[1];
-    appName = api.getAppConfig().getApplicationName();
+    appName = AppConfig.get().getApplicationName();
     StageHelper.getInstance().setTitle(appName, "product.selection.title");
 
     // add progress indicator
@@ -189,49 +187,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     });
 
     // create context menu
-    Platform.runLater(() -> {
-      try {
-        // menu button
-        ImageView img = new ImageView(new Image(this.getClass().getResource("/images/cog-solid.png").openStream()));
-        menuButton.setGraphic(img);
-        menuButton.getStyleClass().add("mButton");
-
-        // menu items
-        final List<SystrayMenuItem> menuItems = new ArrayList<>();
-        menuItems.add(SystrayMenu.createAboutSystrayMenuItem(api, ResourceBundle.getBundle("bundles/nexu")));
-        menuItems.add(SystrayMenu.createPreferencesSystrayMenuItem(api,
-                new UserPreferences(api.getAppConfig())));
-        menuItems.addAll(api.getExtensionSystrayMenuItem());
-        menuItems.add(new SystrayMenuItem() {
-
-          @Override
-          public String getName() {
-            return "systray.menu.exit";
-          }
-
-          @Override
-          public String getLabel() {
-            return ResourceBundle.getBundle("bundles/nexu").getString(getName());
-          }
-
-          @Override
-          public FutureOperationInvocation<Void> getFutureOperationInvocation() {
-            return operationFactory -> {
-              System.exit(0); // force exit
-              return new OperationResult<>((Void) null);
-            };
-          }
-        });
-        for(SystrayMenuItem item : menuItems) {
-          MenuItem menuItem = new MenuItem(item.getLabel());
-          menuItem.setOnAction(a -> item.getFutureOperationInvocation().call(operationFactory));
-          menuItem.getStyleClass().add("mItem");
-          menuButton.getItems().add(menuItem);
-        }
-      } catch (IOException e) {
-        logger.error(e.getMessage(), e);
-      }
-    });
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, false, api));
     setLogoBackground(productsContainer);
   }
 

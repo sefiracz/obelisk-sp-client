@@ -11,6 +11,7 @@ package cz.sefira.obelisk.api;
  */
 
 import cz.sefira.obelisk.api.model.KeystoreType;
+
 public abstract class AbstractProduct implements Product {
 
   protected String certificateId;
@@ -92,6 +93,8 @@ public abstract class AbstractProduct implements Product {
   public void setKeyAlias(String keyAlias) {
     this.keyAlias = keyAlias;
   }
+
+  abstract public String getTooltip();
 
   @Override
   public boolean equals(Object o) {

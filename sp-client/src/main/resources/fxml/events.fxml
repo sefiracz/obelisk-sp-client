@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ © SEFIRA spol. s r.o., 2020-2023
+
+ Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ You may use this work only in accordance with the License.
+ You can obtain a copy of the License at the following address:
+
+ https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+ Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ See the License for specific permissions and language restrictions under the License.
+-->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="cz.sefira.obelisk.view.ui.EventsViewerController">
+
+  <top>
+    <VBox BorderPane.alignment="CENTER">
+      <Label styleClass="message" text="%events.header" wrapText="true" />
+    </VBox>
+  </top>
+
+  <left>
+    <VBox style="-fx-spacing: 5" minWidth="180" prefWidth="180" alignment="CENTER">
+      <fx:define>
+        <ToggleGroup fx:id="group" />
+      </fx:define>
+      <RadioButton toggleGroup="$group" selected="true" minWidth="160" prefWidth="160" fx:id="showLast" styleClass="btn-events" text="%button.events.show.last"/>
+      <RadioButton toggleGroup="$group" minWidth="160" prefWidth="160" fx:id="showToday" styleClass="btn-events" text="%button.events.show.day"/>
+      <RadioButton toggleGroup="$group" minWidth="160" prefWidth="160" fx:id="showAll" styleClass="btn-events" text="%button.events.show.all"/>
+      <Region VBox.vgrow="ALWAYS"/>
+      <Button minWidth="160" prefWidth="160" fx:id="exitButton" styleClass="btn-events" text="%button.events.exit"/>
+    </VBox>
+  </left>
+
+  <center>
+    <TableView fx:id="eventsTable" BorderPane.alignment="CENTER">
+      <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+      <columns>
+        <TableColumn reorderable="false" fx:id="eventIdColumn" minWidth="45.0" maxWidth="45.0" prefWidth="45.0" text="%events.table.id" />
+        <TableColumn reorderable="false" fx:id="eventDateColumn" minWidth="120.0" maxWidth="120.0" prefWidth="120.0" text="%events.table.date" />
+        <TableColumn reorderable="false" fx:id="eventNotificationColumn"  text="%events.table.text" />
+      </columns>
+    </TableView>
+  </center>
+
+  <bottom>
+    <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
+      <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel" />
+    </HBox>
+  </bottom>
+
+</BorderPane>

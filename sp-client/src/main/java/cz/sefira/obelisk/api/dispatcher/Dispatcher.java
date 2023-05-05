@@ -12,6 +12,7 @@ package cz.sefira.obelisk.api.dispatcher;
 
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.api.*;
+import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.api.ws.GenericApiException;
@@ -46,6 +47,7 @@ import java.security.Security;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +87,7 @@ public class Dispatcher implements AppPlugin {
     logger.info("Dispatcher initializing");
     try {
       this.api = api;
-      this.messageQueue = MessageQueueFactory.getInstance(api.getAppConfig());
+      this.messageQueue = MessageQueueFactory.getInstance(AppConfig.get());
       this.client = new SpApiClient(api);
       dispatcher.scheduleAtFixedRate(() -> {
         // init thread
@@ -105,6 +107,7 @@ public class Dispatcher implements AppPlugin {
 
   private void validateMessage(Message message) {
     // get message
+    String notificationProperty = null;
     try {
       if (message == null) {
         return;
@@ -146,83 +149,100 @@ public class Dispatcher implements AppPlugin {
       // TODO
       String magicLink = URLDecoder.decode(magicParam.getValue(), UTF_8);
       AuthenticationProvider tokenProvider = new BearerTokenProvider(magicLink, api); // obtain authorization credentials
-      processMessage(tokenProvider);
+      Execution<?> result = processMessage(tokenProvider);
+      if (result != null) {
+        if (result.isSuccess()) {
+          notificationProperty = "notification.event.success";
+        } else if (BasicOperationStatus.USER_CANCEL.getCode().equals(result.getError())) {
+          notificationProperty = "notification.event.user.cancel";
+        } else {
+          notificationProperty = "notification.event.exception";
+        }
+      }
     }
     catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
-    }
-    catch (Exception e) {
-      logger.error(e.getMessage(), e);
-      DialogMessage errMsg = new DialogMessage("dispatcher.generic.error", DialogMessage.Level.ERROR);
-      StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
-    }
-  }
-
-  private void processMessage(AuthenticationProvider tokenProvider)
-      throws GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
-    try {
-      String url = tokenProvider.getRedirectUri();
-      boolean sync = performSync();
-      do {
-        // GET work request
-        HttpResponse response = client.call("GET", url, tokenProvider, null, sync);
-        if (response.getCode() == HttpStatus.SC_ACCEPTED) {
-          idle(); // wait operation = go back to GET method
-          continue;
-        } else if (response.getCode() != HttpStatus.SC_OK) {
-          throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
-        }
-        idleTime = 0;
-        BaseRequest req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
-        Execution<?> result = api.checkSession(req.getSession());
-        if (!result.isSuccess()) {
-          client.call("POST", url, tokenProvider, result, false);
-          logger.error("Session invalid, stop process");
-          return;
-        }
-        // synchronize supported hardware database
-        sync = sync && syncDevices(req);
-
-        // execute  result
-        while (true) {
-          // check if request is present
-          if (req == null) {
-            break;
-          }
-          // execute flow
-          result = executeFlow(req, response.getContent());
-          if (result != null) {
-            audit(result, response);
-            // send results
-            response = client.call("POST", url, tokenProvider, result, false);
-            int responseCode = response.getCode();
-            if (responseCode == HttpStatus.SC_OK) {
-              req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
-            } else if (responseCode == HttpStatus.SC_NO_CONTENT) {
-              return;
-            } else if (responseCode == HttpStatus.SC_SEE_OTHER || responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-              url = HttpUtils.getLocationURI(response);
-              break; // go back to GET method
-            } else if (responseCode == HttpStatus.SC_ACCEPTED) {
-              idle();
-              break; // wait operation = go back to GET method
-            }
-          }
-        }
-      } while (true); // batch ended
+      notificationProperty = "notification.event.fatal";
     }
     catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
       StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e));
+      notificationProperty = "notification.event.fatal";
     }
     catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage("dispatcher.communication.error", DialogMessage.Level.ERROR,
           new String[]{String.valueOf(e.getStatusCode()), e.getReasonPhrase()}, 475, 150);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
+      notificationProperty = "notification.event.fatal";
     }
+    catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      DialogMessage errMsg = new DialogMessage("dispatcher.generic.error", DialogMessage.Level.ERROR);
+      StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
+      notificationProperty = "notification.event.fatal";
+    } finally {
+      if (notificationProperty != null) {
+        // close notification
+        String messageText = ResourceBundle.getBundle("bundles/nexu").getString(notificationProperty);
+        api.pushNotification(new Notification(messageText, true, 5));
+      }
+    }
+  }
+
+  private Execution<?> processMessage(AuthenticationProvider tokenProvider)
+      throws GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
+    String url = tokenProvider.getRedirectUri();
+    boolean sync = performSync();
+    Execution<?> result;
+    do {
+      // GET work request
+      HttpResponse response = client.call("GET", url, tokenProvider, null, sync);
+      if (response.getCode() == HttpStatus.SC_ACCEPTED) {
+        idle(); // wait operation = go back to GET method
+        continue;
+      } else if (response.getCode() != HttpStatus.SC_OK) {
+        throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
+      }
+      idleTime = 0;
+      BaseRequest req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
+      // execute  result
+      while (true) {
+        // check if request is present
+        if (req == null) {
+          break;
+        }
+        // check session
+        if (!checkSession(req.getSession(), url, tokenProvider)) {
+          return null;
+        }
+        // notification
+        api.pushNotification(new Notification(req.getDescription()));
+        // synchronize supported hardware database
+        sync = sync && syncDevices(req);
+        // execute flow
+        result = executeFlow(req, response.getContent());
+        if (result != null) {
+          audit(result, response);
+          // send results
+          response = client.call("POST", url, tokenProvider, result, false);
+          int responseCode = response.getCode();
+          if (responseCode == HttpStatus.SC_OK) {
+            req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
+          } else if (responseCode == HttpStatus.SC_NO_CONTENT) {
+            return result;
+          } else if (responseCode == HttpStatus.SC_SEE_OTHER || responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+            url = HttpUtils.getLocationURI(response);
+            break; // go back to GET method
+          } else if (responseCode == HttpStatus.SC_ACCEPTED) {
+            idle();
+            break; // wait operation = go back to GET method
+          }
+        }
+      }
+    } while (true); // batch ended
   }
 
   private Execution<?> executeFlow(BaseRequest req, byte[] requestData) {
@@ -243,6 +263,17 @@ public class Dispatcher implements AppPlugin {
         throw new IllegalStateException("Unknown operation: " + req.getOperation());
     }
     return result;
+  }
+
+  private boolean checkSession(SessionValue sessionValue, String url, AuthenticationProvider tokenProvider)
+      throws GeneralSecurityException, URISyntaxException, IOException {
+    Execution<?> result = api.checkSession(sessionValue);
+    if (!result.isSuccess()) {
+      client.call("POST", url, tokenProvider, result, false);
+      logger.error("Session invalid, stop process");
+      return false;
+    }
+    return true;
   }
 
   private void idle() throws InterruptedException {

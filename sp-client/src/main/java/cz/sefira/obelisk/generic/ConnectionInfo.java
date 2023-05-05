@@ -26,9 +26,17 @@ import cz.sefira.obelisk.api.model.ScAPI;
 public class ConnectionInfo {
 
 	private OS os;
-
 	private ScAPI selectedApi;
 	private String apiParam;
+
+	public ConnectionInfo() {
+	}
+
+	public ConnectionInfo(OS os, ScAPI selectedApi, String apiParam) {
+		this.os = os;
+		this.selectedApi = selectedApi;
+		this.apiParam = apiParam;
+	}
 
 	public OS getOs() {
 		return os;
@@ -52,5 +60,25 @@ public class ConnectionInfo {
 
 	public void setApiParam(String apiParam) {
 		this.apiParam = apiParam;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ConnectionInfo that = (ConnectionInfo) o;
+
+		if (getOs() != that.getOs()) return false;
+		if (getSelectedApi() != that.getSelectedApi()) return false;
+		return getApiParam().equals(that.getApiParam());
+	}
+
+	@Override
+	public int hashCode() {
+		int result = getOs().hashCode();
+		result = 31 * result + getSelectedApi().hashCode();
+		result = 31 * result + getApiParam().hashCode();
+		return result;
 	}
 }

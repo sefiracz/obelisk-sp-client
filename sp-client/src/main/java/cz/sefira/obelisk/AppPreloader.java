@@ -68,7 +68,7 @@ public class AppPreloader extends Preloader {
 			StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
 							DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
 			System.exit(1);
-		} else if (new UserPreferences(AppConfig.get()).getSplashScreen()) {
+		} else if (new UserPreferences(AppConfig.get()).isSplashScreen()) {
 			showSplashScreen(primaryStage);
 		}
 	}

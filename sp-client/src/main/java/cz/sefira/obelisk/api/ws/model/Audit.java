@@ -42,8 +42,8 @@ public class Audit {
       String type = usedProduct.getType().getLabel();
       if (usedProduct instanceof DetectedCard) {
         DetectedCard card = (DetectedCard) usedProduct;
-        List<ConnectionInfo> infos = card.getInfos();
-        String driver = !infos.isEmpty() && infos.get(0) != null ? infos.get(0).getApiParam() : "";
+        ConnectionInfo infos = card.getConnectionInfo();
+        String driver = infos != null ? infos.getApiParam() : "";
         String detail = card.getAtr()+" "+driver;
         this.usedToken = new UsedToken(type, detail);
       } else if (usedProduct instanceof ConfiguredKeystore) {

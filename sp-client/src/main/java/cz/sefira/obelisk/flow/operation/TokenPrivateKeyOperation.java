@@ -23,6 +23,8 @@ package cz.sefira.obelisk.flow.operation;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.CancelledOperationException;
+import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.api.flow.OperationResult;
 import cz.sefira.obelisk.flow.exceptions.AbstractTokenRuntimeException;
@@ -68,6 +70,8 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
       else {
         return new OperationResult<>(CoreOperationStatus.NO_TOKEN);
       }
+    } catch (CancelledOperationException e) {
+      return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     } catch (AbstractTokenRuntimeException e) {
       this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
       return new OperationResult<>(CoreOperationStatus.CANNOT_SELECT_KEY);

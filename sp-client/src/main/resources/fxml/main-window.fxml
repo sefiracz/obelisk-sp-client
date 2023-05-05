@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ © SEFIRA spol. s r.o., 2020-2023
+
+ Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ You may use this work only in accordance with the License.
+ You can obtain a copy of the License at the following address:
+
+ https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+ Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ See the License for specific permissions and language restrictions under the License.
+-->
+
+<?import javafx.scene.control.*?>
+
+<TabPane style="-fx-border-radius: 0" fx:id="tabPane" prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx/8"
+         xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.MainWindowController">
+  <Tab text="%systray.menu.manage.events" closable="false">
+      <fx:include fx:id="eventsViewer" source="/fxml/events.fxml"/>
+  </Tab>
+  <Tab text="%systray.menu.manage.keystores" closable="false">
+    <fx:include fx:id="manageKeystores" source="/fxml/manage-keystores.fxml"/>
+  </Tab>
+  <Tab text="%systray.menu.preferences" closable="false">
+    <fx:include fx:id="preferences" source="/fxml/preferences.fxml"/>
+  </Tab>
+  <Tab text="%systray.menu.about" closable="false">
+    <fx:include fx:id="about" source="/fxml/about.fxml"/>
+  </Tab>
+</TabPane>

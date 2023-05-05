@@ -24,12 +24,12 @@ package cz.sefira.obelisk;
  */
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.ipc.MessageQueue;
 import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.process.*;
+import cz.sefira.obelisk.util.LogUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class AppLauncher {
       appConfig = AppConfig.get();
       // logging mode (debug / info)
       Level logLevel = new UserPreferences(appConfig).isDebugMode() ? Level.DEBUG : Level.INFO;
-      setLogLevel(logLevel);
+      LogUtils.setLogLevel(logLevel);
       // add message to the queue
       if (args.length > 0) {
         String input = args[0];
@@ -63,6 +63,7 @@ public class AppLauncher {
       } else {
         logger.info("Launcher initiated with no message");
       }
+      checkDevMode();
       // check lock
       checkForRunningProcess();
       // start app
@@ -87,11 +88,12 @@ public class AppLauncher {
     s.checkRunning();
   }
 
-  private static void setLogLevel(Level logLevel) {
-    LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-    ch.qos.logback.classic.Logger log = loggerContext.getLogger("ROOT");
-    log.setLevel(Level.toLevel(logLevel.levelInt, Level.INFO));
-    logger.info("Log level: "+logLevel);
+  private static void checkDevMode() {
+    String devMode = System.getProperty("dev.mode");
+    if (Boolean.parseBoolean(devMode)) {
+      logger.info("DEV MODE enabled, exiting.");
+      System.exit(0);
+    }
   }
 
 }

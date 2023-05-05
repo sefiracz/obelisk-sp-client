@@ -81,11 +81,11 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
           OperationResult<Object> result;
           if(product instanceof DetectedCard && ((DetectedCard) product).isKnownToken() != null) {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unavailable-config.fxml",
-                    new Object[]{this.api.getAppConfig().getApplicationName(),
+                    new Object[]{AppConfig.get().getApplicationName(),
                             ((DetectedCard) product).isKnownToken()}).perform();
           } else {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
-                            new Object[]{this.api.getAppConfig().getApplicationName()}).perform();
+                            new Object[]{AppConfig.get().getApplicationName()}).perform();
           }
           // advanced config?
           if (result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
@@ -149,7 +149,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     ScAPI scAPI = ScAPI.PKCS_11;
     map.put(TokenOperationResultKey.SELECTED_API, scAPI);
     final OperationResult<Object> driverSelection = operationFactory.getOperation(UIOperation.class,
-        "/fxml/pkcs11-params.fxml", this.api.getAppConfig().getApplicationName()).perform();
+        "/fxml/pkcs11-params.fxml", AppConfig.get().getApplicationName()).perform();
     if(driverSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     }
@@ -163,7 +163,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     connectionInfo.setSelectedApi(scAPI);
     connectionInfo.setOs(this.api.getEnvironmentInfo().getOs());
     DetectedCard card = (DetectedCard) product;
-    card.setInfos(List.of(connectionInfo));
+    card.setConnectionInfo(connectionInfo);
     final GenericCardAdapter adapter = new GenericCardAdapter(card, api);
 
     // create token

@@ -1,10 +1,10 @@
-package cz.sefira.obelisk;
+package cz.sefira.obelisk.storage;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.ProductStorage
+ * cz.sefira.obelisk.storage.ProductStorage
  *
  * Created: 06.03.2023
  * Author: hlavnicka
@@ -13,7 +13,6 @@ package cz.sefira.obelisk;
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.generic.QuickAccessProductsMap;
 import cz.sefira.obelisk.util.annotation.NotNull;
-import one.microstream.persistence.internal.InquiringLegacyTypeMappingResultor;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
 import one.microstream.persistence.types.Storer;

@@ -36,14 +36,12 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public abstract class AbstractUIOperationController<R> implements UIOperationController<R> {
+public abstract class AbstractUIOperationController<R> extends ControllerCore implements UIOperationController<R> {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractUIOperationController.class.getName());
 
 	private UIOperation<R> uiOperation;
 	private UIDisplay display;
-
-	private volatile boolean update;
 
 	public AbstractUIOperationController() {
 		super();
@@ -87,149 +85,8 @@ public abstract class AbstractUIOperationController<R> implements UIOperationCon
 		return display;
 	}
 
-  public final void setLogoBackground(Pane node, Integer width, Integer height) {
-    try {
-      byte[] imageData = IOUtils.toByteArray(AbstractUIOperationController.class.getResourceAsStream("/images/sefira_logo.png"));
-      node.setStyle("-fx-background-image: url(data:image/png;base64," + Base64.encodeBase64String(imageData) + ");" +
-          "-fx-background-position: right top;" +
-          "-fx-background-repeat: no-repeat;" +
-          ((height != null && width != null) ? ("-fx-background-size: "+width+"px "+height+"px;") : "")
-      );
-    }
-    catch (IOException e) {
-      logger.error("Unable to show background image logo: "+e.getMessage(), e);
-    }
-  }
-
-  public final void setLogoBackground(Pane node) {
-    setLogoBackground(node, null, null);
-  }
-
-  /**
-   * Offload thread to be run apart from JavaFX thread for heavy workload that takes time and therefore needs to
-   * run at separate thread to not block UI rendering and user experience.
-   *
-   * @param callback Heavy workload that might take time to finish
-   * @param notifyUpdate (if true) After workload is done notify update thread that updates JavaFX UI components
-   */
-  public final void asyncTask(TaskCallback callback, boolean notifyUpdate) {
-    new Thread(() -> {
-      try {
-        callback.execute();
-        if(notifyUpdate)
-          notifyUpdate();
-      } catch (Exception e) {
-        logger.error(e.getMessage(), e);
-      }
-    }).start();
-  }
-
-  /**
-   * Notifies the update thread that updates JavaFX UI components
-   */
-  public final void notifyUpdate() {
-    update = true;
-  }
-
-  /**
-   * Updates the JavaFX UI components whenever {@code notifyUpdate()} is called
-   * @param callback Implementation of {@code UpdateCallback()} function that updates the JavaFX components
-   */
-  public final void asyncUpdate(UpdateCallback callback) {
-    if(uiOperation == null)
-      return;
-    uiOperation.getUpdateExecutorService().scheduleAtFixedRate(() -> {
-      if (update) {
-        Platform.runLater(() -> {
-          try {
-            callback.update();
-          } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-          } finally {
-            update = false;
-          }
-        });
-      }
-    }, 100, 500, TimeUnit.MILLISECONDS);
-  }
-
-  @FunctionalInterface
-  public interface UpdateCallback {
-
-    void update() throws Exception;
-
-  }
-
-  @FunctionalInterface
-  public interface TaskCallback {
-
-    void execute() throws Exception;
-
-  }
-
-  public static class TimerService extends Service<Void> {
-
-    private final long seconds;
-
-    public TimerService(long seconds) {
-      if (seconds <= 0)
-        throw new IllegalArgumentException("Invalid value. Positive value only.");
-      this.seconds = seconds;
-    }
-
-    @Override
-    protected Task<Void> createTask() {
-      return new Task<Void>() {
-
-        @Override
-        protected Void call() throws Exception {
-          Thread.sleep(seconds * 10L);
-          for (int p = 99; p > 0; p--) {
-            Thread.sleep(seconds * 10L);
-            updateProgress(p, 100);
-          }
-          return null;
-        }
-      };
-    }
-  }
-
-  public static class PressedRepeatEventHandler implements EventHandler<MouseEvent> {
-
-    private final Runnable callable;
-    private final int initialDelay;
-    private final  int period;
-    private final  TimeUnit unit;
-
-    private ScheduledExecutorService executorService;
-
-    public PressedRepeatEventHandler(Runnable callable, int initialDelay, int period, TimeUnit unit) {
-      this.callable = callable;
-      this.initialDelay = initialDelay;
-      this.period = period;
-      this.unit = unit;
-    }
-
-    @Override
-    public void handle(MouseEvent event) {
-      if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-        Platform.runLater(() -> {
-          if (executorService == null || executorService.isShutdown()) {
-            executorService = Executors.newSingleThreadScheduledExecutor();
-          }
-          executorService.scheduleAtFixedRate(callable, initialDelay, period, unit);
-        });
-      }
-      else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED) ||
-          event.getEventType().equals(MouseEvent.MOUSE_EXITED) ||
-          event.getEventType().equals(MouseEvent.DRAG_DETECTED) ||
-          event.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
-        if (executorService != null && !executorService.isShutdown()) {
-          executorService.shutdownNow();
-        }
-      }
-    }
-
+  public void asyncUpdate(UpdateCallback callback) {
+    asyncUpdate(uiOperation.getUpdateExecutorService(), callback);
   }
 
 }

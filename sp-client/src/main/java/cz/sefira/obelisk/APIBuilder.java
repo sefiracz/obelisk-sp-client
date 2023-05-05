@@ -20,6 +20,9 @@ import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
+import cz.sefira.obelisk.storage.EventsStorage;
+import cz.sefira.obelisk.storage.ProductStorage;
+import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,23 +51,23 @@ public class APIBuilder {
 	/**
 	 * Builds and returns an instance of {@link PlatformAPI}.
 	 * @param display The implementation of {@link UIDisplay} used to display UI elements.
-	 * @param appConfig The configuration parameters.
 	 * @param flowRegistry The implementation of {@link FlowRegistry} to use.
 	 * @param productStorage The local product database.
 	 * @param smartcardStorage The local database of supported smartcard information.
+	 * @param eventsStorage The local events database
 	 * @param operationFactory The implementation of {@link OperationFactory} to use.
 	 * @return The built instance of {@link PlatformAPI}.
 	 */
-	public PlatformAPI build(final UIDisplay display, final AppConfig appConfig, final FlowRegistry flowRegistry,
+	public PlatformAPI build(final UIDisplay display, final FlowRegistry flowRegistry,
 													 final ProductStorage<?> productStorage, final SmartcardStorage smartcardStorage,
-													 final OperationFactory operationFactory) {
-		return new InternalAPI(display, productStorage, smartcardStorage, flowRegistry, operationFactory, appConfig);
+													 final EventsStorage eventsStorage, final OperationFactory operationFactory) {
+		return new InternalAPI(display, productStorage, smartcardStorage, eventsStorage, flowRegistry, operationFactory);
 	}
 
 	/**
 	 * Init plugins on the given {@link PlatformAPI} instance.
 	 * @param api The {@link PlatformAPI} instance on which plugins must be initialized. It <strong>MUST</strong> be
-	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, AppConfig, FlowRegistry, ProductStorage, SmartcardStorage, OperationFactory)}.
+	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, FlowRegistry, ProductStorage, SmartcardStorage, EventsStorage, OperationFactory)}.
 	 * @param properties Configuration properties of the plugin to initialize.
 	 * @return Messages about events that occurred during plugins initialization.
 	 */

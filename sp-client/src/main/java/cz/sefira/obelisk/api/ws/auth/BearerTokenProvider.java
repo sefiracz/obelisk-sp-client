@@ -10,6 +10,7 @@ package cz.sefira.obelisk.api.ws.auth;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
@@ -140,7 +141,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
 
   private BearerToken token(List<NameValuePair> params) throws URISyntaxException, GeneralSecurityException, IOException {
     URIBuilder uriBuilder = new URIBuilder(authServerUrl);
-    uriBuilder.appendPath(api.getAppConfig().getTokenEndpoint()); // /protocol/openid-connect/token
+    uriBuilder.appendPath(AppConfig.get().getTokenEndpoint()); // /protocol/openid-connect/token
     ClassicHttpRequest request = new HttpUriRequestBase("POST", uriBuilder.build());
     request.setEntity(new UrlEncodedFormEntity(params));
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
@@ -149,7 +150,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
   }
 
   private void parseAuthServerURL() {
-    int opIdx = magicLink.indexOf(api.getAppConfig().getActionTokenEndpoint()); // /login-actions/action-token
+    int opIdx = magicLink.indexOf(AppConfig.get().getActionTokenEndpoint()); // /login-actions/action-token
     if (opIdx != -1) {
       authServerUrl = magicLink.substring(0, opIdx);
     } else {

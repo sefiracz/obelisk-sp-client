@@ -34,7 +34,7 @@ public class InternalAPITest {
 	@Test
 	public void testEnvironment() throws Exception {
 
-		InternalAPI api = new InternalAPI(null, null, null, null, null, mock(AppConfig.class));
+		InternalAPI api = new InternalAPI(null, null, null, null, null, null);
 
 		EnvironmentInfo info = api.getEnvironmentInfo();
 		Assert.assertNotNull(info.getOs());
@@ -86,7 +86,7 @@ public class InternalAPITest {
 		DetectedCard card = new DetectedCard("ATR", 0);
 
 		UIDisplay display = Mockito.mock(UIDisplay.class);
-		InternalAPI api = new InternalAPI(display, null, null, null, null, mock(AppConfig.class));
+		InternalAPI api = new InternalAPI(display, null, null,  null, null, null);
 
 		SignatureTokenConnection c = new MockSignatureTokenConnection((DSSPrivateKeyEntry[])null);
 
