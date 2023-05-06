@@ -79,8 +79,18 @@ public class BusyIndicator implements Closeable {
       background.setStyle("-fx-background-color: rgba(0, 0, 0, 0)");
       final Scene scene = new Scene(background, 150, 150);
       scene.setFill(Color.TRANSPARENT);
+      // primary utility stage (does not show busy indicator window on taskbar)
+      Stage primaryStage = new Stage();
+      primaryStage.initStyle(StageStyle.UTILITY);
+      primaryStage.setWidth(0.1);
+      primaryStage.setHeight(0.1);
+      primaryStage.setOpacity(0.0);
+      primaryStage.setX(-1000);
+      primaryStage.setY(-1000);
+      primaryStage.show();
       // stage
       stage = new Stage();
+      stage.initOwner(primaryStage);
       final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
       stage.setX((screenResolution.getWidth() / 2) - (scene.getWidth() / 2));
       stage.setY((screenResolution.getHeight() / 2) - (scene.getHeight() / 2));
