@@ -132,10 +132,6 @@ public class UserPreferences {
     return cacheDuration;
   }
 
-  public AppConfig getAppConfig() {
-    return appConfig;
-  }
-
   public void clear() {
     try {
       this.prefs.clear();
@@ -146,12 +142,14 @@ public class UserPreferences {
     debugMode = null;
     hiddenDialogIds = null;
     splashScreen = null;
+    showNotifications = null;
     cacheDuration = 0;
   }
 
   @Override
   public String toString() {
     return "hiddenDialogIds=" + hiddenDialogIds + "\n" +
+        "showNotifications=" + showNotifications + "\n" +
         "splashScreen=" + splashScreen + "\n" +
         "debugMode=" + debugMode + "\n" +
         "cacheDuration=" + cacheDuration;

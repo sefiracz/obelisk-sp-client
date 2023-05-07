@@ -32,14 +32,13 @@ import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.pkcs11.PKCS11Manager;
 import cz.sefira.obelisk.view.StandaloneDialog;
-import cz.sefira.obelisk.view.StandaloneUIController;
+import cz.sefira.obelisk.view.core.StageState;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.*;
@@ -77,12 +76,9 @@ public class InternalAPI implements PlatformAPI {
   private SSLCertificateProvider sslCertificateProvider;
 
   private final ProductStorage productStorage;
-  private final SmartcardStorage smartcardStorage;
   private final EventsStorage eventsStorage;
-
   private final ExecutorService executor;
-
-  private PropertyChangeSupport propertyChangeSupport;
+  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
   private Future<?> currentTask;
 
@@ -90,7 +86,6 @@ public class InternalAPI implements PlatformAPI {
                      EventsStorage eventsStorage, FlowRegistry flowRegistry,  OperationFactory operationFactory) {
     this.display = display;
     this.productStorage = productStorage;
-    this.smartcardStorage = smartcardStorage;
     this.eventsStorage = eventsStorage;
     this.detector = new CardDetector(this, EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
     this.flowRegistry = flowRegistry;
@@ -102,6 +97,7 @@ public class InternalAPI implements PlatformAPI {
       return t;
     });
     this.currentTask = null;
+    StandaloneDialog.runLater(() -> StandaloneDialog.createDialogFromFXML("/fxml/notification.fxml", null, StageState.HIDDEN, propertyChangeSupport));
   }
 
   @Override
@@ -194,9 +190,7 @@ public class InternalAPI implements PlatformAPI {
             currentTask.cancel(true);
           }
 
-          task = executor.submit(() -> {
-            return flow.execute(this, request);
-          });
+          task = executor.submit(() -> flow.execute(this, request));
           currentTask = task;
         }
 
@@ -274,30 +268,18 @@ public class InternalAPI implements PlatformAPI {
 
 
   public void pushNotification(Notification notification) {
-    synchronized (notificationLock) {
+    synchronized (this) {
+      logger.info("Push notification: " + notification.getMessageText());
       // push notification into events
       eventsStorage.addNotification(notification);
-      // do not spawn window when show_notifications = false
-      if (new UserPreferences(AppConfig.get()).isShowNotifications()) {
-        if (propertyChangeSupport == null) {
-          logger.info("Create notification");
-          propertyChangeSupport = new PropertyChangeSupport(this);
-          StandaloneDialog.runLater(() -> {
-                StandaloneUIController notificationController =
-                    StandaloneDialog.createDialogFromFXML("/fxml/notification.fxml", null, false, this, notification);
-                propertyChangeSupport.addPropertyChangeListener((PropertyChangeListener) notificationController);
-              }
-          );
-        } else {
-          propertyChangeSupport.firePropertyChange("notify", new Object(), notification);
-        }
-      }
+      // push notification message to dialog
+      propertyChangeSupport.firePropertyChange("notify", new Object(), notification);
     }
   }
 
-  public void closeNotification() {
-    synchronized (notificationLock) {
-      propertyChangeSupport = null;
+  public PropertyChangeSupport getPropertyChangeSupport() {
+    synchronized (this) {
+      return propertyChangeSupport;
     }
   }
 

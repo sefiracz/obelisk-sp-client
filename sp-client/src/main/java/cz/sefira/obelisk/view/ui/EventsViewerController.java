@@ -21,9 +21,14 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -31,14 +36,19 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Events viewer controller
  */
-public class EventsViewerController extends ControllerCore implements StandaloneUIController, Initializable {
+public class EventsViewerController extends ControllerCore implements StandaloneUIController, PropertyChangeListener, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(EventsViewerController.class.getName());
 
@@ -58,7 +68,7 @@ public class EventsViewerController extends ControllerCore implements Standalone
   private TableView<Notification> eventsTable;
 
   @FXML
-  private TableColumn<Notification, Number> eventIdColumn;
+  private TableColumn<Notification, String> eventIdColumn;
 
   @FXML
   private TableColumn<Notification, String> eventDateColumn;
@@ -73,6 +83,8 @@ public class EventsViewerController extends ControllerCore implements Standalone
 
   private final ObservableList<Notification> observableEvents;
 
+  private ScheduledExecutorService executorService;
+
   private PlatformAPI api;
 
   public EventsViewerController() {
@@ -84,6 +96,8 @@ public class EventsViewerController extends ControllerCore implements Standalone
   public void init(Stage stage, Object... params) {
     this.primaryStage = stage;
     this.api = (PlatformAPI) params[0];
+    executorService = Executors.newSingleThreadScheduledExecutor();
+    api.getEventsStorage().addListener(this);
 
     Region lastIcon = new Region();
     lastIcon.setPrefSize(22,22);
@@ -108,19 +122,27 @@ public class EventsViewerController extends ControllerCore implements Standalone
     exitIcon.getStyleClass().add("icon-event-exit");
     exitButton.setGraphic(exitIcon);
 
-    if (showLast.isSelected()) {
-      observableEvents.setAll(api.getEventsStorage().getNotifications(EventsStorage.SelectorType.LAST));
-    } else if (showToday.isSelected()) {
-      observableEvents.setAll(api.getEventsStorage().getNotifications(EventsStorage.SelectorType.DAY));
-    } else if (showAll.isSelected()) {
-      observableEvents.setAll(api.getEventsStorage().getNotifications(EventsStorage.SelectorType.ALL));
-    }
+    asyncTask(() -> {}, true);
+
+    // asynchronous window content update
+    asyncUpdate(executorService, () -> {
+      List<Notification> list = new ArrayList<>();
+      if (showLast.isSelected()) {
+        list = api.getEventsStorage().getNotifications(EventsStorage.SelectorType.LAST);
+      } else if (showToday.isSelected()) {
+        list = api.getEventsStorage().getNotifications(EventsStorage.SelectorType.DAY);
+      } else if (showAll.isSelected()) {
+        list = api.getEventsStorage().getNotifications(EventsStorage.SelectorType.ALL);
+      }
+      observableEvents.setAll(list);
+    });
+
   }
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
     exitButton.setOnAction(e -> Platform.exit());
-    cancel.setOnAction((e) -> close());
+    cancel.setOnAction((e) -> windowClose(primaryStage));
     eventsTable.setPlaceholder(new Label(resourceBundle.getString("table.view.no.content")));
     eventsTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     eventsTable.setRowFactory(tv -> new TableRow<>() {
@@ -134,7 +156,11 @@ public class EventsViewerController extends ControllerCore implements Standalone
       }
     });
 
-    eventIdColumn.setCellValueFactory(param -> new ReadOnlyLongWrapper(param.getValue().getSeqId()));
+    eventIdColumn.setCellValueFactory(param -> {
+      Long seqId = param.getValue().getSeqId();
+      String seqIdValue = seqId >= 0 ? String.valueOf(seqId) : null;
+      return new ReadOnlyStringWrapper(seqIdValue);
+    });
     eventDateColumn.setCellValueFactory(param -> {
       String date = TextUtils.localizedDatetime(param.getValue().getDate(), true);
       return new ReadOnlyStringWrapper(date);
@@ -159,6 +185,8 @@ public class EventsViewerController extends ControllerCore implements Standalone
       }
     });
 
+    eventsTable.setItems(observableEvents);
+
     showLast.setOnAction(e -> {
       observableEvents.setAll(api.getEventsStorage().getNotifications(EventsStorage.SelectorType.LAST));
     });
@@ -169,13 +197,18 @@ public class EventsViewerController extends ControllerCore implements Standalone
       observableEvents.setAll(api.getEventsStorage().getNotifications(EventsStorage.SelectorType.ALL));
     });
 
-    eventsTable.setItems(observableEvents);
   }
 
 
   @Override
   public void close() {
-    primaryStage.close();
+    if(executorService != null)
+      executorService.shutdown();
+    api.getEventsStorage().removeListener(this);
   }
 
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    asyncTask(() -> {}, true);
+  }
 }

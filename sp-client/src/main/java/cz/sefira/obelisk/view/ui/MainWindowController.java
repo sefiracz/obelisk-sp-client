@@ -20,9 +20,11 @@ import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -53,6 +55,7 @@ public class MainWindowController implements StandaloneUIController, Initializab
   @Override
   public void init(Stage stage, Object... params) {
     this.stage = stage;
+    stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
     PlatformAPI api = (PlatformAPI) params[0];
     eventsViewerController.init(stage, api);
     manageKeystoresController.init(stage, api);
@@ -77,7 +80,15 @@ public class MainWindowController implements StandaloneUIController, Initializab
   }
 
   @Override
-  public void close() {
+  public void close(){
+    try {
+      eventsViewerController.close();
+      manageKeystoresController.close();
+      preferencesController.close();
+      aboutController.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     stage.close();
   }
 }

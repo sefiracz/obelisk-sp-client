@@ -79,4 +79,9 @@ public class IAIKPrivateKeyEntry implements DSSPrivateKeyEntry {
   public EncryptionAlgorithm getEncryptionAlgorithm() throws DSSException {
     return encryptionAlgorithm;
   }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName()+" keyLabel='" + keyLabel + "'";
+  }
 }

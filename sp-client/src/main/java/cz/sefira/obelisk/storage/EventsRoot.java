@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * description
+ * Events root object - holding event sequence number, and all notifications/events,
+ * False close flag signalizes that sequence needs to be incremented explicitly upon app start up
  */
 public class EventsRoot {
 
-  private AtomicLong sequence = new AtomicLong(1);
+  private AtomicLong sequence = new AtomicLong(0);
 
   private boolean closeFlag;
 

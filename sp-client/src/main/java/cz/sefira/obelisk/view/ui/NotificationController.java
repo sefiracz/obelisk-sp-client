@@ -10,13 +10,20 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.UserPreferences;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
-import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import cz.sefira.obelisk.view.core.TimerService;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableStringValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
@@ -33,8 +40,12 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.net.URL;
+import java.util.Queue;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -65,55 +76,72 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   private Stage stage;
 
-  private PlatformAPI api;
-  private Notification notification;
+  private PropertyChangeSupport propertyChangeSupport;
   private ScheduledExecutorService executorService;
   private double xOffset;
   private double yOffset;
+  private boolean showNotification;
+  private boolean hiddenFlag;
 
+  private Notification notification;
+  private final Queue<Notification> notificationQueue = new ConcurrentLinkedQueue<>();
   private TimerService service;
 
   @Override
   public void init(Stage stage, Object... params) {
     this.stage = stage;
-    this.api = (PlatformAPI) params[0];
-    this.notification = (Notification) params[1];
-    executorService = Executors.newSingleThreadScheduledExecutor();
-
-    // initial notification
-    asyncTask(() -> {}, true);
-
-    // asynchronous window content update
-    asyncUpdate(executorService, () -> {
-      String msg = notification.getMessageText();
-      logger.info("Notify: "+msg);
-      message.setText(msg);
-      timestamp.setText(TextUtils.localizedDatetime(notification.getDate(), true));
-      if (notification.isClose()) {
-        if (stage != null && (!stage.isShowing() || notification.getDelay() == 0)) {
-          close();
-        } else {
-          service = createTimer(notification.getDelay());
-        }
-      }
-    });
+    this.propertyChangeSupport = (PropertyChangeSupport) params[0];
+    this.propertyChangeSupport.addPropertyChangeListener(this);
+    this.executorService = Executors.newSingleThreadScheduledExecutor();
+    this.showNotification = new UserPreferences(AppConfig.get()).isShowNotifications();
 
     stage.initStyle(StageStyle.UNDECORATED);
     stage.setTitle(ResourceBundle.getBundle("bundles/nexu").getString("notification.title"));
     stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
     spawnInRightBottomCorner(background);
+
+    // asynchronous window content update
+    asyncUpdate(executorService, false, () -> {
+      if (showNotification && notification != null) {
+        Notification currentNotification = notification;
+        Platform.runLater(() -> {
+          logger.info("Notification FX thread");
+          message.setText(currentNotification.getMessageText());
+          timestamp.setText(TextUtils.localizedDatetime(currentNotification.getDate(), true));
+          // cancel if notification is in closing process and we have new notification
+          if (service != null) {
+            service.cancel();
+            progress.setVisible(false);
+            hiddenFlag = false;
+            service = null;
+          }
+          // check if notification should be spawned
+          if (!hiddenFlag) {
+            if (!stage.isShowing())
+              logger.info("Show notification");
+            stage.show();
+          }
+          if (currentNotification.isClose()) {
+            if (!stage.isShowing() || currentNotification.getDelay() == 0) {
+              hideNotification(false);
+            } else {
+              service = createHideTimer(currentNotification.getDelay());
+            }
+          }
+        });
+      } else {
+        Platform.runLater(stage::hide);
+      }
+    });
+
   }
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
-    closeButton.setOnAction((e) -> {
-      if (stage != null)
-        stage.hide();
-    });
+    closeButton.setOnAction((e) -> hideNotification(true));
 
     minimizeButton.setOnAction(e -> {
-      if (stage != null)
-        stage.setIconified(true);
+      stage.setIconified(true);
     });
 
     background.setOnMousePressed(event -> {
@@ -137,35 +165,30 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   @Override
   public void close() {
-    logger.info("Closing notification window");
-    if (stage != null) {
-      stage.close();
-    }
-    if(executorService != null)
-      executorService.shutdown();
-    api.closeNotification();
+    stage.close();
+    executorService.shutdown();
+    propertyChangeSupport.removePropertyChangeListener(this);
   }
 
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    asyncTask(() -> {
-      Platform.runLater(() -> {
-        if (service != null) {
-          service.cancel();
-          progress.setVisible(false);
-        }
-      });
-      notification = (Notification) evt.getNewValue();
-    }, true);
+    asyncTask(() -> notification = (Notification) evt.getNewValue(), true);
   }
 
-  public TimerService createTimer(long seconds) {
+  public TimerService createHideTimer(long seconds) {
     TimerService service = new TimerService(seconds);
-    service.setOnSucceeded(e -> close());
+    service.setOnSucceeded(e -> hideNotification(false));
     progress.progressProperty().bind(service.progressProperty());
     service.start();
     progress.setVisible(true);
     return service;
+  }
+
+  private void hideNotification(boolean flag) {
+    logger.info("Hiding notification (flag="+flag+")");
+    hiddenFlag = flag;
+    stage.setIconified(false);
+    stage.hide();
   }
 
 }

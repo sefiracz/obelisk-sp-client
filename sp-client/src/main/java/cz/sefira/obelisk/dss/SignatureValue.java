@@ -20,6 +20,8 @@
  */
 package cz.sefira.obelisk.dss;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -84,4 +86,8 @@ public final class SignatureValue implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return algorithm+" bLen="+value.length;
+	}
 }

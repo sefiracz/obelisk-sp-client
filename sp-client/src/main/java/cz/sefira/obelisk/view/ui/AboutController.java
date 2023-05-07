@@ -48,7 +48,7 @@ public class AboutController extends ControllerCore implements StandaloneUIContr
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		cancel.setOnAction(e -> primaryStage.close());
+		cancel.setOnAction(e -> windowClose(primaryStage));
 	}
 
 	@Override

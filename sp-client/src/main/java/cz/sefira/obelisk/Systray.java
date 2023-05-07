@@ -14,8 +14,8 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.systray.AWTSystray;
 import cz.sefira.obelisk.systray.AbstractSystray;
-import cz.sefira.obelisk.systray.DorkboxSystray;
 import cz.sefira.obelisk.view.StandaloneDialog;
+import cz.sefira.obelisk.view.core.StageState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class Systray {
       systray = new AWTSystray(tooltip, trayIcon);
     }
     if (systray != null) {
-      systray.spawnTray(() -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, false, api));
+      systray.spawnTray(() -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
     }
   }
 }

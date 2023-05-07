@@ -146,7 +146,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
           return this.handleErrorOperationResult(createTokenOperationResult);
         }
       }
-      logger.info("Token: " + token);
+      logger.info("Token: " + token.getClass().getSimpleName());
 
       // select key
       DSSPrivateKeyEntry key;

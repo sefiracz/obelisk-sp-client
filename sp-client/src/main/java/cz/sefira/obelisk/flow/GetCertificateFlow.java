@@ -67,7 +67,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
           } else {
             // let user select a product device (keystores, windows, smartcards)
             final Operation<Product> operation = this.getOperationFactory().getOperation(UIOperation.class,
-                "/fxml/product-selection.fxml", new Object[] {api, getOperationFactory()});
+                "/fxml/product-selection.fxml", api);
             final OperationResult<Product> selectProductOperationResult = operation.perform();
             if (selectProductOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
               selectedProduct = (AbstractProduct) selectProductOperationResult.getResult();

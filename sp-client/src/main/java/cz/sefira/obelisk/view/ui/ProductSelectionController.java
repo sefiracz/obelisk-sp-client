@@ -19,6 +19,7 @@ import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.token.macos.MacOSKeychain;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
+import cz.sefira.obelisk.view.core.StageState;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -81,7 +82,6 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
   private String appName;
   private PlatformAPI api;
-  private OperationFactory operationFactory;
 
   private VBox overlay;
   private VBox progressIndicator;
@@ -122,7 +122,6 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   @SuppressWarnings("unchecked")
   public final void init(Object... params) {
     api = (PlatformAPI) params[0];
-    operationFactory = (OperationFactory) params[1];
     appName = AppConfig.get().getApplicationName();
     StageHelper.getInstance().setTitle(appName, "product.selection.title");
 
@@ -187,7 +186,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     });
 
     // create context menu
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, false, api));
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
     setLogoBackground(productsContainer);
   }
 

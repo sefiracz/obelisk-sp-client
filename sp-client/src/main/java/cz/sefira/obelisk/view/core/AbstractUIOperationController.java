@@ -85,7 +85,7 @@ public abstract class AbstractUIOperationController<R> extends ControllerCore im
 		return display;
 	}
 
-  public void asyncUpdate(UpdateCallback callback) {
+  public void asyncUpdate(Runnable callback) {
     asyncUpdate(uiOperation.getUpdateExecutorService(), callback);
   }
 

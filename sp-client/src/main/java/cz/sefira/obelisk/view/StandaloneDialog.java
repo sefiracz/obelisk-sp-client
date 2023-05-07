@@ -20,6 +20,7 @@ import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
+import cz.sefira.obelisk.view.core.StageState;
 import cz.sefira.obelisk.view.core.TimerService;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -254,7 +255,7 @@ public class StandaloneDialog {
     }
   }
 
-  public static StandaloneUIController createDialogFromFXML(@NotNull String fxml, Stage owner, boolean blocking, Object... params) {
+  public static StandaloneUIController createDialogFromFXML(@NotNull String fxml, Stage owner, StageState state, Object... params) {
     try {
       FXMLLoader loader = new FXMLLoader();
       loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
@@ -271,10 +272,17 @@ public class StandaloneDialog {
       primaryStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
       StandaloneUIController controller = loader.getController();
       controller.init(primaryStage, params);
-      if (blocking) {
-        primaryStage.showAndWait();
-      } else {
-        primaryStage.show();
+      switch (state) {
+        case BLOCKING:
+          primaryStage.showAndWait();
+          break;
+        case HIDDEN:
+          primaryStage.hide();
+          break;
+        case NONBLOCKING:
+        default:
+          primaryStage.show();
+          break;
       }
       return controller;
     } catch (Throwable t) {

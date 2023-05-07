@@ -132,9 +132,9 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 			}
 			userPreferences.setCacheDuration(duration);
 			AppConfigurer.applyUserPreferences(userPreferences);
-			close();
+			windowClose(primaryStage);
 		});
-		cancel.setOnAction((e) -> close());
+		cancel.setOnAction((e) -> windowClose(primaryStage));
 		reset.setOnAction((e) -> {
 			StandaloneDialog.showConfirmResetDialog(primaryStage, api, userPreferences);
 		});
@@ -214,6 +214,6 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 
 	@Override
 	public void close() {
-		primaryStage.close();
+
 	}
 }

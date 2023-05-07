@@ -10,8 +10,6 @@ package cz.sefira.obelisk.api;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.util.TextUtils;
-
 import java.util.Date;
 
 /**
@@ -21,18 +19,26 @@ public class Notification {
 
   private long seqId;
   private final String messageText;
-  private final Date date = new Date();
+  private final Date date;
   private boolean close = false;
   private int delay;
 
+  public Notification() {
+    // empty notification (placeholder)
+    this.messageText = null;
+    this.date = null;
+    this.seqId = -1L;
+  }
+
   public Notification(String messageText) {
-    this.messageText = messageText;
+    this(messageText, false, 5);
   }
 
   public Notification(String messageText, boolean close, int delay) {
     this.messageText = messageText;
     this.close = close;
     this.delay = delay;
+    this.date = new Date();
   }
 
   public long getSeqId() {
