@@ -19,7 +19,6 @@ import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.operation.UIDisplayAwareOperation;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import cz.sefira.obelisk.api.flow.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(UIOperation.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(UIOperation.class.getName());
 
 	private final transient Object lock = new Object();
 	private transient volatile OperationResult<R> result = null;
@@ -85,7 +84,7 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
 	@Override
 	public final OperationResult<R> perform() {
-		LOGGER.info("Loading " + fxml + " view");
+		logger.info("Loading " + fxml + " view");
 		final FXMLLoader loader = new FXMLLoader();
 		try {
 			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
@@ -113,11 +112,13 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
 	public void waitEnd() throws InterruptedException {
 		String name = getOperationName();
-		LOGGER.info("Thread " + Thread.currentThread().getName() + " wait on " + name);
+		if (logger.isDebugEnabled())
+			logger.debug("Thread " + Thread.currentThread().getName() + " wait on " + name);
 		synchronized (lock) {
 			lock.wait();
 		}
-		LOGGER.info("Thread " + Thread.currentThread().getName() + " resumed on " + name);
+		if (logger.isDebugEnabled())
+			logger.debug("Thread " + Thread.currentThread().getName() + " resumed on " + name);
 	}
 
 	/**
@@ -127,7 +128,8 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 	 */
 	public final void signalEnd(R result) {
 		String name = getOperationName();
-		LOGGER.info("Notify from " + Thread.currentThread().getName() + " on " + name);
+		if (logger.isDebugEnabled())
+			logger.debug("Notify on " + name);
 		notifyResult(new OperationResult<>(result));
 		hide();
 	}

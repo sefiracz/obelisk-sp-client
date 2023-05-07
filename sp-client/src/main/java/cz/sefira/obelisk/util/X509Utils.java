@@ -26,6 +26,7 @@ package cz.sefira.obelisk.util;
 import cz.sefira.obelisk.dss.DSSException;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
 import cz.sefira.obelisk.view.StandaloneDialog;
+import cz.sefira.obelisk.view.core.StageState;
 import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
@@ -112,7 +113,7 @@ public class X509Utils {
 
   public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
     try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner,true, certificates);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.BLOCKING, certificates);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

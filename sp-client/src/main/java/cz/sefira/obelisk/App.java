@@ -88,6 +88,7 @@ public class App extends Application {
 				});
 			}
 		});
+		initThread.shutdown(); // initialization thread no longer needed
 		logger.info("Start finished");
 	}
 

@@ -16,6 +16,7 @@ package cz.sefira.obelisk.flow.operation;
 
 import cz.sefira.obelisk.CancelledOperationException;
 import cz.sefira.obelisk.api.ws.model.SignParameters;
+import cz.sefira.obelisk.token.windows.WindowsSignatureTokenAdapter;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
@@ -71,7 +72,9 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 		byte[] toBeSigned = signParams.getToBeSigned();
 		DigestAlgorithm digestAlgorithm = signParams.getDigestAlgorithm();
 		boolean rsaPss = signParams.isUseRsaPss();
-		try (BusyIndicator busyIndicator = new BusyIndicator()) {
+		// to prevent covering windows minidriver PIN input being covered by busy indicator
+		boolean alwaysOnTop = !(token instanceof WindowsSignatureTokenAdapter);
+		try (BusyIndicator busyIndicator = new BusyIndicator(true, alwaysOnTop)) {
 			if (!EncryptionAlgorithm.RSA.equals(key.getEncryptionAlgorithm())) {
 				rsaPss = false; // force RSA-PSS value to false for non-RSA keys
 			}

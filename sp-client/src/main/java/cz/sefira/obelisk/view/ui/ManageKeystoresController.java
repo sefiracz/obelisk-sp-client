@@ -107,7 +107,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		cancel.setOnAction(e -> primaryStage.close());
+		cancel.setOnAction(e -> windowClose(primaryStage));
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		// double-click show certificate

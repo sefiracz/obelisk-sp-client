@@ -27,6 +27,7 @@ import cz.sefira.obelisk.view.core.UIDisplay;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 /**
@@ -78,6 +79,8 @@ public interface PlatformAPI {
 
 	PKCS11Manager getPKCS11Manager();
 
+	PropertyChangeSupport getPropertyChangeSupport();
+
   OperationFactory getOperationFactory();
 
 	<T extends AbstractProduct> ProductStorage<T> getProductStorage(Class<T> c);
@@ -90,5 +93,4 @@ public interface PlatformAPI {
 
 	void pushNotification(Notification notification);
 
-	void closeNotification();
 }

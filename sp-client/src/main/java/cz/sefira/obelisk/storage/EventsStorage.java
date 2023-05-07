@@ -19,6 +19,8 @@ import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
 import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 import org.apache.commons.lang.time.DateUtils;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,8 @@ import java.util.List;
 public class EventsStorage implements AutoCloseable {
 
   private final EventsRoot eventsRoot = new EventsRoot();
+
+  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
   private final EmbeddedStorageManager storage;
 
@@ -57,40 +61,57 @@ public class EventsStorage implements AutoCloseable {
         eventsRoot.setCloseFlag(false);
       }
     }
+    propertyChangeSupport.firePropertyChange("event", "", "refresh");
     commitChange();
   }
 
   public List<Notification> getNotifications(SelectorType selectorType) {
-    List<Notification> allNotifications = eventsRoot.getNotifications();
+    List<Notification> allNotifications = new ArrayList<>(eventsRoot.getNotifications());
     List<Notification> selected = new ArrayList<>();
     switch (selectorType) {
-      case DAY:
-        Date today = new Date();
-        for (int i = allNotifications.size() - 1; i >= 0; i--) {
-          Notification n = allNotifications.get(i);
-          if (DateUtils.isSameDay(today, n.getDate())) {
-            selected.add(0, n);
-          } else {
-            break;
-          }
-        }
-        return selected;
       case LAST:
         int size = allNotifications.size();
         long seqId = size > 0 ? allNotifications.get(size-1).getSeqId() : -1;
         for (int i = allNotifications.size() - 1; i >= 0; i--) {
           Notification n = allNotifications.get(i);
           if (seqId == n.getSeqId()) {
-            selected.add(0, n);
+            selected.add(n);
           } else {
             break;
           }
         }
-        return selected;
+        break;
+      case DAY:
+        Date today = new Date();
+        for (int i = allNotifications.size() - 1; i >= 0; i--) {
+          Notification n = allNotifications.get(i);
+          if (DateUtils.isSameDay(today, n.getDate())) {
+            selected.add(n);
+          } else {
+            break;
+          }
+        }
+        break;
       case ALL:
       default:
-        return allNotifications;
+        for (Notification n : allNotifications) {
+          selected.add(0, n);
+        }
+        break;
     }
+    // create empty placeholders to pad buggy javafx tableview
+    for (int i=0; i<13; i++) {
+      selected.add(new Notification());
+    }
+    return selected;
+  }
+
+  public void addListener(PropertyChangeListener listener) {
+    propertyChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  public void removeListener(PropertyChangeListener listener) {
+    propertyChangeSupport.removePropertyChangeListener(listener);
   }
 
   private void commitChange() {

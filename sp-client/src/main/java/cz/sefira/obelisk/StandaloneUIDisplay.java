@@ -70,7 +70,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 		currentOperationName = operation.getOperationName();
 		Platform.runLater(() -> {
 			Stage stage = (blockingOperation) ? blockingStage : nonBlockingStage;
-			logger.info("Display " + currentOperationName + " in display " + this);
+			logger.info("Display " + currentOperationName);
 			if (!stage.isShowing()) {
 				if(blockingOperation) {
 					stage = blockingStage = createStage(true);
@@ -78,7 +78,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 					stage = nonBlockingStage = createStage(false);
 				}
 				logger.info("Loading "+(blockingOperation?"":"non-")+"blocking UI "
-						+ currentOperationName + " in " + panel + " using new Stage " + stage);
+						+ currentOperationName + " using new Stage " + stage);
 			} else {
 				logger.info("Stage still showing, displaying " + currentOperationName);
 			}
@@ -125,7 +125,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 		newStage.setAlwaysOnTop(true);
 		newStage.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
-				logger.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
+				logger.info("Closing window '"+newStage.getTitle()+"'");
 				newStage.close();
 				if (blockingStage && (currentBlockingOperation != null)) {
 					currentBlockingOperation.signalUserCancel();
@@ -133,7 +133,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 			}
 		});
 		newStage.setOnCloseRequest((e) -> {
-			logger.info("Closing window '"+newStage.getTitle()+"' from " + Thread.currentThread().getName());
+			logger.info("Closing window '"+newStage.getTitle()+"'");
 			newStage.hide();
 			e.consume();
 
@@ -146,16 +146,19 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	@Override
 	public void close(final boolean blockingOperation) {
-		Platform.runLater(() -> {
-			Stage oldStage = (blockingOperation) ? blockingStage : nonBlockingStage;
-			logger.info("Hide "+currentOperationName+" using " + oldStage + " and create new stage");
-			if(blockingOperation) {
-				blockingStage = createStage(true);
-			} else {
-				nonBlockingStage = createStage(false);
-			}
-			oldStage.hide();
-		});
+		if (currentOperationName != null) {
+			Platform.runLater(() -> {
+				Stage oldStage = (blockingOperation) ? blockingStage : nonBlockingStage;
+				logger.info("Hide "+currentOperationName+" using " + oldStage + " and create new stage");
+				if (blockingOperation) {
+					blockingStage = createStage(true);
+				} else {
+					nonBlockingStage = createStage(false);
+				}
+				oldStage.close();
+				currentOperationName = null;
+			});
+		}
 	}
 
 	@Override

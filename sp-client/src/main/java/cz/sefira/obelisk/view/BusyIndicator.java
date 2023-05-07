@@ -48,15 +48,20 @@ import java.io.Closeable;
  */
 public class BusyIndicator implements Closeable {
 
+  private Stage primaryStage = null;
   private Stage stage = null;
 
   public BusyIndicator() {
-    this(true);
+    this(true, true);
   }
 
   public BusyIndicator(boolean show) {
+    this(show, true);
+  }
+
+  public BusyIndicator(boolean show, boolean alwaysOnTop) {
     if (show) {
-      show();
+      show(alwaysOnTop);
     }
   }
 
@@ -64,7 +69,7 @@ public class BusyIndicator implements Closeable {
    * Toggles busy indicator for potential long workloads to indicate
    * to user that something is still happening
    */
-  private void show() {
+  private void show(boolean alwaysOnTop) {
     Platform.runLater(() -> {
       // toggle on busy indicator
       ProgressIndicator indicator = new ProgressIndicator();
@@ -80,7 +85,7 @@ public class BusyIndicator implements Closeable {
       final Scene scene = new Scene(background, 150, 150);
       scene.setFill(Color.TRANSPARENT);
       // primary utility stage (does not show busy indicator window on taskbar)
-      Stage primaryStage = new Stage();
+      primaryStage = new Stage();
       primaryStage.initStyle(StageStyle.UTILITY);
       primaryStage.setWidth(0.1);
       primaryStage.setHeight(0.1);
@@ -96,7 +101,7 @@ public class BusyIndicator implements Closeable {
       stage.setY((screenResolution.getHeight() / 2) - (scene.getHeight() / 2));
       stage.setScene(scene);
       stage.setTitle(AppConfig.get().getApplicationName());
-      stage.setAlwaysOnTop(true); // TODO - not for signing process?
+      stage.setAlwaysOnTop(alwaysOnTop);
       stage.initStyle(StageStyle.TRANSPARENT);
       stage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/images/icon.png")));
       stage.show();

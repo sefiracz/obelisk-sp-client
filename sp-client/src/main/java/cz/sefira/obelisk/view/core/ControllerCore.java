@@ -15,6 +15,8 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,11 @@ public abstract class ControllerCore  {
 
   private static final Logger logger = LoggerFactory.getLogger(ControllerCore.class.getName());
 
-  private volatile boolean update;
+  private static final Object lock = new Object();
+
+  protected final long UPDATE_INTERVAL = 500;
+
+  protected volatile boolean update;
 
   /**
    * Notifies the update thread that updates JavaFX UI components
@@ -39,7 +45,6 @@ public abstract class ControllerCore  {
     update = true;
   }
 
-
   /**
    * Offload thread to be run apart from JavaFX thread for heavy workload that takes time and therefore needs to
    * run at separate thread to not block UI rendering and user experience.
@@ -47,10 +52,10 @@ public abstract class ControllerCore  {
    * @param callback Heavy workload that might take time to finish
    * @param notifyUpdate (if true) After workload is done notify update thread that updates JavaFX UI components
    */
-  public final void asyncTask(TaskCallback callback, boolean notifyUpdate) {
+  public final void asyncTask(Runnable callback, boolean notifyUpdate) {
     new Thread(() -> {
       try {
-        callback.execute();
+        callback.run();
         if(notifyUpdate)
           notifyUpdate();
       } catch (Exception e) {
@@ -59,38 +64,46 @@ public abstract class ControllerCore  {
     }).start();
   }
 
-
   /**
    * Updates the JavaFX UI components whenever {@code notifyUpdate()} is called
-   * @param callback Implementation of {@code UpdateCallback()} function that updates the JavaFX components
+   * @param executorService Thread executor service that's going to run this function
+   * @param useJfxThread Runs callback in JavaFX thread when set to true, otherwise user needs to wrap code explicitly
+   * @param callback Implementation that updates the JavaFX components
    */
-  public final void asyncUpdate(ScheduledExecutorService executorService, UpdateCallback callback) {
+  public final void asyncUpdate(ScheduledExecutorService executorService, boolean useJfxThread, Runnable callback) {
     executorService.scheduleAtFixedRate(() -> {
       if (update) {
-        update = false;
-        Platform.runLater(() -> {
-          try {
-            callback.update();
-          } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+        synchronized (lock) {
+          if (useJfxThread) {
+            Platform.runLater(() -> run(callback));
+          } else {
+            run(callback);
           }
-        });
+        }
+        update = false;
       }
-    }, 100, 500, TimeUnit.MILLISECONDS);
+    }, 100, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
   }
 
-  @FunctionalInterface
-  public interface UpdateCallback {
-
-    void update() throws Exception;
-
+  /**
+   * Updates the JavaFX UI components whenever {@code notifyUpdate()} is called, implicitly runs under JavaFX thread
+   * @param executorService Thread executor service that's going to run this function
+   * @param callback Implementation that updates the JavaFX components
+   */
+  public final void asyncUpdate(ScheduledExecutorService executorService, Runnable callback) {
+    asyncUpdate(executorService, true, callback);
   }
 
-  @FunctionalInterface
-  public interface TaskCallback {
+  private void run(Runnable callback) {
+    try {
+      callback.run();
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+    }
+  }
 
-    void execute() throws Exception;
-
+  public void windowClose(Stage stage) {
+    stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
   }
 
   public void setLogoBackground(Pane node) {

@@ -30,6 +30,7 @@ import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
+import cz.sefira.obelisk.view.core.StageState;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -106,7 +107,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     cancel.setOnAction(e -> signalUserCancel());
 
     manage.setOnAction(e ->
-        StandaloneDialog.createDialogFromFXML("/fxml/manage-keystores.fxml", null, true, api, products)
+        StandaloneDialog.createDialogFromFXML("/fxml/manage-keystores.fxml", null, StageState.BLOCKING, api, products)
     );
     product = new ToggleGroup();
     select.disableProperty().bind(product.selectedToggleProperty().isNull());
@@ -176,7 +177,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       progressIndicatorVisible(false);
     });
 
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, false, api));
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
     setLogoBackground(productsContainer);
   }
 

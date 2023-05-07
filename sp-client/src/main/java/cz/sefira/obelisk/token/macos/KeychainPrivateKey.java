@@ -69,4 +69,9 @@ public class KeychainPrivateKey implements DSSPrivateKeyEntry {
     return encryptionAlgorithm;
   }
 
+  @Override
+  public String toString() {
+    return getClass().getSimpleName()+" alias='" + alias + "'";
+  }
+
 }

@@ -112,4 +112,8 @@ public class KSPrivateKeyEntry implements DSSPrivateKeyEntry {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+" alias='" + alias + "'";
+	}
 }
