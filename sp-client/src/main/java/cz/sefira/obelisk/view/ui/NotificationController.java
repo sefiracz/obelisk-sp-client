@@ -18,12 +18,6 @@ import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import cz.sefira.obelisk.view.core.TimerService;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableStringValue;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
@@ -45,7 +39,6 @@ import java.net.URL;
 import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -157,7 +150,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
     setLogoBackground(background, 230, 230);
   }
 
-  private void spawnInRightBottomCorner(Region r){
+  private void spawnInRightBottomCorner(Region r) {
     final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
     stage.setX(screenResolution.getWidth() - 75 - r.getPrefWidth());
     stage.setY(screenResolution.getHeight() - 75 - r.getPrefHeight());
@@ -185,7 +178,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
   }
 
   private void hideNotification(boolean flag) {
-    logger.info("Hiding notification (flag="+flag+")");
+    logger.info("Hiding notification (flag=" + flag + ")");
     hiddenFlag = flag;
     stage.setIconified(false);
     stage.hide();

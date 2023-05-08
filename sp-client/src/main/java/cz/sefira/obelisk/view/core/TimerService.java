@@ -18,27 +18,27 @@ import javafx.concurrent.Task;
  */
 public class TimerService extends Service<Void> {
 
- private final long seconds;
+  private final long seconds;
 
- public TimerService(long seconds) {
-  if (seconds <= 0)
-   throw new IllegalArgumentException("Invalid value. Positive value only.");
-  this.seconds = seconds;
- }
+  public TimerService(long seconds) {
+    if (seconds <= 0)
+      throw new IllegalArgumentException("Invalid value. Positive value only.");
+    this.seconds = seconds;
+  }
 
- @Override
- protected Task<Void> createTask() {
-  return new Task<Void>() {
+  @Override
+  protected Task<Void> createTask() {
+    return new Task<>() {
 
-   @Override
-   protected Void call() throws Exception {
-    Thread.sleep(seconds * 10L);
-    for (int p = 99; p > 0; p--) {
-     Thread.sleep(seconds * 10L);
-     updateProgress(p, 100);
-    }
-    return null;
-   }
-  };
- }
+      @Override
+      protected Void call() throws Exception {
+        Thread.sleep(seconds * 10L);
+        for (int p = 99; p > 0; p--) {
+          Thread.sleep(seconds * 10L);
+          updateProgress(p, 100);
+        }
+        return null;
+      }
+    };
+  }
 }

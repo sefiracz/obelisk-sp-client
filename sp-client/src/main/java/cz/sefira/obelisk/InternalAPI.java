@@ -1,13 +1,13 @@
 /**
  * © Nowina Solutions, 2015-2015
  * © SEFIRA spol. s r.o., 2020-2021
- *
+ * <p>
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
  * Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
- *
+ * <p>
  * http://ec.europa.eu/idabc/eupl5
- *
+ * <p>
  * Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
  * SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
  * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
@@ -83,7 +83,7 @@ public class InternalAPI implements PlatformAPI {
   private Future<?> currentTask;
 
   public InternalAPI(UIDisplay display, ProductStorage productStorage, SmartcardStorage smartcardStorage,
-                     EventsStorage eventsStorage, FlowRegistry flowRegistry,  OperationFactory operationFactory) {
+                     EventsStorage eventsStorage, FlowRegistry flowRegistry, OperationFactory operationFactory) {
     this.display = display;
     this.productStorage = productStorage;
     this.eventsStorage = eventsStorage;
@@ -151,10 +151,10 @@ public class InternalAPI implements PlatformAPI {
   }
 
   private List<Match> checkKnownPKCS11Tokens(DetectedCard card) {
-    logger.info("Check if "+card.getAtr()+" has known and present PKCS11 library.");
+    logger.info("Check if " + card.getAtr() + " has known and present PKCS11 library.");
     List<Match> matches = new ArrayList<>();
     String pkcs11 = pkcs11Manager.getAvailablePkcs11Library(card.getAtr());
-    if(pkcs11 != null) {
+    if (pkcs11 != null) {
       // create connection info
       ConnectionInfo cInfo = new ConnectionInfo();
       cInfo.setApiParam(pkcs11);
@@ -179,27 +179,24 @@ public class InternalAPI implements PlatformAPI {
 
 
   private <I, O> Execution<O> executeRequest(Flow<I, O> flow, I request) {
-    Execution<O> resp = null;
-
+    Execution<O> resp;
     try {
-      if(!EXECUTOR_THREAD_GROUP.equals(Thread.currentThread().getThreadGroup())) {
+      if (!EXECUTOR_THREAD_GROUP.equals(Thread.currentThread().getThreadGroup())) {
         final Future<Execution<O>> task;
         // Prevent race condition on currentTask
         synchronized (this) {
-          if((currentTask != null) && !currentTask.isDone()) {
+          if ((currentTask != null) && !currentTask.isDone()) {
             currentTask.cancel(true);
           }
-
           task = executor.submit(() -> flow.execute(this, request));
           currentTask = task;
         }
-
         resp = task.get();
       } else {
         // Allow re-entrant calls
         resp = flow.execute(this, request);
       }
-      if(resp == null) {
+      if (resp == null) {
         resp = new Execution<O>(CoreOperationStatus.NO_RESPONSE);
       }
       return resp;
@@ -290,7 +287,7 @@ public class InternalAPI implements PlatformAPI {
   @Override
   public List<Product> detectProducts() {
     final List<Product> result = new ArrayList<>();
-    for(final ProductAdapter adapter : adapters) {
+    for (final ProductAdapter adapter : adapters) {
       result.addAll(adapter.detectProducts());
     }
     return result;
@@ -305,13 +302,13 @@ public class InternalAPI implements PlatformAPI {
   public String getLabel(Product p) {
     String label;
     final List<Match> matches = this.matchingProductAdapters(p);
-    if(matches.isEmpty()) {
+    if (matches.isEmpty()) {
       label = p.getLabel();
     } else {
       final ProductAdapter adapter = matches.iterator().next().getAdapter();
       label = adapter.getLabel(this, p, display.getPasswordInputCallback(p));
     }
-    if(p instanceof DetectedCard) {
+    if (p instanceof DetectedCard) {
       ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");
       String terminalLabel = ((DetectedCard) p).getTerminalLabel();
       return label + "\n" + rb.getString("card.label.terminal") + ": " +
