@@ -159,26 +159,22 @@ public class Dispatcher implements AppPlugin {
           notificationProperty = "notification.event.exception";
         }
       }
-    }
-    catch (GenericApiException e) {
+    } catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-    }
-    catch (SSLCommunicationException e) {
+    }  catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
       StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e));
       notificationProperty = "notification.event.fatal";
-    }
-    catch (HttpResponseException e) {
+    } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage("dispatcher.communication.error", DialogMessage.Level.ERROR,
           new String[]{String.valueOf(e.getStatusCode()), e.getReasonPhrase()}, 475, 150);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage("dispatcher.generic.error", DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
