@@ -40,6 +40,8 @@ import cz.sefira.obelisk.token.windows.WindowsKeystore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class ProductSelectionController extends AbstractUIOperationController<Product> implements Initializable {
+public class ProductSelectionController extends AbstractUIOperationController<Product> implements PropertyChangeListener, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(ProductSelectionController.class.getName());
 
@@ -125,6 +127,9 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     appName = AppConfig.get().getApplicationName();
     StageHelper.getInstance().setTitle(appName, "product.selection.title");
 
+    // hook up live card detection support
+    api.cardDetection(this, true);
+
     // add progress indicator
     progressIndicatorVisible(true);
     // asynchronous heavy workload
@@ -133,7 +138,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // show initial content before load
     Platform.runLater(() -> {
       message.setText(MessageFormat
-              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
+          .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
       products = api.detectProducts();
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
@@ -156,7 +161,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // asynchronous window content update
     asyncUpdate(() -> {
       message.setText(MessageFormat
-              .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
+          .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
 
       final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
@@ -165,6 +170,11 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
         button.setToggleGroup(product);
         button.setUserData(card);
         button.setMnemonicParsing(false);
+        // disable disconnected cards
+        if (card.getTerminal() == null) {
+          button.setDisable(true);
+          button.setText(api.getLabel(card));
+        }
         radioButtons.add(button);
       }
       for (final Product p : products) {
@@ -204,4 +214,32 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     }
   }
 
+  @Override
+  public synchronized void propertyChange(PropertyChangeEvent evt) {
+    String propertyChange = evt.getPropertyName();
+    DetectedCard changedCard = (DetectedCard) evt.getNewValue();
+    if ("remove".equals(propertyChange)) {
+      try {
+        int removedCardIdx = cards.indexOf(changedCard);
+        if (removedCardIdx == -1) {
+          throw new IllegalStateException("Card not found, user probably already refreshed");
+        }
+        DetectedCard card = cards.get(removedCardIdx);
+        if (card.equals(changedCard)) {
+          card.setTerminal(null);
+          card.setTerminalLabel(null);
+        } else {
+          throw new IllegalStateException("Wrong index, card not found, user probably already refreshed");
+        }
+      } catch (Exception e) {
+        logger.error(e.getMessage(), e);
+        // something happened (user might have already refreshed) - just try to remove it
+        cards.remove(changedCard);
+      }
+    } else if ("detect".equals(propertyChange)) {
+      // TODO - add new card
+    }
+    asyncTask(() -> {
+    }, true);
+  }
 }

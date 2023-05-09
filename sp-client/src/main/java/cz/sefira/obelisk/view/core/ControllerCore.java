@@ -53,6 +53,7 @@ public abstract class ControllerCore  {
    * @param notifyUpdate (if true) After workload is done notify update thread that updates JavaFX UI components
    */
   public final void asyncTask(Runnable callback, boolean notifyUpdate) {
+    // TODO - replace Thread with Executor
     new Thread(() -> {
       try {
         callback.run();
