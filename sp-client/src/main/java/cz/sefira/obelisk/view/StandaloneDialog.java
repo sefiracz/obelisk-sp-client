@@ -113,7 +113,7 @@ public class StandaloneDialog {
     dialogStage.setAlwaysOnTop(true);
     dialogStage.setTitle((appName.isEmpty() ? "" : appName + " - ")
         + resources.getString(dialogMessage.getLevel().getTitleCode()));
-    dialogStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
+    dialogStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
     if (dialogMessage.getOwner() != null) {
       dialogStage.initOwner(dialogMessage.getOwner());
       dialogStage.initModality(Modality.WINDOW_MODAL);
@@ -268,7 +268,7 @@ public class StandaloneDialog {
       Parent panel = loader.load(StandaloneDialog.class.getResourceAsStream(fxml));
       Scene scene = new Scene(panel);
       primaryStage.setScene(scene);
-      primaryStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
+      primaryStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
       primaryStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
       StandaloneUIController controller = loader.getController();
       controller.init(primaryStage, params);
@@ -365,7 +365,7 @@ public class StandaloneDialog {
         }
         detailStage.setAlwaysOnTop(true);
         detailStage.setTitle(Objects.requireNonNullElseGet(title, () -> resources.getString("message.title.error")));
-        detailStage.getIcons().add(new Image(StandaloneDialog.class.getResourceAsStream("/images/icon.png")));
+        detailStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
         Scene scene = new Scene(borderPane, 700, 450);
         detailStage.setScene(scene);
         detailStage.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {

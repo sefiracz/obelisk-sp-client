@@ -45,6 +45,8 @@ import cz.sefira.obelisk.api.PlatformAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ import java.util.ResourceBundle;
 /**
  * User choice colliding products controller
  */
-public class ProductCollisionController extends AbstractUIOperationController<AbstractProduct> implements Initializable {
+public class ProductCollisionController extends AbstractUIOperationController<AbstractProduct> implements PropertyChangeListener, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(ProductCollisionController.class.getName());
 
@@ -137,6 +139,9 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "product.selection.title");
     products = (List<AbstractProduct>) params[1];
 
+    // hook up live card detection support
+    api.cardDetection(this, true);
+
     progressIndicatorVisible(true);
     asyncTask(() -> {
       for (final AbstractProduct p : products) {
@@ -193,5 +198,39 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       borderPane.setEffect(null);
       productsWindow.getChildren().removeIf(node -> node instanceof VBox);
     }
+  }
+
+  @Override
+  public synchronized void propertyChange(PropertyChangeEvent evt) {
+    asyncTask(() -> {
+      String propertyChange = evt.getPropertyName();
+      DetectedCard changedCard = (DetectedCard) evt.getNewValue();
+//      if ("remove".equals(propertyChange)) {
+//        try {
+//          int removedCardIdx = cards.indexOf(changedCard);
+//          if (removedCardIdx == -1) {
+//            throw new IllegalStateException("Card not found, user probably already refreshed");
+//          }
+//          DetectedCard card = cards.get(removedCardIdx);
+//          if (card.equals(changedCard)) {
+//            card.setTerminal(null);
+//            card.setTerminalLabel(null);
+//          } else {
+//            throw new IllegalStateException("Wrong index, card not found, user probably already refreshed");
+//          }
+//        } catch (Exception e) {
+//          logger.error(e.getMessage(), e);
+//          // something happened (user might have already refreshed) - just try to remove it
+//          cards.remove(changedCard);
+//        }
+//      } else if ("add".equals(propertyChange)) {
+//        cards.add(changedCard);
+//      }
+    }, true);
+  }
+
+  @Override
+  public void close() {
+    api.cardDetection(this, false);
   }
 }

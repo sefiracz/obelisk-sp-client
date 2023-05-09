@@ -78,7 +78,7 @@ public class AppPreloader extends Preloader {
 		final String appName = AppConfig.get().getApplicationName();
 		primaryStage.setTitle(appName);
 		logger.info("Load splashscreen resources");
-		primaryStage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/images/icon.png")));
+		primaryStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
 		final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash_min.png")));
 		logger.info("Resources loaded");
 		double splashWidth = splash.getImage().getWidth();

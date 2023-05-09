@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -216,30 +217,35 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
 
   @Override
   public synchronized void propertyChange(PropertyChangeEvent evt) {
-    String propertyChange = evt.getPropertyName();
-    DetectedCard changedCard = (DetectedCard) evt.getNewValue();
-    if ("remove".equals(propertyChange)) {
-      try {
-        int removedCardIdx = cards.indexOf(changedCard);
-        if (removedCardIdx == -1) {
-          throw new IllegalStateException("Card not found, user probably already refreshed");
-        }
-        DetectedCard card = cards.get(removedCardIdx);
-        if (card.equals(changedCard)) {
-          card.setTerminal(null);
-          card.setTerminalLabel(null);
-        } else {
-          throw new IllegalStateException("Wrong index, card not found, user probably already refreshed");
-        }
-      } catch (Exception e) {
-        logger.error(e.getMessage(), e);
-        // something happened (user might have already refreshed) - just try to remove it
-        cards.remove(changedCard);
-      }
-    } else if ("detect".equals(propertyChange)) {
-      // TODO - add new card
-    }
     asyncTask(() -> {
+      String propertyChange = evt.getPropertyName();
+      DetectedCard changedCard = (DetectedCard) evt.getNewValue();
+      if ("remove".equals(propertyChange)) {
+        try {
+          int removedCardIdx = cards.indexOf(changedCard);
+          if (removedCardIdx == -1) {
+            throw new IllegalStateException("Card not found, user probably already refreshed");
+          }
+          DetectedCard card = cards.get(removedCardIdx);
+          if (card.equals(changedCard)) {
+            card.setTerminal(null);
+            card.setTerminalLabel(null);
+          } else {
+            throw new IllegalStateException("Wrong index, card not found, user probably already refreshed");
+          }
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+          // something happened (user might have already refreshed) - just try to remove it
+          cards.remove(changedCard);
+        }
+      } else if ("add".equals(propertyChange)) {
+        cards.add(changedCard);
+      }
     }, true);
+  }
+
+  @Override
+  public void close() {
+    api.cardDetection(this, false);
   }
 }

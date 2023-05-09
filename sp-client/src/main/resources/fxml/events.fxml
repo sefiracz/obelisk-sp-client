@@ -43,8 +43,8 @@
     <TableView fx:id="eventsTable" BorderPane.alignment="CENTER">
       <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
       <columns>
-        <TableColumn reorderable="false" fx:id="eventIdColumn" minWidth="45.0" maxWidth="45.0" prefWidth="45.0" text="%events.table.id" />
-        <TableColumn reorderable="false" fx:id="eventDateColumn" minWidth="120.0" maxWidth="120.0" prefWidth="120.0" text="%events.table.date" />
+        <TableColumn reorderable="false" fx:id="eventIdColumn" style="-fx-alignment: center" minWidth="55.0" maxWidth="55.0" prefWidth="55.0" text="%events.table.id" />
+        <TableColumn reorderable="false" fx:id="eventDateColumn" style="-fx-alignment: center" minWidth="135.0" maxWidth="135.0" prefWidth="135.0" text="%events.table.date" />
         <TableColumn reorderable="false" fx:id="eventNotificationColumn"  text="%events.table.text" />
       </columns>
     </TableView>

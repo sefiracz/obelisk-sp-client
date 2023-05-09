@@ -121,7 +121,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	private Stage createStage(final boolean blockingStage) {
 		final Stage newStage = new Stage();
-		newStage.getIcons().add(new Image(StandaloneUIDisplay.class.getResourceAsStream("/images/icon.png")));
+		newStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
 		newStage.setAlwaysOnTop(true);
 		newStage.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
 			if (event.getCode() == KeyCode.ESCAPE) {

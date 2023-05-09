@@ -14,12 +14,14 @@
  */
 package cz.sefira.obelisk.view.core;
 
+import java.io.Closeable;
+
 /**
  * GUI Controller for an {@link UIOperation}.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-public interface UIOperationController<R> {
+public interface UIOperationController<R> extends Closeable {
 
 	void setUIOperation(UIOperation<R> uiOperation);
 

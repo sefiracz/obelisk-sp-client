@@ -38,8 +38,6 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractUIOperationController<R> extends ControllerCore implements UIOperationController<R> {
 
-  private static final Logger logger = LoggerFactory.getLogger(AbstractUIOperationController.class.getName());
-
 	private UIOperation<R> uiOperation;
 	private UIDisplay display;
 
@@ -89,4 +87,8 @@ public abstract class AbstractUIOperationController<R> extends ControllerCore im
     asyncUpdate(uiOperation.getUpdateExecutorService(), callback);
   }
 
+	@Override
+	public void close() throws IOException {
+		// Do nothing by contract
+	}
 }
