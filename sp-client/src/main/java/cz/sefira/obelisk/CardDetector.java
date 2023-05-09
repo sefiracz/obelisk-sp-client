@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.*;
+import java.beans.PropertyChangeSupport;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -57,6 +58,7 @@ public class CardDetector {
 	private final PlatformAPI api;
 	private final WinscardLibrary lib;
 	private final PresentCards presentCards = new PresentCards();
+	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 	private final ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor(r -> {
 		Thread t = new Thread(r, "Monitor");
 		t.setDaemon(true);
@@ -367,19 +369,24 @@ public class CardDetector {
     }
   }
 
+	public PropertyChangeSupport getPropertyChangeSupport() {
+		return propertyChangeSupport;
+	}
+
 	private void startMonitor() {
-    monitor.scheduleAtFixedRate(() -> {
-      List<DetectedCard> remove = new ArrayList<>();
-      for(DetectedCard card : presentCards.getPresentCards()) {
-        boolean present = isPresent(card);
-        if (!present) {
-          logger.info("Card "+card.getAtr()+" disconnected from terminal '"+card.getTerminal().getName()+"'");
-          card.closeToken();
-          remove.add(card);
-        }
-      }
-      remove.forEach(presentCards::remove); // remove closed cards
-    }, 0, 100, TimeUnit.MILLISECONDS);
+		monitor.scheduleAtFixedRate(() -> {
+			List<DetectedCard> remove = new ArrayList<>();
+			for(DetectedCard card : presentCards.getPresentCards()) {
+				boolean present = isPresent(card);
+				if (!present) {
+					logger.info("Card "+card.getAtr()+" disconnected from terminal '"+card.getTerminal().getName()+"'");
+					card.closeToken();
+					remove.add(card);
+					propertyChangeSupport.firePropertyChange("remove", new Object(), card);
+				}
+			}
+			remove.forEach(presentCards::remove); // remove closed cards
+		}, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
 	/**

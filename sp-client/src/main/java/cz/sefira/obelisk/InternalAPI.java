@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.*;
@@ -271,6 +272,15 @@ public class InternalAPI implements PlatformAPI {
       eventsStorage.addNotification(notification);
       // push notification message to dialog
       propertyChangeSupport.firePropertyChange("notify", new Object(), notification);
+    }
+  }
+
+  @Override
+  public void cardDetection(PropertyChangeListener listener, boolean addListener) {
+    if (addListener) {
+      detector.getPropertyChangeSupport().addPropertyChangeListener(listener);
+    } else {
+      detector.getPropertyChangeSupport().removePropertyChangeListener(listener);
     }
   }
 
