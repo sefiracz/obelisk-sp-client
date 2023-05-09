@@ -66,6 +66,7 @@ public class AppConfig {
   private boolean userPreferencesEditable;
 
   private String backgroundLogo;
+  private byte[] iconLogo;
 
   private static volatile AppConfig appConfig;
   private static volatile Properties properties;
@@ -228,7 +229,18 @@ public class AppConfig {
     return storage;
   }
 
-  public String getBackgroundLogo() throws IOException {
+  public InputStream getIconLogoStream() {
+    if (iconLogo == null) {
+      try {
+        iconLogo = IOUtils.toByteArray(AppConfig.class.getResourceAsStream("/images/icon.png"));
+      } catch (IOException e) {
+        logger.error(e.getMessage(), e);
+      }
+    }
+    return new ByteArrayInputStream(iconLogo);
+  }
+
+  public String getBackgroundLogoInBase64() throws IOException {
     if (backgroundLogo == null) {
       byte[] imageData = IOUtils.toByteArray(AppConfig.class.getResourceAsStream("/images/sefira_logo.png"));
       backgroundLogo = Base64.encodeBase64String(imageData);

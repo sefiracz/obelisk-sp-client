@@ -133,9 +133,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
   public void initialize(URL url, ResourceBundle resourceBundle) {
     closeButton.setOnAction((e) -> hideNotification(true));
 
-    minimizeButton.setOnAction(e -> {
-      stage.setIconified(true);
-    });
+    minimizeButton.setOnAction(e -> stage.setIconified(true));
 
     background.setOnMousePressed(event -> {
       xOffset = stage.getX() - event.getScreenX();

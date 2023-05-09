@@ -105,8 +105,13 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 
       return result;
     } finally {
-		  if(executorService != null)
-        executorService.shutdown();
+			if(executorService != null)
+				executorService.shutdown();
+			try {
+				controller.close();
+			} catch (IOException e) {
+				logger.error("Unable to close UIOperation controller: "+e.getMessage(), e);
+			}
     }
 	}
 

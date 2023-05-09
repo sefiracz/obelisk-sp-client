@@ -113,7 +113,7 @@ public abstract class ControllerCore  {
 
   public void setLogoBackground(Pane node, Integer width, Integer height) {
     try {
-      node.setStyle("-fx-background-image: url(data:image/png;base64," + AppConfig.get().getBackgroundLogo() + ");" +
+      node.setStyle("-fx-background-image: url(data:image/png;base64," + AppConfig.get().getBackgroundLogoInBase64() + ");" +
           "-fx-background-position: right top; -fx-background-repeat: no-repeat;" +
           ((height != null && width != null) ? ("-fx-background-size: "+width+"px "+height+"px;") : "")
       );

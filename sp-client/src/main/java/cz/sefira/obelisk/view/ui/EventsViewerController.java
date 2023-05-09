@@ -17,18 +17,12 @@ import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -150,7 +144,7 @@ public class EventsViewerController extends ControllerCore implements Standalone
       @Override
       protected void updateItem(Notification item, boolean empty) {
         super.updateItem(item, empty);
-        if (item != null) {
+        if (item != null && item.getMessageText() != null) {
           this.setTooltip(new Tooltip(item.getMessageText()));
         }
       }

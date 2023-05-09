@@ -103,7 +103,7 @@ public class BusyIndicator implements Closeable {
       stage.setTitle(AppConfig.get().getApplicationName());
       stage.setAlwaysOnTop(alwaysOnTop);
       stage.initStyle(StageStyle.TRANSPARENT);
-      stage.getIcons().add(new Image(AppPreloader.class.getResourceAsStream("/images/icon.png")));
+      stage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
       stage.show();
     });
   }

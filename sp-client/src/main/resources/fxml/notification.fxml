@@ -24,8 +24,8 @@
       <HBox minHeight="32" maxHeight="32" prefHeight="32">
         <ProgressIndicator fx:id="progress" styleClass="notificationTimer" progress="0.99" visible="false"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="minimizeButton" maxWidth="24" maxHeight="4" prefWidth="24" prefHeight="4" styleClass="minimizeButton" mnemonicParsing="false"/>
-        <Button fx:id="closeButton" maxWidth="24" maxHeight="16" prefWidth="24"  prefHeight="16" styleClass="closeButton" mnemonicParsing="false"/>
+        <Button fx:id="minimizeButton" maxWidth="16" maxHeight="4" prefWidth="16" prefHeight="4" styleClass="minimizeButton" mnemonicParsing="false"/>
+        <Button fx:id="closeButton" maxWidth="16" maxHeight="12" prefWidth="16"  prefHeight="12" styleClass="closeButton" mnemonicParsing="false"/>
       </HBox>
     </top>
 

@@ -204,9 +204,9 @@ RadioButton {
 
     -fx-background-color: #001C40;
     -fx-shape: 'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24H488c13.3 0 24-10.7 24-24s-10.7-24-24-24H24z';
-    -fx-border-insets: 20 4 0 0;
-    -fx-background-insets: 20 4 0 0;
-    -fx-padding: 4 4 0 0;
+    -fx-border-insets: 12 4 0 0;
+    -fx-background-insets: 12 4 0 0;
+    -fx-padding: 4 4 -8 0;
 
 }
 
@@ -229,7 +229,7 @@ RadioButton {
     -fx-shape: "M345 137c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-119 119L73 103c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l119 119L39 375c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l119-119L311 409c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-119-119L345 137z";
     -fx-border-insets: 4 4 0 0;
     -fx-background-insets: 4 4 0 0;
-    -fx-padding: 4 4 0 0;
+    -fx-padding: -4 0 0 0;
 }
 
 .closeButton:hover {
@@ -475,7 +475,7 @@ RadioButton {
 
     -fx-background-color: white;
     -fx-border-style: solid;
-    -fx-border-width: 5px;
+    -fx-border-width: 2px;
     -fx-border-color: #0096C9;
 
 }
