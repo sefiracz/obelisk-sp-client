@@ -6,8 +6,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="messagePane" prefHeight="230.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/8"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.CertNotFoundController">
+<BorderPane fx:id="messagePane" prefHeight="230.0" prefWidth="550.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.CertNotFoundController">
 
   <left>
     <VBox BorderPane.alignment="CENTER" styleClass="icon-primary" fx:id="iconBox">

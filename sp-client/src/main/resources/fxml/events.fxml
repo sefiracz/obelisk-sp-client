@@ -17,7 +17,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="cz.sefira.obelisk.view.ui.EventsViewerController">
 
   <top>

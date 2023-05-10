@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane prefHeight="170.0" prefWidth="560.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane prefHeight="170.0" prefWidth="560.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="cz.sefira.obelisk.view.ui.AboutController">
 
   <top>

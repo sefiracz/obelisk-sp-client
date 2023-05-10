@@ -16,7 +16,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="AnchorPane" prefHeight="230.0" prefWidth="550.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.UnsupportedProductController">
+<BorderPane id="AnchorPane" prefHeight="230.0" prefWidth="550.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.UnsupportedProductController">
 
 	<center>
     <VBox fx:id="messageBox" styleClass="form-container" BorderPane.alignment="CENTER">
