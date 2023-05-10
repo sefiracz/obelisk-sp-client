@@ -80,8 +80,6 @@ public interface PlatformAPI {
 
 	PKCS11Manager getPKCS11Manager();
 
-	PropertyChangeSupport getPropertyChangeSupport();
-
 	OperationFactory getOperationFactory();
 
 	<T extends AbstractProduct> ProductStorage<T> getProductStorage(Class<T> c);

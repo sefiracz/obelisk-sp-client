@@ -15,7 +15,7 @@
 package cz.sefira.obelisk;
 
 import com.sun.jna.*;
-import cz.sefira.obelisk.api.model.EnvironmentInfo;
+import cz.sefira.obelisk.view.BusyIndicator;
 import iaik.pkcs.pkcs11.TokenException;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.api.PlatformAPI;
@@ -51,23 +51,23 @@ public class CardDetector {
 
 	private static final Logger logger = LoggerFactory.getLogger(CardDetector.class.getSimpleName());
 
-	private CardTerminals cardTerminals;
-
-	private boolean contextError = false;
+	public static final String ADD_CARD = "add";
+	public static final String REMOVE_CARD = "remove";
 
 	private final PlatformAPI api;
 	private final WinscardLibrary lib;
 	private final PresentCards presentCards = new PresentCards();
 	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-	private final ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor(r -> {
-		Thread t = new Thread(r, "Monitor");
-		t.setDaemon(true);
-		return t;
-	});
 
-	public CardDetector(final PlatformAPI api, final EnvironmentInfo info) {
+	private volatile boolean terminalsOpened = false;
+	private ScheduledExecutorService monitor;
+	private long tokenThreadTouch;
+	private CardTerminals cardTerminals;
+	private boolean contextError = false;
+
+	public CardDetector(final PlatformAPI api) {
 		this.api = api;
-		if (info.getOs() == OS.LINUX) {
+		if (OS.isLinux()) {
 			logger.info("Checking for PC/SC library on Linux OS.");
 			try {
 				final String library = getPCSCLibraryPath();
@@ -81,10 +81,9 @@ public class CardDetector {
 				logger.error("Error while loading library for Linux", e);
 			}
 		}
-		if (info.getOs() == OS.MACOSX) {
+		if (OS.isMacOS()) {
 			System.setProperty("sun.security.smartcardio.library", MAC_PATH);
 		}
-
 		this.cardTerminals = null;
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			if(cardTerminals != null) {
@@ -96,9 +95,10 @@ public class CardDetector {
 			}
 		}));
 
-		final String libraryName = Platform.isWindows() ? WINDOWS_PATH : Platform.isMac() ? MAC_PATH : PCSC_PATH;
+		final String libraryName = OS.isWindows() ? WINDOWS_PATH : OS.isMacOS() ? MAC_PATH : PCSC_PATH;
 		this.lib = Native.load(libraryName, WinscardLibrary.class);
 		startMonitor();
+		threadMonitor();
 	}
 
 	private List<CardTerminal> getCardTerminals() {
@@ -112,6 +112,7 @@ public class CardDetector {
 				final TerminalFactory terminalFactory = TerminalFactory.getDefault();
 				cardTerminals = terminalFactory.terminals();
 				cardTerminalsCreated = true;
+				terminalsOpened = true;
 			}
 			return cardTerminals.list();
 		} catch(final Exception e) {
@@ -235,26 +236,37 @@ public class CardDetector {
 		final List<DetectedCard> listCardDetect = new ArrayList<DetectedCard>();
 		int terminalIndex = 0;
 		for (CardTerminal cardTerminal : getCardTerminals()) {
-			try {
-				final Card card = cardTerminal.connect("*");
-				final ATR atr = card.getATR();
-				DetectedCard detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
-				detectedCard.initializeToken(api, null, showBusy);
-				// check present cards
-				if (presentCards.get(detectedCard) == null) {
-					presentCards.add(detectedCard); // currently isn't recorded as present, add it
-				} else {
-					detectedCard = presentCards.get(detectedCard); // already is present, use the existing one
-				}
-				listCardDetect.add(detectedCard);
-				logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));
-			} catch (IOException | TokenException | CardException e) {
-				// Card not present or unreadable
-				logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+			DetectedCard card = getCardFromTerminal(showBusy, cardTerminal, terminalIndex);
+			if (card != null) {
+				listCardDetect.add(card);
 			}
 			terminalIndex++;
 		}
 		return listCardDetect;
+	}
+
+	private DetectedCard getCardFromTerminal(boolean showBusy, CardTerminal cardTerminal, int terminalIndex) {
+		try {
+			DetectedCard detectedCard;
+			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+				final Card card = cardTerminal.connect("*");
+				final ATR atr = card.getATR();
+				detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
+			}
+			detectedCard.initializeToken(api, null, showBusy);
+			// check present cards
+			if (presentCards.get(detectedCard) == null) {
+				presentCards.add(detectedCard); // currently isn't recorded as present, add it
+			} else {
+				detectedCard = presentCards.get(detectedCard); // already is present, use the existing one
+			}
+			logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));
+			return detectedCard;
+		} catch (IOException | TokenException | CardException e) {
+			// Card not present or unreadable
+			logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+		}
+		return null;
 	}
 
 	public void detectCardTerminal(final DetectedCard card) {
@@ -323,6 +335,7 @@ public class CardDetector {
 	}
 
 	private void closeCardTerminals() throws Exception {
+		logger.info("Closing card terminals");
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
 		final Field contextIdField = pcscTerminalsClass.getDeclaredField("contextId");
 		contextIdField.setAccessible(true);
@@ -337,6 +350,7 @@ public class CardDetector {
 			else {
 				logger.debug("Context was released successfully.");
 			}
+			terminalsOpened = false;
 
 			// Remove current context value
 			contextIdField.setLong(null, 0L);
@@ -374,19 +388,71 @@ public class CardDetector {
 	}
 
 	private void startMonitor() {
+		monitor = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r, "TokenMonitor");
+			t.setDaemon(true);
+			return t;
+		});
 		monitor.scheduleAtFixedRate(() -> {
+			tokenThreadTouch = System.currentTimeMillis();
 			List<DetectedCard> remove = new ArrayList<>();
+			// check disconnected cards
 			for(DetectedCard card : presentCards.getPresentCards()) {
 				boolean present = isPresent(card);
 				if (!present) {
 					logger.info("Card "+card.getAtr()+" disconnected from terminal '"+card.getTerminal().getName()+"'");
 					card.closeToken();
 					remove.add(card);
-					propertyChangeSupport.firePropertyChange("remove", new Object(), card);
+					propertyChangeSupport.firePropertyChange(REMOVE_CARD, new Object(), card);
 				}
 			}
 			remove.forEach(presentCards::remove); // remove closed cards
+
+			// check newly connected cards
+			if (propertyChangeSupport.getPropertyChangeListeners().length > 0) {
+				int terminalIndex = 0;
+				for (CardTerminal cardTerminal : getCardTerminals()) {
+					try {
+						if (terminalsOpened && !presentCards.checkTerminalPresent(cardTerminal) && cardTerminal.isCardPresent()) {
+							DetectedCard card = getCardFromTerminal(false, cardTerminal, terminalIndex);
+							if (card != null) {
+								propertyChangeSupport.firePropertyChange(ADD_CARD, new Object(), card);
+							} else {
+								logger.error("Terminal is connected, isCardPresent() returns true, but no card detected");
+								// close the terminals and set error state to establish new connection
+								closeCardTerminals();
+								cardTerminals = null;
+								contextError = true;
+								break;
+							}
+						}
+					} catch (Exception e) {
+						logger.error("Unable to get present cards from terminal '"+cardTerminal.getName()+"'", e);
+					}
+					terminalIndex++;
+				}
+			}
 		}, 0, 100, TimeUnit.MILLISECONDS);
+	}
+
+	private void threadMonitor() {
+		ScheduledExecutorService threadMonitor = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r, "ThreadMonitor");
+			t.setDaemon(false);
+			return t;
+		});
+		threadMonitor.scheduleAtFixedRate(() -> {
+			if (System.currentTimeMillis() - tokenThreadTouch > 20000) {
+				logger.error("Kill TokenMonitor thread that is running for long time");
+				try {
+					monitor.awaitTermination(1, TimeUnit.SECONDS);
+					monitor.shutdownNow();
+					startMonitor();
+				} catch (InterruptedException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}, 1, 7, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -414,6 +480,15 @@ public class CardDetector {
 
     private synchronized List<DetectedCard> match(DetectedCard card) {
 			return presentCards.stream().filter(c -> c.match(card)).collect(Collectors.toList());
+		}
+
+		private synchronized boolean checkTerminalPresent(CardTerminal terminal) {
+			for (DetectedCard card : presentCards) {
+				if (terminal.equals(card.getTerminal())) {
+					return true;
+				}
+			}
+			return false;
 		}
 
     private synchronized void remove(DetectedCard card) {

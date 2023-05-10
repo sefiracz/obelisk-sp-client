@@ -39,13 +39,13 @@ public class MainWindowController implements StandaloneUIController, Initializab
   private TabPane tabPane;
 
   @FXML
-  private StandaloneUIController eventsViewerController;
-
-  @FXML
   private StandaloneUIController manageKeystoresController;
 
   @FXML
   private StandaloneUIController preferencesController;
+
+  @FXML
+  private StandaloneUIController eventsViewerController;
 
   @FXML
   private StandaloneUIController aboutController;
