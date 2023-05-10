@@ -30,13 +30,13 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import cz.sefira.obelisk.AppPreloader;
 
 import java.io.Closeable;
 
@@ -87,11 +87,14 @@ public class BusyIndicator implements Closeable {
       // primary utility stage (does not show busy indicator window on taskbar)
       primaryStage = new Stage();
       primaryStage.initStyle(StageStyle.UTILITY);
-      primaryStage.setWidth(0.1);
-      primaryStage.setHeight(0.1);
-      primaryStage.setOpacity(0.0);
+      primaryStage.setWidth(5);
+      primaryStage.setHeight(30);
+      primaryStage.setOpacity(0);
       primaryStage.setX(-1000);
       primaryStage.setY(-1000);
+      Scene s = new Scene(new BorderPane(),1, 1);
+      s.setFill(Color.TRANSPARENT);
+      primaryStage.setScene(s);
       primaryStage.show();
       // stage
       stage = new Stage();
@@ -100,7 +103,7 @@ public class BusyIndicator implements Closeable {
       stage.setX((screenResolution.getWidth() / 2) - (scene.getWidth() / 2));
       stage.setY((screenResolution.getHeight() / 2) - (scene.getHeight() / 2));
       stage.setScene(scene);
-      stage.setTitle(AppConfig.get().getApplicationName());
+      stage.setTitle(AppConfig.get().getApplicationName()+" busy indicator");
       stage.setAlwaysOnTop(alwaysOnTop);
       stage.initStyle(StageStyle.TRANSPARENT);
       stage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
@@ -115,6 +118,10 @@ public class BusyIndicator implements Closeable {
       if(stage != null) {
         stage.close();
         stage = null;
+      }
+      if (primaryStage != null) {
+        primaryStage.close();
+        primaryStage = null;
       }
     });
   }
