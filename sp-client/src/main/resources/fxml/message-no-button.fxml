@@ -18,7 +18,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="125.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.MessageController">
+<BorderPane prefHeight="125.0" prefWidth="250.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+						fx:controller="cz.sefira.obelisk.view.ui.MessageController">
 	<center>
 		<VBox BorderPane.alignment="CENTER">
          <children>

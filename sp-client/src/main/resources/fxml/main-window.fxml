@@ -17,14 +17,14 @@
 
 <TabPane style="-fx-border-radius: 0" fx:id="tabPane" prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx/8"
          xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.MainWindowController">
-  <Tab text="%systray.menu.manage.events" closable="false">
-      <fx:include fx:id="eventsViewer" source="/fxml/events.fxml"/>
-  </Tab>
   <Tab text="%systray.menu.manage.keystores" closable="false">
     <fx:include fx:id="manageKeystores" source="/fxml/manage-keystores.fxml"/>
   </Tab>
   <Tab text="%systray.menu.preferences" closable="false">
     <fx:include fx:id="preferences" source="/fxml/preferences.fxml"/>
+  </Tab>
+  <Tab text="%systray.menu.manage.events" closable="false">
+    <fx:include fx:id="eventsViewer" source="/fxml/events.fxml"/>
   </Tab>
   <Tab text="%systray.menu.about" closable="false">
     <fx:include fx:id="about" source="/fxml/about.fxml"/>

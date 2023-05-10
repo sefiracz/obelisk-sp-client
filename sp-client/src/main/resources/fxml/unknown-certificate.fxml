@@ -17,8 +17,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="230.0" prefWidth="475.0" xmlns="http://javafx.com/javafx/8"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.UnknownCertificateMessageController">
+<BorderPane prefHeight="230.0" prefWidth="475.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cz.sefira.obelisk.view.ui.UnknownCertificateMessageController">
 
 	<center>
     <VBox fx:id="messageBox" styleClass="form-container" BorderPane.alignment="CENTER">

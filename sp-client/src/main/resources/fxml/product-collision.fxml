@@ -16,7 +16,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="360.0" prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane prefWidth="700.0" fx:id="productsWindow" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
            fx:controller="cz.sefira.obelisk.view.ui.ProductCollisionController">
 
   <BorderPane fx:id="borderPane">
@@ -28,8 +28,8 @@
     </top>
 
     <center>
-      <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="center">
-        <VBox fx:id="productsContainer" BorderPane.alignment="CENTER" styleClass="form-container"/>
+      <ScrollPane prefHeight="300" fitToWidth="true">
+        <VBox fx:id="productsContainer" minHeight="290" BorderPane.alignment="CENTER" styleClass="form-container"/>
       </ScrollPane>
     </center>
 
@@ -45,5 +45,10 @@
     </bottom>
 
   </BorderPane>
+
+  <VBox fx:id="overlay" styleClass="overlay" visible="false"/>
+  <VBox fx:id="progressIndicator" alignment="CENTER" visible="false">
+    <ProgressIndicator prefHeight="150" prefWidth="150" minHeight="150" minWidth="150" />
+  </VBox>
 </StackPane>
 
