@@ -60,8 +60,6 @@ public class InternalAPI implements PlatformAPI {
 
   private static final Logger logger = LoggerFactory.getLogger(InternalAPI.class.getName());
 
-  private static final Object notificationLock = new Object();
-
   private final CardDetector detector;
 
   private final List<ProductAdapter> adapters = new ArrayList<>();
@@ -88,7 +86,7 @@ public class InternalAPI implements PlatformAPI {
     this.display = display;
     this.productStorage = productStorage;
     this.eventsStorage = eventsStorage;
-    this.detector = new CardDetector(this, EnvironmentInfo.buildFromSystemProperties(System.getProperties()));
+    this.detector = new CardDetector(this);
     this.flowRegistry = flowRegistry;
     this.operationFactory = operationFactory;
     this.pkcs11Manager = new PKCS11Manager(this, smartcardStorage);
@@ -98,6 +96,7 @@ public class InternalAPI implements PlatformAPI {
       return t;
     });
     this.currentTask = null;
+    // start hidden notification window
     StandaloneDialog.runLater(() -> StandaloneDialog.createDialogFromFXML("/fxml/notification.fxml", null, StageState.HIDDEN, propertyChangeSupport));
   }
 
@@ -130,7 +129,8 @@ public class InternalAPI implements PlatformAPI {
     List<Match> matches = new ArrayList<>();
     for (ProductAdapter adapter : adapters) {
       if (adapter.accept(p)) {
-        logger.info("Product is instance of " + adapter.getClass().getSimpleName());
+        if (logger.isDebugEnabled())
+          logger.debug("Product is instance of " + adapter.getClass().getSimpleName());
         matches.add(new Match(adapter, p));
       }
     }
@@ -138,7 +138,6 @@ public class InternalAPI implements PlatformAPI {
       final DetectedCard card = (DetectedCard) p;
       ProductStorage<DetectedCard> storage = getProductStorage(DetectedCard.class);
       if (!storage.getProducts(DetectedCard.class).contains(card)) {
-        logger.info("Card " + card.getAtr() + " is not in the personal database");
         matches.addAll(checkKnownPKCS11Tokens(card));
       } else {
         card.setKnownToken(getPKCS11Manager().getAvailableSmartcardInfo(card.getAtr()));
@@ -152,7 +151,8 @@ public class InternalAPI implements PlatformAPI {
   }
 
   private List<Match> checkKnownPKCS11Tokens(DetectedCard card) {
-    logger.info("Check if " + card.getAtr() + " has known and present PKCS11 library.");
+    if (logger.isDebugEnabled())
+      logger.debug("Card is not in the personal database. Checking if " + card.getAtr() + " has known and present PKCS11 library.");
     List<Match> matches = new ArrayList<>();
     String pkcs11 = pkcs11Manager.getAvailablePkcs11Library(card.getAtr());
     if (pkcs11 != null) {
@@ -281,12 +281,6 @@ public class InternalAPI implements PlatformAPI {
       detector.getPropertyChangeSupport().addPropertyChangeListener(listener);
     } else {
       detector.getPropertyChangeSupport().removePropertyChangeListener(listener);
-    }
-  }
-
-  public PropertyChangeSupport getPropertyChangeSupport() {
-    synchronized (this) {
-      return propertyChangeSupport;
     }
   }
 

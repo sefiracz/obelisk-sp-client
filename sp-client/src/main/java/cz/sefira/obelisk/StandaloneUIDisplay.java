@@ -146,19 +146,20 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	@Override
 	public void close(final boolean blockingOperation) {
-		if (currentOperationName != null) {
-			Platform.runLater(() -> {
-				Stage oldStage = (blockingOperation) ? blockingStage : nonBlockingStage;
-				logger.info("Hide "+currentOperationName+" using " + oldStage + " and create new stage");
-				if (blockingOperation) {
-					blockingStage = createStage(true);
-				} else {
-					nonBlockingStage = createStage(false);
-				}
-				oldStage.close();
-				currentOperationName = null;
-			});
-		}
+		Platform.runLater(() -> {
+			Stage oldStage = (blockingOperation) ? blockingStage : nonBlockingStage;
+			if (currentOperationName != null) {
+				logger.info("Hide " + currentOperationName + " using " + oldStage + " and create new stage");
+			}
+			if (blockingOperation) {
+				blockingStage = createStage(true);
+			} else {
+				nonBlockingStage = createStage(false);
+			}
+			oldStage.close();
+			currentOperationName = null;
+		});
+
 	}
 
 	@Override

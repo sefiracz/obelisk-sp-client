@@ -44,7 +44,7 @@ public class CardDetectorTest {
 		EnvironmentInfo environmentInfo = new EnvironmentInfo();
 		UIDisplay display = Mockito.mock(UIDisplay.class);
 		InternalAPI api = new InternalAPI(display, null, null, null, null, null);
-		CardDetector cardDetector = PowerMockito.spy(new CardDetector(api, environmentInfo));
+		CardDetector cardDetector = PowerMockito.spy(new CardDetector(api));
 		CardTerminals cardTerminals = mock(CardTerminals.class);
 		CardException cardException = mock(CardException.class);
 		when(cardException.getCause()).thenReturn(new Exception("SCARD_E_NO_SERVICE"));

@@ -82,6 +82,7 @@ public class CertificateViewerController implements StandaloneUIController, Init
 
   public void init(Stage stage, Object... params) {
     this.stage = stage;
+    stage.setResizable(false);
     stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
     stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];

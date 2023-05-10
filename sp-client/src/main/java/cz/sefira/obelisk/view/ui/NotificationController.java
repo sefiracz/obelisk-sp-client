@@ -77,7 +77,6 @@ public class NotificationController extends ControllerCore implements PropertyCh
   private boolean hiddenFlag;
 
   private Notification notification;
-  private final Queue<Notification> notificationQueue = new ConcurrentLinkedQueue<>();
   private TimerService service;
 
   @Override
