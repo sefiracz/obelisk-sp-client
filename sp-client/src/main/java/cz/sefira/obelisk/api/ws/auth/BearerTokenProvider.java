@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +147,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     request.setEntity(new UrlEncodedFormEntity(params));
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     HttpResponse response = client.execute(request, clientBuilder);
-    return GsonHelper.fromJson(new String(response.getContent()), BearerToken.class);
+    return GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
   }
 
   private void parseAuthServerURL() {

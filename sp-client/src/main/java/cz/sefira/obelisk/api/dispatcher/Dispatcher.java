@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Collections;
@@ -203,7 +204,7 @@ public class Dispatcher implements AppPlugin {
         throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
       }
       idleTime = 0;
-      BaseRequest req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
+      BaseRequest req = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BaseRequest.class);
       // execute  result
       while (true) {
         // check if request is present
@@ -226,7 +227,7 @@ public class Dispatcher implements AppPlugin {
           response = client.call("POST", url, tokenProvider, result, false);
           int responseCode = response.getCode();
           if (responseCode == HttpStatus.SC_OK) {
-            req = GsonHelper.fromJson(new String(response.getContent()), BaseRequest.class);
+            req = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BaseRequest.class);
           } else if (responseCode == HttpStatus.SC_NO_CONTENT) {
             return result;
           } else if (responseCode == HttpStatus.SC_SEE_OTHER || responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
@@ -246,12 +247,12 @@ public class Dispatcher implements AppPlugin {
     Execution<?> result;
     switch (req.getOperation()) {
       case GET_CERTIFICATE:
-        GetCertificateRequest getCertificateRequest = GsonHelper.fromJson(new String(requestData),
+        GetCertificateRequest getCertificateRequest = GsonHelper.fromJson(new String(requestData, StandardCharsets.UTF_8),
                 GetCertificateRequest.class);
         result = api.getCertificate(getCertificateRequest);
         break;
       case SIGN:
-        SignatureRequest signatureRequest = GsonHelper.fromJson(new String(requestData), SignatureRequest.class);
+        SignatureRequest signatureRequest = GsonHelper.fromJson(new String(requestData, StandardCharsets.UTF_8), SignatureRequest.class);
         result = api.sign(signatureRequest);
         result.setStepId(signatureRequest.getSignParams().getStepId());
         break;

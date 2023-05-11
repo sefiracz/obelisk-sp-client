@@ -14,13 +14,10 @@
  */
 package cz.sefira.obelisk.json;
 
-//import com.google.common.reflect.TypeParameter;
-//import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
-import cz.sefira.obelisk.api.Execution;
 
 public class GsonHelper {
 
@@ -38,13 +35,4 @@ public class GsonHelper {
 		return customGson.fromJson(json, clasz);
 	}
 
-//	public static <T> Execution<T> fromExecution(String json, Class<T> response) {
-//		return customGson.fromJson(json, buildTokenType(response).getType());
-//	}
-//
-//	@SuppressWarnings("serial")
-//	private static <T> TypeToken<Execution<T>> buildTokenType(Class<T> clas) {
-//		TypeToken<Execution<T>> where = new TypeToken<Execution<T>>() {}.where(new TypeParameter<T>() {}, clas);
-//		return where;
-//	}
 }
