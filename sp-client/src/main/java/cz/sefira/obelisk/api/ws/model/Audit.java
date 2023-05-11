@@ -32,7 +32,6 @@ public class Audit {
   private static final Logger logger = LoggerFactory.getLogger(Audit.class.getName());
 
   private String ip;
-  private String hostname;
   private String username;
   private String appDate;
   private UsedToken usedToken;
@@ -57,7 +56,6 @@ public class Audit {
     this.username = System.getProperty("user.name");
     try {
       this.ip = InetAddress.getLocalHost().getHostAddress();
-      this.hostname = InetAddress.getLocalHost().toString();
     } catch (UnknownHostException e) {
       logger.error(e.getMessage(), e);
     }
@@ -65,10 +63,6 @@ public class Audit {
 
   public String getIp() {
     return ip;
-  }
-
-  public String getHostname() {
-    return hostname;
   }
 
   public String getUsername() {
