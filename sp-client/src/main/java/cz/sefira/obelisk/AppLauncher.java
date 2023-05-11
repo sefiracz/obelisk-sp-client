@@ -1,12 +1,12 @@
 /**
  * © SEFIRA spol. s r.o., 2020-2021
- *
+ * <p>
  * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
  * You may use this work only in accordance with the License.
  * You can obtain a copy of the License at the following address:
- *
+ * <p>
  * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
- *
+ * <p>
  * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
@@ -34,7 +34,9 @@ import cz.sefira.obelisk.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 public class AppLauncher {
@@ -47,7 +49,7 @@ public class AppLauncher {
     try {
       // main thread name - pid
       Thread t = Thread.currentThread();
-      t.setName("main-"+ProcessHandle.current().pid());
+      t.setName("main-" + ProcessHandle.current().pid());
       // load config
       appConfig = AppConfig.get();
       // logging mode (debug / info)
@@ -56,12 +58,21 @@ public class AppLauncher {
       // add message to the queue
       if (args.length > 0) {
         String input = args[0];
-        // TODO - encrypt?
-        MessageQueue messageQueue = MessageQueueFactory.getInstance(appConfig);
-        String msgId = messageQueue.addMessage(input.getBytes(StandardCharsets.UTF_8));
-        logger.info("Queued message: "+msgId);
+        queueMessage(input); // queue message via input argument
       } else {
-        logger.info("Launcher initiated with no message");
+        // register Mac OS URI handler
+        if (OS.isMacOS()) {
+          Desktop.getDesktop().setOpenURIHandler(e -> {
+            URI uri = e.getURI();
+            if (uri != null) {
+              queueMessage(uri.toString()); // queue message via URI handler
+            } else {
+              logger.info("URI handler called with no message");
+            }
+          });
+        } else {
+          logger.info("Launcher initiated with no message");
+        }
       }
       checkDevMode();
       // check lock
@@ -72,9 +83,15 @@ public class AppLauncher {
     } catch (Exception e) {
       // start failed app
       AppPreloader preloader = new AppPreloader();
-      preloader.launchApp(new String[]{"--error=true", "--stacktrace="+TextUtils.printException(e)});
+      preloader.launchApp(new String[]{"--error=true", "--stacktrace=" + TextUtils.printException(e)});
       System.exit(1);
     }
+  }
+
+  private static void queueMessage(String input) {
+    MessageQueue messageQueue = MessageQueueFactory.getInstance(appConfig);
+    String msgId = messageQueue.addMessage(input.getBytes(StandardCharsets.UTF_8));
+    logger.info("Queued message: " + msgId);
   }
 
   private static void checkForRunningProcess() throws IOException {
