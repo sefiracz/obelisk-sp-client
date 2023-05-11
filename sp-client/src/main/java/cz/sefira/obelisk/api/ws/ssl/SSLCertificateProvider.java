@@ -24,10 +24,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Pool of trusted certificates
@@ -35,6 +32,7 @@ import java.util.Map;
 public class SSLCertificateProvider {
 
   private final Map<String, List<X509Certificate>> certsBySubject = new HashMap<>();
+  private final Set<X509Certificate> unique = new HashSet<>();
   private KeyStore trustStore;
   private DelegatedTrustManager delegatedTrustManager;
   private Registry<ConnectionSocketFactory> socketFactory;
@@ -43,6 +41,7 @@ public class SSLCertificateProvider {
     final String subjectName = certificate.getSubjectX500Principal().getName(X500Principal.CANONICAL);
     List<X509Certificate> certs = certsBySubject.computeIfAbsent(subjectName, k -> new ArrayList<>());
     certs.add(certificate);
+    unique.add(certificate);
   }
 
   public List<X509Certificate> getBySubject(X500Principal subjectName) {
@@ -56,6 +55,10 @@ public class SSLCertificateProvider {
 
   public void setTrustStore(KeyStore trustStore) {
     this.trustStore = trustStore;
+  }
+
+  public Set<X509Certificate> getUnique() {
+    return unique;
   }
 
   public List<X509Certificate> getCertificateChain() {

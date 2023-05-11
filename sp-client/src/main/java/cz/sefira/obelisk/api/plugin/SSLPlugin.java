@@ -90,6 +90,7 @@ public class SSLPlugin implements AppPlugin {
 
       sslCertProvider.setTrustStore(truststore);
       api.setSslCertificateProvider(sslCertProvider);
+      logger.info("Added trusted SSL certificates: "+sslCertProvider.getUnique().size());
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       return List.of(new InitErrorMessage(this.getClass().getSimpleName(), "error.install.ssl.cert.message", e));
