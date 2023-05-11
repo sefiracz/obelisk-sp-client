@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.api;
 
+import cz.sefira.obelisk.api.model.OS;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -208,7 +209,9 @@ public class AppConfig {
     final Path files = appUserHome.toPath().resolve(".files");
     if (!files.toFile().exists()) {
       Files.createDirectories(files);
-      Files.setAttribute(files, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+      if (OS.isWindows()) {
+        Files.setAttribute(files, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
+      }
     }
     return files;
   }
