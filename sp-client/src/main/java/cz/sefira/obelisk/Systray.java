@@ -39,7 +39,7 @@ public class Systray {
       systray = new AWTSystray(tooltip, trayIcon);
     }
     if (systray != null) {
-      systray.spawnTray(() -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
+      systray.spawnTray(() -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     }
   }
 }

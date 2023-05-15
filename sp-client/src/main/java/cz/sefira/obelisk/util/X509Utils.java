@@ -113,7 +113,7 @@ public class X509Utils {
 
   public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
     try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.BLOCKING, certificates);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

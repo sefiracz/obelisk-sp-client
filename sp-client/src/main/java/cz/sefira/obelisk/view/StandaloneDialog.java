@@ -48,12 +48,14 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.text.MessageFormat;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StandaloneDialog {
 
   private static final Logger logger = LoggerFactory.getLogger(StandaloneDialog.class.getName());
+
+  private static final Object lock = new Object();
 
   public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
@@ -255,41 +257,53 @@ public class StandaloneDialog {
     }
   }
 
-  public static StandaloneUIController createDialogFromFXML(@NotNull String fxml, Stage owner, StageState state, Object... params) {
+  private static final Map<String, StandaloneUIController> BLOCKING_UI = new ConcurrentHashMap<>();
+
+  public static void createDialogFromFXML(@NotNull String fxml, Stage owner, StageState state, Object... params) {
     try {
+      if (BLOCKING_UI.get(fxml) != null) {
+        BLOCKING_UI.get(fxml).close();
+        return;
+      }
       FXMLLoader loader = new FXMLLoader();
       loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
-      Stage primaryStage = new Stage();
+      Stage dialogStage = new Stage();
       if (owner != null) {
-        primaryStage.initOwner(owner);
-        primaryStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(owner);
+        dialogStage.initModality(Modality.WINDOW_MODAL);
       }
-      primaryStage.setAlwaysOnTop(true);
+      dialogStage.setAlwaysOnTop(true);
       Parent panel = loader.load(StandaloneDialog.class.getResourceAsStream(fxml));
       Scene scene = new Scene(panel);
-      primaryStage.setScene(scene);
-      primaryStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
-      primaryStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
+      dialogStage.setScene(scene);
+      dialogStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
+      dialogStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
       StandaloneUIController controller = loader.getController();
-      controller.init(primaryStage, params);
+      controller.init(dialogStage, params);
       switch (state) {
         case BLOCKING:
-          primaryStage.showAndWait();
+          BLOCKING_UI.put(fxml, controller);
+          logger.info("Showing blocking standalone: "+fxml);
+          try (controller) {
+            dialogStage.showAndWait();
+            logger.info("Releasing blocking standalone: "+fxml);
+            BLOCKING_UI.remove(fxml);
+          }
           break;
         case HIDDEN:
-          primaryStage.hide();
+          logger.info("Spawning hidden standalone: "+fxml);
+          dialogStage.hide();
           break;
         case NONBLOCKING:
         default:
-          primaryStage.show();
+          logger.info("Showing nonblocking standalone: "+fxml);
+          dialogStage.show();
           break;
       }
-      return controller;
     } catch (Throwable t) {
       logger.error(t.getMessage(), t);
       DialogMessage errMsg = new DialogMessage("feedback.message", DialogMessage.Level.ERROR);
       showErrorDialog(errMsg, null, t);
-      return null;
     }
   }
 

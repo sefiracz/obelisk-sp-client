@@ -105,7 +105,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     cancel.setOnAction(e -> signalUserCancel());
 
     manage.setOnAction(e ->
-        StandaloneDialog.createDialogFromFXML("/fxml/manage-keystores.fxml", null, StageState.BLOCKING, api, products)
+        StandaloneDialog.createDialogFromFXML("/fxml/manage-keystores.fxml", getDisplay().getStage(true), StageState.NONBLOCKING, api, products)
     );
     product = new ToggleGroup();
     select.disableProperty().bind(product.selectedToggleProperty().isNull());
@@ -190,7 +190,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       progressIndicatorVisible(false);
     });
 
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 
