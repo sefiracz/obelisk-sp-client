@@ -187,7 +187,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     });
 
     // create context menu
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.NONBLOCKING, api));
+    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 
