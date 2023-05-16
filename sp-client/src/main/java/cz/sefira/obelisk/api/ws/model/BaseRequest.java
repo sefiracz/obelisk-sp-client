@@ -25,7 +25,7 @@ public class BaseRequest {
 
 	private String operation;
 	private String description;
-	private boolean userInteraction;
+	private boolean userInteraction = true;
 	private SessionValue session;
 	private List<SmartcardInfo> smartcards;
 
