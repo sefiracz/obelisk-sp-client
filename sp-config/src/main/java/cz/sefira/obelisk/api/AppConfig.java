@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -141,7 +142,11 @@ public class AppConfig {
   }
 
   public String getApplicationName() {
-    return this.applicationName;
+    String client = "client";
+    if(Locale.getDefault().getLanguage().equals("cs")) {
+      client = "klient";
+    }
+    return MessageFormat.format(applicationName, client);
   }
 
   public String getApplicationPathName() {

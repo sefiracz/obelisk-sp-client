@@ -203,12 +203,11 @@ public class StandaloneUIDisplay implements UIDisplay {
 		public char[] getPassword() {
 			logger.info("Request password");
       final OperationResult<Object> passwordResult = StandaloneUIDisplay.this.operationFactory.getOperation(
-              UIOperation.class, "/fxml/password-input.fxml", passwordPrompt,
-              AppConfig.get().getApplicationName(), product).perform();
+              UIOperation.class, "/fxml/password-input.fxml", passwordPrompt, product).perform();
       if(passwordResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
         return (char[]) passwordResult.getResult(); // get password
       } else if(passwordResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
-        throw new CancelledOperationException(); // TODO - ERROR?
+        throw new CancelledOperationException();
       } else if(passwordResult.getStatus().equals(BasicOperationStatus.EXCEPTION)) {
         final Exception e = passwordResult.getException();
         if(e instanceof RuntimeException) {

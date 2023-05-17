@@ -100,6 +100,8 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 	private List<AbstractProduct> filtered;
 
+	private ResourceBundle resources;
+
 	public ManageKeystoresController() {
 		super();
 		observableKeystores = FXCollections.observableArrayList();
@@ -107,6 +109,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		this.resources = resources;
 		cancel.setOnAction(e -> windowClose(primaryStage));
 		keystoresTable.setPlaceholder(new Label(resources.getString("table.view.no.content")));
 		keystoresTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -231,6 +234,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 		if(params.length > 1) {
       filtered = (List<AbstractProduct>) params[1];
     }
+		stage.setTitle(resources.getString("systray.menu.manage.keystores"));
 		Platform.runLater(() -> {
 		  if(filtered != null && !filtered.isEmpty()) {
 		    // show only this subset

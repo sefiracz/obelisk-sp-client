@@ -22,14 +22,13 @@ import java.util.prefs.Preferences;
 
 public class UserPreferences {
 
-  private static final String SPLASH_SCREEN = "sefira.obelisk.sp.splashScreen";
-  private static final String SHOW_NOTIFICATIONS = "sefira.obelisk.sp.showNotifications";
-  private static final String DEBUG_MODE = "sefira.obelisk.sp.debugMode";
-  private static final String HIDDEN_DIALOGS = "sefira.obelisk.sp.hiddenDialogs";
-  private static final String CACHE_DURATION = "sefira.obelisk.sp.cacheDuration";
+  private static final String SPLASH_SCREEN = "cz.sefira.obelisk.signingportal.splashscreen";
+  private static final String SHOW_NOTIFICATIONS = "cz.sefira.obelisk.signingportal.shownotifications";
+  private static final String DEBUG_MODE = "cz.sefira.obelisk.signingportal.debugmode";
+  private static final String HIDDEN_DIALOGS = "cz.sefira.obelisk.signingportal.hiddendialogs";
+  private static final String CACHE_DURATION = "cz.sefira.obelisk.signingportal.cacheduration";
 
   private final Preferences prefs;
-  private final AppConfig appConfig;
 
   private String hiddenDialogIds;
   private Boolean splashScreen;
@@ -38,7 +37,7 @@ public class UserPreferences {
   private Boolean debugMode;
 
   public UserPreferences(final AppConfig appConfig) {
-    this.appConfig = appConfig;
+
     prefs = Preferences.userRoot().node(appConfig.getApplicationPathName().toLowerCase());
 
     hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
