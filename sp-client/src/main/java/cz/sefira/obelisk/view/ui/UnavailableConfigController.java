@@ -13,6 +13,7 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.flow.operation.CoreOperationStatus;
@@ -76,15 +77,16 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
 
     @Override
     public final void init(final Object... params) {
-        StageHelper.getInstance().setTitle((String) params[0], "unavailable.configuration.title");
+      String applicationName = AppConfig.get().getApplicationName();
+        StageHelper.getInstance().setTitle(applicationName, "unavailable.configuration.title");
 
         Platform.runLater(() -> {
           this.message.setText(StringEscapeUtils.unescapeJava(MessageFormat
-                  .format(resources.getString("unavailable.configuration.header"), params[0])));
+                  .format(resources.getString("unavailable.configuration.header"), applicationName)));
 
           // TODO - button to show descriptions, and known information about token
-          if (params.length == 2) {
-            SmartcardInfo info = (SmartcardInfo) params[1];
+          if (params.length == 1) {
+            SmartcardInfo info = (SmartcardInfo) params[0];
             boolean hasKnownDrivers = info != null && info.getDrivers() != null && !info.getDrivers().isEmpty();
             if (hasKnownDrivers && info.getDownloadUrl() != null && !info.getDownloadUrl().isEmpty()) {
               Label driverUrl = new Label();

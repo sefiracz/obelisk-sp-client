@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppException;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.api.model.KeystoreType;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -62,7 +63,7 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 
 	@Override
 	public void init(Object... params) {
-		StageHelper.getInstance().setTitle((String)params[0], "save.keystore.title");
+		StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "save.keystore.title");
 		setLogoBackground(keystoreSelection, 250, 250);
 	}
 

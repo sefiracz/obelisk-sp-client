@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.model.Pkcs11Params;
@@ -57,7 +58,7 @@ public class Pkcs11ParamsController extends AbstractUIOperationController<Pkcs11
 
     @Override
     public void init(final Object... params) {
-        StageHelper.getInstance().setTitle((String) params[0], "pkcs11.params.title");
+        StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "pkcs11.params.title");
         setLogoBackground(librarySelection, 250, 250);
     }
 

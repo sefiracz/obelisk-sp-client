@@ -64,7 +64,7 @@ public class Dispatcher implements AppPlugin {
   private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class.getName());
   private static final long SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
   private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.MILLISECONDS.toMillis(1000);
-  private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
+  private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.MINUTES.toMillis(5);
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -74,7 +74,7 @@ public class Dispatcher implements AppPlugin {
   private boolean initialized;
 
   private long lastSyncTimestamp = 0L;
-  private long idleTime = 0;
+  private long idleTime = 0L;
 
   private final ScheduledExecutorService dispatcher = Executors.newSingleThreadScheduledExecutor(r -> {
     Thread t = new Thread(r, "Dispatcher");
@@ -275,7 +275,7 @@ public class Dispatcher implements AppPlugin {
 
   private void idle() throws InterruptedException {
     if (idleTime > IDLE_TIMEOUT_MILLISECONDS) {
-      throw new GenericApiException("", "dispatcher.expired.error");
+      throw new GenericApiException("Operation timeout, server communication stalled", "dispatcher.expired.error");
     }
     Thread.sleep(IDLE_PERIOD_MILLISECONDS);
     idleTime += IDLE_PERIOD_MILLISECONDS;

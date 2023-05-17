@@ -23,7 +23,6 @@ import cz.sefira.obelisk.generic.ConnectionInfo;
 import cz.sefira.obelisk.generic.GenericCardAdapter;
 import cz.sefira.obelisk.model.Pkcs11Params;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
-import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.UIOperation;
 import cz.sefira.obelisk.dss.token.SignatureTokenConnection;
 import org.slf4j.Logger;
@@ -81,8 +80,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
           OperationResult<Object> result;
           if(product instanceof DetectedCard && ((DetectedCard) product).isKnownToken() != null) {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unavailable-config.fxml",
-                    new Object[]{AppConfig.get().getApplicationName(),
-                            ((DetectedCard) product).isKnownToken()}).perform();
+                    ((DetectedCard) product).isKnownToken()).perform();
           } else {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
                             new Object[]{AppConfig.get().getApplicationName()}).perform();
@@ -149,7 +147,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
     ScAPI scAPI = ScAPI.PKCS_11;
     map.put(TokenOperationResultKey.SELECTED_API, scAPI);
     final OperationResult<Object> driverSelection = operationFactory.getOperation(UIOperation.class,
-        "/fxml/pkcs11-params.fxml", AppConfig.get().getApplicationName()).perform();
+        "/fxml/pkcs11-params.fxml").perform();
     if(driverSelection.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
       return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
     }

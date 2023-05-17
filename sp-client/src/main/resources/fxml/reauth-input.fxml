@@ -39,12 +39,12 @@
   </center>
 
   <bottom>
-    <VBox fx:id="bottomContainer" BorderPane.alignment="CENTER">
-      <HBox styleClass="btn-container" fx:id="btnContainer" BorderPane.alignment="CENTER">
+    <VBox BorderPane.alignment="CENTER">
+      <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
         <Button fx:id="cancel" styleClass="btn-default" mnemonicParsing="false" text="%button.cancel"/>
         <Button fx:id="ok" mnemonicParsing="false" styleClass="btn-primary" text="%button.ok"/>
       </HBox>
-      <VBox fx:id="storeInputContainer">
+      <VBox>
         <Separator style="-fx-padding: 0 10 0 10"/>
         <HBox BorderPane.alignment="CENTER">
           <SplitPane fx:id="checkboxPane" styleClass="store-input-container">

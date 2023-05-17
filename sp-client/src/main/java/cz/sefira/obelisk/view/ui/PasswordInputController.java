@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -27,7 +28,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +73,8 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 	@Override
 	public void init(Object... params) {
     final String passwordPrompt = (String) params[0];
-		if(params.length > 2) {
-			product = (AbstractProduct) params[2];
+		if(params.length > 1) {
+			product = (AbstractProduct) params[1];
 		}
 		String titleKey = "password.title";
     String promptKey = "password.default.prompt";
@@ -103,6 +103,6 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 			this.passwordPrompt.setText(resources.getString(titleKey));
 		}
 		this.password.setPromptText(resources.getString(titleKey));
-    StageHelper.getInstance().setTitle((String) params[1], titleKey);
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), titleKey);
 	}
 }

@@ -99,8 +99,7 @@ public class KeystoreProductAdapter implements ProductAdapter {
 	@SuppressWarnings("unchecked")
 	public FutureOperationInvocation<Product> getConfigurationOperation(PlatformAPI api, Product product) {
 		if (product instanceof NewKeystore) {
-			return UIOperation
-          .getFutureOperationInvocation(UIOperation.class, "/fxml/configure-keystore.fxml", AppConfig.get().getApplicationName());
+			return UIOperation.getFutureOperationInvocation(UIOperation.class, "/fxml/configure-keystore.fxml");
 		} else {
 			return new NoOpFutureOperationInvocation<>(product);
 		}

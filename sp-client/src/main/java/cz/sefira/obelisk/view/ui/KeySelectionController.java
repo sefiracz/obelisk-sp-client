@@ -14,7 +14,7 @@
  */
 package cz.sefira.obelisk.view.ui;
 
-import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.dss.DSSASN1Utils;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -174,7 +174,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
     @Override
     @SuppressWarnings("unchecked")
     public void init(final Object... params) {
-        StageHelper.getInstance().setTitle((String) params[1], "key.selection.title");
+        StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "key.selection.title");
         final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
         keys.removeIf(k -> k instanceof EmptyKeyEntry);
         final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
