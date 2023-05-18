@@ -62,9 +62,11 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
             } else if (Platform.isMac()) {
               selectedProduct = new MacOSKeychain();
             } else {
-              // TODO - hledat ručně?
+              // look manually ?
+              logger.warn("Unsupported platform for system-wide keystore");
             }
-          } else {
+          }
+          if (selectedProduct == null) {
             // let user select a product device (keystores, windows, smartcards)
             final Operation<Product> operation = this.getOperationFactory().getOperation(UIOperation.class,
                 "/fxml/product-selection.fxml", api);
@@ -113,7 +115,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
           }
 
           // select key/certificate
-          final Product product = (Product) map.get(TokenOperationResultKey.SELECTED_PRODUCT);
+          final AbstractProduct product = (AbstractProduct) map.get(TokenOperationResultKey.SELECTED_PRODUCT);
           final ProductAdapter productAdapter = (ProductAdapter) map.get(TokenOperationResultKey.SELECTED_PRODUCT_ADAPTER);
           final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult = this.getOperationFactory()
               .getOperation(UserSelectPrivateKeyOperation.class,
@@ -143,7 +145,7 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
               this.getOperationFactory().getMessageDialog(api, certFlowFinished, false);
             }
 
-            return new Execution<>(resp, selectedProduct);
+            return new Execution<>(resp, product);
           } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
             continue; // go back from key selection
           } else {

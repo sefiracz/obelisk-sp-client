@@ -40,14 +40,12 @@ import java.util.List;
  * <ol>
  * <li>{@link SignatureTokenConnection}</li>
  * <li>{@link PlatformAPI}</li>
- * <li>{@link Product} (optional)</li>
  * <li>{@link ProductAdapter} (optional)</li>
  * <li>{@link CertificateFilter} (optional)</li>
  * </ol>
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
-// TODO - make this into Controller? / move this into key-selection.fxml controller
 public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DSSPrivateKeyEntry> {
 
     private SignatureTokenConnection token;

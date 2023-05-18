@@ -14,6 +14,7 @@ import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.view.StandaloneUIController;
+import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TabPane;
@@ -31,7 +32,7 @@ import java.util.ResourceBundle;
 /**
  * description
  */
-public class MainWindowController implements StandaloneUIController, Initializable {
+public class MainWindowController extends ControllerCore implements StandaloneUIController, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(MainWindowController.class.getName());
 
@@ -55,6 +56,7 @@ public class MainWindowController implements StandaloneUIController, Initializab
   @Override
   public void init(Stage stage, Object... params) {
     this.stage = stage;
+    setMinSize(tabPane, stage);
     stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
     PlatformAPI api = (PlatformAPI) params[0];
     eventsViewerController.init(stage, api);
