@@ -15,6 +15,7 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
@@ -121,6 +122,11 @@ public abstract class ControllerCore  {
     catch (IOException e) {
       logger.error("Unable to show background image logo: "+e.getMessage(), e);
     }
+  }
+
+  public void setMinSize(Region rootPane, Stage stage) {
+    stage.setMinWidth(rootPane.getMinWidth() != 0 ? rootPane.getMinWidth() : rootPane.getPrefWidth());
+    stage.setMinHeight(rootPane.getMinHeight() != 0 ? rootPane.getMinHeight() : rootPane.getPrefHeight());
   }
 
   /**
