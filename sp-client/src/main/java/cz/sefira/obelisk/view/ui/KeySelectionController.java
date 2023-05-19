@@ -34,6 +34,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -55,6 +56,9 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
     private static final String ICON_UNLOCKED = "/images/key.png";
     private static final String ICON_QC = "/images/qc.png";
     private static final String ICON_QCSD = "/images/qscd.png";
+
+    @FXML
+    private BorderPane borderPane;
 
     @FXML
     private Button select;
@@ -181,6 +185,7 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
             new Object[]{})));
         this.listView.setItems(items);
+        borderPane.setPrefHeight(keys.size() > 2 ? 390 : 320);
     }
 
 }

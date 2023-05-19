@@ -80,7 +80,7 @@ public abstract class AbstractUIOperationController<R> extends ControllerCore im
 	}
 
 	protected final UIDisplay getDisplay() {
-		return display;
+		return display != null ? display : uiOperation.getDisplay();
 	}
 
   public void asyncUpdate(Runnable callback) {

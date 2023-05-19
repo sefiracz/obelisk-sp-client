@@ -1,5 +1,7 @@
 package cz.sefira.obelisk.flow;
 
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,15 @@ public class StageHelper {
 			title = applicationName;
 		} else {
 			title = "";
+		}
+	}
+
+	public void setMinSize(Region rootPane, Stage stage) {
+		double minWidth = rootPane.getMinWidth() > 0 ? rootPane.getMinWidth() : rootPane.getPrefWidth();
+		double minHeight = rootPane.getMinHeight() > 0 ? rootPane.getMinHeight() : rootPane.getPrefHeight();
+		if (minWidth > 0 && minHeight > 0) {
+			stage.setMinWidth(minWidth);
+			stage.setMinHeight(minHeight);
 		}
 	}
 
