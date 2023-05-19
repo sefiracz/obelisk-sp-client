@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.util.TextUtils;
@@ -33,6 +34,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.slf4j.Logger;
@@ -61,6 +63,9 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 	private static final Logger logger = LoggerFactory.getLogger(ManageKeystoresController.class.getName());
 
 	// TODO - disable remove when using devices
+
+	@FXML
+	private BorderPane borderPane;
 
 	@FXML
 	private Button cancel;
@@ -230,6 +235,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 	@Override
 	public void init(Stage stage, Object... params) {
 		primaryStage = stage;
+		StageHelper.getInstance().setMinSize(borderPane, stage);
 		api = (PlatformAPI) params[0];
 		if(params.length > 1) {
       filtered = (List<AbstractProduct>) params[1];

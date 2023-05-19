@@ -124,11 +124,6 @@ public abstract class ControllerCore  {
     }
   }
 
-  public void setMinSize(Region rootPane, Stage stage) {
-    stage.setMinWidth(rootPane.getMinWidth() != 0 ? rootPane.getMinWidth() : rootPane.getPrefWidth());
-    stage.setMinHeight(rootPane.getMinHeight() != 0 ? rootPane.getMinHeight() : rootPane.getPrefHeight());
-  }
-
   /**
    * Handler for repeated periodical activation of pressed buttons
    */

@@ -13,6 +13,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
@@ -56,7 +57,6 @@ public class MainWindowController extends ControllerCore implements StandaloneUI
   @Override
   public void init(Stage stage, Object... params) {
     this.stage = stage;
-    setMinSize(tabPane, stage);
     stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
     PlatformAPI api = (PlatformAPI) params[0];
     eventsViewerController.init(stage, api);
@@ -74,6 +74,7 @@ public class MainWindowController extends ControllerCore implements StandaloneUI
         e.consume();
       }
     });
+    StageHelper.getInstance().setMinSize(tabPane, stage);
   }
 
   @Override

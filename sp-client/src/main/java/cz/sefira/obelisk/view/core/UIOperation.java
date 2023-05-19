@@ -98,8 +98,8 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
       root = loader.getRoot();
       controller = loader.getController();
       controller.setUIOperation(this);
-      controller.init(params);
-      controller.setDisplay(display);
+			controller.setDisplay(display);
+			controller.init(params);
 
       display();
 

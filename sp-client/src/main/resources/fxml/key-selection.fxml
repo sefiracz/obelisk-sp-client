@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.HBox?>
 
 <BorderPane prefWidth="450.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="cz.sefira.obelisk.view.ui.KeySelectionController">
+            fx:id="borderPane" fx:controller="cz.sefira.obelisk.view.ui.KeySelectionController">
 
   <center>
     <BorderPane>
