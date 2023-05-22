@@ -24,6 +24,7 @@ import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -49,6 +50,9 @@ import java.util.concurrent.TimeUnit;
 public class PreferencesController extends ControllerCore implements StandaloneUIController, Initializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreferencesController.class.getName());
+
+	private static final int MIN_VALUE_CACHE_DURATION_MINUTES = 0;
+	private static final int MAX_VALUE_CACHE_DURATION_MINUTES = 30;
 
 	@FXML
 	private GridPane gridPane;
@@ -103,7 +107,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 
 	private ResourceBundle resources;
 
-	private int duration = 0;
+	private SimpleIntegerProperty duration = new SimpleIntegerProperty(0);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -127,17 +131,15 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 			userPreferences.setDebugMode(debugMode.selectedProperty().getValue());
 			userPreferences.setShowNotifications(showNotifications.selectedProperty().getValue());
 			userPreferences.setSplashScreen(splashscreen.selectedProperty().getValue());
-			if (duration == 0 || !Integer.valueOf(duration).equals(userPreferences.getCacheDuration())) {
+			if (duration.getValue() == 0 || !duration.getValue().equals(userPreferences.getCacheDuration())) {
 				SessionManager.getManager().destroySecret();
 			}
-			userPreferences.setCacheDuration(duration);
+			userPreferences.setCacheDuration(duration.getValue());
 			AppConfigurer.applyUserPreferences(userPreferences);
 			windowClose(primaryStage);
 		});
 		cancel.setOnAction((e) -> windowClose(primaryStage));
-		reset.setOnAction((e) -> {
-			StandaloneDialog.showConfirmResetDialog(primaryStage, api, userPreferences);
-		});
+		reset.setOnAction((e) -> StandaloneDialog.showConfirmResetDialog(primaryStage, api, userPreferences));
 
 		export.setOnAction((e) -> {
 			final FileChooser fileChooser = new FileChooser();
@@ -168,7 +170,9 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 		this.debugMode.selectedProperty().setValue(userPreferences.isDebugMode());
 		this.showNotifications.selectedProperty().setValue(userPreferences.isShowNotifications());
 		this.splashscreen.selectedProperty().setValue(userPreferences.isSplashScreen());
-		this.duration = userPreferences.getCacheDuration();
+		this.duration = new SimpleIntegerProperty(userPreferences.getCacheDuration());
+		toggleCacheDurationButtons(duration.getValue());
+		duration.addListener((observable, oldValue, newValue) -> toggleCacheDurationButtons(newValue));
 		setTextFieldDuration(true);
 		setLogoBackground(gridPane);
 	}
@@ -179,7 +183,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
     }
     else {
       try {
-        duration = Integer.parseInt(change.getControlNewText());
+        duration.set(Integer.parseInt(change.getControlNewText()));
         setTextFieldDuration(false);
       }
       catch (NumberFormatException ignored) {
@@ -190,27 +194,32 @@ public class PreferencesController extends ControllerCore implements StandaloneU
   }
 
   void setTextFieldDuration(boolean clearText) {
-    String minutes = duration == 0 || duration > 4 ? resources.getString("preferences.minutes.universal") :
-        duration == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
+    String minutes = duration.getValue() == 0 || duration.getValue() > 4 ? resources.getString("preferences.minutes.universal") :
+        duration.getValue() == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
     if (clearText) {
       durationTextField.setText("");
     }
-    durationTextField.setPromptText(duration + " " + minutes);
+    durationTextField.setPromptText(duration.getValue() + " " + minutes);
   }
 
   private void decrementDuration() {
-    if (duration > 0) {
-      duration--;
+    if (duration.getValue() > MIN_VALUE_CACHE_DURATION_MINUTES) {
+			duration.set(duration.get()-1);
       setTextFieldDuration(true);
     }
   }
 
   private void incrementDuration() {
-    if (duration < 30) {
-      duration++;
+    if (duration.getValue() < MAX_VALUE_CACHE_DURATION_MINUTES) {
+			duration.set(duration.get()+1);
       setTextFieldDuration(true);
     }
   }
+
+	private void toggleCacheDurationButtons(Number currentValue) {
+		minusDuration.setDisable(currentValue.equals(MIN_VALUE_CACHE_DURATION_MINUTES));
+		plusDuration.setDisable(currentValue.equals(MAX_VALUE_CACHE_DURATION_MINUTES));
+	}
 
 	@Override
 	public void close() {
