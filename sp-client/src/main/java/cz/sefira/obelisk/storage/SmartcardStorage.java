@@ -17,6 +17,8 @@ import one.microstream.persistence.types.Storer;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
 import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SmartcardStorage implements AutoCloseable {
 
+  private static final Logger logger = LoggerFactory.getLogger(SmartcardStorage.class.getName());
+
   private List<SmartcardInfo> smartcards = new ArrayList<>();
 
   private final EmbeddedStorageManager storage;
@@ -42,6 +46,7 @@ public class SmartcardStorage implements AutoCloseable {
         )
     );
     this.storage = foundation.createEmbeddedStorageManager(smartcards).start();
+    logger.info("Supported smartcards: "+smartcards.size());
   }
 
   public final synchronized void setSmartcards(List<SmartcardInfo> smartcards) {
