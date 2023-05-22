@@ -388,6 +388,20 @@ public class DetectedCard extends AbstractProduct {
 	}
 
 	@Override
+	public boolean matchToken(Object o) {
+		if (this == o) return true;
+		if (o == null || (getClass() != o.getClass() && !getClass().isAssignableFrom(o.getClass()) &&
+				!o.getClass().isAssignableFrom(getClass()))) return false;
+
+		DetectedCard that = (DetectedCard) o;
+		if (!getAtr().equalsIgnoreCase(that.getAtr())) return false;
+		if(getConnectionInfo() != null && that.getConnectionInfo() != null) {
+			if (!getConnectionInfo().equals(that.getConnectionInfo())) return false;
+		}
+		return getSimpleLabel().equalsIgnoreCase(that.getSimpleLabel());
+	}
+
+	@Override
 	public int hashCode() {
 		int result = getAtr().hashCode();
 		if(getKeyAlias() != null) {

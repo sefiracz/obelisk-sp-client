@@ -108,6 +108,11 @@ public abstract class AbstractProduct implements Product {
         (getCertificate().equals(that.getCertificate()));
   }
 
+  public boolean matchToken(Object o) {
+    if (this == o) return true;
+    return o != null && getClass() == o.getClass();
+  }
+
   @Override
   public int hashCode() {
     int result = getCertificateId().hashCode();

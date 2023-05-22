@@ -37,9 +37,13 @@ import javafx.scene.layout.Region;
 import javafx.util.Duration;
 import org.identityconnectors.common.security.GuardedString;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Pkcs11ReauthInputController extends AbstractUIOperationController<GuardedString> implements Initializable {
 
@@ -68,6 +72,10 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
 
   private AppConfig appConfig;
 
+  private ScheduledExecutorService executorService;
+
+  private Integer cacheDuration;
+
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     EventHandler<ActionEvent> handler = event -> {
@@ -90,34 +98,64 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
   public void init(Object... params) {
     this.appConfig = (AppConfig) params[0];
     String titleKey = "reauth.title.qpin";
-    this.password.setPromptText(titleKey);
+    this.password.setPromptText(resources.getString(titleKey));
     this.passwordPrompt.setText(resources.getString("reauth.dialog.label"));
-
+    executorService = Executors.newSingleThreadScheduledExecutor(r -> {
+      Thread t = new Thread(r, "ReAuth");
+      t.setDaemon(true);
+      return t;
+    });
     StageHelper.getInstance().setTitle(appConfig.getApplicationName(), titleKey);
-
-    UserPreferences prefs = new UserPreferences(appConfig);
-    boolean cacheEnabled = prefs.getCacheDuration() != null && prefs.getCacheDuration() > 0;
-    if (cacheEnabled) {
-      storeInputCheckbox.selectedProperty().setValue(true);
-      storeInputCheckbox.setSelected(true);
-    }
-    Integer cacheDuration = prefs.getCacheDuration();
-    boolean cacheDisabled = cacheDuration == null || cacheDuration == 0;
-    if (cacheDuration == null) {
-      cacheDuration = 0;
-    }
-    storeInputCheckbox.disableProperty().setValue(cacheDisabled);
-    String minutes = cacheDuration == 0 || cacheDuration > 4 ? resources.getString("preferences.minutes.universal") :
-        cacheDuration == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
-    Tooltip tooltip = new Tooltip(MessageFormat.format(resources.getString("reauth.tooltip.enabled"),
-        prefs.getCacheDuration()+" "+minutes));
-    tooltip.setShowDelay(new Duration(50));
-    if (cacheDisabled) {
-      tooltip.setText(resources.getString("reauth.tooltip.disabled"));
-    }
+    cacheDuration = setCacheCheckbox();
+    executorService.scheduleAtFixedRate(this::setCacheCheckbox, 500, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     icon.getStyleClass().add("icon-qpin");
     icon.setPrefSize(50, 40);
+  }
 
-    checkboxPane.setTooltip(tooltip);
+  private int setCacheCheckbox() {
+    UserPreferences prefs = new UserPreferences(appConfig);
+    int duration = getCacheDuration(prefs);
+    if (cacheDuration == null || cacheDuration != duration) {
+      boolean enabled = isCacheEnabled(prefs);
+      if (enabled) {
+        storeInputCheckbox.selectedProperty().setValue(true);
+        storeInputCheckbox.setSelected(true);
+      } else {
+        storeInputCheckbox.selectedProperty().setValue(false);
+        storeInputCheckbox.setSelected(false);
+      }
+      Tooltip tooltip = getTooltip(duration);
+      storeInputCheckbox.disableProperty().setValue(!enabled);
+      checkboxPane.setTooltip(tooltip);
+      cacheDuration = duration;
+    }
+    return duration;
+  }
+
+  private boolean isCacheEnabled(UserPreferences prefs) {
+    return prefs.getCacheDuration() != null && prefs.getCacheDuration() > 0;
+  }
+
+  private int getCacheDuration(UserPreferences prefs) {
+    return prefs.getCacheDuration() != null ? prefs.getCacheDuration() : 0;
+  }
+
+  private Tooltip getTooltip(int cacheDuration) {
+    Tooltip tooltip = new Tooltip();
+    tooltip.setShowDelay(new Duration(50));
+    if (cacheDuration == 0) {
+      tooltip.setText(resources.getString("reauth.tooltip.disabled"));
+    } else {
+      String minutes = cacheDuration > 4 ? resources.getString("preferences.minutes.universal") :
+          cacheDuration == 1 ? resources.getString("preferences.minute.1") : resources.getString("preferences.minutes");
+      tooltip.setText(MessageFormat.format(resources.getString("reauth.tooltip.enabled"), cacheDuration+" "+minutes));
+    }
+    return tooltip;
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (executorService != null)
+      executorService.shutdown();
   }
 }

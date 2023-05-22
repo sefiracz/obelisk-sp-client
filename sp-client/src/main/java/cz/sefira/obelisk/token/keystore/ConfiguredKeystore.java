@@ -86,6 +86,15 @@ public class ConfiguredKeystore extends AbstractProduct {
 	}
 
 	@Override
+	public boolean matchToken(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ConfiguredKeystore that = (ConfiguredKeystore) o;
+		return getUrl().equals(that.getUrl());
+	}
+
+	@Override
 	public int hashCode() {
 		int result = getCertificateId().hashCode();
 		result = 31 * result + getKeyAlias().hashCode();
