@@ -83,6 +83,8 @@ public class CertificateViewerController implements StandaloneUIController, Init
 
   private PlatformAPI api;
 
+  private boolean sslTrust;
+
   final private ObservableList<String[]> observableCertificateData;
 
   private ResourceBundle resourceBundle;
@@ -98,11 +100,12 @@ public class CertificateViewerController implements StandaloneUIController, Init
     stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
     stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];
-    if (params.length > 1) {
+    if (params.length == 3) {
       this.api = (PlatformAPI) params[1];
+      this.sslTrust = (boolean) params[2];
     }
     // no API interaction, hide trust SSL button
-    if (api == null) {
+    if (api == null || !sslTrust) {
       trust.setVisible(false);
       trust.setManaged(false);
     }

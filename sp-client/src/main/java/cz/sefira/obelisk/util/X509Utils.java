@@ -105,23 +105,19 @@ public class X509Utils {
     try {
       X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(
           new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
-      openCertificateChain(owner, List.of(certificate));
+      openCertificateChain(owner, List.of(certificate), null, false);
     }
     catch (CertificateException e) {
       logger.error(e.getMessage(), e);
     }
   }
 
-  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates, PlatformAPI api) {
+  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates, PlatformAPI api, boolean sslTrust) {
     try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates, api);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates, api, sslTrust);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
-  }
-
-  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
-    openCertificateChain(owner, certificates, null);
   }
 
   public static String wrapPEMCertificate(String certificate) {
