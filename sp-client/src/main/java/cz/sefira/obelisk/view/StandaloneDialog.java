@@ -17,6 +17,7 @@ import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
+import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
@@ -125,7 +126,9 @@ public class StandaloneDialog {
     // setup scene
     BorderPane borderPane = new BorderPane();
     borderPane.getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
+    borderPane.setPrefSize(dialogMessage.getWidth(), dialogMessage.getHeight());
     Scene scene = new Scene(borderPane, dialogMessage.getWidth(), dialogMessage.getHeight());
+    StageHelper.getInstance().setMinSize(borderPane, dialogStage);
 
     // left icon box
     VBox leftBox = new VBox();
@@ -307,7 +310,7 @@ public class StandaloneDialog {
     }
   }
 
-  public static void showSslErrorDialog(@NotNull SSLCommunicationException ex) {
+  public static void showSslErrorDialog(@NotNull SSLCommunicationException ex, @NotNull PlatformAPI api) {
     ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
     // establish an error message
     String exceptionMsg = ex.getSSLException().getMessage();
@@ -339,7 +342,7 @@ public class StandaloneDialog {
     certs.setText(resources.getString("button.show.ssl.certificates"));
     certs.getStyleClass().add("btn-default");
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
-      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain());
+      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain(), api);
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
   }

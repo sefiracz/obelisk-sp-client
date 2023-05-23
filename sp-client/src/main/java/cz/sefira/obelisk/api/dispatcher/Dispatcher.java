@@ -167,7 +167,7 @@ public class Dispatcher implements AppPlugin {
       notificationProperty = "notification.event.fatal";
     }  catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
-      StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e));
+      StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api));
       notificationProperty = "notification.event.fatal";
     } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);

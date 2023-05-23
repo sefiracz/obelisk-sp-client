@@ -23,6 +23,7 @@ package cz.sefira.obelisk.util;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.dss.DSSException;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -111,12 +112,16 @@ public class X509Utils {
     }
   }
 
-  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
+  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates, PlatformAPI api) {
     try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates, api);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
+  }
+
+  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates) {
+    openCertificateChain(owner, certificates, null);
   }
 
   public static String wrapPEMCertificate(String certificate) {
