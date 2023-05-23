@@ -10,7 +10,13 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
+import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.dss.x509.CertificateDataParser;
+import cz.sefira.obelisk.util.DSSUtils;
+import cz.sefira.obelisk.view.DialogMessage;
+import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -23,6 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.hc.client5.http.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +51,9 @@ import java.util.ResourceBundle;
 public class CertificateViewerController implements StandaloneUIController, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(CertificateViewerController.class);
+
+  @FXML
+  private Button trust;
 
   @FXML
   private Button save;
@@ -71,6 +81,8 @@ public class CertificateViewerController implements StandaloneUIController, Init
 
   private Stage stage;
 
+  private PlatformAPI api;
+
   final private ObservableList<String[]> observableCertificateData;
 
   private ResourceBundle resourceBundle;
@@ -86,6 +98,14 @@ public class CertificateViewerController implements StandaloneUIController, Init
     stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
     stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];
+    if (params.length > 1) {
+      this.api = (PlatformAPI) params[1];
+    }
+    // no API interaction, hide trust SSL button
+    if (api == null) {
+      trust.setVisible(false);
+      trust.setManaged(false);
+    }
     try {
       int fieldsCount = 0;
       // parse certificates
@@ -134,6 +154,41 @@ public class CertificateViewerController implements StandaloneUIController, Init
         int height = items.size() * 29;
         certChainBox.setPrefHeight(Math.min(height, 200));
       }
+
+      trust.setOnAction(e -> {
+        if (api != null) {
+          DialogMessage message = new DialogMessage("certificate.viewer.temp.trust", DialogMessage.Level.WARNING);
+          message.setShowOkButton(false);
+          message.setOwner(stage);
+          Button no = new Button(resourceBundle.getString("button.cancel"));
+          no.getStyleClass().add("btn-default");
+          Button yes = new Button(resourceBundle.getString("button.ok"));
+          yes.getStyleClass().add("btn-primary");
+          message.addButton(new DialogMessage.MessageButton(no, (dialogStage, controller) -> dialogStage.close()));
+          message.addButton(new DialogMessage.MessageButton(yes, (dialogStage, controller) -> {
+            try {
+              CertificateDataParser parser = certificateChainView.getSelectionModel().getSelectedItem().getValue();
+              X509Certificate certificate = parser.getX509Certificate();
+              SSLCertificateProvider provider = api.getSslCertificateProvider();
+              if (!provider.getUnique().contains(certificate)) {
+                String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, certificate.getEncoded()));
+                logger.info("Temporarily trust certificate: " + certificate.getSubjectX500Principal().toString() + " (" + alias + ")");
+                provider.put(certificate);
+                provider.getTrustStore().setCertificateEntry(alias, certificate);
+                provider.unregisterSocketFactory();
+              }
+            } catch (Exception ex) {
+              logger.error(ex.getMessage(), ex);
+              DialogMessage errMsg = new DialogMessage("feedback.message", DialogMessage.Level.ERROR, 380, 140);
+              errMsg.setOwner(dialogStage);
+              StandaloneDialog.showErrorDialog(errMsg, null, ex);
+            }
+            dialogStage.close();
+            stage.close();
+          }));
+          StandaloneDialog.showDialog(api, message, true);
+        }
+      });
 
       save.setOnAction(e -> {
         final FileChooser fileChooser = new FileChooser();

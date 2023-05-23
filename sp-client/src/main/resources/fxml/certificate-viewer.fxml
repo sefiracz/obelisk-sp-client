@@ -56,6 +56,7 @@
   <bottom>
     <HBox styleClass="btn-container" BorderPane.alignment="CENTER">
       <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
+      <Button fx:id="trust" mnemonicParsing="false" styleClass="btn-danger" text="%certificate.viewer.ssl.exception"/>
       <Button fx:id="save" mnemonicParsing="false" styleClass="btn-secondary" text="%certificate.viewer.save.title"/>
     </HBox>
   </bottom>

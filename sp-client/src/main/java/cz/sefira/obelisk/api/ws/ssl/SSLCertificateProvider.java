@@ -16,6 +16,8 @@ import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -30,6 +32,8 @@ import java.util.*;
  * Pool of trusted certificates
  */
 public class SSLCertificateProvider {
+
+  private static final Logger logger = LoggerFactory.getLogger(SSLCertificateProvider.class);
 
   private final Map<String, List<X509Certificate>> certsBySubject = new HashMap<>();
   private final Set<X509Certificate> unique = new HashSet<>();
@@ -53,6 +57,10 @@ public class SSLCertificateProvider {
     return trustStore;
   }
 
+  public void unregisterSocketFactory() {
+    socketFactory = null;
+  }
+
   public void setTrustStore(KeyStore trustStore) {
     this.trustStore = trustStore;
   }
@@ -70,6 +78,7 @@ public class SSLCertificateProvider {
     if (socketFactory != null) {
       return socketFactory;
     }
+    logger.info("Creating new socket factory");
     TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     tmf.init(trustStore);
     delegatedTrustManager = new DelegatedTrustManager((X509ExtendedTrustManager) tmf.getTrustManagers()[0]);
