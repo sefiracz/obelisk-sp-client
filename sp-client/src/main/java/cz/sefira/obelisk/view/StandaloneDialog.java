@@ -51,6 +51,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StandaloneDialog {
 
@@ -316,8 +317,13 @@ public class StandaloneDialog {
     String exceptionMsg = ex.getSSLException().getMessage();
     exceptionMsg = exceptionMsg != null ? exceptionMsg.toLowerCase() : "";
     String[] arguments = new String[] {"", resources.getString("dispatcher.ssl.error.contact")};
+    AtomicBoolean sslTrust = new AtomicBoolean(false);
+    double height = 220;
+    double width = 600;
     if (exceptionMsg.contains("unable to find valid certification path to requested target")) {
       arguments[0] = resources.getString("dispatcher.ssl.error.notTrusted");
+      height = 300;
+      sslTrust.set(true);
     } else if (ex.getSSLException() instanceof SSLPeerUnverifiedException && exceptionMsg.contains("doesn't match")) {
       arguments[0] = MessageFormat.format(resources.getString("dispatcher.ssl.error.hostname"), ex.getHostname());
     }
@@ -334,15 +340,14 @@ public class StandaloneDialog {
       arguments[0] = resources.getString("dispatcher.ssl.error.generic");
     }
     // create the dialog window with the message
-    DialogMessage errMsg = new DialogMessage("dispatcher.ssl.error", DialogMessage.Level.ERROR,
-        arguments);
-    errMsg.setHeight(220);
-    errMsg.setWidth(600);
+    DialogMessage errMsg = new DialogMessage("dispatcher.ssl.error", DialogMessage.Level.ERROR, arguments);
+    errMsg.setHeight(height);
+    errMsg.setWidth(width);
     Button certs = new Button();
     certs.setText(resources.getString("button.show.ssl.certificates"));
     certs.getStyleClass().add("btn-default");
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
-      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain(), api);
+      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain(), api, sslTrust.get());
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
   }
