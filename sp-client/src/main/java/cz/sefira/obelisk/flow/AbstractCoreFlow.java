@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base class for flows of the core version of NexU.
+ * Abstract base class for flows of the core version of App.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */

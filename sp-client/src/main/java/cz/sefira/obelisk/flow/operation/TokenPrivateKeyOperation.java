@@ -55,7 +55,7 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
       this.api = (PlatformAPI) params[1];
       this.keyId = (String) params[2];
     } catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, NexuAPI, String (keyId)");
+      throw new IllegalArgumentException("Expected parameters: SignatureTokenConnection, PlatformAPI, String (keyId)");
     }
   }
 

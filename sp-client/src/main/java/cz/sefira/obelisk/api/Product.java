@@ -15,7 +15,7 @@
 package cz.sefira.obelisk.api;
 
 /**
- * A product represents a potential signature mean for NexU.
+ * A product represents a potential signature mean.
  * 
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */

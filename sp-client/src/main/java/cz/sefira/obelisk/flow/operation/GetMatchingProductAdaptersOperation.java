@@ -49,7 +49,7 @@ public class GetMatchingProductAdaptersOperation extends AbstractCompositeOperat
 			this.products = (List<Product>) params[0];
 			this.api = (PlatformAPI) params[1];
 		} catch(final ArrayIndexOutOfBoundsException | ClassCastException e) {
-			throw new IllegalArgumentException("Expected parameters: list of Product, NexuAPI");
+			throw new IllegalArgumentException("Expected parameters: list of Product, PlatformAPI");
 		}
 	}
 

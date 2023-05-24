@@ -127,7 +127,7 @@ public class StandaloneDialog {
     }
     // setup scene
     BorderPane borderPane = new BorderPane();
-    borderPane.getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
+    borderPane.getStylesheets().add(StandaloneDialog.class.getResource("/styles/styles.css").toString());
     borderPane.setPrefSize(dialogMessage.getWidth(), dialogMessage.getHeight());
     Scene scene = new Scene(borderPane, dialogMessage.getWidth(), dialogMessage.getHeight());
     StageHelper.getInstance().setMinSize(borderPane, dialogStage);
@@ -282,7 +282,7 @@ public class StandaloneDialog {
       Scene scene = new Scene(panel);
       dialogStage.setScene(scene);
       dialogStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
-      dialogStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/nexu.css").toString());
+      dialogStage.getScene().getStylesheets().add(StandaloneDialog.class.getResource("/styles/styles.css").toString());
       StandaloneUIController controller = loader.getController();
       controller.init(dialogStage, params);
       switch (state) {

@@ -136,13 +136,13 @@ public class ConfigurationManagerTest {
 		when(OS.getOS()).thenReturn(OS.LINUX);
 		assertFalse(cm.getCommonConfigPath(appName).toFile().exists());
 		AppConfig config = Mockito.spy(AppConfig.class);
-		when(config.getApplicationName()).thenReturn("Nexu");
+		when(config.getApplicationName()).thenReturn("OBSP");
 		when(config.getConfigurationManager()).thenReturn(cm);
-		File nexuConfigFolder = config.getAppUserHome();
+		File configFolder = config.getAppUserHome();
 		verify(cm, times(1)).manageCommonConfiguration(appName);
 		verify(cm, never()).manageWindowsConfiguration(appName);
-		assertTrue(nexuConfigFolder.exists());
-		assertEquals(0, nexuConfigFolder.compareTo(cm.getCommonConfigPath(appName).toFile()));
+		assertTrue(configFolder.exists());
+		assertEquals(0, configFolder.compareTo(cm.getCommonConfigPath(appName).toFile()));
 
 	}
 
@@ -151,14 +151,12 @@ public class ConfigurationManagerTest {
 		// Launch 1st time
 		when(OS.getOS()).thenReturn(OS.LINUX);
 		AppConfig config = Mockito.spy(AppConfig.class);
-		when(config.getApplicationName()).thenReturn("Nexu");
+		when(config.getApplicationName()).thenReturn("OBSP");
 		when(config.getConfigurationManager()).thenReturn(cm);
-		File nexuConfigFolder = config.getAppUserHome();
-		nexuConfigFolder = config.getAppUserHome();
-		nexuConfigFolder = config.getAppUserHome();
+		File configFolder = config.getAppUserHome();
 		// Verify ConfigurationManager is not called on subsequent launches
-		assertTrue(nexuConfigFolder.exists());
-		assertEquals(0, nexuConfigFolder.compareTo(cm.getCommonConfigPath(appName).toFile()));
+		assertTrue(configFolder.exists());
+		assertEquals(0, configFolder.compareTo(cm.getCommonConfigPath(appName).toFile()));
 		verify(cm, times(1)).manageConfiguration(appName); // cm should have been called only once (the first time)
 
 	}
@@ -171,15 +169,15 @@ public class ConfigurationManagerTest {
 		File existingConfigFile = Paths.get(genericConfigFolder.getPath(), "existing_config_file").toFile();
 		assertTrue(existingConfigFile.createNewFile());
 		AppConfig config = Mockito.spy(AppConfig.class);
-		when(config.getApplicationName()).thenReturn("Nexu");
+		when(config.getApplicationName()).thenReturn("OBSP");
 		when(config.getConfigurationManager()).thenReturn(cm);
-		File nexuConfigFolder = config.getAppUserHome();
+		File configFolder = config.getAppUserHome();
 		verify(cm, times(1)).moveExistingConfigFolder(any(File.class), any(File.class));
-		assertEquals(0, nexuConfigFolder.compareTo(Paths.get(cm.getWindowsConfigPath().toString(), appName).toFile()));
+		assertEquals(0, configFolder.compareTo(Paths.get(cm.getWindowsConfigPath().toString(), appName).toFile()));
 		assertTrue(cm.getConfigBackupPath(genericConfigFolder).toFile().exists());
 		assertFalse(genericConfigFolder.exists());
 		assertTrue(Paths.get(cm.getConfigBackupPath(genericConfigFolder).toString(), existingConfigFile.getName())
 				.toFile().exists());
-		assertTrue(Paths.get(nexuConfigFolder.getAbsolutePath(), existingConfigFile.getName()).toFile().exists());
+		assertTrue(Paths.get(configFolder.getAbsolutePath(), existingConfigFile.getName()).toFile().exists());
 	}
 }

@@ -84,7 +84,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 				logger.info("Stage still showing, displaying " + currentOperationName);
 			}
 			final Scene scene = new Scene(panel);
-			scene.getStylesheets().add(this.getClass().getResource("/styles/nexu.css").toString());
+			scene.getStylesheets().add(this.getClass().getResource("/styles/styles.css").toString());
 			stage.setScene(scene);
 			StageHelper.getInstance().setMinSize(((Region)panel), stage);
 			// center stage on primary screen

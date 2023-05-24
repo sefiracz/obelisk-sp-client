@@ -25,7 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Handles creation of Nexu configuration folder.
+ * Handles creation of App configuration folder.
  *
  * @author Landry Soules
  *
