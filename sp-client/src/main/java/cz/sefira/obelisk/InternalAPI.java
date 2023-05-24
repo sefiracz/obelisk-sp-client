@@ -31,6 +31,7 @@ import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.pkcs11.PKCS11Manager;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.StageState;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -313,7 +314,7 @@ public class InternalAPI implements PlatformAPI {
       label = adapter.getLabel(this, p, display.getPasswordInputCallback(p));
     }
     if (p instanceof DetectedCard) {
-      ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");
+      ResourceBundle rb = ResourceUtils.getBundle();
       String terminalLabel = ((DetectedCard) p).getTerminalLabel();
       return label + "\n" + rb.getString("card.label.terminal") + ": " +
           (terminalLabel != null ? terminalLabel : rb.getString("card.label.terminal.disconnected"));

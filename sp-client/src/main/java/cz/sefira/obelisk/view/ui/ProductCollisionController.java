@@ -29,6 +29,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import cz.sefira.obelisk.view.core.StageState;
@@ -160,14 +161,14 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     }, true);
 
     Platform.runLater(() -> {
-      message.setText(MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
+      message.setText(MessageFormat.format(ResourceUtils.getBundle()
           .getString("product.collision.selection.header"), new Object[]{}));
 
     });
 
     // asynchronous window update
     asyncUpdate(() -> {
-      message.setText(MessageFormat.format(ResourceBundle.getBundle("bundles/nexu")
+      message.setText(MessageFormat.format(ResourceUtils.getBundle()
           .getString("product.collision.selection.header"), new Object[]{}));
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());

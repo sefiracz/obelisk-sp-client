@@ -73,6 +73,7 @@ public class App extends Application {
 		// initialize API thread
 		initThread.submit(() -> {
 			try {
+				AppConfigurer.applyLocale(null);
 				logger.info("Initializing platform API");
 				final PlatformAPI api = buildAPI(uiDisplay, operationFactory);
 				logger.info("Detect all available products");

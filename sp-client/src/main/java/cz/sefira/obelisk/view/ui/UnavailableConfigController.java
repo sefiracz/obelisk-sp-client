@@ -17,6 +17,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.flow.operation.CoreOperationStatus;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -70,7 +71,7 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-      this.resources = ResourceBundle.getBundle("bundles/nexu");
+      this.resources = ResourceUtils.getBundle();
       this.hicSuntDracones.setOnAction(ev -> this.signalEnd(null));
       this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
     }

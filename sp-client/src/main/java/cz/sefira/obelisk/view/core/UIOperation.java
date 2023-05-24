@@ -17,6 +17,7 @@ package cz.sefira.obelisk.view.core;
 import cz.sefira.obelisk.api.flow.*;
 import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.operation.UIDisplayAwareOperation;
+import cz.sefira.obelisk.util.ResourceUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class UIOperation<R> implements UIDisplayAwareOperation<R> {
 		logger.info("Loading " + fxml + " view");
 		final FXMLLoader loader = new FXMLLoader();
 		try {
-			loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
+			loader.setResources(ResourceUtils.getBundle());
 			loader.load(getClass().getResourceAsStream(fxml));
     } catch(final IOException e) {
       throw new RuntimeException(e);

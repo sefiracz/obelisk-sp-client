@@ -240,7 +240,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 		if(params.length > 1) {
       filtered = (List<AbstractProduct>) params[1];
     }
-		stage.setTitle(resources.getString("systray.menu.manage.keystores"));
+		stage.setTitle(resources.getString("main.menu.manage.keystores"));
 		Platform.runLater(() -> {
 		  if(filtered != null && !filtered.isEmpty()) {
 		    // show only this subset

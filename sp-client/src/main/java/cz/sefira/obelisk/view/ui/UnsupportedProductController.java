@@ -16,6 +16,7 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.flow.operation.CoreOperationStatus;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -60,7 +61,7 @@ public class UnsupportedProductController extends AbstractUIOperationController<
         StageHelper.getInstance().setTitle((String) params[0], "unsupported.product.title");
 
         Platform.runLater(() -> this.message.setText(StringEscapeUtils.unescapeJava(MessageFormat
-                .format(ResourceBundle.getBundle("bundles/nexu").getString("unsupported.product.header"), params[0]))));
+                .format(ResourceUtils.getBundle().getString("unsupported.product.header"), params[0]))));
 
         setLogoBackground(messageBox);
     }

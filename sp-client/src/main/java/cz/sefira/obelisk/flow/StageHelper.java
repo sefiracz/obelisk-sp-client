@@ -1,5 +1,6 @@
 package cz.sefira.obelisk.flow;
 
+import cz.sefira.obelisk.util.ResourceUtils;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class StageHelper {
 		}
 		String translatedTitle = "";
 		try {
-			translatedTitle = ResourceBundle.getBundle("bundles/nexu").getString(resourceBundleKey);
+			translatedTitle = ResourceUtils.getBundle().getString(resourceBundleKey);
 		} catch (MissingResourceException mre) {
 			LOGGER.warn("Resource bundle key \"{}\" is missing.", resourceBundleKey);
 		}catch(Exception e) {

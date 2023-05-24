@@ -194,7 +194,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
   }
 
   void setTextFieldDuration(boolean clearText) {
-    String minutes = duration.getValue() == 0 || duration.getValue() > 4 ? resources.getString("preferences.minutes.universal") :
+    String minutes = duration.getValue() == 0 || duration.getValue() > 4 ? resources.getString("preferences.minutes.1") :
         duration.getValue() == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
     if (clearText) {
       durationTextField.setText("");

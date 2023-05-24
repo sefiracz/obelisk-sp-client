@@ -10,6 +10,7 @@ package cz.sefira.obelisk.systray;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.Systray;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +32,26 @@ public class AWTSystray extends AbstractSystray {
   }
 
   @Override
-  public void spawnTray(Runnable r) {
+  public void spawnTray(final Runnable r, final SystrayMenuItem... systrayMenuItems) {
+    PopupMenu popup = null;
+    if (systrayMenuItems != null && systrayMenuItems.length > 0) {
+      popup = new PopupMenu();
+      for (SystrayMenuItem item : systrayMenuItems) {
+        final MenuItem mi = new MenuItem(item.getLabel());
+        mi.setName(item.getName());
+        mi.addActionListener((l) -> Platform.runLater(item.getOperation()));
+        popup.add(mi);
+      }
+    }
     final Image image = Toolkit.getDefaultToolkit().getImage(trayIcon);
-    final TrayIcon trayIcon = new TrayIcon(image, tooltip, null);
+    final TrayIcon trayIcon = new TrayIcon(image, tooltip, popup);
     trayIcon.setImageAutoSize(true);
     trayIcon.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        Platform.runLater(r);
+        if (e.getButton() == MouseEvent.BUTTON1) {
+          Platform.runLater(r);
+        }
       }
     });
 

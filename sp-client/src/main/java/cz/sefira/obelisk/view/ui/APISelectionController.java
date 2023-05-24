@@ -16,6 +16,7 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -88,9 +89,7 @@ public class APISelectionController extends AbstractUIOperationController<ScAPI>
 	public final void init(Object... params) {
 		StageHelper.getInstance().setTitle((String) params[0], "api.selection.title");
 		Platform.runLater(() ->
-			message.setText(MessageFormat.format(
-					ResourceBundle.getBundle("bundles/nexu").getString("api.selection.header"),
-					params[0]))
+			message.setText(MessageFormat.format(ResourceUtils.getBundle().getString("api.selection.header"), params[0]))
 		);
 	}
 }

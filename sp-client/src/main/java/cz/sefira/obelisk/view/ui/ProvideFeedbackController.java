@@ -18,6 +18,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.model.Feedback;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -60,7 +61,7 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-    this.resources = ResourceBundle.getBundle("bundles/nexu");
+    this.resources = ResourceUtils.getBundle();
 		report.setOnAction(e -> {
 			new Thread(() -> {
 				try {

@@ -14,6 +14,8 @@
  */
 package cz.sefira.obelisk.api.model;
 
+import cz.sefira.obelisk.util.ResourceUtils;
+
 import java.util.ResourceBundle;
 
 public enum KeystoreType {
@@ -39,6 +41,6 @@ public enum KeystoreType {
 	}
 
 	public String getSimpleLabel() {
-		return ResourceBundle.getBundle("bundles/nexu").getString(simpleLabelCode);
+		return ResourceUtils.getBundle().getString(simpleLabelCode);
 	}
 }

@@ -16,6 +16,7 @@ package cz.sefira.obelisk.token.macos;
 
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.model.KeystoreType;
+import cz.sefira.obelisk.util.ResourceUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ResourceBundle;
@@ -40,13 +41,13 @@ public class MacOSKeychain extends AbstractProduct {
 
 	@Override
 	public String getSimpleLabel() {
-		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
+		return StringEscapeUtils.unescapeJava(ResourceUtils.getBundle()
 				.getString("product.selection.add.new.macos.keystore"));
 	}
 
 	@Override
 	public String getLabel() {
-		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
+		return StringEscapeUtils.unescapeJava(ResourceUtils.getBundle()
 				.getString("product.selection.macos.keystore"));
 	}
 

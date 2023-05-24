@@ -18,6 +18,7 @@ import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
@@ -60,7 +61,7 @@ public class StandaloneDialog {
   private static final Object lock = new Object();
 
   public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
-    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+    ResourceBundle resources = ResourceUtils.getBundle();
     DialogMessage message = new DialogMessage("preferences.reset.dialog",
         DialogMessage.Level.WARNING, 400, 150);
     message.setShowOkButton(false);
@@ -99,7 +100,7 @@ public class StandaloneDialog {
    * @param blockingUI True if blocking UI operation
    */
   public static void showDialog(PlatformAPI api, DialogMessage dialogMessage, boolean blockingUI) {
-    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+    ResourceBundle resources = ResourceUtils.getBundle();
 
     String appName = "";
     if(api != null) {
@@ -270,7 +271,7 @@ public class StandaloneDialog {
         return;
       }
       FXMLLoader loader = new FXMLLoader();
-      loader.setResources(ResourceBundle.getBundle("bundles/nexu"));
+      loader.setResources(ResourceUtils.getBundle());
       Stage dialogStage = new Stage();
       if (owner != null) {
         dialogStage.initOwner(owner);
@@ -312,7 +313,7 @@ public class StandaloneDialog {
   }
 
   public static void showSslErrorDialog(@NotNull SSLCommunicationException ex, @NotNull PlatformAPI api) {
-    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+    ResourceBundle resources = ResourceUtils.getBundle();
     // establish an error message
     String exceptionMsg = ex.getSSLException().getMessage();
     exceptionMsg = exceptionMsg != null ? exceptionMsg.toLowerCase() : "";
@@ -364,7 +365,7 @@ public class StandaloneDialog {
 
   public static void showErrorDialog(DialogMessage errMsg, String title, String printedStacktrace) {
     // Display dialog
-    ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+    ResourceBundle resources = ResourceUtils.getBundle();
     if (printedStacktrace != null) {
       Button detail = new Button();
       detail.setText(resources.getString("button.detail"));

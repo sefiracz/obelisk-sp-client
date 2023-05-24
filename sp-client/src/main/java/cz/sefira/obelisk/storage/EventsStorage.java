@@ -99,10 +99,6 @@ public class EventsStorage implements AutoCloseable {
         }
         break;
     }
-    // create empty placeholders to pad buggy javafx tableview
-    for (int i=0; i<13; i++) {
-      selected.add(new Notification());
-    }
     return selected;
   }
 

@@ -21,6 +21,7 @@ import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
 import cz.sefira.obelisk.generic.ConnectionInfo;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.BusyIndicator;
 import iaik.pkcs.pkcs11.TokenException;
 
@@ -297,7 +298,7 @@ public class DetectedCard extends AbstractProduct {
 
 	@Override
 	public String getLabel() {
-		ResourceBundle rb = ResourceBundle.getBundle("bundles/nexu");
+		ResourceBundle rb = ResourceUtils.getBundle();
 		String label = rb.getString("card.label.tokenLabel")+": "+getTokenLabel();
 		if(getTokenManufacturer() != null) {
 			label += "\n"+rb.getString("card.label.tokenManufacturer")+": " + getTokenManufacturer();

@@ -18,6 +18,7 @@ import cz.sefira.obelisk.CardDetector;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.token.macos.MacOSKeychain;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.StageState;
 import javafx.application.Platform;
@@ -124,7 +125,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // show initial content before load
     Platform.runLater(() -> {
       message.setText(MessageFormat
-          .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
+          .format(ResourceUtils.getBundle().getString("product.selection.header"), appName));
       products = api.detectProducts();
 
       final List<RadioButton> radioButtons = new ArrayList<>(products.size());
@@ -147,7 +148,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     // asynchronous window content update
     asyncUpdate(() -> {
       message.setText(MessageFormat
-          .format(ResourceBundle.getBundle("bundles/nexu").getString("product.selection.header"), appName));
+          .format(ResourceUtils.getBundle().getString("product.selection.header"), appName));
 
       final List<RadioButton> radioButtons = new ArrayList<>(cards.size() + products.size());
 
