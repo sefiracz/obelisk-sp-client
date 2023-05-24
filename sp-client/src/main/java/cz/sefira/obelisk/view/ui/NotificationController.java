@@ -13,6 +13,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
@@ -86,7 +87,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
     this.showNotification = new UserPreferences(AppConfig.get()).isShowNotifications();
 
     stage.initStyle(StageStyle.UNDECORATED);
-    stage.setTitle(ResourceBundle.getBundle("bundles/nexu").getString("notification.title"));
+    stage.setTitle(ResourceUtils.getBundle().getString("notification.title"));
     stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
     spawnInRightBottomCorner(background);
 

@@ -81,7 +81,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
   @SuppressWarnings("unchecked")
   public void init(final Object... params) {
     api = (PlatformAPI) params[0];
-    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title");
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title.information");
     certificateToken = (CertificateToken) params[1];
     message.setText(MessageFormat.format(resources.getString("certificates.flow.manual"), new Object[]{}));
     setLogoBackground(messageBox, 250, 250);

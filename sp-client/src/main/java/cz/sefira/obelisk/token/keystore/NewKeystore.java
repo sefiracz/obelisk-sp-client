@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.token.keystore;
 
 import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.util.ResourceUtils;
 
 import java.util.ResourceBundle;
 
@@ -41,6 +42,6 @@ public class NewKeystore extends AbstractProduct {
 
 	@Override
 	public String getLabel() {
-		return ResourceBundle.getBundle("bundles/nexu").getString("product.selection.add.new.keystore");
+		return ResourceUtils.getBundle().getString("product.selection.add.new.keystore");
 	}
 }

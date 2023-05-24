@@ -17,6 +17,7 @@ package cz.sefira.obelisk;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
 import cz.sefira.obelisk.dss.token.PasswordInputCallback;
 import javafx.application.Platform;
@@ -275,7 +276,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 	@Override
 	public File displayFileChooser(ExtensionFilter... extensionFilters) {
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(ResourceBundle.getBundle("bundles/nexu").getString("fileChooser.title.openResourceFile"));
+		fileChooser.setTitle(ResourceUtils.getBundle().getString("fileChooser.title.openResourceFile"));
 		fileChooser.getExtensionFilters().addAll(toJavaFXExtensionFilters(extensionFilters));
 		return fileChooser.showOpenDialog(blockingStage);
 	}

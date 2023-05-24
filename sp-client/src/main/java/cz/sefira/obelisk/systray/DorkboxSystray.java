@@ -12,7 +12,6 @@ package cz.sefira.obelisk.systray;
 
 //import dorkbox.systemTray.MenuItem;
 //import dorkbox.systemTray.SystemTray;
-import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class DorkboxSystray extends AbstractSystray {
   }
 
   @Override
-  public void spawnTray(Runnable r) {
+  public void spawnTray(Runnable r, SystrayMenuItem... systrayMenuItems) {
 //    SystemTray systemTray = SystemTray.get();
 //    if (systemTray != null) {
 //      systemTray.setImage(trayIcon);

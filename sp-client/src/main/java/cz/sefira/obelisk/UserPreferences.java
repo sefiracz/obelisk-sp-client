@@ -22,6 +22,7 @@ import java.util.prefs.Preferences;
 
 public class UserPreferences {
 
+  private static final String LANGUAGE = "cz.sefira.obelisk.signingportal.language";
   private static final String SPLASH_SCREEN = "cz.sefira.obelisk.signingportal.splashscreen";
   private static final String SHOW_NOTIFICATIONS = "cz.sefira.obelisk.signingportal.shownotifications";
   private static final String DEBUG_MODE = "cz.sefira.obelisk.signingportal.debugmode";
@@ -30,6 +31,7 @@ public class UserPreferences {
 
   private final Preferences prefs;
 
+  private String language;
   private String hiddenDialogIds;
   private Boolean splashScreen;
   private Boolean showNotifications;
@@ -51,6 +53,8 @@ public class UserPreferences {
     final String debugModeValue = prefs.get(DEBUG_MODE, null);
     debugMode = debugModeValue != null ? Boolean.parseBoolean(debugModeValue) : null;
 
+    language = prefs.get(LANGUAGE, null);
+
     try {
       final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
       cacheDuration = Integer.parseInt(cacheDurationValue);
@@ -60,6 +64,15 @@ public class UserPreferences {
     } catch (NumberFormatException e) {
       cacheDuration = 0;
     }
+  }
+
+  public void setLanguage(String language) {
+    if(language != null) {
+      prefs.put(LANGUAGE, language);
+    } else {
+      prefs.remove(LANGUAGE);
+    }
+    this.language = language;
   }
 
   public void setDebugMode(Boolean debugMode) {
@@ -115,6 +128,10 @@ public class UserPreferences {
     }
   }
 
+  public String getLanguage() {
+    return language;
+  }
+
   public Boolean isDebugMode() {
     return debugMode != null ? debugMode : false; // by default is OFF
   }
@@ -142,6 +159,7 @@ public class UserPreferences {
     hiddenDialogIds = null;
     splashScreen = null;
     showNotifications = null;
+    language = null;
     cacheDuration = 0;
   }
 
@@ -151,6 +169,7 @@ public class UserPreferences {
         "showNotifications=" + showNotifications + "\n" +
         "splashScreen=" + splashScreen + "\n" +
         "debugMode=" + debugMode + "\n" +
-        "cacheDuration=" + cacheDuration;
+        "cacheDuration=" + cacheDuration + "\n" +
+        "language="+language;
   }
 }

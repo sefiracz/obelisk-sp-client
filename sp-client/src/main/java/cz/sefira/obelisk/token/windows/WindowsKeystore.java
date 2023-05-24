@@ -16,6 +16,7 @@ package cz.sefira.obelisk.token.windows;
 
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.model.KeystoreType;
+import cz.sefira.obelisk.util.ResourceUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ResourceBundle;
@@ -35,20 +36,17 @@ public class WindowsKeystore extends AbstractProduct {
 
 	@Override
 	public String getTooltip() {
-		return  StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
-				.getString("keystore.type.simple.keystore.windows"));
+		return  StringEscapeUtils.unescapeJava(ResourceUtils.getBundle().getString("keystore.type.simple.keystore.windows"));
 	}
 
 	@Override
 	public String getSimpleLabel() {
-		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
-				.getString("product.selection.add.new.windows.keystore"));
+		return StringEscapeUtils.unescapeJava(ResourceUtils.getBundle().getString("product.selection.add.new.windows.keystore"));
 	}
 
 	@Override
 	public String getLabel() {
-		return StringEscapeUtils.unescapeJava(ResourceBundle.getBundle("bundles/nexu")
-				.getString("product.selection.windows.keystore"));
+		return StringEscapeUtils.unescapeJava(ResourceUtils.getBundle().getString("product.selection.windows.keystore"));
 	}
 
 }

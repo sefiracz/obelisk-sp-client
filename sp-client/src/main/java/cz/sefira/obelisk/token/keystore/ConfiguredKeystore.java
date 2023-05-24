@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.token.keystore;
 
 import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.util.ResourceUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import java.text.MessageFormat;
 
@@ -62,7 +63,7 @@ public class ConfiguredKeystore extends AbstractProduct {
 	@Override
 	public String getLabel() {
 		return StringEscapeUtils.unescapeJava(MessageFormat.format(
-				ResourceBundle.getBundle("bundles/nexu").getString("product.selection.configured.keystore.button.label"),
+				ResourceUtils.getBundle().getString("product.selection.configured.keystore.button.label"),
 				this.getType().getLabel(), this.getUrl().substring(this.getUrl().lastIndexOf('/') + 1)));
 	}
 

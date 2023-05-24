@@ -56,9 +56,6 @@ public class EventsViewerController extends ControllerCore implements Standalone
   private RadioButton showAll;
 
   @FXML
-  private Button exitButton;
-
-  @FXML
   private TableView<Notification> eventsTable;
 
   @FXML
@@ -111,11 +108,6 @@ public class EventsViewerController extends ControllerCore implements Standalone
     showAll.setGraphic(allIcon);
     showAll.getStyleClass().remove("radio-button");
 
-    Region exitIcon = new Region();
-    exitIcon.setPrefSize(22,22);
-    exitIcon.getStyleClass().add("icon-event-exit");
-    exitButton.setGraphic(exitIcon);
-
     asyncTask(() -> {}, true);
 
     // asynchronous window content update
@@ -135,7 +127,6 @@ public class EventsViewerController extends ControllerCore implements Standalone
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
-    exitButton.setOnAction(e -> Platform.exit());
     cancel.setOnAction((e) -> windowClose(primaryStage));
     eventsTable.setPlaceholder(new Label(resourceBundle.getString("table.view.no.content")));
     eventsTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

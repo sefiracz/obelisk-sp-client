@@ -9,6 +9,7 @@ package cz.sefira.obelisk.dss.x509;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.dss.DSSASN1Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
@@ -52,7 +53,7 @@ public class CertificateDataParser {
 
   public CertificateDataParser(@NotNull X509Certificate certificate)
       throws CertificateEncodingException, NoSuchAlgorithmException {
-    this.resources = ResourceBundle.getBundle("bundles/nexu");
+    this.resources = ResourceUtils.getBundle();
     this.x509cert = certificate;
     // Get subject
     this.subjectDN = x509cert.getSubjectDN().getName();

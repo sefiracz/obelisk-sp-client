@@ -57,7 +57,7 @@ public class CertNotFoundController extends AbstractUIOperationController<Boolea
     api = (PlatformAPI) params[0];
 
     // set title
-    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title");
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title.information");
 
     Platform.runLater(() -> {
 

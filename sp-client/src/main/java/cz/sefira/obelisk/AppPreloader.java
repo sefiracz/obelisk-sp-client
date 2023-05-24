@@ -17,6 +17,7 @@ package cz.sefira.obelisk;
 import com.sun.javafx.application.LauncherImpl;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Implementation;
@@ -157,7 +158,7 @@ public class AppPreloader extends Preloader {
 			logger.error("PreLoaderMessage: type = " + preloaderMessage.getMessageType() + ", title = " + preloaderMessage.getTitle()
 					+", header = " + preloaderMessage.getHeaderText() + ", content = " + preloaderMessage.getContentText());
 		} else if (info instanceof ErrorNotification) {
-			ResourceBundle resources = ResourceBundle.getBundle("bundles/nexu");
+			ResourceBundle resources = ResourceUtils.getBundle();
 			try {
 				ErrorNotification error = (ErrorNotification) info;
 				Throwable t = error.getCause();
@@ -185,7 +186,7 @@ public class AppPreloader extends Preloader {
 		logger.error("An error has occurred during startup", info.getCause());
 
 		// Display dialog
-		ResourceBundle resourceBundle = ResourceBundle.getBundle("bundles/nexu");
+		ResourceBundle resourceBundle = ResourceUtils.getBundle();
 		final Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setTitle(resourceBundle.getString("preloader.error"));
 		alert.setHeaderText(MessageFormat.format(resourceBundle.getString("preloader.error.occurred"), AppConfig.get().getApplicationName()));

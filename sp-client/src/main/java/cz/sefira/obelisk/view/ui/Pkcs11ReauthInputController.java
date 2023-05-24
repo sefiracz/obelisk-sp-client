@@ -146,7 +146,7 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
     if (cacheDuration == 0) {
       tooltip.setText(resources.getString("reauth.tooltip.disabled"));
     } else {
-      String minutes = cacheDuration > 4 ? resources.getString("preferences.minutes.universal") :
+      String minutes = cacheDuration > 4 ? resources.getString("preferences.minutes.1") :
           cacheDuration == 1 ? resources.getString("preferences.minute.1") : resources.getString("preferences.minutes");
       tooltip.setText(MessageFormat.format(resources.getString("reauth.tooltip.enabled"), cacheDuration+" "+minutes));
     }

@@ -28,6 +28,7 @@ import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.json.GsonHelper;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.util.HttpUtils;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -183,7 +184,7 @@ public class Dispatcher implements AppPlugin {
     } finally {
       if (notificationProperty != null) {
         // close notification
-        String messageText = ResourceBundle.getBundle("bundles/nexu").getString(notificationProperty);
+        String messageText = ResourceUtils.getBundle().getString(notificationProperty);
         api.pushNotification(new Notification(messageText, true, 5));
       }
     }

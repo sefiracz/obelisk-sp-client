@@ -39,7 +39,7 @@
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="cancel" mnemonicParsing="false" styleClass="btn-default" text="%button.cancel"/>
         <Button fx:id="refresh" mnemonicParsing="false" styleClass="btn-secondary" text="%button.refresh"/>
-        <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%systray.menu.manage.keystores"/>
+        <Button fx:id="manage" mnemonicParsing="false" styleClass="btn-secondary" text="%main.menu.manage.keystores"/>
         <Button fx:id="select" mnemonicParsing="false" styleClass="btn-primary" text="%button.next"/>
       </HBox>
     </bottom>

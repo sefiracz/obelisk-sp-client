@@ -25,6 +25,6 @@ public abstract class AbstractSystray {
     this.trayIcon = trayIcon;
   }
 
-  public abstract void spawnTray(Runnable r);
+  public abstract void spawnTray(Runnable r, SystrayMenuItem... systrayMenuItems);
 
 }
