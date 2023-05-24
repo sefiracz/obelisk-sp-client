@@ -250,6 +250,10 @@ public class ManageKeystoresController extends ControllerCore implements Standal
         observableKeystores.setAll(QuickAccessProductsMap.access().getAllProducts());
       }
 		});
+		Platform.runLater(() -> {
+			keystoresTable.refresh();
+			keystoresTable.scrollTo(0);
+		});
 	}
 
 	@Override
