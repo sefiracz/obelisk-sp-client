@@ -49,7 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * Implementation of the NexuAPI
+ * Implementation of the PlatformAPI
  *
  * @author David Naramski
  *

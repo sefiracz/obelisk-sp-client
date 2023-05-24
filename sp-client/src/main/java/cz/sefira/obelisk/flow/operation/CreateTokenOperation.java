@@ -64,7 +64,7 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
             this.matchingProductAdapters = (List<Match>) params[1];
             this.product = (AbstractProduct) params[2];
         } catch(final ArrayIndexOutOfBoundsException | ClassCastException e) {
-            throw new IllegalArgumentException("Expected parameters: NexuAPI, List of Match");
+            throw new IllegalArgumentException("Expected parameters: PlatformAPI, List of Match");
         }
     }
 

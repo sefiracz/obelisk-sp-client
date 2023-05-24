@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Plugin that registers Windows Keystore implementation to NexU.
+ * Plugin that registers Windows Keystore implementation to App.
  *
  * @author simon.ghisalberti
  *

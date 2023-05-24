@@ -17,7 +17,7 @@ package cz.sefira.obelisk.flow.operation;
 import cz.sefira.obelisk.api.flow.OperationStatus;
 
 /**
- * This enum defines {@link OperationStatus}es applicable to the core version of NexU.
+ * This enum defines {@link OperationStatus}es applicable to the core version of App.
  *
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */

@@ -15,7 +15,7 @@
 package cz.sefira.obelisk.api.plugin;
 
 /**
- * NexU mediates request from the browser to the underlying Signature Product.
+ * App mediates request from the browser to the underlying Signature Product.
  * 
  * @author David Naramski
  *

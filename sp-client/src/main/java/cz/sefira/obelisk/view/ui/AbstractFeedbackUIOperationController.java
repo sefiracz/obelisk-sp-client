@@ -46,11 +46,11 @@ public abstract class AbstractFeedbackUIOperationController extends AbstractUIOp
       applicationName = AppConfig.get().getApplicationName();
       appConfig = AppConfig.get();
 		} catch(final ClassCastException | ArrayIndexOutOfBoundsException e) {
-			throw new IllegalArgumentException("Expected parameters: Feedback, NexuAPI");
+			throw new IllegalArgumentException("Expected parameters: Feedback, PlatformAPI");
 		}
 
 		if((exception == null) || (api == null)) {
-			throw new IllegalArgumentException("Expected parameters: Feedback, NexuAPI");
+			throw new IllegalArgumentException("Expected parameters: Feedback, PlatformAPI");
 		}
 
 		if(params.length > 5) {
