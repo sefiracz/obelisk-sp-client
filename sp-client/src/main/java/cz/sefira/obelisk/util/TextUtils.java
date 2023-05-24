@@ -54,12 +54,7 @@ public class TextUtils {
   public static String localizedDatetime(Date date, boolean includeTime) {
     if (date == null)
       return "";
-    String timeFormat;
-    if(Locale.getDefault().getLanguage().equals("cs")) {
-      timeFormat = "dd. MM. yyyy";
-    } else {
-      timeFormat = "dd/MM/yyyy";
-    }
+    String timeFormat = ResourceUtils.getBundle().getString("date.format.pattern");
     timeFormat = (includeTime ? timeFormat+" HH:mm:ss" : timeFormat);
     SimpleDateFormat sdf = new SimpleDateFormat(timeFormat);
     return sdf.format(date);
