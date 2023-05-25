@@ -250,6 +250,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
         observableKeystores.setAll(QuickAccessProductsMap.access().getAllProducts());
       }
 		});
+		// workaround for column misalignment
 		Platform.runLater(() -> {
 			keystoresTable.refresh();
 			keystoresTable.scrollTo(0);
