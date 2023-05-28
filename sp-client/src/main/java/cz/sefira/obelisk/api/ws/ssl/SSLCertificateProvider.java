@@ -10,10 +10,16 @@ package cz.sefira.obelisk.api.ws.ssl;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.dss.DigestAlgorithm;
+import cz.sefira.obelisk.storage.SSLCacheStorage;
+import cz.sefira.obelisk.util.DSSUtils;
+import cz.sefira.obelisk.util.X509Utils;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.utils.Hex;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
@@ -24,7 +30,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -35,22 +45,57 @@ public class SSLCertificateProvider {
 
   private static final Logger logger = LoggerFactory.getLogger(SSLCertificateProvider.class);
 
+  private final SSLCacheStorage cache;
   private final Map<String, List<X509Certificate>> certsBySubject = new HashMap<>();
   private final Set<X509Certificate> unique = new HashSet<>();
+
   private KeyStore trustStore;
   private DelegatedTrustManager delegatedTrustManager;
   private Registry<ConnectionSocketFactory> socketFactory;
 
-  public void put(X509Certificate certificate) {
-    final String subjectName = certificate.getSubjectX500Principal().getName(X500Principal.CANONICAL);
-    List<X509Certificate> certs = certsBySubject.computeIfAbsent(subjectName, k -> new ArrayList<>());
-    certs.add(certificate);
-    unique.add(certificate);
+  public SSLCertificateProvider(SSLCacheStorage cache) {
+    this.cache = cache;
+  }
+
+  public boolean put(X509Certificate certificate) {
+    if (!unique.contains(certificate)) {
+      final String subjectName = certificate.getSubjectX500Principal().getName(X500Principal.CANONICAL);
+      List<X509Certificate> certs = certsBySubject.computeIfAbsent(subjectName, k -> new ArrayList<>());
+      certs.add(certificate);
+      unique.add(certificate);
+      return true;
+    }
+    return false;
   }
 
   public List<X509Certificate> getBySubject(X500Principal subjectName) {
     String canonicalSubjectName = subjectName.getName(X500Principal.CANONICAL);
     return certsBySubject.get(canonicalSubjectName);
+  }
+
+  public void refreshRoot() {
+    try {
+      KeyStore root;
+      if (OS.isWindows()) {
+        root = KeyStore.getInstance("Windows-ROOT");
+      } else if (OS.isLinux()) {
+        root = KeyStore.getInstance("KeychainStore");
+      } else {
+        return;
+      }
+      root.load(null, null);
+      Enumeration<String> trustAliases = root.aliases();
+      while (trustAliases.hasMoreElements()) {
+        String alias = trustAliases.nextElement();
+        Certificate ca = root.getCertificate(alias);
+        String sha1Alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, ca.getEncoded()));
+        if (!getTrustStore().containsAlias(sha1Alias)) {
+          X509Utils.addToTrust((X509Certificate) ca, getTrustStore(), this);
+        }
+      }
+    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+      logger.error(e.getMessage(), e);
+    }
   }
 
   public KeyStore getTrustStore() {
@@ -71,6 +116,47 @@ public class SSLCertificateProvider {
 
   public List<X509Certificate> getCertificateChain() {
     return delegatedTrustManager != null ? delegatedTrustManager.getCertificateChain() : null;
+  }
+
+  public boolean addTrustedChain(List<X509Certificate> chain, boolean addToCache)
+      throws CertificateException, KeyStoreException {
+    boolean trustedChain = false;
+    X509Certificate chainEnd = chain.get(chain.size()-1);
+    List<X509Certificate> anchors = getBySubject(chainEnd.getIssuerX500Principal());
+    if (anchors != null) {
+      for (X509Certificate anchor : anchors) {
+        // find trusted-anchor that signs the chain
+        if (X509Utils.validateCertificateIssuer(chainEnd, anchor)) {
+          trustedChain = true;
+        }
+      }
+    }
+    if (trustedChain) {
+      addToRuntimeTruststore(chain);
+      // trusted chain found - add to cache if needed
+      if (addToCache) {
+        cache.add(chain);
+      }
+      // used as trusted chain
+      return true;
+    } else {
+      // no longer able to find path to trusted anchor - remove from cache
+      return false;
+    }
+  }
+
+  public void addToRuntimeTruststore(List<X509Certificate> chain)
+      throws KeyStoreException, CertificateEncodingException {
+    for (X509Certificate certificate : chain) {
+      if (!getUnique().contains(certificate)) {
+        String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, certificate.getEncoded()));
+        logger.info("Add certificate to runtime trust: " + certificate.getSubjectX500Principal().toString() + " (" + alias + ")");
+        if (put(certificate)) {
+          getTrustStore().setCertificateEntry(alias, certificate);
+        }
+      }
+    }
+    unregisterSocketFactory();
   }
 
   public Registry<ConnectionSocketFactory> getSocketFactory()

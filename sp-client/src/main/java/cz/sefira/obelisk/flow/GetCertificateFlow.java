@@ -136,15 +136,6 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
             if (certificateChain != null) {
               resp.setCertificateChain(certificateChain);
             }
-
-            // certificate obtained dialog - if user interaction is wanted (no auto-select mode)
-            if (req.isUserInteraction()) {
-              DialogMessage certFlowFinished = new DialogMessage("certificates.flow.finished",
-                  DialogMessage.Level.SUCCESS, 400, 165);
-              certFlowFinished.setShowDoNotShowCheckbox(true, false, "cert-flow-finished");
-              this.getOperationFactory().getMessageDialog(api, certFlowFinished, false);
-            }
-
             return new Execution<>(resp, product);
           } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
             continue; // go back from key selection

@@ -290,7 +290,7 @@ RadioButton {
 
 .btn-default:hover {
 
-   -fx-background-color: #CED3D8;
+   -fx-background-color: #EEEEEE;
 
 }
 
@@ -367,32 +367,30 @@ RadioButton {
 .btn-events {
 
     -fx-background-radius: 0;
-    -fx-padding: 7 12 7 12;
+    -fx-padding: 10 15 10 15;
     -fx-font-size: 14px;
     -fx-alignment: center-left;
     -fx-text-alignment: center;
-    -fx-background-color: #FFF;
+    -fx-background-color: #F5F5F5;
     -fx-text-fill: black;
-    -fx-border-color: #4AA9E7;
 
 }
 
 .btn-events:hover {
 
-    -fx-background-color: #E0E0E0;
+    -fx-background-color: #EEEEEE;
 
 }
 
 .btn-events:pressed {
 
-    -fx-background-color: #CED3D8;
+    -fx-background-color: #D8D8D8;
 
 }
 
 .btn-events:selected {
 
-    -fx-background-color: #E0E0E0;
-    -fx-border-color: #D86985;
+    -fx-background-color: #DEDFE1;
 
 }
 

@@ -17,6 +17,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.NotificationType;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.util.ZipUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -43,9 +44,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
+
+import static cz.sefira.obelisk.api.NotificationType.*;
 
 public class PreferencesController extends ControllerCore implements StandaloneUIController, Initializable {
 
@@ -73,7 +77,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 	private CheckBox splashscreen;
 
 	@FXML
-	private CheckBox showNotifications;
+	private ComboBox<NotificationType> showNotifications;
 
 	@FXML
 	private Button minusDuration;
@@ -83,16 +87,6 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 
 	@FXML
 	private Button plusDuration;
-
-	// TODO - notification delay?
-//	@FXML
-//	private Button minusDelay;
-//
-//	@FXML
-//	private TextField delayTextField;
-//
-//	@FXML
-//	private Button plusDelay;
 
 	@FXML
 	private CheckBox debugMode;
@@ -127,9 +121,11 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 		durationTextField.setTextFormatter(new TextFormatter<>(this::filter));
 		durationTextField.setOnMouseClicked((e) -> setTextFieldDuration(true));
 
+		showNotifications.getItems().addAll(List.of(OFF, NATIVE, INTEGRATED));
+
 		ok.setOnAction((evt) -> {
 			userPreferences.setDebugMode(debugMode.selectedProperty().getValue());
-			userPreferences.setShowNotifications(showNotifications.selectedProperty().getValue());
+			userPreferences.setShowNotifications(showNotifications.getSelectionModel().getSelectedItem());
 			userPreferences.setSplashScreen(splashscreen.selectedProperty().getValue());
 			if (duration.getValue() == 0 || !duration.getValue().equals(userPreferences.getCacheDuration())) {
 				SessionManager.getManager().destroySecret();
@@ -168,7 +164,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 		this.userPreferences = (UserPreferences) params[1];
 		this.readOnly.set((boolean) params[2]);
 		this.debugMode.selectedProperty().setValue(userPreferences.isDebugMode());
-		this.showNotifications.selectedProperty().setValue(userPreferences.isShowNotifications());
+		this.showNotifications.getSelectionModel().select(userPreferences.getShowNotifications());
 		this.splashscreen.selectedProperty().setValue(userPreferences.isSplashScreen());
 		this.duration = new SimpleIntegerProperty(userPreferences.getCacheDuration());
 		toggleCacheDurationButtons(duration.getValue());

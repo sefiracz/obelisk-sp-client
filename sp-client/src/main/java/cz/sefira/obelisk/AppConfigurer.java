@@ -25,6 +25,7 @@ package cz.sefira.obelisk;
 
 import ch.qos.logback.classic.Level;
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.util.LogUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class AppConfigurer {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppConfigurer.class.getSimpleName());
 
-	public static void applyLocale(String lang) {
+	public static void applyLocale(PlatformAPI api, String lang) {
 		String defaultLang = Locale.getDefault().getLanguage();
 		if (!defaultLang.equalsIgnoreCase(lang)) {
 			UserPreferences prefs = new UserPreferences(AppConfig.get());
@@ -51,7 +52,7 @@ public class AppConfigurer {
 			if (!defaultLang.equalsIgnoreCase(language)) {
 				Locale.setDefault(new Locale(language, "")); // change locale language
 				prefs.setLanguage(language); // save new language to preferences
-				Systray.refreshLabels(); // refresh Systray labels with new language
+				api.getSystray().refreshLabels(); // refresh Systray labels with new language
 			}
 		}
 	}

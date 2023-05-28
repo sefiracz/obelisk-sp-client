@@ -27,13 +27,13 @@
   </top>
 
   <left>
-    <VBox style="-fx-spacing: 5" minWidth="180" prefWidth="180" alignment="CENTER">
+    <VBox minWidth="180" prefWidth="180" alignment="CENTER">
       <fx:define>
         <ToggleGroup fx:id="group" />
       </fx:define>
-      <RadioButton toggleGroup="$group" selected="true" minWidth="160" prefWidth="160" fx:id="showLast" styleClass="btn-events" text="%button.events.show.last"/>
-      <RadioButton toggleGroup="$group" minWidth="160" prefWidth="160" fx:id="showToday" styleClass="btn-events" text="%button.events.show.day"/>
-      <RadioButton toggleGroup="$group" minWidth="160" prefWidth="160" fx:id="showAll" styleClass="btn-events" text="%button.events.show.all"/>
+      <RadioButton toggleGroup="$group" selected="true" minWidth="180" prefWidth="180" fx:id="showLast" styleClass="btn-events" text="%button.events.show.last"/>
+      <RadioButton toggleGroup="$group" minWidth="180" prefWidth="180" fx:id="showToday" styleClass="btn-events" text="%button.events.show.day"/>
+      <RadioButton toggleGroup="$group" minWidth="180" prefWidth="180" fx:id="showAll" styleClass="btn-events" text="%button.events.show.all"/>
       <Region VBox.vgrow="ALWAYS"/>
     </VBox>
   </left>

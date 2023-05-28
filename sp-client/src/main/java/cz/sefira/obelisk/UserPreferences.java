@@ -15,6 +15,8 @@
 package cz.sefira.obelisk;
 
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.NotificationType;
+import cz.sefira.obelisk.api.model.OS;
 
 import java.util.*;
 import java.util.prefs.BackingStoreException;
@@ -34,7 +36,7 @@ public class UserPreferences {
   private String language;
   private String hiddenDialogIds;
   private Boolean splashScreen;
-  private Boolean showNotifications;
+  private NotificationType showNotifications;
   private Integer cacheDuration;
   private Boolean debugMode;
 
@@ -47,8 +49,8 @@ public class UserPreferences {
     final String splashScreenValue = prefs.get(SPLASH_SCREEN, null);
     splashScreen = splashScreenValue != null ? Boolean.parseBoolean(splashScreenValue) : null;
 
-    final String showNotificationsValue = prefs.get(SHOW_NOTIFICATIONS, null);
-    showNotifications = showNotificationsValue != null ? Boolean.parseBoolean(showNotificationsValue) : null;
+    final String showNotificationsType = prefs.get(SHOW_NOTIFICATIONS, null);
+    showNotifications = NotificationType.fromType(showNotificationsType);
 
     final String debugModeValue = prefs.get(DEBUG_MODE, null);
     debugMode = debugModeValue != null ? Boolean.parseBoolean(debugModeValue) : null;
@@ -101,12 +103,8 @@ public class UserPreferences {
   }
 
 
-  public void setShowNotifications(Boolean showNotifications) {
-    if(showNotifications) {
-      prefs.put(SHOW_NOTIFICATIONS, "true");
-    } else {
-      prefs.put(SHOW_NOTIFICATIONS, "false");
-    }
+  public void setShowNotifications(NotificationType showNotifications) {
+    prefs.put(SHOW_NOTIFICATIONS, Objects.requireNonNullElse(showNotifications, NotificationType.OFF).getType());
     this.showNotifications = showNotifications;
   }
 
@@ -140,8 +138,8 @@ public class UserPreferences {
     return splashScreen != null ? splashScreen : true; // by default is ON
   }
 
-  public Boolean isShowNotifications() {
-    return showNotifications != null ? showNotifications : true; // by default is ON
+  public NotificationType getShowNotifications() {
+    return showNotifications != null ? showNotifications : NotificationType.getDefault(); // default is system dependant
   }
 
   public Integer getCacheDuration() {
@@ -158,7 +156,7 @@ public class UserPreferences {
     debugMode = null;
     hiddenDialogIds = null;
     splashScreen = null;
-    showNotifications = null;
+    showNotifications = NotificationType.getDefault();
     language = null;
     cacheDuration = 0;
   }
@@ -166,7 +164,7 @@ public class UserPreferences {
   @Override
   public String toString() {
     return "hiddenDialogIds=" + hiddenDialogIds + "\n" +
-        "showNotifications=" + showNotifications + "\n" +
+        "showNotifications=" + showNotifications.getType() + "\n" +
         "splashScreen=" + splashScreen + "\n" +
         "debugMode=" + debugMode + "\n" +
         "cacheDuration=" + cacheDuration + "\n" +

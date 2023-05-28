@@ -24,13 +24,16 @@ package cz.sefira.obelisk.util;
  */
 
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.dss.DSSException;
+import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.StageState;
 import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.hc.client5.http.utils.Hex;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.slf4j.Logger;
@@ -38,8 +41,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -56,8 +63,20 @@ public class X509Utils {
   }
 
   public static X509Certificate getCertificateFromBytes(byte[] encoded) throws CertificateException {
+    return getCertificateFromStream(new ByteArrayInputStream(encoded));
+  }
+
+  public static X509Certificate getCertificateFromStream(InputStream in) throws CertificateException {
     CertificateFactory factory = CertificateFactory.getInstance("X509");
-    return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(encoded));
+    return (X509Certificate) factory.generateCertificate(in);
+  }
+
+  public static void addToTrust(X509Certificate cert, KeyStore truststore, SSLCertificateProvider provider)
+      throws KeyStoreException, CertificateEncodingException {
+    String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, cert.getEncoded()));
+    if (provider.put(cert)) {
+      truststore.setCertificateEntry(alias, cert);
+    }
   }
 
   public static boolean isSelfSigned(X509Certificate x509Certificate) {

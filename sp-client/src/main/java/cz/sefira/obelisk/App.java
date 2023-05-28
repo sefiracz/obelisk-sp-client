@@ -26,6 +26,7 @@ import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.storage.SmartcardStorage;
+import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -52,10 +53,7 @@ public class App extends Application {
 		return t;
 	});
 
-	private Systray systray;
-	private ProductStorage<?> productStorage;
-	private SmartcardStorage smartcardStorage;
-	private EventsStorage eventsStorage;
+	private StorageHandler storageHandler;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -73,12 +71,11 @@ public class App extends Application {
 		// initialize API thread
 		initThread.submit(() -> {
 			try {
-				AppConfigurer.applyLocale(null);
 				logger.info("Initializing platform API");
 				final PlatformAPI api = buildAPI(uiDisplay, operationFactory);
+				AppConfigurer.applyLocale(api, null);
 				logger.info("Detect all available products");
 				api.detectAll();
-				Systray.spawnSystray(api);
 				logger.info("Initialization finished");
 			} catch (Exception e) {
 				logger.error("Initialization failed: "+e.getMessage(), e);
@@ -95,10 +92,7 @@ public class App extends Application {
 
 	private PlatformAPI buildAPI(final UIDisplay uiDisplay, final OperationFactory operationFactory) {
 		try {
-			Path storage = AppConfig.get().getAppStorageDirectory();
-			productStorage = new ProductStorage<>(storage.resolve("products"));
-			smartcardStorage = new SmartcardStorage(storage.resolve("smartcards"));
-			eventsStorage = new EventsStorage(storage.resolve("events"));
+			storageHandler = new StorageHandler();
 		} catch (IOException e) {
 			StandaloneDialog.showDialog(null, new DialogMessage("preloader.error.occurred",
 					DialogMessage.Level.ERROR, new String[] {e.getMessage()}), true);
@@ -107,7 +101,7 @@ public class App extends Application {
 
 		AppConfigurer.applyUserPreferences(new UserPreferences(AppConfig.get()));
 		final APIBuilder builder = new APIBuilder();
-		final PlatformAPI api = builder.build(uiDisplay, getFlowRegistry(), productStorage, smartcardStorage, eventsStorage, operationFactory);
+		final PlatformAPI api = builder.build(uiDisplay, getFlowRegistry(), storageHandler, operationFactory);
 		notifyPreloader(builder.initPlugins(api, AppConfig.get().getProperties()));
 		return api;
 	}
@@ -124,17 +118,8 @@ public class App extends Application {
 	public void stop() {
 		logger.info("Stopping application...");
 		SessionManager.getManager().destroy();
-		if (productStorage != null) {
-			logger.info("Stopping products storage");
-			productStorage.close();
-		}
-		if (smartcardStorage != null) {
-			logger.info("Stopping smartcards storage");
-			smartcardStorage.close();
-		}
-		if (eventsStorage != null) {
-			logger.info("Stopping events storage");
-			eventsStorage.close();
+		if (storageHandler != null) {
+			storageHandler.close();
 		}
 		System.exit(0);
 	}

@@ -4,7 +4,7 @@ package cz.sefira.obelisk.api.ws.ssl;
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.api.ws.ssl.SSLErrorException
+ * cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException
  *
  * Created: 14.03.2023
  * Author: hlavnicka

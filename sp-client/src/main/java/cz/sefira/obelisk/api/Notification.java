@@ -10,7 +10,10 @@ package cz.sefira.obelisk.api;
  * Author: hlavnicka
  */
 
+import java.awt.*;
 import java.util.Date;
+
+import static java.awt.TrayIcon.MessageType.NONE;
 
 /**
  * Notification message
@@ -20,6 +23,7 @@ public class Notification {
   private long seqId;
   private final String messageText;
   private final Date date;
+  private final TrayIcon.MessageType type;
   private boolean close = false;
   private int delay;
 
@@ -27,15 +31,21 @@ public class Notification {
     // empty notification (placeholder)
     this.messageText = null;
     this.date = null;
+    this.type = null;
     this.seqId = -1L;
   }
 
   public Notification(String messageText) {
-    this(messageText, false, 5);
+    this(messageText, NONE, false, 5);
   }
 
-  public Notification(String messageText, boolean close, int delay) {
+  public Notification(String messageText, TrayIcon.MessageType type) {
+    this(messageText, type, false, 5);
+  }
+
+  public Notification(String messageText, TrayIcon.MessageType type, boolean close, int delay) {
     this.messageText = messageText;
+    this.type = type;
     this.close = close;
     this.delay = delay;
     this.date = new Date();
@@ -51,6 +61,10 @@ public class Notification {
 
   public String getMessageText() {
     return messageText;
+  }
+
+  public TrayIcon.MessageType getType() {
+    return type;
   }
 
   public boolean isClose() {
