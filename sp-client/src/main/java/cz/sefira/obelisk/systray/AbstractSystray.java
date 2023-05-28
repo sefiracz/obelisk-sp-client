@@ -10,21 +10,32 @@ package cz.sefira.obelisk.systray;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.PlatformAPI;
+
 import java.net.URL;
 
 /**
- * description
+ * Abstract basic systray support
  */
 public abstract class AbstractSystray {
 
+  protected final PlatformAPI api;
   protected final String tooltip;
-  protected final URL trayIcon;
+  protected final URL icon;
 
-  public AbstractSystray(String tooltip, URL trayIcon) {
+  public AbstractSystray(PlatformAPI api, String tooltip, URL icon) {
+    this.api = api;
     this.tooltip = tooltip;
-    this.trayIcon = trayIcon;
+    this.icon = icon;
   }
 
   public abstract void spawnTray(Runnable r, SystrayMenuItem... systrayMenuItems);
+
+  public void pushNotification(Notification notification) {
+    api.pushIntegratedNotification(notification);
+  }
+
+  public abstract void refreshLabels();
 
 }

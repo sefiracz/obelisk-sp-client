@@ -36,12 +36,14 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -49,6 +51,7 @@ public class AppPreloader extends Preloader {
 	private static final Logger logger = LoggerFactory.getLogger(AppPreloader.class.getName());
 
 	public void launchApp(String[] args) {
+		Security.addProvider(new BouncyCastleProvider());
 		// set jni dispatch (needs to happen before any JNA calls), JavaFX library cache directory,
 		// MSCrypto, IAIK PKCS11 wrapper native libraries
 		String libPath = setLibraryPath();

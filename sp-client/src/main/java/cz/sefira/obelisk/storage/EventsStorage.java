@@ -11,31 +11,38 @@ package cz.sefira.obelisk.storage;
  */
 
 import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.storage.model.EventsRoot;
+import one.microstream.X;
+import one.microstream.collections.EqHashTable;
+import one.microstream.collections.HashTable;
+import one.microstream.collections.types.XGettingTable;
+import one.microstream.persistence.internal.InquiringLegacyTypeMappingResultor;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
+import one.microstream.persistence.types.PersistenceRefactoringMappingProvider;
 import one.microstream.persistence.types.Storer;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
 import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import one.microstream.typing.KeyValue;
 import org.apache.commons.lang.time.DateUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
  * description
  */
-public class EventsStorage implements AutoCloseable {
+public class EventsStorage extends AbstractStorage {
 
   private final EventsRoot eventsRoot = new EventsRoot();
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
-  private final EmbeddedStorageManager storage;
 
   public EventsStorage(Path store) {
     EmbeddedStorageFoundation<?> foundation = EmbeddedStorage.Foundation(store);
@@ -48,6 +55,20 @@ public class EventsStorage implements AutoCloseable {
     if (!eventsRoot.isCloseFlag()) {
       eventsRoot.incrementSequence(); // increment at startup if sequence was not properly closed
     }
+    removeOldEvents();
+  }
+
+  private void removeOldEvents() {
+    List<Notification> old = new ArrayList<>();
+    for (Notification n : eventsRoot.getNotifications()) {
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(Calendar.YEAR, -1);
+      if (n.getDate().before(calendar.getTime())) {
+        old.add(n);
+      }
+    }
+    eventsRoot.getNotifications().removeAll(old);
+    commitChange(eventsRoot);
   }
 
   public final synchronized void addNotification(Notification notification) {
@@ -62,7 +83,7 @@ public class EventsStorage implements AutoCloseable {
       }
     }
     propertyChangeSupport.firePropertyChange("event", "", "refresh");
-    commitChange();
+    commitChange(eventsRoot);
   }
 
   public List<Notification> getNotifications(SelectorType selectorType) {
@@ -108,23 +129,6 @@ public class EventsStorage implements AutoCloseable {
 
   public void removeListener(PropertyChangeListener listener) {
     propertyChangeSupport.removePropertyChangeListener(listener);
-  }
-
-  private void commitChange() {
-    Storer storer = storage.createEagerStorer();
-    storer.store(eventsRoot);
-    storer.commit();
-  }
-
-  @Override
-  public void close() {
-    try {
-      storage.close();
-      storage.shutdown();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public enum SelectorType {

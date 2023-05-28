@@ -10,22 +10,27 @@ package cz.sefira.obelisk.api.plugin;
  * Author: hlavnicka
  */
 
-import com.sun.jna.Platform;
 import cz.sefira.crypto.MSCryptoStore;
 import cz.sefira.crypto.StoreType;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.api.model.OS;
-import org.apache.hc.client5.http.utils.Hex;
+import cz.sefira.obelisk.storage.SSLCacheStorage;
+import cz.sefira.obelisk.storage.model.CertificateChain;
+import cz.sefira.obelisk.util.X509Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * SSL trust plugin
@@ -36,7 +41,8 @@ public class SSLPlugin implements AppPlugin {
 
   @Override
   public List<InitErrorMessage> init(String pluginId, PlatformAPI api) {
-    SSLCertificateProvider sslCertProvider = new SSLCertificateProvider();
+    SSLCacheStorage cache = api.getStorageHandler().getSslCacheStorage();
+    SSLCertificateProvider sslCertProvider = new SSLCertificateProvider(cache);
     try {
       // load application local truststore
       KeyStore truststore = KeyStore.getInstance("JKS");
@@ -58,9 +64,7 @@ public class SSLPlugin implements AppPlugin {
         try {
           List<Certificate> caList = MSCryptoStore.getCertificates(StoreType.CA);
           for (Certificate ca : caList) {
-            String alias = Hex.encodeHexString(MessageDigest.getInstance("SHA-1").digest(ca.getEncoded()));
-            sslCertProvider.put((X509Certificate) ca);
-            truststore.setCertificateEntry(alias, ca);
+            X509Utils.addToTrust((X509Certificate) ca, truststore, sslCertProvider);
           }
         }
         catch (Exception e) {
@@ -68,27 +72,59 @@ public class SSLPlugin implements AppPlugin {
         }
       }
       // load up MacOS trusted certificates
-      if (Platform.isMac()) {
+      if (OS.isMacOS()) {
         systemStore = KeyStore.getInstance("KeychainStore");
       }
 
-      // load SSL certificates from system store
+      // load up Linux trusted certificates
+      if (OS.isLinux()) {
+        try (Stream<Path> list = Files.list(Paths.get("/etc/ssl/certs"))) {
+          List<Path> certificates = list.filter(Files::isRegularFile).collect(Collectors.toList());
+          for (Path certPath : certificates) {
+            try (InputStream in = Files.newInputStream(certPath)) {
+              X509Certificate certificate = X509Utils.getCertificateFromStream(in);
+              X509Utils.addToTrust(certificate, truststore, sslCertProvider);
+            } catch (Exception e) {
+              logger.error(e.getMessage());
+            }
+          }
+        } catch (Exception e) {
+          logger.error("Unable to load /etc/ssl/certs: "+e.getMessage());
+        }
+      }
+
+      // load SSL certificates from system store (Win/Mac)
       if (systemStore != null) {
         systemStore.load(null, null);
         Enumeration<String> trustAliases = systemStore.aliases();
         while (trustAliases.hasMoreElements()) {
           String alias = trustAliases.nextElement();
           Certificate ca = systemStore.getCertificate(alias);
-          sslCertProvider.put((X509Certificate) ca);
-          truststore.setCertificateEntry(alias, ca);
+          X509Utils.addToTrust((X509Certificate) ca, truststore, sslCertProvider);
         }
       }
-
-      // TODO - get intermediate certificates from DB
-      // TODO - re-check trusted chain
-      // TODO - add to trustStore/certificatePool
-
+      // establish trust store as SSL cert source
       sslCertProvider.setTrustStore(truststore);
+
+      // add intermediate certificates from cache that complete chains to trusted anchors
+      try {
+        List<CertificateChain> remove = new ArrayList<>();
+        for (CertificateChain chain : cache.getAll()) {
+          if (!sslCertProvider.addTrustedChain(chain.getCertificateChain(), false)) {
+            remove.add(chain);
+          }
+        }
+        if (remove.size() > 0) {
+          logger.info("Removing " + remove.size() + " from SSL cache");
+        }
+        // remove untrusted certificates from cache
+        for (CertificateChain r : remove) {
+          cache.remove(r);
+        }
+      } catch (Exception e) {
+        logger.error("Unable to load SSL cache: "+e.getMessage(), e);
+      }
+
       api.setSslCertificateProvider(sslCertProvider);
       logger.info("Added trusted SSL certificates: "+sslCertProvider.getUnique().size());
     } catch (Exception e) {
@@ -97,4 +133,5 @@ public class SSLPlugin implements AppPlugin {
     }
     return Collections.emptyList();
   }
+
 }

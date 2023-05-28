@@ -30,13 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Supported smartcards storage
  */
-public class SmartcardStorage implements AutoCloseable {
+public class SmartcardStorage extends AbstractStorage {
 
   private static final Logger logger = LoggerFactory.getLogger(SmartcardStorage.class.getName());
 
   private List<SmartcardInfo> smartcards = new ArrayList<>();
-
-  private final EmbeddedStorageManager storage;
 
   public SmartcardStorage(Path store) {
     EmbeddedStorageFoundation<?> foundation = EmbeddedStorage.Foundation(store);
@@ -51,7 +49,7 @@ public class SmartcardStorage implements AutoCloseable {
 
   public final synchronized void setSmartcards(List<SmartcardInfo> smartcards) {
     this.smartcards = smartcards;
-    commitChange();
+    commitChange(smartcards);
   }
 
   public List<SmartcardInfo> getSmartcards() {
@@ -66,20 +64,4 @@ public class SmartcardStorage implements AutoCloseable {
     return infosMap;
   }
 
-  private void commitChange() {
-    Storer storer = storage.createEagerStorer();
-    storer.store(smartcards);
-    storer.commit();
-  }
-
-  @Override
-  public void close() {
-    try {
-      storage.close();
-      storage.shutdown();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

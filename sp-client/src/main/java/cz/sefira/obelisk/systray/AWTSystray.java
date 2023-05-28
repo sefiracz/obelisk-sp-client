@@ -11,6 +11,11 @@ package cz.sefira.obelisk.systray;
  */
 
 import cz.sefira.obelisk.Systray;
+import cz.sefira.obelisk.UserPreferences;
+import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.util.ResourceUtils;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +32,10 @@ public class AWTSystray extends AbstractSystray {
 
   private static final Logger logger = LoggerFactory.getLogger(AWTSystray.class.getName());
 
-  public AWTSystray(String tooltip, URL trayIcon) {
-    super(tooltip, trayIcon);
+  private TrayIcon trayIcon;
+
+  public AWTSystray(PlatformAPI api, String tooltip, URL icon) {
+    super(api, tooltip, icon);
   }
 
   @Override
@@ -43,8 +50,8 @@ public class AWTSystray extends AbstractSystray {
         popup.add(mi);
       }
     }
-    final Image image = Toolkit.getDefaultToolkit().getImage(trayIcon);
-    final TrayIcon trayIcon = new TrayIcon(image, tooltip, popup);
+    final Image image = Toolkit.getDefaultToolkit().getImage(icon);
+    trayIcon = new TrayIcon(image, tooltip, popup);
     trayIcon.setImageAutoSize(true);
     trayIcon.addMouseListener(new MouseAdapter() {
       @Override
@@ -60,6 +67,22 @@ public class AWTSystray extends AbstractSystray {
       logger.info("Creating AWT SystemTray icon");
     } catch (final AWTException e) {
       logger.error("Cannot add TrayIcon", e);
+    }
+  }
+
+  @Override
+  public void pushNotification(Notification notification) {
+    trayIcon.displayMessage(AppConfig.get().getApplicationName(), notification.getMessageText(), notification.getType());
+  }
+
+  public void refreshLabels() {
+    TrayIcon[] trayIcons = SystemTray.getSystemTray().getTrayIcons();
+    if (trayIcons != null && trayIcons.length > 0) {
+      TrayIcon trayIcon = trayIcons[0];
+      for (int i = 0; i < trayIcon.getPopupMenu().getItemCount(); i++) {
+        MenuItem item = trayIcon.getPopupMenu().getItem(i);
+        item.setLabel(ResourceUtils.getBundle().getString(item.getName()));
+      }
     }
   }
 

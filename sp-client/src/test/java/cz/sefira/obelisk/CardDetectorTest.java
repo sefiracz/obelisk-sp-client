@@ -43,7 +43,7 @@ public class CardDetectorTest {
 	public void testSCardNoServiceIsHandledCorrectly() throws Exception {
 		EnvironmentInfo environmentInfo = new EnvironmentInfo();
 		UIDisplay display = Mockito.mock(UIDisplay.class);
-		InternalAPI api = new InternalAPI(display, null, null, null, null, null);
+		InternalAPI api = new InternalAPI(display, null, null, null);
 		CardDetector cardDetector = PowerMockito.spy(new CardDetector(api));
 		CardTerminals cardTerminals = mock(CardTerminals.class);
 		CardException cardException = mock(CardException.class);

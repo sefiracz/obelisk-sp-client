@@ -13,6 +13,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.NotificationType;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
@@ -72,11 +73,11 @@ public class NotificationController extends ControllerCore implements PropertyCh
   private ScheduledExecutorService executorService;
   private double xOffset;
   private double yOffset;
-  private boolean showNotification;
   private boolean hiddenFlag;
 
   private Notification notification;
   private TimerService service;
+  private long lastShown = 0;
 
   @Override
   public void init(Stage stage, Object... params) {
@@ -84,7 +85,6 @@ public class NotificationController extends ControllerCore implements PropertyCh
     this.propertyChangeSupport = (PropertyChangeSupport) params[0];
     this.propertyChangeSupport.addPropertyChangeListener(this);
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.showNotification = new UserPreferences(AppConfig.get()).isShowNotifications();
 
     stage.initStyle(StageStyle.UNDECORATED);
     stage.setTitle(ResourceUtils.getBundle().getString("notification.title"));
@@ -93,12 +93,13 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
     // asynchronous window content update
     asyncUpdate(executorService, false, () -> {
-      if (showNotification && notification != null) {
+      if (notification != null) {
         Notification currentNotification = notification;
         Platform.runLater(() -> {
           logger.info("Notification FX thread");
           message.setText(currentNotification.getMessageText());
           timestamp.setText(TextUtils.localizedDatetime(currentNotification.getDate(), true));
+          lastShown = System.currentTimeMillis();
           // cancel if notification is in closing process and we have new notification
           if (service != null) {
             service.cancel();
@@ -161,7 +162,19 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    asyncTask(() -> notification = (Notification) evt.getNewValue(), true);
+    asyncTask(() -> {
+      Notification pushedNotification = (Notification) evt.getNewValue();
+      // keep last notification for longer if next this is closing one, and it wasn't displayed for too long yet
+      long displayTime = System.currentTimeMillis() - lastShown;
+      if (stage.isShowing() && pushedNotification.isClose() && (displayTime < 2000)) {
+        try {
+          Thread.sleep(2000 - displayTime); // show last notification for longer (at least 2s)
+        } catch (InterruptedException e) {
+          logger.error(e.getMessage(), e);
+        }
+      }
+      notification = pushedNotification;
+    }, true);
   }
 
   public TimerService createHideTimer(long seconds) {

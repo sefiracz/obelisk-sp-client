@@ -12,9 +12,8 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
-import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.dss.x509.CertificateDataParser;
-import cz.sefira.obelisk.util.DSSUtils;
+import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.StandaloneUIController;
@@ -29,7 +28,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.hc.client5.http.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,13 +171,7 @@ public class CertificateViewerController implements StandaloneUIController, Init
               CertificateDataParser parser = certificateChainView.getSelectionModel().getSelectedItem().getValue();
               X509Certificate certificate = parser.getX509Certificate();
               SSLCertificateProvider provider = api.getSslCertificateProvider();
-              if (!provider.getUnique().contains(certificate)) {
-                String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, certificate.getEncoded()));
-                logger.info("Temporarily trust certificate: " + certificate.getSubjectX500Principal().toString() + " (" + alias + ")");
-                provider.put(certificate);
-                provider.getTrustStore().setCertificateEntry(alias, certificate);
-                provider.unregisterSocketFactory();
-              }
+              provider.addToRuntimeTruststore(List.of(certificate));
             } catch (Exception ex) {
               logger.error(ex.getMessage(), ex);
               DialogMessage errMsg = new DialogMessage("feedback.message", DialogMessage.Level.ERROR, 380, 140);

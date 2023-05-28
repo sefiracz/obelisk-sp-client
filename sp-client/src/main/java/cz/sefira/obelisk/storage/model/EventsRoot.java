@@ -1,4 +1,4 @@
-package cz.sefira.obelisk.storage;
+package cz.sefira.obelisk.storage.model;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.

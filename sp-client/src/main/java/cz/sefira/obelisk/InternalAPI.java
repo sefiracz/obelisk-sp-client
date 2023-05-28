@@ -28,7 +28,7 @@ import cz.sefira.obelisk.flow.operation.CoreOperationStatus;
 import cz.sefira.obelisk.generic.*;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
-import cz.sefira.obelisk.storage.SmartcardStorage;
+import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.pkcs11.PKCS11Manager;
 import cz.sefira.obelisk.util.ResourceUtils;
@@ -75,30 +75,29 @@ public class InternalAPI implements PlatformAPI {
 
   private SSLCertificateProvider sslCertificateProvider;
 
-  private final ProductStorage productStorage;
-  private final EventsStorage eventsStorage;
+  private final StorageHandler storageHandler;
   private final ExecutorService executor;
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
+  private final Systray systray;
   private Future<?> currentTask;
 
-  public InternalAPI(UIDisplay display, ProductStorage productStorage, SmartcardStorage smartcardStorage,
-                     EventsStorage eventsStorage, FlowRegistry flowRegistry, OperationFactory operationFactory) {
+  public InternalAPI(UIDisplay display, StorageHandler storageHandler, FlowRegistry flowRegistry, OperationFactory operationFactory) {
     this.display = display;
-    this.productStorage = productStorage;
-    this.eventsStorage = eventsStorage;
+    this.storageHandler = storageHandler;
     this.detector = new CardDetector(this);
     this.flowRegistry = flowRegistry;
     this.operationFactory = operationFactory;
-    this.pkcs11Manager = new PKCS11Manager(this, smartcardStorage);
+    this.pkcs11Manager = new PKCS11Manager(this, storageHandler.getSmartcardStorage());
     this.executor = Executors.newSingleThreadExecutor(r -> {
       final Thread t = new Thread(EXECUTOR_THREAD_GROUP, r);
       t.setDaemon(true);
       return t;
     });
     this.currentTask = null;
-    // start hidden notification window
+    // start hidden notification window (fallback)
     StandaloneDialog.runLater(() -> StandaloneDialog.createDialogFromFXML("/fxml/notification.fxml", null, StageState.HIDDEN, propertyChangeSupport));
+    systray = new Systray(this);
   }
 
   @Override
@@ -248,12 +247,17 @@ public class InternalAPI implements PlatformAPI {
 
   @Override
   public <T extends AbstractProduct> ProductStorage<T> getProductStorage(Class<T> c) {
-    return productStorage;
+    return (ProductStorage<T>) getStorageHandler().getProductStorage();
   }
 
   @Override
   public EventsStorage getEventsStorage() {
-    return eventsStorage;
+    return getStorageHandler().getEventsStorage();
+  }
+
+  @Override
+  public StorageHandler getStorageHandler() {
+    return storageHandler;
   }
 
   @Override
@@ -265,12 +269,13 @@ public class InternalAPI implements PlatformAPI {
     return sslCertificateProvider;
   }
 
+  @Override
+  public Systray getSystray() {
+    return systray;
+  }
 
-  public void pushNotification(Notification notification) {
+  public void pushIntegratedNotification(Notification notification) {
     synchronized (this) {
-      logger.info("Push notification: " + notification.getMessageText());
-      // push notification into events
-      eventsStorage.addNotification(notification);
       // push notification message to dialog
       propertyChangeSupport.firePropertyChange("notify", new Object(), notification);
     }

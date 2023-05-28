@@ -27,11 +27,9 @@ import java.util.List;
 /**
  * Product (location of certificate+key in device) storage
  */
-public class ProductStorage<T> implements AutoCloseable {
+public class ProductStorage<T> extends AbstractStorage {
 
   private final List<AbstractProduct> products = new ArrayList<>();
-
-  private final EmbeddedStorageManager storage;
 
   public ProductStorage(Path store) {
     EmbeddedStorageFoundation<?> foundation = EmbeddedStorage.Foundation(store);
@@ -50,14 +48,14 @@ public class ProductStorage<T> implements AutoCloseable {
     if (!getProducts().contains(product)) {
       getProducts().add(product);
       QuickAccessProductsMap.access().put(product.getCertificateId(), product);
-      commitChange();
+      commitChange(getProducts());
     }
   }
 
   public synchronized void remove(@NotNull AbstractProduct product) {
     getProducts().remove(product);
     QuickAccessProductsMap.access().remove(product.getCertificateId(), product);
-    commitChange();
+    commitChange(getProducts());
   }
 
   public List<T> getProducts(Class<T> cl) {
@@ -83,20 +81,4 @@ public class ProductStorage<T> implements AutoCloseable {
     return products;
   }
 
-  private void commitChange() {
-    Storer storer = storage.createEagerStorer();
-    storer.store(getProducts());
-    storer.commit();
-  }
-
-  @Override
-  public void close() {
-    try {
-      storage.close();
-      storage.shutdown();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

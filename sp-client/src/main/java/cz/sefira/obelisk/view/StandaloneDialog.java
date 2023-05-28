@@ -40,6 +40,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import cz.sefira.obelisk.api.PlatformAPI;
@@ -82,7 +83,7 @@ public class StandaloneDialog {
     confirm.getStyleClass().add("btn-primary");
     message.addButton(new DialogMessage.MessageButton(confirm, (stage, controller) -> {
       userPreferences.clear();
-      AppConfigurer.applyLocale(null);
+      AppConfigurer.applyLocale(api, null);
       AppConfigurer.applyUserPreferences(userPreferences);
       if(stage != null)
         stage.close();

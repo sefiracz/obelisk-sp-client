@@ -14,6 +14,7 @@
  */
 package cz.sefira.obelisk.api;
 
+import cz.sefira.obelisk.Systray;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.flow.OperationFactory;
@@ -21,6 +22,7 @@ import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
+import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.token.pkcs11.PKCS11Manager;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -28,7 +30,6 @@ import cz.sefira.obelisk.view.core.UIDisplay;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 /**
@@ -86,11 +87,15 @@ public interface PlatformAPI {
 
 	EventsStorage getEventsStorage();
 
+	StorageHandler getStorageHandler();
+
 	void setSslCertificateProvider(SSLCertificateProvider sslCertificateProvider);
 
 	SSLCertificateProvider getSslCertificateProvider();
 
-	void pushNotification(Notification notification);
+	Systray getSystray();
+
+	void pushIntegratedNotification(Notification notification);
 
 	void cardDetection(PropertyChangeListener listener, boolean addListener);
 }

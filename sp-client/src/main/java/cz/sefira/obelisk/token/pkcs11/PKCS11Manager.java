@@ -13,6 +13,7 @@
  */
 package cz.sefira.obelisk.token.pkcs11;
 
+import cz.sefira.obelisk.InternalAPI;
 import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.api.model.KeystoreType;
 import cz.sefira.obelisk.api.PlatformAPI;
@@ -104,7 +105,7 @@ public class PKCS11Manager {
 
   /**
    * Unregister smartcard informations
-   * @param info Smartcard informations
+   * @param card Smartcard
    */
   public void unregisterCard(DetectedCard card) {
     boolean unregister = true;

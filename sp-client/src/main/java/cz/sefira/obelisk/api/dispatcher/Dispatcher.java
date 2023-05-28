@@ -16,6 +16,7 @@ import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.api.ws.GenericApiException;
+import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.SpApiClient;
 import cz.sefira.obelisk.api.ws.auth.*;
 import cz.sefira.obelisk.api.ws.model.*;
@@ -32,14 +33,13 @@ import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.net.URIBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -49,7 +49,6 @@ import java.security.Security;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +84,6 @@ public class Dispatcher implements AppPlugin {
 
   @Override
   public List<InitErrorMessage> init(String pluginId, PlatformAPI api) {
-    Security.addProvider(new BouncyCastleProvider());
     logger.info("Dispatcher initializing");
     try {
       this.api = api;
@@ -110,6 +108,7 @@ public class Dispatcher implements AppPlugin {
   private void validateMessage(Message message) {
     // get message
     String notificationProperty = null;
+    TrayIcon.MessageType notificationType = TrayIcon.MessageType.INFO;
     try {
       if (message == null) {
         return;
@@ -132,7 +131,7 @@ public class Dispatcher implements AppPlugin {
       // process language
       NameValuePair langParam = uriBuilder.getFirstQueryParam("l");
       if (langParam != null && langParam.getValue() != null) {
-        AppConfigurer.applyLocale(langParam.getValue());
+        AppConfigurer.applyLocale(api, langParam.getValue());
       }
       // process expiration
       NameValuePair timestampParam = uriBuilder.getFirstQueryParam("t");
@@ -159,6 +158,7 @@ public class Dispatcher implements AppPlugin {
           notificationProperty = "notification.event.user.cancel";
         } else {
           notificationProperty = "notification.event.exception";
+          notificationType = TrayIcon.MessageType.ERROR;
         }
       }
     } catch (GenericApiException e) {
@@ -166,26 +166,42 @@ public class Dispatcher implements AppPlugin {
       DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-    }  catch (SSLCommunicationException e) {
+      notificationType = TrayIcon.MessageType.ERROR;
+    } catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
       StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api));
       notificationProperty = "notification.event.fatal";
+      notificationType = TrayIcon.MessageType.ERROR;
     } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
-      DialogMessage errMsg = new DialogMessage("dispatcher.communication.error", DialogMessage.Level.ERROR,
-          new String[]{String.valueOf(e.getStatusCode()), e.getReasonPhrase()}, 475, 150);
+      DialogMessage dialogMessage = null;
+      Problem p = null;
+      if ((p = HttpUtils.processProblem(e)) != null) {
+        // SP-API error
+        dialogMessage = new DialogMessage("dispatcher.api.error", DialogMessage.Level.ERROR,
+            new String[]{ p.getTitle() }, 500, 200);
+      } else {
+        // generic error
+        dialogMessage = new DialogMessage("dispatcher.communication.error", DialogMessage.Level.ERROR,
+            new String[]{String.valueOf(e.getStatusCode()), e.getReasonPhrase()}, 475, 150);
+      }
+      final DialogMessage errMsg = dialogMessage;
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
+      notificationType = TrayIcon.MessageType.ERROR;
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage("dispatcher.generic.error", DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
+      notificationType = TrayIcon.MessageType.ERROR;
     } finally {
       if (notificationProperty != null) {
         // close notification
         String messageText = ResourceUtils.getBundle().getString(notificationProperty);
-        api.pushNotification(new Notification(messageText, true, 5));
+        api.getSystray().pushNotification(new Notification(messageText, notificationType, true, 5));
+
+
       }
     }
   }
@@ -217,7 +233,7 @@ public class Dispatcher implements AppPlugin {
           return null;
         }
         // notification
-        api.pushNotification(new Notification(req.getDescription()));
+        api.getSystray().pushNotification(new Notification(req.getDescription()));
         // synchronize supported hardware database
         sync = sync && syncDevices(req);
         // execute flow
@@ -226,6 +242,9 @@ public class Dispatcher implements AppPlugin {
           audit(result, response);
           // send results
           response = client.call("POST", url, tokenProvider, result, false);
+          // flow finished and result successfully transmitted
+          flowFinished(req, result);
+          // process response
           int responseCode = response.getCode();
           if (responseCode == HttpStatus.SC_OK) {
             req = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BaseRequest.class);
@@ -304,6 +323,18 @@ public class Dispatcher implements AppPlugin {
   private void audit(Execution<?> result, HttpResponse response) {
     Audit audit = new Audit(result.getUsedProduct(), initializedDate);
     result.setAudit(audit);
+  }
+
+  private void flowFinished(BaseRequest req, Execution<?> result) {
+    // certificate obtained dialog - if user interaction is wanted (no auto-select mode)
+    if (req.isUserInteraction() && GET_CERTIFICATE.equals(req.getOperation()) && result.isSuccess()) {
+      DialogMessage certFlowFinished = new DialogMessage("certificates.flow.finished",
+          DialogMessage.Level.SUCCESS, 400, 165);
+      certFlowFinished.setShowDoNotShowCheckbox(true, false, "cert-flow-finished");
+      StandaloneDialog.runLater(() -> StandaloneDialog.showDialog(api, certFlowFinished, false));
+    }
+    // any additional finishing operations can be added here
+    // ...
   }
 
 }

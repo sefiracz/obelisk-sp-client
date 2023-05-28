@@ -23,6 +23,7 @@ import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.storage.SmartcardStorage;
+import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +60,14 @@ public class APIBuilder {
 	 * @return The built instance of {@link PlatformAPI}.
 	 */
 	public PlatformAPI build(final UIDisplay display, final FlowRegistry flowRegistry,
-													 final ProductStorage<?> productStorage, final SmartcardStorage smartcardStorage,
-													 final EventsStorage eventsStorage, final OperationFactory operationFactory) {
-		return new InternalAPI(display, productStorage, smartcardStorage, eventsStorage, flowRegistry, operationFactory);
+													 final StorageHandler storageHandler, final OperationFactory operationFactory) {
+		return new InternalAPI(display, storageHandler, flowRegistry, operationFactory);
 	}
 
 	/**
 	 * Init plugins on the given {@link PlatformAPI} instance.
 	 * @param api The {@link PlatformAPI} instance on which plugins must be initialized. It <strong>MUST</strong> be
-	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, FlowRegistry, ProductStorage, SmartcardStorage, EventsStorage, OperationFactory)}.
+	 * an instance previously returned by {@link APIBuilder#build(UIDisplay, FlowRegistry, StorageHandler, OperationFactory)}.
 	 * @param properties Configuration properties of the plugin to initialize.
 	 * @return Messages about events that occurred during plugins initialization.
 	 */
