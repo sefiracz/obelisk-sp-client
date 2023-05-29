@@ -74,6 +74,10 @@ public class SSLPlugin implements AppPlugin {
       // load up MacOS trusted certificates
       if (OS.isMacOS()) {
         systemStore = KeyStore.getInstance("KeychainStore");
+        List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
+        for (X509Certificate certificate : caList) {
+          X509Utils.addToTrust(certificate, truststore, sslCertProvider);
+        }
       }
 
       // load up Linux trusted certificates
