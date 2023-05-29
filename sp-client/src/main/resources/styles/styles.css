@@ -481,8 +481,8 @@ RadioButton {
 .notification-message {
 
     -fx-text-alignment: left;
-    -fx-font-size: 16px;
-    -fx-padding: 15 15 15 15;
+    -fx-font-size: 14px;
+    -fx-padding: 5 15 5 15;
 
 }
 

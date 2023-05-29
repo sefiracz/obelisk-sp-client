@@ -18,7 +18,7 @@
 
 <HBox styleClass="notification" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="cz.sefira.obelisk.view.ui.NotificationController">
-  <BorderPane fx:id="background" prefHeight="180" prefWidth="360">
+  <BorderPane fx:id="background" prefHeight="150" prefWidth="360">
 
     <top>
       <HBox minHeight="32" maxHeight="32" prefHeight="32">
@@ -36,7 +36,7 @@
     </center>
 
     <bottom>
-      <HBox prefHeight="32" style="-fx-alignment: bottom-left" >
+      <HBox prefHeight="22" style="-fx-alignment: bottom-left" >
         <Label styleClass="timeMessage" fx:id="timestamp" wrapText="true"/>
       </HBox>
     </bottom>
