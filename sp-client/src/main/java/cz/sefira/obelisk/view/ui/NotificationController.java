@@ -10,10 +10,7 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.UserPreferences;
-import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
-import cz.sefira.obelisk.api.NotificationType;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
@@ -26,6 +23,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -97,7 +95,14 @@ public class NotificationController extends ControllerCore implements PropertyCh
         Notification currentNotification = notification;
         Platform.runLater(() -> {
           logger.info("Notification FX thread");
-          message.setText(currentNotification.getMessageText());
+          String text = currentNotification.getMessageText();
+          if (text.length() < 120) {
+            message.setStyle("-fx-font-size: 16px");
+          } else {
+            message.setStyle("-fx-font-size: 14px");
+          }
+          message.setText(text);
+          message.setTooltip(new Tooltip(text));
           timestamp.setText(TextUtils.localizedDatetime(currentNotification.getDate(), true));
           lastShown = System.currentTimeMillis();
           // cancel if notification is in closing process and we have new notification

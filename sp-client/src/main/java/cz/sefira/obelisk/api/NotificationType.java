@@ -10,9 +10,7 @@ package cz.sefira.obelisk.api;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.util.ResourceUtils;
-import cz.sefira.obelisk.util.annotation.NotNull;
 
 /**
  * Notification type
@@ -39,11 +37,6 @@ public enum NotificationType {
   }
 
   public static NotificationType getDefault() {
-    if (OS.isWindows()) {
-      return NATIVE;
-    } else if (OS.isMacOS()) {
-      return INTEGRATED;
-    }
     return INTEGRATED;
   }
 
