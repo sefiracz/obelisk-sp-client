@@ -19,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,7 +29,7 @@ public class SmartcardStorage extends AbstractStorage {
 
   private static final Logger logger = LoggerFactory.getLogger(SmartcardStorage.class.getName());
 
-  private List<SmartcardInfo> smartcards = new ArrayList<>();
+  private final List<SmartcardInfo> smartcards = new ArrayList<>();
 
   public SmartcardStorage(Path store) {
     EmbeddedStorageFoundation<?> foundation = EmbeddedStorage.Foundation(store);
@@ -45,13 +42,23 @@ public class SmartcardStorage extends AbstractStorage {
     logger.info("Supported smartcards: "+smartcards.size());
   }
 
-  public final synchronized void setSmartcards(List<SmartcardInfo> smartcards) {
-    this.smartcards = smartcards;
-    commitChange(smartcards);
-  }
-
-  public List<SmartcardInfo> getSmartcards() {
-    return Collections.unmodifiableList(smartcards);
+  public final synchronized void setSmartcards(List<SmartcardInfo> smartcardList) {
+    for (SmartcardInfo smartcard : smartcardList) {
+      int index = smartcards.indexOf(smartcard);
+      // this ATR is stored
+      if (index > -1) {
+        SmartcardInfo stored = smartcards.get(index);
+        // but info differs
+        if (!stored.compare(smartcard)) {
+          // replace the stored value with the new one
+          smartcards.remove(stored);
+          smartcards.add(smartcard);
+        }
+      } else {
+        smartcards.add(smartcard);
+      }
+    }
+    commitChange(this.smartcards);
   }
 
   public Map<String, SmartcardInfo> getSmartcardInfosMap() {
