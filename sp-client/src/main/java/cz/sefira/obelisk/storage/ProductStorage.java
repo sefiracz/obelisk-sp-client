@@ -15,10 +15,10 @@ import cz.sefira.obelisk.generic.QuickAccessProductsMap;
 import cz.sefira.obelisk.util.annotation.NotNull;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
-import one.microstream.persistence.types.Storer;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +28,8 @@ import java.util.List;
  * Product (location of certificate+key in device) storage
  */
 public class ProductStorage<T> extends AbstractStorage {
+
+  private static final Logger logger = LoggerFactory.getLogger(ProductStorage.class.getName());
 
   private final List<AbstractProduct> products = new ArrayList<>();
 
@@ -39,6 +41,7 @@ public class ProductStorage<T> extends AbstractStorage {
         )
     );
     this.storage = foundation.createEmbeddedStorageManager(products).start();
+    logger.info("Product storage size: "+products.size());
     for (AbstractProduct product : products) {
       QuickAccessProductsMap.access().put(product.getCertificateId(), product);
     }

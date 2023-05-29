@@ -10,8 +10,6 @@ package cz.sefira.obelisk.systray;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.Systray;
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
 import cz.sefira.obelisk.api.PlatformAPI;
