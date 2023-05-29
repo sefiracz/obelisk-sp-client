@@ -89,4 +89,34 @@ public class SmartcardInfo {
     this.drivers = drivers;
   }
 
+  public boolean compare(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    SmartcardInfo that = (SmartcardInfo) o;
+
+    if (getAtr() != null ? !getAtr().equals(that.getAtr()) : that.getAtr() != null) return false;
+    if (getDescription() != null ? !getDescription().equals(that.getDescription()) : that.getDescription() != null)
+      return false;
+    if (getModelName() != null ? !getModelName().equals(that.getModelName()) : that.getModelName() != null)
+      return false;
+    if (getDownloadUrl() != null ? !getDownloadUrl().equals(that.getDownloadUrl()) : that.getDownloadUrl() != null)
+      return false;
+    return getDrivers() != null ? getDrivers().equals(that.getDrivers()) : that.getDrivers() == null;
+  }
+
+    @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    SmartcardInfo that = (SmartcardInfo) o;
+
+    return getAtr() != null ? getAtr().equals(that.getAtr()) : that.getAtr() == null;
+  }
+
+  @Override
+  public int hashCode() {
+    return getAtr() != null ? getAtr().hashCode() : 0;
+  }
 }

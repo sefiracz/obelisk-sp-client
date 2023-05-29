@@ -11,7 +11,6 @@ package cz.sefira.obelisk.storage;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
-import one.microstream.persistence.types.PersistenceRefactoringMappingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class StorageHandler implements Closeable {
     productStorage = new ProductStorage<>(storage.resolve("products"));
     smartcardStorage = new SmartcardStorage(storage.resolve("smartcards"));
     eventsStorage = new EventsStorage(storage.resolve("events"));
-    sslCacheStorage = new SSLCacheStorage(storage.resolve("sslCache"));
+    sslCacheStorage = new SSLCacheStorage(storage.resolve("ssl"));
   }
 
   public ProductStorage<?> getProductStorage() {
