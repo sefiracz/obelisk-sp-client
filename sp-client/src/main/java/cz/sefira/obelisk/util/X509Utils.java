@@ -40,9 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.x500.X500Principal;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -192,6 +190,42 @@ public class X509Utils {
       keyUsageList.add(resources.getString("keyUsage.decipherOnly"));
     }
     return String.join(delimiter, keyUsageList);
+  }
+
+  public static List<X509Certificate> loadMacOSSystemRoot() {
+    List<X509Certificate> certificates = new ArrayList<>();
+    try {
+      List<String> base64Certs = new ArrayList<>();
+      StringBuilder sb = new StringBuilder();
+      ProcessBuilder builder = new ProcessBuilder();
+      builder.command("security", "find-certificate", "-a", "-p", "/System/Library/KeyChains/SystemRootCertificates.keychain");
+      Process p = builder.start();
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          if (line.contains("-----BEGIN CERTIFICATE-----")) {
+            sb = new StringBuilder(); // start new string
+          } else if (line.contains("-----END CERTIFICATE-----")) {
+            base64Certs.add(sb.toString()); // dump base64 string
+          } else if (!line.trim().isEmpty()) {
+            sb.append(line); // append base64
+          }
+        }
+      } catch (IOException e) {
+        logger.error(e.getMessage(), e);
+      }
+      CertificateFactory factory = CertificateFactory.getInstance("X509");
+      for (String cert : base64Certs) {
+        try {
+          certificates.add((X509Certificate) factory.generateCertificate(new ByteArrayInputStream(Base64.decodeBase64(cert))));
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Unable to read MacOS System root certificates: "+e.getMessage(), e);
+    }
+    return certificates;
   }
 
 }
