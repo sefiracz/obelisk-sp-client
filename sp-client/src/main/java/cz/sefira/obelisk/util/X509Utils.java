@@ -23,7 +23,9 @@ package cz.sefira.obelisk.util;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.crypto.MSCryptoStore;
+import cz.sefira.crypto.StoreType;
+import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.dss.DSSException;
 import cz.sefira.obelisk.dss.DigestAlgorithm;
@@ -42,15 +44,18 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class X509Utils {
 
@@ -67,14 +72,6 @@ public class X509Utils {
   public static X509Certificate getCertificateFromStream(InputStream in) throws CertificateException {
     CertificateFactory factory = CertificateFactory.getInstance("X509");
     return (X509Certificate) factory.generateCertificate(in);
-  }
-
-  public static void addToTrust(X509Certificate cert, KeyStore truststore, SSLCertificateProvider provider)
-      throws KeyStoreException, CertificateEncodingException {
-    String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, cert.getEncoded()));
-    if (provider.put(cert)) {
-      truststore.setCertificateEntry(alias, cert);
-    }
   }
 
   public static boolean isSelfSigned(X509Certificate x509Certificate) {
@@ -122,17 +119,9 @@ public class X509Utils {
     try {
       X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(
           new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
-      openCertificateChain(owner, List.of(certificate), null, false);
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, List.of(certificate));
     }
     catch (CertificateException e) {
-      logger.error(e.getMessage(), e);
-    }
-  }
-
-  public static void openCertificateChain(Stage owner, List<X509Certificate> certificates, PlatformAPI api, boolean sslTrust) {
-    try {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, certificates, api, sslTrust);
-    } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
   }
@@ -192,7 +181,76 @@ public class X509Utils {
     return String.join(delimiter, keyUsageList);
   }
 
-  public static List<X509Certificate> loadMacOSSystemRoot() {
+  public static void loadSSLCertificates(KeyStore truststore, SSLCertificateProvider provider) {
+    try {
+      KeyStore systemStore = null;
+
+      // load up Windows trusted certificates
+      if (OS.isWindows()) {
+        // load Java MSCAPI - ROOT store
+        systemStore = KeyStore.getInstance("Windows-ROOT");
+
+        // load native MSCAPI - CA store
+        try {
+          List<Certificate> caList = MSCryptoStore.getCertificates(StoreType.CA);
+          for (Certificate ca : caList) {
+            X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+          }
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
+      }
+
+      // load up macOS trusted certificates
+      if (OS.isMacOS()) {
+        systemStore = KeyStore.getInstance("KeychainStore");
+        List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
+        for (X509Certificate certificate : caList) {
+          X509Utils.addToTrust(certificate, truststore, provider);
+        }
+      }
+
+      // load up Linux trusted certificates
+      if (OS.isLinux()) {
+        try (Stream<Path> list = Files.list(Paths.get("/etc/ssl/certs"))) {
+          List<Path> certificates = list.filter(Files::isRegularFile).collect(Collectors.toList());
+          for (Path certPath : certificates) {
+            try (InputStream in = Files.newInputStream(certPath)) {
+              X509Certificate certificate = X509Utils.getCertificateFromStream(in);
+              X509Utils.addToTrust(certificate, truststore, provider);
+            } catch (Exception e) {
+              logger.error(e.getMessage());
+            }
+          }
+        } catch (Exception e) {
+          logger.error("Unable to load /etc/ssl/certs: " + e.getMessage());
+        }
+      }
+
+      // load SSL certificates from system store (Win/Mac)
+      if (systemStore != null) {
+        systemStore.load(null, null);
+        Enumeration<String> trustAliases = systemStore.aliases();
+        while (trustAliases.hasMoreElements()) {
+          String alias = trustAliases.nextElement();
+          Certificate ca = systemStore.getCertificate(alias);
+          X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Unable to load SSL certificates from OS: "+e.getMessage(), e);
+    }
+  }
+
+  private static void addToTrust(X509Certificate cert, KeyStore truststore, SSLCertificateProvider provider)
+      throws KeyStoreException, CertificateEncodingException {
+    if (provider.put(cert)) {
+      String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, cert.getEncoded()));
+      truststore.setCertificateEntry(alias, cert);
+    }
+  }
+
+  private static List<X509Certificate> loadMacOSSystemRoot() {
     List<X509Certificate> certificates = new ArrayList<>();
     try {
       List<String> base64Certs = new ArrayList<>();
