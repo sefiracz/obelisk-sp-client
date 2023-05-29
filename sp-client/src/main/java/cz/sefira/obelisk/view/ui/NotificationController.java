@@ -13,6 +13,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.api.Notification;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
+import cz.sefira.obelisk.util.annotation.NotNull;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import cz.sefira.obelisk.view.core.TimerService;
@@ -96,10 +97,8 @@ public class NotificationController extends ControllerCore implements PropertyCh
         Platform.runLater(() -> {
           logger.info("Notification FX thread");
           String text = currentNotification.getMessageText();
-          if (text.length() < 120) {
-            message.setStyle("-fx-font-size: 16px");
-          } else {
-            message.setStyle("-fx-font-size: 14px");
+          if (text != null) {
+            resizeFont(text.length()); // resize according to text length
           }
           message.setText(text);
           message.setTooltip(new Tooltip(text));
@@ -196,6 +195,20 @@ public class NotificationController extends ControllerCore implements PropertyCh
     hiddenFlag = flag;
     stage.setIconified(false);
     stage.hide();
+  }
+
+  private void resizeFont(int textLength) {
+    if (textLength < 120){
+      message.setStyle("-fx-font-size: 16px");
+    } else if (textLength < 180) {
+      message.setStyle("-fx-font-size: 14px");
+    } else if (textLength < 200) {
+      message.setStyle("-fx-font-size: 13px");
+    } else if (textLength < 280) {
+      message.setStyle("-fx-font-size: 12px");
+    } else {
+      message.setStyle("-fx-font-size: 11px");
+    }
   }
 
 }
