@@ -10,10 +10,11 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
-import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.dss.x509.CertificateDataParser;
-import cz.sefira.obelisk.util.X509Utils;
+import cz.sefira.obelisk.ipc.Message;
+import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.StandaloneUIController;
@@ -83,6 +84,8 @@ public class CertificateViewerController implements StandaloneUIController, Init
 
   private boolean sslTrust;
 
+  private Message queueMessage;
+
   final private ObservableList<String[]> observableCertificateData;
 
   private ResourceBundle resourceBundle;
@@ -98,9 +101,10 @@ public class CertificateViewerController implements StandaloneUIController, Init
     stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
     stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/styles.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];
-    if (params.length == 3) {
+    if (params.length == 4) {
       this.api = (PlatformAPI) params[1];
       this.sslTrust = (boolean) params[2];
+      this.queueMessage = (Message) params[3];
     }
     // no API interaction, hide trust SSL button
     if (api == null || !sslTrust) {
@@ -167,19 +171,28 @@ public class CertificateViewerController implements StandaloneUIController, Init
           yes.getStyleClass().add("btn-primary");
           message.addButton(new DialogMessage.MessageButton(no, (dialogStage, controller) -> dialogStage.close()));
           message.addButton(new DialogMessage.MessageButton(yes, (dialogStage, controller) -> {
+            boolean repeat = false;
             try {
               CertificateDataParser parser = certificateChainView.getSelectionModel().getSelectedItem().getValue();
               X509Certificate certificate = parser.getX509Certificate();
-              SSLCertificateProvider provider = api.getSslCertificateProvider();
-              provider.addToRuntimeTruststore(List.of(certificate));
+              api.getSslCertificateProvider().addToRuntimeTruststore(List.of(certificate)); // add to temp trust
+              repeat = true;
             } catch (Exception ex) {
               logger.error(ex.getMessage(), ex);
               DialogMessage errMsg = new DialogMessage("feedback.message", DialogMessage.Level.ERROR, 380, 140);
               errMsg.setOwner(dialogStage);
               StandaloneDialog.showErrorDialog(errMsg, null, ex);
             }
+            // close all dialog windows
             dialogStage.close();
             stage.close();
+            if (stage.getOwner() instanceof Stage) {
+              ((Stage) stage.getOwner()).close();
+            }
+            // push message back to queue
+            if (repeat && queueMessage != null) {
+              MessageQueueFactory.getInstance(AppConfig.get()).addMessage(queueMessage);
+            }
           }));
           StandaloneDialog.showDialog(api, message, true);
         }

@@ -114,14 +114,15 @@ public class HttpsClient {
     exceptionMsg = exceptionMsg != null ? exceptionMsg.toLowerCase() : "";
     if (exceptionMsg.contains("unable to find valid certification path to requested target") &&
         sslChain != null && !sslChain.isEmpty()) {
-      api.getSslCertificateProvider().refreshRoot();
+      SSLCertificateProvider provider = api.getSslCertificateProvider();
+      X509Utils.loadSSLCertificates(provider.getTrustStore(), provider); // refresh trusted SSL certificates
       return completeCertificateChain(sslChain.get(sslChain.size()-1), sslChain);
     }
     return false;
   }
 
 
-  public boolean completeCertificateChain(X509Certificate subject, List<X509Certificate> certificates) {
+  private boolean completeCertificateChain(X509Certificate subject, List<X509Certificate> certificates) {
     if (X509Utils.isSelfSigned(subject)) {
       return false; // chain ends with untrusted self-sign, nothing to do here
     }

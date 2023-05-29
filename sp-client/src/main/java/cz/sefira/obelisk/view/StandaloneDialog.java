@@ -18,9 +18,9 @@ import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.ipc.Message;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
-import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.util.annotation.NotNull;
 import cz.sefira.obelisk.view.core.StageState;
 import cz.sefira.obelisk.view.core.TimerService;
@@ -40,7 +40,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import cz.sefira.obelisk.api.PlatformAPI;
@@ -59,48 +58,13 @@ public class StandaloneDialog {
 
   private static final Logger logger = LoggerFactory.getLogger(StandaloneDialog.class.getName());
 
-  private static final Object lock = new Object();
-
-  public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
-    ResourceBundle resources = ResourceUtils.getBundle();
-    DialogMessage message = new DialogMessage("preferences.reset.dialog",
-        DialogMessage.Level.WARNING, 400, 150);
-    message.setShowOkButton(false);
-    message.setOwner(primaryStage);
-
-    // add button
-    Button cancel = new Button();
-    cancel.setText(resources.getString("button.cancel"));
-    cancel.getStyleClass().add("btn-default");
-    message.addButton(new DialogMessage.MessageButton(cancel, (stage, controller) -> {
-      if(stage != null)
-        stage.hide();
-    }));
-
-    // add confirm button
-    Button confirm = new Button();
-    confirm.setText(resources.getString("button.ok"));
-    confirm.getStyleClass().add("btn-primary");
-    message.addButton(new DialogMessage.MessageButton(confirm, (stage, controller) -> {
-      userPreferences.clear();
-      AppConfigurer.applyLocale(api, null);
-      AppConfigurer.applyUserPreferences(userPreferences);
-      if(stage != null)
-        stage.close();
-      if (primaryStage != null)
-        primaryStage.close();
-    }));
-
-    showDialog(api, message, true);
-  }
-
   /**
    * Standalone message dialog implementation
    * @param api API
    * @param dialogMessage Dialog message information
    * @param blockingUI True if blocking UI operation
    */
-  public static void showDialog(PlatformAPI api, DialogMessage dialogMessage, boolean blockingUI) {
+  public static void showDialog(PlatformAPI api, DialogMessage dialogMessage,  boolean blockingUI) {
     ResourceBundle resources = ResourceUtils.getBundle();
 
     String appName = "";
@@ -263,8 +227,42 @@ public class StandaloneDialog {
     }
   }
 
-  private static final Map<String, StandaloneUIController> BLOCKING_UI = new ConcurrentHashMap<>();
+  public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
+    ResourceBundle resources = ResourceUtils.getBundle();
+    DialogMessage message = new DialogMessage("preferences.reset.dialog",
+        DialogMessage.Level.WARNING, 400, 150);
+    message.setShowOkButton(false);
+    message.setOwner(primaryStage);
 
+    // add button
+    Button cancel = new Button();
+    cancel.setText(resources.getString("button.cancel"));
+    cancel.getStyleClass().add("btn-default");
+    message.addButton(new DialogMessage.MessageButton(cancel, (stage, controller) -> {
+      if(stage != null)
+        stage.hide();
+    }));
+
+    // add confirm button
+    Button confirm = new Button();
+    confirm.setText(resources.getString("button.ok"));
+    confirm.getStyleClass().add("btn-primary");
+    message.addButton(new DialogMessage.MessageButton(confirm, (stage, controller) -> {
+      userPreferences.clear();
+      AppConfigurer.applyLocale(api, null);
+      AppConfigurer.applyUserPreferences(userPreferences);
+      if(stage != null)
+        stage.close();
+      if (primaryStage != null)
+        primaryStage.close();
+    }));
+
+    showDialog(api, message, true);
+  }
+
+  /// DIALOG FROM FXML
+
+  private static final Map<String, StandaloneUIController> BLOCKING_UI = new ConcurrentHashMap<>();
   public static void createDialogFromFXML(@NotNull String fxml, Stage owner, StageState state, Object... params) {
     try {
       if (BLOCKING_UI.get(fxml) != null) {
@@ -313,7 +311,16 @@ public class StandaloneDialog {
     }
   }
 
-  public static void showSslErrorDialog(@NotNull SSLCommunicationException ex, @NotNull PlatformAPI api) {
+  /// ERROR DIALOGS
+
+  /**
+   * SSL communication error
+   * @param ex      SSL error exception
+   * @param api     PlatformAPI
+   * @param message Currently processed queue message, for potential chance that user will
+   *                allow temporary trust to SSL chain, so we can replay the message seamlessly
+   */
+  public static void showSslErrorDialog(@NotNull SSLCommunicationException ex, @NotNull PlatformAPI api, Message message) {
     ResourceBundle resources = ResourceUtils.getBundle();
     // establish an error message
     String exceptionMsg = ex.getSSLException().getMessage();
@@ -349,7 +356,8 @@ public class StandaloneDialog {
     certs.setText(resources.getString("button.show.ssl.certificates"));
     certs.getStyleClass().add("btn-default");
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
-      X509Utils.openCertificateChain(errMsg.getOwner(), ex.getCertificateChain(), api, sslTrust.get());
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", errMsg.getOwner(),
+          StageState.NONBLOCKING, ex.getCertificateChain(), api, sslTrust.get(), message);
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
   }

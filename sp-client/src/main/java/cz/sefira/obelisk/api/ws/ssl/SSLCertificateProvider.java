@@ -10,7 +10,6 @@ package cz.sefira.obelisk.api.ws.ssl;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.storage.SSLCacheStorage;
 import cz.sefira.obelisk.util.DSSUtils;
@@ -30,9 +29,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -71,31 +68,6 @@ public class SSLCertificateProvider {
   public List<X509Certificate> getBySubject(X500Principal subjectName) {
     String canonicalSubjectName = subjectName.getName(X500Principal.CANONICAL);
     return certsBySubject.get(canonicalSubjectName);
-  }
-
-  public void refreshRoot() {
-    try {
-      KeyStore root;
-      if (OS.isWindows()) {
-        root = KeyStore.getInstance("Windows-ROOT");
-      } else if (OS.isLinux()) {
-        root = KeyStore.getInstance("KeychainStore");
-      } else {
-        return;
-      }
-      root.load(null, null);
-      Enumeration<String> trustAliases = root.aliases();
-      while (trustAliases.hasMoreElements()) {
-        String alias = trustAliases.nextElement();
-        Certificate ca = root.getCertificate(alias);
-        String sha1Alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, ca.getEncoded()));
-        if (!getTrustStore().containsAlias(sha1Alias)) {
-          X509Utils.addToTrust((X509Certificate) ca, getTrustStore(), this);
-        }
-      }
-    } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
-      logger.error(e.getMessage(), e);
-    }
   }
 
   public KeyStore getTrustStore() {
@@ -148,12 +120,10 @@ public class SSLCertificateProvider {
   public void addToRuntimeTruststore(List<X509Certificate> chain)
       throws KeyStoreException, CertificateEncodingException {
     for (X509Certificate certificate : chain) {
-      if (!getUnique().contains(certificate)) {
+      if (put(certificate)) {
         String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, certificate.getEncoded()));
         logger.info("Add certificate to runtime trust: " + certificate.getSubjectX500Principal().toString() + " (" + alias + ")");
-        if (put(certificate)) {
-          getTrustStore().setCertificateEntry(alias, certificate);
-        }
+        getTrustStore().setCertificateEntry(alias, certificate);
       }
     }
     unregisterSocketFactory();

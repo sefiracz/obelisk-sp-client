@@ -13,7 +13,6 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.api.Notification;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
-import cz.sefira.obelisk.util.annotation.NotNull;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import cz.sefira.obelisk.view.core.TimerService;

@@ -169,12 +169,12 @@ public class Dispatcher implements AppPlugin {
       notificationType = TrayIcon.MessageType.ERROR;
     } catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
-      StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api));
+      StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api, message));
       notificationProperty = "notification.event.fatal";
       notificationType = TrayIcon.MessageType.ERROR;
     } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
-      DialogMessage dialogMessage = null;
+      DialogMessage dialogMessage;
       Problem p = null;
       if ((p = HttpUtils.processProblem(e)) != null) {
         // SP-API error
@@ -200,8 +200,6 @@ public class Dispatcher implements AppPlugin {
         // close notification
         String messageText = ResourceUtils.getBundle().getString(notificationProperty);
         api.getSystray().pushNotification(new Notification(messageText, notificationType, true, 5));
-
-
       }
     }
   }

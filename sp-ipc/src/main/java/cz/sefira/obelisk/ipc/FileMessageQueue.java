@@ -55,6 +55,21 @@ public final class FileMessageQueue implements MessageQueue {
     }
   }
 
+  public String addMessage(Message message) {
+    try {
+      String messagesDir = getMessagesDirectory();
+      String filenameId = message.getId();
+      Path filename = Paths.get(messagesDir, filenameId + partExt);
+      try (OutputStream out = Files.newOutputStream(filename)) {
+        out.write(message.getPayload()); // TODO - encrypt message?
+      }
+      Files.move(filename, Paths.get(messagesDir, filenameId + fileExt), ATOMIC_MOVE);
+      return filenameId + fileExt;
+    } catch (Exception e) {
+      throw new RuntimeException(e); // TODO - handle error
+    }
+  }
+
   public Message getMessage() {
     try {
       String messagesDir = getMessagesDirectory();
