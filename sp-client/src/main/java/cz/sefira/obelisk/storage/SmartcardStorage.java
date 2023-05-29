@@ -13,10 +13,8 @@ package cz.sefira.obelisk.storage;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
-import one.microstream.persistence.types.Storer;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

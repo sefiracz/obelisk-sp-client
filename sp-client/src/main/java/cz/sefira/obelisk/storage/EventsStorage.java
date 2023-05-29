@@ -12,20 +12,13 @@ package cz.sefira.obelisk.storage;
 
 import cz.sefira.obelisk.api.Notification;
 import cz.sefira.obelisk.storage.model.EventsRoot;
-import one.microstream.X;
-import one.microstream.collections.EqHashTable;
-import one.microstream.collections.HashTable;
-import one.microstream.collections.types.XGettingTable;
-import one.microstream.persistence.internal.InquiringLegacyTypeMappingResultor;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
-import one.microstream.persistence.types.PersistenceRefactoringMappingProvider;
-import one.microstream.persistence.types.Storer;
 import one.microstream.storage.embedded.types.EmbeddedStorage;
 import one.microstream.storage.embedded.types.EmbeddedStorageFoundation;
-import one.microstream.storage.embedded.types.EmbeddedStorageManager;
-import one.microstream.typing.KeyValue;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -39,6 +32,8 @@ import java.util.List;
  * description
  */
 public class EventsStorage extends AbstractStorage {
+
+  private static final Logger logger = LoggerFactory.getLogger(EventsStorage.class.getName());
 
   private final EventsRoot eventsRoot = new EventsRoot();
 
@@ -55,6 +50,7 @@ public class EventsStorage extends AbstractStorage {
     if (!eventsRoot.isCloseFlag()) {
       eventsRoot.incrementSequence(); // increment at startup if sequence was not properly closed
     }
+    logger.info("Events size: "+eventsRoot.getNotifications().size());
     removeOldEvents();
   }
 
@@ -67,8 +63,11 @@ public class EventsStorage extends AbstractStorage {
         old.add(n);
       }
     }
-    eventsRoot.getNotifications().removeAll(old);
-    commitChange(eventsRoot);
+    if (!old.isEmpty()) {
+      logger.info("Removing old events: "+old.size());
+      eventsRoot.getNotifications().removeAll(old);
+      commitChange(eventsRoot);
+    }
   }
 
   public final synchronized void addNotification(Notification notification) {
