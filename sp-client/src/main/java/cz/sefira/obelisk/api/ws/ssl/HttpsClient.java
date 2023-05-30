@@ -115,6 +115,7 @@ public class HttpsClient {
     if (exceptionMsg.contains("unable to find valid certification path to requested target") &&
         sslChain != null && !sslChain.isEmpty()) {
       SSLCertificateProvider provider = api.getSslCertificateProvider();
+      logger.info("Reload system SSL certificates");
       X509Utils.loadSSLCertificates(provider.getTrustStore(), provider); // refresh trusted SSL certificates
       return completeCertificateChain(sslChain.get(sslChain.size()-1), sslChain);
     }
