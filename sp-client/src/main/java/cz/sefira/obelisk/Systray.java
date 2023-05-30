@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 /**
  * description
@@ -36,9 +37,13 @@ import java.util.ResourceBundle;
 public class Systray {
 
   private static final Logger logger = LoggerFactory.getLogger(Systray.class.getName());
+  private static final long DISPLAY_PERIOD = TimeUnit.SECONDS.toMillis(2);
 
   private final AbstractSystray systray;
   private final PlatformAPI api;
+
+  private long lastShown = 0;
+  private boolean showing = false;
 
   public Systray(PlatformAPI api) {
     this.api = api;
@@ -65,7 +70,7 @@ public class Systray {
 
   public void pushNotification(@NotNull Notification notification) {
     NotificationType showNotification = new UserPreferences(AppConfig.get()).getShowNotifications();
-    logger.info("Push notification: " + notification.getMessageText());
+    logger.info("Push notification ("+showNotification.name()+"): " + notification.getMessageText());
     // push notification into events
     api.getEventsStorage().addNotification(notification);
     // show notification
@@ -74,6 +79,10 @@ public class Systray {
         systray.pushNotification(notification);
         break;
       case INTEGRATED:
+        waitForLast(notification); // wait if last notification before closing wasn't displayed for longer period
+        // push notification
+        showing = true;
+        lastShown = System.currentTimeMillis();
         api.pushIntegratedNotification(notification);
         break;
       case OFF:
@@ -84,5 +93,18 @@ public class Systray {
 
   public void refreshLabels() {
     systray.refreshLabels();
+  }
+
+  private void waitForLast(Notification notification) {
+    long displayTime = System.currentTimeMillis() - lastShown;
+    if (showing && notification.isClose() && (displayTime < DISPLAY_PERIOD)) {
+      try {
+        showing = false;
+        Thread.sleep(DISPLAY_PERIOD - displayTime); // show last notification for longer
+
+      } catch (InterruptedException e) {
+        logger.error(e.getMessage(), e);
+      }
+    }
   }
 }
