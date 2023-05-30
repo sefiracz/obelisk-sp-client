@@ -75,7 +75,6 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   private Notification notification;
   private TimerService service;
-  private long lastShown = 0;
 
   @Override
   public void init(Stage stage, Object... params) {
@@ -102,7 +101,6 @@ public class NotificationController extends ControllerCore implements PropertyCh
           message.setText(text);
           message.setTooltip(new Tooltip(text));
           timestamp.setText(TextUtils.localizedDatetime(currentNotification.getDate(), true));
-          lastShown = System.currentTimeMillis();
           // cancel if notification is in closing process and we have new notification
           if (service != null) {
             service.cancel();
@@ -165,19 +163,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    asyncTask(() -> {
-      Notification pushedNotification = (Notification) evt.getNewValue();
-      // keep last notification for longer if next this is closing one, and it wasn't displayed for too long yet
-      long displayTime = System.currentTimeMillis() - lastShown;
-      if (stage.isShowing() && pushedNotification.isClose() && (displayTime < 2000)) {
-        try {
-          Thread.sleep(2000 - displayTime); // show last notification for longer (at least 2s)
-        } catch (InterruptedException e) {
-          logger.error(e.getMessage(), e);
-        }
-      }
-      notification = pushedNotification;
-    }, true);
+    asyncTask(() -> notification = (Notification) evt.getNewValue(), true);
   }
 
   public TimerService createHideTimer(long seconds) {
