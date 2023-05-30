@@ -29,12 +29,12 @@ public class LogUtils {
     logger.info("Log level: " + logLevel);
   }
 
-  public static class TimeMeasure implements AutoCloseable {
+  public static class Time implements AutoCloseable {
 
     private final long start;
     private final String logText;
 
-    public TimeMeasure(String logText) {
+    public Time(String logText) {
       this.start = System.currentTimeMillis();
       this.logText = logText;
     }
