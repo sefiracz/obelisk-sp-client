@@ -60,8 +60,10 @@ public class UserPreferences {
     try {
       final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
       cacheDuration = Integer.parseInt(cacheDurationValue);
-      if (cacheDuration < 0 || cacheDuration > 30) {
+      if (cacheDuration < 0) {
         cacheDuration = 0;
+      } else if (cacheDuration > 30) {
+        cacheDuration = 30;
       }
     } catch (NumberFormatException e) {
       cacheDuration = 0;
