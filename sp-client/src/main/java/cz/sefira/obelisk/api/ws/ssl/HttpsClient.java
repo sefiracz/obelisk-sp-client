@@ -53,13 +53,30 @@ public class HttpsClient {
     this.api = api;
   }
 
+  /**
+   * Execute HTTP request
+   * @param request HTTP request
+   * @param clientBuilder Request parameters
+   * @return Http response
+   * @throws GeneralSecurityException
+   * @throws IOException
+   * @throws URISyntaxException
+   */
   public HttpResponse execute(ClassicHttpRequest request, HttpClientBuilder clientBuilder)
       throws GeneralSecurityException, IOException, URISyntaxException {
-    return execute(request, clientBuilder, true);
+    return execute(request, clientBuilder, true, true);
   }
 
-  private HttpResponse execute(ClassicHttpRequest request, HttpClientBuilder clientBuilder, boolean allowAIA)
-      throws GeneralSecurityException, IOException, URISyntaxException {
+  /**
+   * Execute HTTP request
+   * @param request HTTP request
+   * @param clientBuilder Request parameters
+   * @param allowAIA Allow using AIA to try and complete SSL certificate chain till trusted anchors
+   * @param reloadSSL Reload SSL certificate stores to check if new trusted anchors didn't appear
+   * @return Http response
+   */
+  private HttpResponse execute(ClassicHttpRequest request, HttpClientBuilder clientBuilder, boolean allowAIA,
+                               boolean reloadSSL) throws GeneralSecurityException, IOException, URISyntaxException {
     if (api.getSslCertificateProvider() != null) {
       ConnectionConfig.Builder config = ConnectionConfig.custom()
           .setConnectTimeout(5, TimeUnit.SECONDS)
@@ -88,7 +105,13 @@ public class HttpsClient {
         }
       });
     } catch (SSLException e) {
-      List<X509Certificate> sslChain = api.getSslCertificateProvider().getCertificateChain();
+      SSLCertificateProvider provider = api.getSslCertificateProvider();
+      List<X509Certificate> sslChain = provider.getCertificateChain();
+      if (reloadSSL && sslTrustIssue(e)) {
+        logger.info("Reload system SSL certificates");
+        X509Utils.loadSSLCertificates(provider.getTrustStore(), provider); // refresh trusted SSL certificates
+        return execute(request, clientBuilder, true, false);
+      }
       // if AIA is allowed
       if (allowAIA && processSSLException(e, sslChain)) {
         // we found trusted chain
@@ -98,9 +121,9 @@ public class HttpsClient {
           subChain.add(sslChain.get(i));
         }
         // add to cache and trusted store
-        api.getSslCertificateProvider().addTrustedChain(subChain, true);
+        provider.addTrustedChain(subChain, true);
         // try again with new completed trust chain
-        return execute(request, clientBuilder, false);
+        return execute(request, clientBuilder, false, false);
       } else {
         throw new SSLCommunicationException(e, request.getUri().getHost(), sslChain);
       }
@@ -110,18 +133,11 @@ public class HttpsClient {
   }
 
   private boolean processSSLException(SSLException e, List<X509Certificate> sslChain) {
-    String exceptionMsg = e.getMessage();
-    exceptionMsg = exceptionMsg != null ? exceptionMsg.toLowerCase() : "";
-    if (exceptionMsg.contains("unable to find valid certification path to requested target") &&
-        sslChain != null && !sslChain.isEmpty()) {
-      SSLCertificateProvider provider = api.getSslCertificateProvider();
-      logger.info("Reload system SSL certificates");
-      X509Utils.loadSSLCertificates(provider.getTrustStore(), provider); // refresh trusted SSL certificates
+    if (sslTrustIssue(e) && sslChain != null && !sslChain.isEmpty()) {
       return completeCertificateChain(sslChain.get(sslChain.size()-1), sslChain);
     }
     return false;
   }
-
 
   private boolean completeCertificateChain(X509Certificate subject, List<X509Certificate> certificates) {
     if (X509Utils.isSelfSigned(subject)) {
@@ -137,7 +153,7 @@ public class HttpsClient {
       try {
         logger.info("Accessing AIA URL: "+url);
         ClassicHttpRequest request = new HttpUriRequestBase("GET", new URIBuilder(url).build());
-        HttpResponse response = execute(request, HttpClientBuilder.create(), false);
+        HttpResponse response = execute(request, HttpClientBuilder.create(), false, false);
         if (response == null || response.getContent() == null)
           continue; // no certificate downloaded
         X509Certificate issuer = X509Utils.getCertificateFromBytes(response.getContent());
@@ -167,6 +183,12 @@ public class HttpsClient {
       }
     }
     return false;
+  }
+
+  private boolean sslTrustIssue(SSLException e) {
+    String exceptionMsg = e.getMessage();
+    exceptionMsg = exceptionMsg != null ? exceptionMsg.toLowerCase() : "";
+    return  exceptionMsg.contains("unable to find valid certification path to requested target");
   }
 
 }
