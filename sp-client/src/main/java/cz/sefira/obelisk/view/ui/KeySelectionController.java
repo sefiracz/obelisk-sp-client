@@ -1,13 +1,13 @@
 /**
  * © Nowina Solutions, 2015-2015
  * © SEFIRA spol. s r.o., 2020-2021
- *
+ * <p>
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
  * Vous pouvez obtenir une copie de la Licence à l’adresse suivante:
- *
+ * <p>
  * http://ec.europa.eu/idabc/eupl5
- *
+ * <p>
  * Sauf obligation légale ou contractuelle écrite, le logiciel distribué sous la Licence est distribué «en l’état»,
  * SANS GARANTIES OU CONDITIONS QUELLES QU’ELLES SOIENT, expresses ou implicites.
  * Consultez la Licence pour les autorisations et les restrictions linguistiques spécifiques relevant de la Licence.
@@ -51,141 +51,151 @@ import java.util.ResourceBundle;
 
 public class KeySelectionController extends AbstractUIOperationController<DSSPrivateKeyEntry> implements Initializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeySelectionController.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(KeySelectionController.class.getName());
 
-    private static final String ICON_UNLOCKED = "/images/key.png";
-    private static final String ICON_QC = "/images/qc.png";
-    private static final String ICON_QCSD = "/images/qscd.png";
+  private static final String ICON_UNLOCKED = "/images/key.png";
+  private static final String ICON_QC = "/images/qc.png";
+  private static final String ICON_QCSD = "/images/qscd.png";
 
-    @FXML
-    private BorderPane borderPane;
+  @FXML
+  private BorderPane borderPane;
 
-    @FXML
-    private Button select;
+  @FXML
+  private Button select;
 
-    @FXML
-    private Button cancel;
+  @FXML
+  private Button cancel;
 
-    @FXML
-    private Button back;
+  @FXML
+  private Button back;
 
-    @FXML
-    private ListView<DSSPrivateKeyEntry> listView;
+  @FXML
+  private ListView<DSSPrivateKeyEntry> listView;
 
-    private ResourceBundle resources;
+  private ResourceBundle resources;
 
-    @Override
-    public void initialize(final URL location, final ResourceBundle resources) {
-        this.resources = resources;
-        this.select.disableProperty().bind(this.listView.getSelectionModel().selectedItemProperty().isNull());
-        this.select.setOnAction((event) -> {
-            final DSSPrivateKeyEntry selectedItem = this.listView.getSelectionModel().getSelectedItem();
-            logger.info("Selected item " + selectedItem);
-            this.signalEnd(selectedItem);
-        });
-        this.cancel.setOnAction(e -> this.signalUserCancel());
-        this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
+  @Override
+  public void initialize(final URL location, final ResourceBundle resources) {
+    this.resources = resources;
+    this.select.disableProperty().bind(this.listView.getSelectionModel().selectedItemProperty().isNull());
+    this.select.setOnAction((event) -> selectItem());
+    this.cancel.setOnAction(e -> this.signalUserCancel());
+    this.back.setOnAction(e -> this.signalEndWithStatus(CoreOperationStatus.BACK));
 
-        this.listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        this.listView.setCellFactory(param -> {
-            return new ListCell<DSSPrivateKeyEntry>() {
+    this.listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+    this.listView.setCellFactory(param -> {
+      ListCell<DSSPrivateKeyEntry> cell = new ListCell<>() {
 
-                @Override
-                protected void updateItem(final DSSPrivateKeyEntry k, final boolean bln) {
-                    super.updateItem(k, bln);
-                    if (k != null) {
-                        final CertificateToken certificateToken = k.getCertificateToken();
+        @Override
+        protected void updateItem(final DSSPrivateKeyEntry k, final boolean bln) {
+          super.updateItem(k, bln);
+          if (k != null) {
+            final CertificateToken certificateToken = k.getCertificateToken();
 
-                        final Label lSubject = new Label();
-                        lSubject.setText(DSSASN1Utils.getSubjectCommonName(certificateToken));
-                        lSubject.setStyle("-fx-font-weight: bold;");
+            final Label lSubject = new Label();
+            lSubject.setText(DSSASN1Utils.getSubjectCommonName(certificateToken));
+            lSubject.setStyle("-fx-font-weight: bold;");
 
-                        final Label lIssuer = new Label();
-                        lIssuer.setText(MessageFormat.format(resources.getString("key.selection.issuer"),
-                                DSSASN1Utils.get(certificateToken.getIssuerX500Principal()).get("2.5.4.3")));
+            final Label lIssuer = new Label();
+            lIssuer.setText(MessageFormat.format(resources.getString("key.selection.issuer"),
+                DSSASN1Utils.get(certificateToken.getIssuerX500Principal()).get("2.5.4.3")));
 
-                        final Label lUsage = new Label();
-                        lUsage.setText(MessageFormat.format(resources.getString("key.selection.keyusage"),
-                            X509Utils.createKeyUsageString(certificateToken.getCertificate(), resources)));
+            final Label lUsage = new Label();
+            lUsage.setText(MessageFormat.format(resources.getString("key.selection.keyusage"),
+                X509Utils.createKeyUsageString(certificateToken.getCertificate(), resources)));
 
-                        final Label lValidity = new Label();
-                        final SimpleDateFormat format = new SimpleDateFormat("dd MMMMMM yyyy");
-                        final String startDate = format.format(certificateToken.getNotBefore());
-                        final String endDate = format.format(certificateToken.getNotAfter());
-                        lValidity.setText(
-                                MessageFormat.format(resources.getString("key.selection.validity"), startDate, endDate));
+            final Label lValidity = new Label();
+            final SimpleDateFormat format = new SimpleDateFormat("dd MMMMMM yyyy");
+            final String startDate = format.format(certificateToken.getNotBefore());
+            final String endDate = format.format(certificateToken.getNotAfter());
+            lValidity.setText(
+                MessageFormat.format(resources.getString("key.selection.validity"), startDate, endDate));
 
-                        final Hyperlink link = new Hyperlink(resources.getString("key.selection.certificate.open"));
+            final Hyperlink link = new Hyperlink(resources.getString("key.selection.certificate.open"));
 
-                        link.setOnAction(actionEvent -> X509Utils.openPEMCertificate(getDisplay().getStage(true), X509Utils.convertToPEM(certificateToken)));
+            link.setOnAction(actionEvent -> X509Utils.openPEMCertificate(getDisplay().getStage(true), X509Utils.convertToPEM(certificateToken)));
 
-                        final VBox vBox = new VBox(lSubject, lIssuer, lUsage, lValidity, link);
+            final VBox vBox = new VBox(lSubject, lIssuer, lUsage, lValidity, link);
 
-                        VBox vBoxLeft;
-                        try {
-                            vBoxLeft = new VBox(KeySelectionController.this.getQCIcons(certificateToken).stream().toArray(ImageView[]::new));
-                        } catch (final IOException e) {
-                            logger.error(e.getMessage(), e);
-                            vBoxLeft = new VBox();
-                        }
-                        vBoxLeft.setPadding(new Insets(0, 10, 0, 0));
-                        vBoxLeft.setAlignment(Pos.CENTER);
+            VBox vBoxLeft;
+            try {
+              vBoxLeft = new VBox(KeySelectionController.this.getQCIcons(certificateToken).stream().toArray(ImageView[]::new));
+            } catch (final IOException e) {
+              logger.error(e.getMessage(), e);
+              vBoxLeft = new VBox();
+            }
+            vBoxLeft.setPadding(new Insets(0, 10, 0, 0));
+            vBoxLeft.setAlignment(Pos.CENTER);
 
-                        final HBox hBox = new HBox(vBoxLeft, vBox);
-                        this.setGraphic(hBox);
+            final HBox hBox = new HBox(vBoxLeft, vBox);
+            this.setGraphic(hBox);
 
-                        Tooltip tooltip = new Tooltip(getQCInfo(certificateToken));
-                        tooltip.setShowDelay(new Duration(50));
-                        this.setTooltip(tooltip);
-                    }
-                }
-
-            };
-        });
-    }
-
-    private List<ImageView> getQCIcons(final CertificateToken certificateToken) throws IOException {
-        final List<ImageView> qcIconsImages = new ArrayList<>();
-        final List<String> qcStatements = DSSASN1Utils.getQCStatementsIdList(certificateToken);
-        if (qcStatements.contains(QCStatementOids.QC_COMPLIANCE.getOid())) {
-            qcIconsImages.add(this.fetchImage(ICON_QC));
+            Tooltip tooltip = new Tooltip(getQCInfo(certificateToken));
+            tooltip.setShowDelay(new Duration(50));
+            this.setTooltip(tooltip);
+          }
         }
-        if (qcStatements.contains(QCStatementOids.QC_SSCD.getOid())) {
-            qcIconsImages.add(this.fetchImage(ICON_QCSD));
-        }
-        if (qcIconsImages.isEmpty()) {
-            qcIconsImages.add(this.fetchImage(ICON_UNLOCKED));
-        }
-        return qcIconsImages;
-    }
+      };
 
-    private String getQCInfo(final CertificateToken certificateToken) {
-        String tooltip = MessageFormat.format(resources.getString("certificates.status.noqc"), new Object[]{});
-        final List<String> qcStatements = DSSASN1Utils.getQCStatementsIdList(certificateToken);
-        if (qcStatements.contains(QCStatementOids.QC_COMPLIANCE.getOid())) {
-            tooltip = MessageFormat.format(resources.getString("certificates.status.qc"), new Object[]{});
+      cell.setOnMouseClicked(event -> {
+        if (event.getClickCount() == 2 && (!cell.isEmpty())) {
+          selectItem();
         }
-        if (qcStatements.contains(QCStatementOids.QC_SSCD.getOid())) {
-            tooltip = MessageFormat.format(resources.getString("certificates.status.qscd"), new Object[]{});
-        }
-        return tooltip;
-    }
+      });
+      return cell;
+    });
+  }
 
-    private ImageView fetchImage(final String imagePath) throws IOException {
-        return new ImageView(new Image(this.getClass().getResource(imagePath).openStream()));
+  private List<ImageView> getQCIcons(final CertificateToken certificateToken) throws IOException {
+    final List<ImageView> qcIconsImages = new ArrayList<>();
+    final List<String> qcStatements = DSSASN1Utils.getQCStatementsIdList(certificateToken);
+    if (qcStatements.contains(QCStatementOids.QC_COMPLIANCE.getOid())) {
+      qcIconsImages.add(this.fetchImage(ICON_QC));
     }
+    if (qcStatements.contains(QCStatementOids.QC_SSCD.getOid())) {
+      qcIconsImages.add(this.fetchImage(ICON_QCSD));
+    }
+    if (qcIconsImages.isEmpty()) {
+      qcIconsImages.add(this.fetchImage(ICON_UNLOCKED));
+    }
+    return qcIconsImages;
+  }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void init(final Object... params) {
-        StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "key.selection.title");
-        final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
-        keys.removeIf(k -> k instanceof EmptyKeyEntry);
-        final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
-        this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
-            new Object[]{})));
-        this.listView.setItems(items);
-        borderPane.setPrefHeight(keys.size() > 2 ? 390 : 320);
+  private String getQCInfo(final CertificateToken certificateToken) {
+    String tooltip = MessageFormat.format(resources.getString("certificates.status.noqc"), new Object[]{});
+    final List<String> qcStatements = DSSASN1Utils.getQCStatementsIdList(certificateToken);
+    if (qcStatements.contains(QCStatementOids.QC_COMPLIANCE.getOid())) {
+      tooltip = MessageFormat.format(resources.getString("certificates.status.qc"), new Object[]{});
     }
+    if (qcStatements.contains(QCStatementOids.QC_SSCD.getOid())) {
+      tooltip = MessageFormat.format(resources.getString("certificates.status.qscd"), new Object[]{});
+    }
+    return tooltip;
+  }
+
+  private ImageView fetchImage(final String imagePath) throws IOException {
+    return new ImageView(new Image(this.getClass().getResource(imagePath).openStream()));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void init(final Object... params) {
+    StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "key.selection.title");
+    final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
+    keys.removeIf(k -> k instanceof EmptyKeyEntry);
+    final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
+    this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
+        new Object[]{})));
+    this.listView.setItems(items);
+    borderPane.setPrefHeight(keys.size() > 2 ? 390 : 320);
+  }
+
+  private void selectItem() {
+    final DSSPrivateKeyEntry selectedItem = this.listView.getSelectionModel().getSelectedItem();
+    if (selectedItem != null) {
+      logger.info("Selected item " + selectedItem);
+      this.signalEnd(selectedItem);
+    }
+  }
 
 }
