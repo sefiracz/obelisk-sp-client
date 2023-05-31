@@ -15,9 +15,11 @@ import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.storage.SSLCacheStorage;
 import cz.sefira.obelisk.storage.model.CertificateChain;
 import cz.sefira.obelisk.util.X509Utils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -37,13 +39,23 @@ public class SSLPlugin implements AppPlugin {
     try {
       // load application local truststore
       KeyStore truststore = KeyStore.getInstance("JKS");
-      try (InputStream in = SSLPlugin.class.getResourceAsStream("cacerts.jks")) {
-        truststore.load(in, "zx9h6$Cs39CV7DSf#@6d".toCharArray());
+      try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("cacerts.jks")) {
+        InputStream byteStream = null;
+        if (in != null) {
+          byte[] bytes = IOUtils.toByteArray(in);
+          byteStream = new ByteArrayInputStream(bytes);
+        } else {
+          logger.error("Unable to load cacerts.jks");
+        }
+        truststore.load(byteStream, "zx9h6$Cs39CV7DSf#@6d".toCharArray());
       }
+      int count = 0;
       Enumeration<String> aliases = truststore.aliases();
       while (aliases.hasMoreElements()) {
         sslProvider.put((X509Certificate) truststore.getCertificate(aliases.nextElement()));
+        count++;
       }
+      logger.info("Loaded "+count+" SSL certificates from embedded truststore");
 
       // load SSL certificates from OS specific stores
       X509Utils.loadSSLCertificates(truststore, sslProvider);
@@ -71,7 +83,7 @@ public class SSLPlugin implements AppPlugin {
       }
 
       api.setSslCertificateProvider(sslProvider);
-      logger.info("Added trusted SSL certificates: "+sslProvider.getUnique().size());
+      logger.info("Trusted SSL certificates in total: "+sslProvider.getUnique().size());
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       return List.of(new InitErrorMessage(this.getClass().getSimpleName(), "error.install.ssl.cert.message", e));

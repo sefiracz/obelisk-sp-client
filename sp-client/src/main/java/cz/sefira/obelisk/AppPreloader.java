@@ -167,7 +167,7 @@ public class AppPreloader extends Preloader {
 				Throwable t = error.getCause();
 				String title = resources.getString("preloader.error")+" - "+error.getLocation();
 				// Display dialog
-				DialogMessage errMsg = new DialogMessage(error.getDetails(), DialogMessage.Level.ERROR);
+				DialogMessage errMsg = new DialogMessage(error.getDetails(), DialogMessage.Level.ERROR, 450, 175);
 				StandaloneDialog.showErrorDialog(errMsg, title, t);
 			} catch (Exception e) {
 				final Alert alert = new Alert(Alert.AlertType.ERROR);

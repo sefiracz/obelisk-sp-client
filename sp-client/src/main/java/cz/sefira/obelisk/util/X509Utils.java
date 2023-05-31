@@ -182,6 +182,7 @@ public class X509Utils {
   }
 
   public static void loadSSLCertificates(KeyStore truststore, SSLCertificateProvider provider) {
+    int count = 0;
     try  (LogUtils.Time total = new LogUtils.Time("SSL certificates loaded in total time")) {
       KeyStore systemStore = null;
 
@@ -191,7 +192,7 @@ public class X509Utils {
         try (LogUtils.Time rootTime = new LogUtils.Time("Windows-ROOT store loaded in")) {
           List<Certificate> caList = MSCryptoStore.getCertificates(StoreType.ROOT);
           for (Certificate ca : caList) {
-            X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+            count += X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
           }
         } catch (Exception e) {
           logger.error("Native MSCAPI-ROOT failed: "+e.getMessage(), e);
@@ -203,7 +204,7 @@ public class X509Utils {
         try (LogUtils.Time caTime = new LogUtils.Time("Windows-CA store loaded in")) {
           List<Certificate> caList = MSCryptoStore.getCertificates(StoreType.CA);
           for (Certificate ca : caList) {
-            X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+            count += X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
           }
         } catch (Exception e) {
           logger.error("Native MSCAPI-CA failed: "+e.getMessage(), e);
@@ -215,7 +216,7 @@ public class X509Utils {
         systemStore = KeyStore.getInstance("KeychainStore");
         List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
         for (X509Certificate certificate : caList) {
-          X509Utils.addToTrust(certificate, truststore, provider);
+          count += X509Utils.addToTrust(certificate, truststore, provider);
         }
       }
 
@@ -227,7 +228,7 @@ public class X509Utils {
           for (Path certPath : certificates) {
             try (InputStream in = Files.newInputStream(certPath)) {
               X509Certificate certificate = X509Utils.getCertificateFromStream(in);
-              X509Utils.addToTrust(certificate, truststore, provider);
+              count += X509Utils.addToTrust(certificate, truststore, provider);
             } catch (Exception e) {
               logger.error(e.getMessage());
             }
@@ -245,21 +246,25 @@ public class X509Utils {
           while (trustAliases.hasMoreElements()) {
             String alias = trustAliases.nextElement();
             Certificate ca = systemStore.getCertificate(alias);
-            X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+            count += X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
           }
         }
       }
     } catch (Exception e) {
       logger.error("Unable to load SSL certificates from OS: "+e.getMessage(), e);
+    } finally {
+      logger.info("Added "+count+" new SSL certificates to trust store");
     }
   }
 
-  private static void addToTrust(X509Certificate cert, KeyStore truststore, SSLCertificateProvider provider)
+  private static int addToTrust(X509Certificate cert, KeyStore truststore, SSLCertificateProvider provider)
       throws KeyStoreException, CertificateEncodingException {
     if (provider.put(cert)) {
       String alias = Hex.encodeHexString(DSSUtils.digest(DigestAlgorithm.SHA1, cert.getEncoded()));
       truststore.setCertificateEntry(alias, cert);
+      return 1;
     }
+    return 0;
   }
 
   private static List<X509Certificate> loadMacOSSystemRoot() {
