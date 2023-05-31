@@ -121,7 +121,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 		// double-click show certificate
 		keystoresTable.setRowFactory(tv -> {
 
-		 TableRow<AbstractProduct> row = new TableRow<AbstractProduct>() {
+		 TableRow<AbstractProduct> row = new TableRow<>() {
 
 				@Override
 				protected void updateItem(AbstractProduct item, boolean empty) {
