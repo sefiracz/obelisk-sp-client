@@ -213,11 +213,9 @@ public class X509Utils {
       // load up macOS trusted certificates
       if (OS.isMacOS()) {
         systemStore = KeyStore.getInstance("KeychainStore");
-        try (LogUtils.Time macOsTime = new LogUtils.Time("macOS system root loaded in")) {
-          List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
-          for (X509Certificate certificate : caList) {
-            X509Utils.addToTrust(certificate, truststore, provider);
-          }
+        List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
+        for (X509Certificate certificate : caList) {
+          X509Utils.addToTrust(certificate, truststore, provider);
         }
       }
 
@@ -241,7 +239,7 @@ public class X509Utils {
 
       // load SSL certificates from system store (Win/Mac)
       if (systemStore != null) {
-        try (LogUtils.Time systemTime = new LogUtils.Time("System certificate store loaded in")) {
+        try (LogUtils.Time systemTime = new LogUtils.Time("System truststore loaded in")) {
           systemStore.load(null, null);
           Enumeration<String> trustAliases = systemStore.aliases();
           while (trustAliases.hasMoreElements()) {
@@ -266,7 +264,7 @@ public class X509Utils {
 
   private static List<X509Certificate> loadMacOSSystemRoot() {
     List<X509Certificate> certificates = new ArrayList<>();
-    try {
+    try (LogUtils.Time macOsTime = new LogUtils.Time("macOS system root loaded in")) {
       List<String> base64Certs = new ArrayList<>();
       StringBuilder sb = new StringBuilder();
       ProcessBuilder builder = new ProcessBuilder();
@@ -295,7 +293,7 @@ public class X509Utils {
         }
       }
     } catch (Exception e) {
-      logger.error("Unable to read MacOS System root certificates: "+e.getMessage(), e);
+      logger.error("Unable to read macOS system root certificates: "+e.getMessage(), e);
     }
     return certificates;
   }
