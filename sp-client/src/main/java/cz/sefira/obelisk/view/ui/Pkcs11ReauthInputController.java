@@ -23,10 +23,11 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -80,7 +81,7 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
   public void initialize(URL location, ResourceBundle resources) {
     EventHandler<ActionEvent> handler = event -> {
       GuardedString reauth = new GuardedString(password.getText().toCharArray());
-      UserPreferences prefs = new UserPreferences(appConfig);
+      UserPreferences prefs = PreferencesFactory.getInstance(appConfig);
       boolean cacheEnabled = prefs.getCacheDuration() != null && prefs.getCacheDuration() > 0;
       if(storeInputCheckbox.selectedProperty().getValue() && cacheEnabled) {
         SessionManager.getManager().setSecret(reauth, prefs.getCacheDuration());
@@ -113,7 +114,7 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
   }
 
   private int setCacheCheckbox() {
-    UserPreferences prefs = new UserPreferences(appConfig);
+    UserPreferences prefs = PreferencesFactory.getInstance(appConfig);
     int duration = getCacheDuration(prefs);
     if (cacheDuration == null || cacheDuration != duration) {
       boolean enabled = isCacheEnabled(prefs);

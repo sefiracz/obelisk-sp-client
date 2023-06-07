@@ -14,9 +14,10 @@
  */
 package cz.sefira.obelisk.view.ui;
 
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import cz.sefira.obelisk.view.core.TimerService;
@@ -75,7 +76,7 @@ public class MessageController extends AbstractUIOperationController<Void> imple
 		if (ok != null) {
 			ok.setOnAction(e -> {
         if(doNotShowCheckbox.selectedProperty().getValue()) {
-          UserPreferences prefs = new UserPreferences(AppConfig.get());
+          UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
 			  signalEnd(null);

@@ -14,6 +14,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.Notification;
 import cz.sefira.obelisk.api.NotificationType;
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.systray.AWTSystray;
 import cz.sefira.obelisk.systray.AbstractSystray;
 import cz.sefira.obelisk.systray.NoSystray;
@@ -69,7 +70,7 @@ public class Systray {
   }
 
   public void pushNotification(@NotNull Notification notification) {
-    NotificationType showNotification = new UserPreferences(AppConfig.get()).getShowNotifications();
+    NotificationType showNotification = PreferencesFactory.getInstance(AppConfig.get()).getShowNotifications();
     logger.info("Push notification ("+showNotification.name()+"): " + notification.getMessageText());
     // push notification into events
     api.getEventsStorage().addNotification(notification);

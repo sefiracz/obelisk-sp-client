@@ -28,6 +28,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.ipc.MessageQueue;
 import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.process.*;
 import cz.sefira.obelisk.util.LogUtils;
 import cz.sefira.obelisk.util.TextUtils;
@@ -53,7 +54,7 @@ public class AppLauncher {
       // load config
       appConfig = AppConfig.get();
       // logging mode (debug / info)
-      Level logLevel = new UserPreferences(appConfig).isDebugMode() ? Level.DEBUG : Level.INFO;
+      Level logLevel = PreferencesFactory.getInstance(appConfig).isDebugMode() ? Level.DEBUG : Level.INFO;
       LogUtils.setLogLevel(logLevel);
       // add message to the queue
       if (args.length > 0) {

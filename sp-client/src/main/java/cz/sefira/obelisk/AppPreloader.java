@@ -17,6 +17,7 @@ package cz.sefira.obelisk;
 import com.sun.javafx.application.LauncherImpl;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -72,7 +73,7 @@ public class AppPreloader extends Preloader {
 			StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
 							DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
 			System.exit(1);
-		} else if (new UserPreferences(AppConfig.get()).isSplashScreen()) {
+		} else if (PreferencesFactory.getInstance(AppConfig.get()).isSplashScreen()) {
 			showSplashScreen(primaryStage);
 		}
 	}

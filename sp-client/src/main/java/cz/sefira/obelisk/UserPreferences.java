@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class UserPreferences {
+class UserPreferences {
 
   private static final String LANGUAGE = "cz.sefira.obelisk.signingportal.language";
   private static final String SPLASH_SCREEN = "cz.sefira.obelisk.signingportal.splashscreen";

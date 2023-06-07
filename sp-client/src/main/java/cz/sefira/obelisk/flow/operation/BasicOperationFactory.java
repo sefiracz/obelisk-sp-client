@@ -14,10 +14,11 @@
  */
 package cz.sefira.obelisk.flow.operation;
 
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.flow.Operation;
 import cz.sefira.obelisk.api.flow.OperationFactory;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
 import cz.sefira.obelisk.view.core.UIDisplay;
@@ -60,7 +61,7 @@ public class BasicOperationFactory implements OperationFactory {
   @Override
   @SuppressWarnings("unchecked")
   public void getMessageDialog(PlatformAPI api, DialogMessage message, boolean blockingUI) {
-    UserPreferences prefs = new UserPreferences(AppConfig.get());
+    UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
     String dialogId = message.getDialogId();
     if(dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
       return; // do not display message dialog
