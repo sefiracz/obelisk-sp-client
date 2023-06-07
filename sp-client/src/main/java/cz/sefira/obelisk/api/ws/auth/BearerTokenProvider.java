@@ -78,7 +78,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
       return AUTH_TYPE + currentToken.getAccessToken();
     }
     else {
-      throw new CommunicationExpirationException("Authentication credentials expired and cannot be refreshed");
+      throw new AuthExpirationException("Authentication credentials expired and cannot be refreshed");
     }
   }
 
@@ -113,7 +113,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
 
   private void actionToken() throws URISyntaxException, GeneralSecurityException, IOException {
     URIBuilder uriBuilder = new URIBuilder(magicLink);
-    ClassicHttpRequest request = new HttpUriRequestBase("GET", uriBuilder.build());
+    HttpUriRequestBase request = new HttpUriRequestBase("GET", uriBuilder.build());
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     HttpResponse response = client.execute(request, clientBuilder);
     int responseCode = response.getCode();
@@ -143,7 +143,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
   private BearerToken token(List<NameValuePair> params) throws URISyntaxException, GeneralSecurityException, IOException {
     URIBuilder uriBuilder = new URIBuilder(authServerUrl);
     uriBuilder.appendPath(AppConfig.get().getTokenEndpoint()); // /protocol/openid-connect/token
-    ClassicHttpRequest request = new HttpUriRequestBase("POST", uriBuilder.build());
+    HttpUriRequestBase request = new HttpUriRequestBase("POST", uriBuilder.build());
     request.setEntity(new UrlEncodedFormEntity(params));
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     HttpResponse response = client.execute(request, clientBuilder);

@@ -356,8 +356,10 @@ public class StandaloneDialog {
     certs.setText(resources.getString("button.show.ssl.certificates"));
     certs.getStyleClass().add("btn-default");
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", errMsg.getOwner(),
-          StageState.NONBLOCKING, ex.getCertificateChain(), api, sslTrust.get(), message);
+      if (ex.getCertificateChain() != null) {
+        StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", errMsg.getOwner(),
+            StageState.NONBLOCKING, ex.getCertificateChain(), api, sslTrust.get(), message);
+      }
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
   }

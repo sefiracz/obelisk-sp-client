@@ -15,16 +15,19 @@ import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.auth.CommunicationExpirationException;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.util.X509Utils;
+import cz.sefira.obelisk.view.BusyIndicator;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.RequestFailedException;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,8 @@ import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.apache.hc.core5.http.HttpStatus.*;
 
@@ -46,6 +50,8 @@ import static org.apache.hc.core5.http.HttpStatus.*;
 public class HttpsClient {
 
   private static final Logger logger = LoggerFactory.getLogger(HttpsClient.class.getName());
+  private static final Timeout CONNECT_TIMEOUT = Timeout.ofMilliseconds(2_500);
+  private static final Timeout SOCKET_TIMEOUT = Timeout.ofMilliseconds(7_500); // TODO - auth vs getCert vs sign ?
 
   private final PlatformAPI api;
 
@@ -60,9 +66,8 @@ public class HttpsClient {
    * @return Http response
    * @throws GeneralSecurityException
    * @throws IOException
-   * @throws URISyntaxException
    */
-  public HttpResponse execute(ClassicHttpRequest request, HttpClientBuilder clientBuilder)
+  public HttpResponse execute(HttpUriRequestBase request, HttpClientBuilder clientBuilder)
       throws GeneralSecurityException, IOException, URISyntaxException {
     return execute(request, clientBuilder, true, true);
   }
@@ -75,18 +80,22 @@ public class HttpsClient {
    * @param reloadSSL Reload SSL certificate stores to check if new trusted anchors didn't appear
    * @return Http response
    */
-  private HttpResponse execute(ClassicHttpRequest request, HttpClientBuilder clientBuilder, boolean allowAIA,
+  private HttpResponse execute(HttpUriRequestBase request, HttpClientBuilder clientBuilder, boolean allowAIA,
                                boolean reloadSSL) throws GeneralSecurityException, IOException, URISyntaxException {
+
+    BasicHttpClientConnectionManager connectionManager;
     if (api.getSslCertificateProvider() != null) {
-      ConnectionConfig.Builder config = ConnectionConfig.custom()
-          .setConnectTimeout(5, TimeUnit.SECONDS)
-          .setSocketTimeout(30, TimeUnit.SECONDS);
-      BasicHttpClientConnectionManager connectionManager =
-          new BasicHttpClientConnectionManager(api.getSslCertificateProvider().getSocketFactory());
-      connectionManager.setConnectionConfig(config.build());
-      clientBuilder.setConnectionManager(connectionManager);
+      connectionManager = new BasicHttpClientConnectionManager(api.getSslCertificateProvider().getSocketFactory());
+    } else {
+      connectionManager = new BasicHttpClientConnectionManager();
     }
-    try (CloseableHttpClient httpClient = clientBuilder.build()) {
+    connectionManager.setSocketConfig(SocketConfig.custom().setSoTimeout(SOCKET_TIMEOUT).build());
+    connectionManager.setConnectionConfig(ConnectionConfig.custom()
+        .setConnectTimeout(CONNECT_TIMEOUT).setSocketTimeout(SOCKET_TIMEOUT).build());
+    clientBuilder.setConnectionManager(connectionManager);
+    setHardTimeout(request);
+    try (BusyIndicator busyIndicator = new BusyIndicator(true, false);
+         CloseableHttpClient httpClient = clientBuilder.build()) {
       HttpClientContext context = HttpClientContext.create();
       return httpClient.execute(request, context, response -> {
         // process response
@@ -99,8 +108,7 @@ public class HttpsClient {
         if (responseCode == SC_OK || responseCode == SC_ACCEPTED || responseCode == SC_NO_CONTENT ||
             responseCode == SC_MOVED_TEMPORARILY || responseCode == SC_SEE_OTHER) {
           return new HttpResponse(responseCode, response.getReasonPhrase(), response.getHeaders(), content);
-        }
-        else {
+        } else {
           throw new HttpResponseException(responseCode, response.getReasonPhrase(), response.getHeaders(), content);
         }
       });
@@ -116,8 +124,8 @@ public class HttpsClient {
       if (allowAIA && processSSLException(e, sslChain)) {
         // we found trusted chain
         // put all but end-certificate to SSL cache and add to runtime trust
-        List<X509Certificate> subChain = new ArrayList<>(sslChain.size()-1);
-        for (int i=1; i<sslChain.size(); i++) {
+        List<X509Certificate> subChain = new ArrayList<>(sslChain.size() - 1);
+        for (int i = 1; i < sslChain.size(); i++) {
           subChain.add(sslChain.get(i));
         }
         // add to cache and trusted store
@@ -127,9 +135,19 @@ public class HttpsClient {
       } else {
         throw new SSLCommunicationException(e, request.getUri().getHost(), sslChain);
       }
-    } catch (SocketTimeoutException e) {
-      throw new CommunicationExpirationException(e.getMessage(), e);
+    } catch (SocketTimeoutException | RequestFailedException e) {
+      throw new CommunicationExpirationException("Connection expired: "+e.getMessage(), e);
     }
+  }
+
+  private void setHardTimeout(HttpUriRequestBase request) {
+    TimerTask task = new TimerTask() {
+      @Override
+      public void run() {
+        request.abort();
+      }
+    };
+    new Timer(true).schedule(task, SOCKET_TIMEOUT.toMilliseconds());
   }
 
   private boolean processSSLException(SSLException e, List<X509Certificate> sslChain) {
@@ -152,7 +170,7 @@ public class HttpsClient {
       }
       try {
         logger.info("Accessing AIA URL: "+url);
-        ClassicHttpRequest request = new HttpUriRequestBase("GET", new URIBuilder(url).build());
+        HttpUriRequestBase request = new HttpUriRequestBase("GET", new URIBuilder(url).build());
         HttpResponse response = execute(request, HttpClientBuilder.create(), false, false);
         if (response == null || response.getContent() == null)
           continue; // no certificate downloaded
