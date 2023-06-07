@@ -26,13 +26,14 @@ package cz.sefira.obelisk;
 import ch.qos.logback.classic.Level;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.LogUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class AppConfigurer {
 
@@ -41,7 +42,7 @@ public class AppConfigurer {
 	public static void applyLocale(PlatformAPI api, String lang) {
 		String defaultLang = Locale.getDefault().getLanguage();
 		if (!defaultLang.equalsIgnoreCase(lang)) {
-			UserPreferences prefs = new UserPreferences(AppConfig.get());
+			UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
 			String prefLang = prefs.getLanguage();
 			String language = StringUtils.defaultIfEmpty(prefLang, defaultLang); // prefs or default
 			language = StringUtils.defaultIfEmpty(lang, language);

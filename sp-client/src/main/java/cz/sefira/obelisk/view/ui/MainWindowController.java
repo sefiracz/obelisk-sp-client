@@ -10,10 +10,10 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
@@ -76,7 +76,7 @@ public class MainWindowController extends ControllerCore implements StandaloneUI
     PlatformAPI api = (PlatformAPI) params[0];
     eventsViewerController.init(stage, api);
     manageKeystoresController.init(stage, api);
-    preferencesController.init(stage, api, new UserPreferences(AppConfig.get()), false);
+    preferencesController.init(stage, api, PreferencesFactory.getInstance(AppConfig.get()), false);
     aboutController.init(stage);
 
     stage.setTitle(tabPane.getSelectionModel().getSelectedItem().getText());

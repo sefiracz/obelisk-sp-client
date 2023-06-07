@@ -14,11 +14,12 @@
 package cz.sefira.obelisk.view;
 
 import cz.sefira.obelisk.AppConfigurer;
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.ipc.Message;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.annotation.NotNull;
@@ -70,7 +71,7 @@ public class StandaloneDialog {
     String appName = "";
     if(api != null) {
       appName = AppConfig.get().getApplicationName();
-      UserPreferences prefs = new UserPreferences(AppConfig.get());
+      UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
       // check if message is supposed to be displayed
       String dialogId = dialogMessage.getDialogId();
       if (dialogId != null && prefs.getHiddenDialogIds().contains(dialogId)) {
@@ -206,7 +207,7 @@ public class StandaloneDialog {
     okButton.setOnAction(e -> {
       if(doNotShowCheckBox.selectedProperty().getValue()) {
         if (api != null) {
-          UserPreferences prefs = new UserPreferences(AppConfig.get());
+          UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
           prefs.addHiddenDialogId(dialogMessage.getDialogId());
         }
       }

@@ -23,6 +23,7 @@ import cz.sefira.obelisk.flow.Flow;
 import cz.sefira.obelisk.flow.FlowRegistry;
 import cz.sefira.obelisk.flow.operation.BasicOperationFactory;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.storage.SmartcardStorage;
@@ -99,7 +100,7 @@ public class App extends Application {
 			System.exit(1);
 		}
 
-		AppConfigurer.applyUserPreferences(new UserPreferences(AppConfig.get()));
+		AppConfigurer.applyUserPreferences(PreferencesFactory.getInstance(AppConfig.get()));
 		final APIBuilder builder = new APIBuilder();
 		final PlatformAPI api = builder.build(uiDisplay, getFlowRegistry(), storageHandler, operationFactory);
 		notifyPreloader(builder.initPlugins(api, AppConfig.get().getProperties()));

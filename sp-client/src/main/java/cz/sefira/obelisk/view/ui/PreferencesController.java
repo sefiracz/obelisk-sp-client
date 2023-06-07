@@ -15,10 +15,10 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppConfigurer;
-import cz.sefira.obelisk.UserPreferences;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.NotificationType;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.ZipUtils;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.StandaloneUIController;
