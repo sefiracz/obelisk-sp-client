@@ -41,10 +41,8 @@ public class SpApiClient {
   private static final Logger logger = LoggerFactory.getLogger(SpApiClient.class.getName());
 
   private final HttpsClient client;
-  private final PlatformAPI api;
 
   public SpApiClient(PlatformAPI api) {
-    this.api = api;
     this.client = new HttpsClient(api);
   }
 
@@ -58,7 +56,7 @@ public class SpApiClient {
     // execute request
     URI requestUri = uriBuilder.build();
     logger.info(method+" "+requestUri);
-    ClassicHttpRequest request = new HttpUriRequestBase(method, requestUri);
+    HttpUriRequestBase request = new HttpUriRequestBase(method, requestUri);
     request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     clientBuilder.setDefaultRequestConfig(RequestConfig.custom()

@@ -163,7 +163,7 @@ public class Dispatcher implements AppPlugin {
       }
     } catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
-      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR);
+      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 475, 170);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
       notificationType = TrayIcon.MessageType.ERROR;
@@ -215,7 +215,10 @@ public class Dispatcher implements AppPlugin {
       if (response.getCode() == HttpStatus.SC_ACCEPTED) {
         idle(); // wait operation = go back to GET method
         continue;
+      } else if (response.getCode() == HttpStatus.SC_NO_CONTENT) {
+        return null; // no work - finish process
       } else if (response.getCode() != HttpStatus.SC_OK) {
+        // unexpected status code result
         throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
       }
       idleTime = 0;
@@ -247,7 +250,7 @@ public class Dispatcher implements AppPlugin {
           if (responseCode == HttpStatus.SC_OK) {
             req = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BaseRequest.class);
           } else if (responseCode == HttpStatus.SC_NO_CONTENT) {
-            return result;
+            return result; // no more work - finish process
           } else if (responseCode == HttpStatus.SC_SEE_OTHER || responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
             url = HttpUtils.getLocationURI(response);
             break; // go back to GET method
