@@ -10,7 +10,7 @@ package cz.sefira.obelisk.prefs;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.NotificationType;
+import cz.sefira.obelisk.api.notification.NotificationType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,29 +36,17 @@ public abstract class UserPreferences {
   protected Integer cacheDuration;
   protected Boolean debugMode;
 
-  public void setLanguage(String language) {
-    this.language = language;
-  }
+  public abstract void setLanguage(String language);
 
-  public void addHiddenDialogId(String hiddenDialogIds) {
-    this.hiddenDialogIds = hiddenDialogIds;
-  }
+  public abstract void addHiddenDialogId(String hiddenDialogIds);
 
-  public void setSplashScreen(Boolean splashScreen) {
-    this.splashScreen = splashScreen;
-  }
+  public abstract void setSplashScreen(Boolean splashScreen);
 
-  public void setShowNotifications(NotificationType showNotifications) {
-    this.showNotifications = showNotifications;
-  }
+  public abstract void setShowNotifications(NotificationType showNotifications);
 
-  public void setCacheDuration(Integer cacheDuration) {
-    this.cacheDuration = cacheDuration;
-  }
+  public abstract void setCacheDuration(Integer cacheDuration);
 
-  public void setDebugMode(Boolean debugMode) {
-    this.debugMode = debugMode;
-  }
+  public abstract void setDebugMode(Boolean debugMode);
 
   public List<String> getHiddenDialogIds() {
     if(hiddenDialogIds != null) {

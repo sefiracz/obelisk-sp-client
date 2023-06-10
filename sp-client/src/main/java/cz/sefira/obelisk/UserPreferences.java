@@ -15,8 +15,7 @@
 package cz.sefira.obelisk;
 
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.NotificationType;
-import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.api.notification.NotificationType;
 
 import java.util.*;
 import java.util.prefs.BackingStoreException;

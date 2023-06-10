@@ -10,7 +10,7 @@ package cz.sefira.obelisk.systray;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.api.PlatformAPI;
 
 import java.net.URL;

@@ -11,7 +11,8 @@ package cz.sefira.obelisk.systray;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.MessageType;
+import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.util.ResourceUtils;
 import javafx.application.Platform;
@@ -70,7 +71,8 @@ public class AWTSystray extends AbstractSystray {
 
   @Override
   public void pushNotification(Notification notification) {
-    trayIcon.displayMessage(AppConfig.get().getApplicationName(), notification.getMessageText(), notification.getType());
+    TrayIcon.MessageType type = getAWTMessageType(notification.getType());
+    trayIcon.displayMessage(AppConfig.get().getApplicationName(), notification.getMessageText(), type);
   }
 
   public void refreshLabels() {
@@ -82,6 +84,27 @@ public class AWTSystray extends AbstractSystray {
         item.setLabel(ResourceUtils.getBundle().getString(item.getName()));
       }
     }
+  }
+
+  private TrayIcon.MessageType getAWTMessageType(MessageType messageType) {
+    TrayIcon.MessageType type;
+    switch (messageType) {
+      case WARNING:
+        type = TrayIcon.MessageType.WARNING;
+        break;
+      case ERROR:
+        type = TrayIcon.MessageType.ERROR;
+        break;
+      case INFO:
+        type = TrayIcon.MessageType.INFO;
+        break;
+      case SUCCESS:
+      case NONE:
+      default:
+        type = TrayIcon.MessageType.NONE;
+        break;
+    }
+    return type;
   }
 
 }

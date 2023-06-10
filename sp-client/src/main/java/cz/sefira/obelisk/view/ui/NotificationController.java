@@ -10,7 +10,8 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.MessageType;
+import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
@@ -49,6 +50,9 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   @FXML
   private BorderPane background;
+
+  @FXML
+  private Region icon;
 
   @FXML
   private ProgressIndicator progress;
@@ -121,6 +125,9 @@ public class NotificationController extends ControllerCore implements PropertyCh
               service = createHideTimer(currentNotification.getDelay());
             }
           }
+          if (currentNotification.getType() != null) {
+            displayIcon(currentNotification.getType());
+          }
         });
       } else {
         Platform.runLater(stage::hide);
@@ -165,6 +172,32 @@ public class NotificationController extends ControllerCore implements PropertyCh
   public void propertyChange(PropertyChangeEvent evt) {
     asyncTask(() -> notification = (Notification) evt.getNewValue(), true);
   }
+
+  public void displayIcon(MessageType type) {
+    icon.setVisible(false);
+    boolean visible = true;
+    icon.getStyleClass().clear();
+    switch (type) {
+      case SUCCESS:
+        icon.getStyleClass().add("icon-success");
+        break;
+      case INFO:
+        icon.getStyleClass().add("icon-information");
+        break;
+      case WARNING:
+        icon.getStyleClass().add("icon-warning");
+        break;
+      case ERROR:
+        icon.getStyleClass().add("icon-error");
+        break;
+      case NONE:
+      default:
+        visible = false;
+        break;
+    }
+    icon.setVisible(visible);
+  }
+
 
   public TimerService createHideTimer(long seconds) {
     TimerService service = new TimerService(seconds);

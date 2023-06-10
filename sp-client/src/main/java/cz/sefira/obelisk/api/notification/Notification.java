@@ -1,49 +1,40 @@
-package cz.sefira.obelisk.api;
+package cz.sefira.obelisk.api.notification;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.api.Notification
+ * cz.sefira.obelisk.Notification
  *
- * Created: 02.05.2023
+ * Created: 08/06/2023
  * Author: hlavnicka
  */
 
-import java.awt.*;
+import cz.sefira.obelisk.util.annotation.NotNull;
+
 import java.util.Date;
 
-import static java.awt.TrayIcon.MessageType.NONE;
-
 /**
- * Notification message
+ * Notification
  */
 public class Notification {
 
   private long seqId;
   private final String messageText;
   private final Date date;
-  private final TrayIcon.MessageType type;
-  private boolean close = false;
-  private int delay;
-
-  public Notification() {
-    // empty notification (placeholder)
-    this.messageText = null;
-    this.date = null;
-    this.type = null;
-    this.seqId = -1L;
-  }
+  private final MessageType type;
+  private final boolean close;
+  private final int delay;
 
   public Notification(String messageText) {
-    this(messageText, NONE, false, 5);
+    this(messageText, MessageType.INFO, false, 5);
   }
 
-  public Notification(String messageText, TrayIcon.MessageType type) {
+  public Notification(String messageText, @NotNull MessageType type) {
     this(messageText, type, false, 5);
   }
 
-  public Notification(String messageText, TrayIcon.MessageType type, boolean close, int delay) {
+  public Notification(String messageText, @NotNull MessageType type, boolean close, int delay) {
     this.messageText = messageText;
     this.type = type;
     this.close = close;
@@ -63,7 +54,7 @@ public class Notification {
     return messageText;
   }
 
-  public TrayIcon.MessageType getType() {
+  public MessageType getType() {
     return type;
   }
 

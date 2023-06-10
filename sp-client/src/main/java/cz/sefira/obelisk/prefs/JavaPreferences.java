@@ -11,7 +11,7 @@ package cz.sefira.obelisk.prefs;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.NotificationType;
+import cz.sefira.obelisk.api.notification.NotificationType;
 
 import java.util.List;
 import java.util.Objects;

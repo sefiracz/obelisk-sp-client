@@ -10,10 +10,10 @@ package cz.sefira.obelisk;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.Notification;
-import cz.sefira.obelisk.api.NotificationType;
-import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.*;
+import cz.sefira.obelisk.api.notification.EventNotification;
+import cz.sefira.obelisk.api.notification.Notification;
+import cz.sefira.obelisk.api.notification.NotificationType;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.systray.AWTSystray;
 import cz.sefira.obelisk.systray.AbstractSystray;
@@ -73,7 +73,9 @@ public class Systray {
     NotificationType showNotification = PreferencesFactory.getInstance(AppConfig.get()).getShowNotifications();
     logger.info("Push notification ("+showNotification.name()+"): " + notification.getMessageText());
     // push notification into events
-    api.getEventsStorage().addNotification(notification);
+    if (notification instanceof EventNotification) {
+      api.getEventsStorage().addNotification((EventNotification) notification);
+    }
     // show notification
     switch (showNotification) {
       case NATIVE:

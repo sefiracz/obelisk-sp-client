@@ -1,4 +1,4 @@
-package cz.sefira.obelisk.api;
+package cz.sefira.obelisk.api.notification;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.

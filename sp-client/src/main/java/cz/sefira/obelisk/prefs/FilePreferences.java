@@ -11,7 +11,7 @@ package cz.sefira.obelisk.prefs;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.NotificationType;
+import cz.sefira.obelisk.api.notification.NotificationType;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.FileBasedBuilderParameters;

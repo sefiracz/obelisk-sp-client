@@ -10,7 +10,7 @@ package cz.sefira.obelisk.storage.model;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.EventNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class EventsRoot {
 
   private boolean closeFlag;
 
-  private List<Notification> notifications;
+  private List<EventNotification> notifications;
 
   public AtomicLong getSequence() {
     return sequence;
@@ -40,7 +40,7 @@ public class EventsRoot {
     this.sequence.incrementAndGet();
   }
 
-  public List<Notification> getNotifications() {
+  public List<EventNotification> getNotifications() {
     if (notifications == null) {
       notifications = new ArrayList<>();
     }
