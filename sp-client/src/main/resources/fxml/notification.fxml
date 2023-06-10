@@ -22,6 +22,9 @@
 
     <top>
       <HBox minHeight="32" maxHeight="32" prefHeight="32">
+        <VBox BorderPane.alignment="CENTER" styleClass="icon-notification">
+          <Region fx:id="icon" prefHeight="20" prefWidth="20"/>
+        </VBox>
         <ProgressIndicator fx:id="progress" styleClass="notificationTimer" progress="0.99" visible="false"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="minimizeButton" maxWidth="16" maxHeight="4" prefWidth="16" prefHeight="4" styleClass="minimizeButton" mnemonicParsing="false"/>
@@ -36,7 +39,7 @@
     </center>
 
     <bottom>
-      <HBox prefHeight="22" style="-fx-alignment: bottom-left" >
+      <HBox prefHeight="22" style="-fx-alignment: bottom-left;" >
         <Label styleClass="timeMessage" fx:id="timestamp" wrapText="true"/>
       </HBox>
     </bottom>

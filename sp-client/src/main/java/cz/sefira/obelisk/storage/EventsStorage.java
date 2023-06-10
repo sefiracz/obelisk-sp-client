@@ -10,7 +10,7 @@ package cz.sefira.obelisk.storage;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.EventNotification;
 import cz.sefira.obelisk.storage.model.EventsRoot;
 import one.microstream.persistence.internal.LoggingLegacyTypeMappingResultor;
 import one.microstream.persistence.types.PersistenceLegacyTypeMappingResultor;
@@ -55,8 +55,8 @@ public class EventsStorage extends AbstractStorage {
   }
 
   private void removeOldEvents() {
-    List<Notification> old = new ArrayList<>();
-    for (Notification n : eventsRoot.getNotifications()) {
+    List<EventNotification> old = new ArrayList<>();
+    for (EventNotification n : eventsRoot.getNotifications()) {
       Calendar calendar = Calendar.getInstance();
       calendar.add(Calendar.YEAR, -1);
       if (n.getDate().before(calendar.getTime())) {
@@ -70,7 +70,7 @@ public class EventsStorage extends AbstractStorage {
     }
   }
 
-  public final synchronized void addNotification(Notification notification) {
+  public final synchronized void addNotification(EventNotification notification) {
     if (notification != null) {
       notification.setSeqId(eventsRoot.getSequence().get());
       eventsRoot.getNotifications().add(notification);
@@ -85,15 +85,15 @@ public class EventsStorage extends AbstractStorage {
     commitChange(eventsRoot);
   }
 
-  public List<Notification> getNotifications(SelectorType selectorType) {
-    List<Notification> allNotifications = new ArrayList<>(eventsRoot.getNotifications());
-    List<Notification> selected = new ArrayList<>();
+  public List<EventNotification> getNotifications(SelectorType selectorType) {
+    List<EventNotification> allNotifications = new ArrayList<>(eventsRoot.getNotifications());
+    List<EventNotification> selected = new ArrayList<>();
     switch (selectorType) {
       case LAST:
         int size = allNotifications.size();
         long seqId = size > 0 ? allNotifications.get(size-1).getSeqId() : -1;
         for (int i = allNotifications.size() - 1; i >= 0; i--) {
-          Notification n = allNotifications.get(i);
+          EventNotification n = allNotifications.get(i);
           if (seqId == n.getSeqId()) {
             selected.add(n);
           } else {
@@ -104,7 +104,7 @@ public class EventsStorage extends AbstractStorage {
       case DAY:
         Date today = new Date();
         for (int i = allNotifications.size() - 1; i >= 0; i--) {
-          Notification n = allNotifications.get(i);
+          EventNotification n = allNotifications.get(i);
           if (DateUtils.isSameDay(today, n.getDate())) {
             selected.add(n);
           } else {
@@ -114,7 +114,7 @@ public class EventsStorage extends AbstractStorage {
         break;
       case ALL:
       default:
-        for (Notification n : allNotifications) {
+        for (EventNotification n : allNotifications) {
           selected.add(0, n);
         }
         break;

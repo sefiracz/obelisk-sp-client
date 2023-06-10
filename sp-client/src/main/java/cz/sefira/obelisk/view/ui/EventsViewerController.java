@@ -10,13 +10,12 @@ package cz.sefira.obelisk.view.ui;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.Notification;
+import cz.sefira.obelisk.api.notification.EventNotification;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
-import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -56,23 +55,23 @@ public class EventsViewerController extends ControllerCore implements Standalone
   private RadioButton showAll;
 
   @FXML
-  private TableView<Notification> eventsTable;
+  private TableView<EventNotification> eventsTable;
 
   @FXML
-  private TableColumn<Notification, String> eventIdColumn;
+  private TableColumn<EventNotification, String> eventIdColumn;
 
   @FXML
-  private TableColumn<Notification, String> eventDateColumn;
+  private TableColumn<EventNotification, String> eventDateColumn;
 
   @FXML
-  private TableColumn<Notification, String> eventNotificationColumn;
+  private TableColumn<EventNotification, String> eventNotificationColumn;
 
   @FXML
   private Button cancel;
 
   private Stage primaryStage;
 
-  private final ObservableList<Notification> observableEvents;
+  private final ObservableList<EventNotification> observableEvents;
 
   private ScheduledExecutorService executorService;
 
@@ -112,7 +111,7 @@ public class EventsViewerController extends ControllerCore implements Standalone
 
     // asynchronous window content update
     asyncUpdate(executorService, () -> {
-      List<Notification> list = new ArrayList<>();
+      List<EventNotification> list = new ArrayList<>();
       if (showLast.isSelected()) {
         list = api.getEventsStorage().getNotifications(EventsStorage.SelectorType.LAST);
       } else if (showToday.isSelected()) {
@@ -133,7 +132,7 @@ public class EventsViewerController extends ControllerCore implements Standalone
     eventsTable.setRowFactory(tv -> new TableRow<>() {
 
       @Override
-      protected void updateItem(Notification item, boolean empty) {
+      protected void updateItem(EventNotification item, boolean empty) {
         super.updateItem(item, empty);
         if (item != null && item.getMessageText() != null) {
           this.setTooltip(new Tooltip(item.getMessageText()));
@@ -153,7 +152,7 @@ public class EventsViewerController extends ControllerCore implements Standalone
     eventNotificationColumn.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue().getMessageText()));
     eventNotificationColumn.setCellFactory(new Callback<>() {
       @Override
-      public TableCell<Notification, String> call(TableColumn<Notification, String> param) {
+      public TableCell<EventNotification, String> call(TableColumn<EventNotification, String> param) {
         return new TableCell<>() {
           @Override
           public void updateItem(String item, boolean empty) {

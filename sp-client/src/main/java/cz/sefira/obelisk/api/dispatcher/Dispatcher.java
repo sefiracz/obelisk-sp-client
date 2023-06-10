@@ -13,6 +13,9 @@ package cz.sefira.obelisk.api.dispatcher;
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
+import cz.sefira.obelisk.api.notification.EventNotification;
+import cz.sefira.obelisk.api.notification.LongActivityNotifier;
+import cz.sefira.obelisk.api.notification.MessageType;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.api.ws.GenericApiException;
@@ -31,21 +34,19 @@ import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.util.HttpUtils;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
+import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.net.URIBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.Security;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -63,8 +64,9 @@ public class Dispatcher implements AppPlugin {
 
   private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class.getName());
   private static final long SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
-  private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.MILLISECONDS.toMillis(1000);
-  private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.MINUTES.toMillis(5);
+  private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.SECONDS.toMillis(2);
+  private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.SECONDS.toMillis(60);
+  private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(10);
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -75,6 +77,7 @@ public class Dispatcher implements AppPlugin {
 
   private long lastSyncTimestamp = 0L;
   private long idleTime = 0L;
+  private LongActivityNotifier activityNotifier;
 
   private final ScheduledExecutorService dispatcher = Executors.newSingleThreadScheduledExecutor(r -> {
     Thread t = new Thread(r, "Dispatcher");
@@ -108,7 +111,7 @@ public class Dispatcher implements AppPlugin {
   private void validateMessage(Message message) {
     // get message
     String notificationProperty = null;
-    TrayIcon.MessageType notificationType = TrayIcon.MessageType.INFO;
+    MessageType notificationType = MessageType.NONE;
     try {
       if (message == null) {
         return;
@@ -154,11 +157,13 @@ public class Dispatcher implements AppPlugin {
       if (result != null) {
         if (result.isSuccess()) {
           notificationProperty = "notification.event.success";
+          notificationType = MessageType.SUCCESS;
         } else if (BasicOperationStatus.USER_CANCEL.getCode().equals(result.getError())) {
           notificationProperty = "notification.event.user.cancel";
+          notificationType = MessageType.INFO;
         } else {
           notificationProperty = "notification.event.exception";
-          notificationType = TrayIcon.MessageType.ERROR;
+          notificationType = MessageType.ERROR;
         }
       }
     } catch (GenericApiException e) {
@@ -166,12 +171,12 @@ public class Dispatcher implements AppPlugin {
       DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 475, 170);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-      notificationType = TrayIcon.MessageType.ERROR;
+      notificationType = MessageType.ERROR;
     } catch (SSLCommunicationException e) {
       logger.error(e.getMessage(), e);
       StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api, message));
       notificationProperty = "notification.event.fatal";
-      notificationType = TrayIcon.MessageType.ERROR;
+      notificationType = MessageType.ERROR;
     } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
       DialogMessage dialogMessage;
@@ -188,18 +193,19 @@ public class Dispatcher implements AppPlugin {
       final DialogMessage errMsg = dialogMessage;
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-      notificationType = TrayIcon.MessageType.ERROR;
+      notificationType = MessageType.ERROR;
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       DialogMessage errMsg = new DialogMessage("dispatcher.generic.error", DialogMessage.Level.ERROR);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
-      notificationType = TrayIcon.MessageType.ERROR;
+      notificationType = MessageType.ERROR;
     } finally {
+      closeIdleNotifier();
       if (notificationProperty != null) {
         // close notification
         String messageText = ResourceUtils.getBundle().getString(notificationProperty);
-        api.getSystray().pushNotification(new Notification(messageText, notificationType, true, 5));
+        api.getSystray().pushNotification(new EventNotification(messageText, notificationType, true, 5));
       }
     }
   }
@@ -221,7 +227,7 @@ public class Dispatcher implements AppPlugin {
         // unexpected status code result
         throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
       }
-      idleTime = 0;
+      closeIdleNotifier();
       BaseRequest req = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BaseRequest.class);
       // execute  result
       while (true) {
@@ -234,7 +240,7 @@ public class Dispatcher implements AppPlugin {
           return null;
         }
         // notification
-        api.getSystray().pushNotification(new Notification(req.getDescription()));
+        api.getSystray().pushNotification(new EventNotification(req.getDescription()));
         // synchronize supported hardware database
         sync = sync && syncDevices(req);
         // execute flow
@@ -296,10 +302,15 @@ public class Dispatcher implements AppPlugin {
 
   private void idle() throws InterruptedException {
     if (idleTime > IDLE_TIMEOUT_MILLISECONDS) {
-      throw new GenericApiException("Operation timeout, server communication stalled", "dispatcher.expired.error");
+      throw new GenericApiException("Operation timeout, server communication stalled", "dispatcher.idle.error");
     }
-    Thread.sleep(IDLE_PERIOD_MILLISECONDS);
+    try (BusyIndicator busyIndicator = new BusyIndicator(true, false)) {
+      Thread.sleep(IDLE_PERIOD_MILLISECONDS);
+    }
     idleTime += IDLE_PERIOD_MILLISECONDS;
+    if (activityNotifier == null) {
+      activityNotifier = new LongActivityNotifier(api, "notification.long.activity.idle", LONG_ACTIVITY_IDLE_MILLISECONDS);
+    }
   }
 
   private boolean syncDevices(BaseRequest baseRequest) {
@@ -320,12 +331,16 @@ public class Dispatcher implements AppPlugin {
     return syncTime > SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS;
   }
 
-
   private void audit(Execution<?> result, HttpResponse response) {
     Audit audit = new Audit(result.getUsedProduct(), initializedDate);
     result.setAudit(audit);
   }
 
+  /**
+   * Flow finished, perform specific finishg tasks
+   * @param req Flow request
+   * @param result Flow result
+   */
   private void flowFinished(BaseRequest req, Execution<?> result) {
     // certificate obtained dialog - if user interaction is wanted (no auto-select mode)
     if (req.isUserInteraction() && GET_CERTIFICATE.equals(req.getOperation()) && result.isSuccess()) {
@@ -336,6 +351,17 @@ public class Dispatcher implements AppPlugin {
     }
     // any additional finishing operations can be added here
     // ...
+  }
+
+  /**
+   * Close long activity (idle) notifier
+   */
+  private void closeIdleNotifier() {
+    idleTime = 0;
+    if (activityNotifier != null) {
+      activityNotifier.close();
+      activityNotifier = null;
+    }
   }
 
 }

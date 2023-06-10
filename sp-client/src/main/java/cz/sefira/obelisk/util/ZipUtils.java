@@ -37,8 +37,6 @@ public class ZipUtils {
     try (ZipOutputStream zos = new ZipOutputStream(baos, StandardCharsets.UTF_8)) {
       // write AppHome directory
       zipDirectory(directory, directory.getName(), zos, zipParams);
-      // write user preferences
-      zipUserPrefs(prefs.getBytes(StandardCharsets.UTF_8), directory.getName(), zos, zipParams);
     }
     // return if no encryption
     if (password == null) {
@@ -66,14 +64,6 @@ public class ZipUtils {
         }
       }
     }
-  }
-
-  private static void zipUserPrefs(byte[] prefs, String parentFolder, ZipOutputStream zos, ZipParameters zipParams)
-      throws IOException {
-    zipParams.setFileNameInZip(parentFolder + "/config.properties");
-    zos.putNextEntry(zipParams);
-    zos.write(prefs);
-    zos.closeEntry();
   }
 
   private static byte[] zipAndEncrypt(String name, byte[] data, char[] password) throws IOException {

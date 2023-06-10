@@ -19,6 +19,7 @@ import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.model.ScAPI;
+import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;

@@ -16,7 +16,7 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppConfigurer;
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.NotificationType;
+import cz.sefira.obelisk.api.notification.NotificationType;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.ZipUtils;
@@ -49,7 +49,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-import static cz.sefira.obelisk.api.NotificationType.*;
+import static cz.sefira.obelisk.api.notification.NotificationType.*;
 
 public class PreferencesController extends ControllerCore implements StandaloneUIController, Initializable {
 

@@ -486,6 +486,13 @@ RadioButton {
 
 }
 
+.icon-notification {
+
+    -fx-alignment: center;
+    -fx-padding: 5 5 5 6; /* t r b l*/
+
+}
+
 .notificationTimer {
 
     -fx-progress-color: #4AA9E7;

@@ -13,6 +13,7 @@ package cz.sefira.obelisk.api.ws.ssl;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.auth.CommunicationExpirationException;
+import cz.sefira.obelisk.api.notification.LongActivityNotifier;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.view.BusyIndicator;
@@ -50,8 +51,11 @@ import static org.apache.hc.core5.http.HttpStatus.*;
 public class HttpsClient {
 
   private static final Logger logger = LoggerFactory.getLogger(HttpsClient.class.getName());
-  private static final Timeout CONNECT_TIMEOUT = Timeout.ofMilliseconds(2_500);
-  private static final Timeout SOCKET_TIMEOUT = Timeout.ofMilliseconds(7_500); // TODO - auth vs getCert vs sign ?
+
+  private static final Timeout LONG_ACTIVITY = Timeout.ofSeconds(3);
+  private static final Timeout CONNECT_TIMEOUT = Timeout.ofSeconds(10);
+  private static final Timeout SOCKET_TIMEOUT = Timeout.ofSeconds(30);
+  private static final Timeout HARD_TIMEOUT = Timeout.ofMinutes(2);
 
   private final PlatformAPI api;
 
@@ -89,12 +93,17 @@ public class HttpsClient {
     } else {
       connectionManager = new BasicHttpClientConnectionManager();
     }
-    connectionManager.setSocketConfig(SocketConfig.custom().setSoTimeout(SOCKET_TIMEOUT).build());
+    connectionManager.setSocketConfig(SocketConfig.custom()
+        .setSoTimeout(SOCKET_TIMEOUT)
+        .build());
     connectionManager.setConnectionConfig(ConnectionConfig.custom()
-        .setConnectTimeout(CONNECT_TIMEOUT).setSocketTimeout(SOCKET_TIMEOUT).build());
+        .setConnectTimeout(CONNECT_TIMEOUT)
+        .setSocketTimeout(SOCKET_TIMEOUT)
+        .build());
     clientBuilder.setConnectionManager(connectionManager);
     setHardTimeout(request);
     try (BusyIndicator busyIndicator = new BusyIndicator(true, false);
+         LongActivityNotifier notifier = new LongActivityNotifier(api, "notification.long.activity.server", LONG_ACTIVITY.toMilliseconds());
          CloseableHttpClient httpClient = clientBuilder.build()) {
       HttpClientContext context = HttpClientContext.create();
       return httpClient.execute(request, context, response -> {
@@ -147,7 +156,7 @@ public class HttpsClient {
         request.abort();
       }
     };
-    new Timer(true).schedule(task, SOCKET_TIMEOUT.toMilliseconds());
+    new Timer(true).schedule(task, HARD_TIMEOUT.toMilliseconds());
   }
 
   private boolean processSSLException(SSLException e, List<X509Certificate> sslChain) {
