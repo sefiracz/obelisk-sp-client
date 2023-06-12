@@ -20,10 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Property file-based preferences
@@ -40,6 +43,15 @@ public class FilePreferences extends UserPreferences {
       if (!configFile.toFile().exists()) {
         try {
           Files.createFile(configFile);
+          try {
+            InputStream configStream = FilePreferences.class.getResourceAsStream("/user-preferences.properties");
+            if (configStream != null) {
+              Files.copy(configStream, configFile, REPLACE_EXISTING);
+              logger.info("New user-preferences.properties file created from template");
+            }
+          } catch (Exception e) {
+            logger.error("Unable to create config from template: "+e.getMessage(), e);
+          }
         } catch (IOException e) {
           logger.error("Failed to create configuration file: "+e.getMessage(), e);
           throw new RuntimeException(e);
