@@ -36,7 +36,7 @@ public class FilePreferences extends UserPreferences {
 
   public FilePreferences(AppConfig appConfig) {
     try {
-      Path configFile = appConfig.getAppUserHome().toPath().resolve("preferences.properties");
+      Path configFile = appConfig.getAppUserHome().toPath().resolve("user-preferences.properties");
       if (!configFile.toFile().exists()) {
         try {
           Files.createFile(configFile);
