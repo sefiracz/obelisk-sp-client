@@ -116,7 +116,7 @@ public class AppConfig {
   }
 
   public void loadFromProperties(final Properties props) {
-    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal client"));
+    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client v2"));
     this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "OBELISK Signing Portal client"));
 
     this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
@@ -127,7 +127,7 @@ public class AppConfig {
     this.setUserPreferencesEditable(Boolean.parseBoolean(props.getProperty(USER_PREFERENCES_EDITABLE, "true")));
 
     this.setWindowsInstalledPath(
-        props.getProperty(WINDOWS_INSTALLED_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal\\"));
+        props.getProperty(WINDOWS_INSTALLED_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal Client v2\\"));
 
     this.setTicketUrl(props.getProperty(TICKET_URL, "ob-support@sefira.cz"));
     this.setEnableIncidentReport(Boolean.parseBoolean(props.getProperty(ENABLE_INCIDENT_REPORT, "false")));
@@ -142,11 +142,7 @@ public class AppConfig {
   }
 
   public String getApplicationName() {
-    String client = "client";
-    if(Locale.getDefault().getLanguage().equals("cs")) {
-      client = "klient";
-    }
-    return MessageFormat.format(applicationName, client);
+    return MessageFormat.format(applicationName, "Client v2");
   }
 
   public String getApplicationPathName() {
