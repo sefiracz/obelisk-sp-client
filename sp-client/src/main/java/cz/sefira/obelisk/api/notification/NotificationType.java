@@ -26,7 +26,7 @@ public enum NotificationType {
   }
 
   public static NotificationType fromType(String type) {
-    if (type != null) {
+    if (type != null && !type.isEmpty()) {
       for (NotificationType n : NotificationType.values()) {
         if (n.getType().equals(type)) {
           return n;

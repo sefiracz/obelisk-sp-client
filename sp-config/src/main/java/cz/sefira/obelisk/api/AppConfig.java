@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -38,6 +39,7 @@ public class AppConfig {
 
   private static final String APPLICATION_NAME = "application_name";
   private static final String APPLICATION_PATH_NAME = "application_path_name";
+  private static final String COMPANY_NAME = "company_name";
   private static final String DEBUG = "debug";
 
   private static final String TICKET_URL = "ticket_url";
@@ -55,6 +57,7 @@ public class AppConfig {
 
   private String applicationName;
   private String applicationPathName;
+  private String companyName;
   private boolean debug;
 
   private String ticketUrl;
@@ -118,6 +121,7 @@ public class AppConfig {
   public void loadFromProperties(final Properties props) {
     this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client v2"));
     this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "OBELISK Signing Portal client"));
+    this.setCompanyName(props.getProperty(COMPANY_NAME, "SEFIRA"));
 
     this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
 
@@ -147,6 +151,10 @@ public class AppConfig {
 
   public String getApplicationPathName() {
     return applicationPathName;
+  }
+
+  public String getCompanyName() {
+    return companyName;
   }
 
   public String getApplicationVersion() {
@@ -182,6 +190,17 @@ public class AppConfig {
       this.appUserHome = null;
     }
     return this.appUserHome;
+  }
+
+  public Path getDefaultUserConfigDir() {
+    if (OS.isWindows()) {
+      String commonAppData = System.getenv("AllUsersProfile");
+      if (commonAppData != null) {
+        return Paths.get(commonAppData).resolve(getCompanyName()).resolve(getApplicationName());
+      }
+    }
+    // TODO - macOS / Linux
+    return null;
   }
 
   /**
@@ -271,6 +290,10 @@ public class AppConfig {
 
   private void setApplicationPathName(String applicationPathName) {
     this.applicationPathName = applicationPathName;
+  }
+
+  private void setCompanyName(String companyName) {
+    this.companyName = companyName;
   }
 
   private void setUserPreferencesEditable(final boolean userPreferencesEditable) {
