@@ -13,6 +13,8 @@ package cz.sefira.obelisk.prefs;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.notification.NotificationType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
@@ -28,7 +30,13 @@ public class JavaPreferences extends UserPreferences {
   public JavaPreferences(AppConfig appConfig) {
     prefs = Preferences.userRoot().node(appConfig.getApplicationPathName().toLowerCase());
 
-    hiddenDialogIds = prefs.get(HIDDEN_DIALOGS, null);
+    final String hiddenDialogIdsValue = prefs.get(HIDDEN_DIALOGS, null);
+    if (hiddenDialogIdsValue != null && !hiddenDialogIdsValue.isEmpty()) {
+      String[] dialogIds = hiddenDialogIdsValue.split(",");
+      hiddenDialogIds = new ArrayList<>(Arrays.asList(dialogIds));
+    } else {
+      hiddenDialogIds = new ArrayList<>();
+    }
 
     final String splashScreenValue = prefs.get(SPLASH_SCREEN, null);
     splashScreen = splashScreenValue != null ? Boolean.parseBoolean(splashScreenValue) : null;
@@ -68,10 +76,17 @@ public class JavaPreferences extends UserPreferences {
   }
 
   public void addHiddenDialogId(String dialogId) {
-    List<String> list = getHiddenDialogIds();
-    list.add(dialogId);
-    this.hiddenDialogIds = String.join(",", list);
-    prefs.put(HIDDEN_DIALOGS, hiddenDialogIds);
+    if (hiddenDialogIds == null) {
+      hiddenDialogIds = new ArrayList<>();
+    }
+    if (!hiddenDialogIds.contains(dialogId)) {
+      hiddenDialogIds.add(dialogId);
+    }
+    prefs.put(HIDDEN_DIALOGS, String.join(",", hiddenDialogIds));
+  }
+
+  public void setHiddenDialogIds(List<String> hiddenDialogs){
+    this.hiddenDialogIds = hiddenDialogs;
   }
 
   public void setSplashScreen(Boolean splashScreen) {

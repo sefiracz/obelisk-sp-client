@@ -13,8 +13,8 @@ package cz.sefira.obelisk.prefs;
 import cz.sefira.obelisk.api.notification.NotificationType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract user preferences
@@ -29,16 +29,18 @@ public abstract class UserPreferences {
   protected static final String CACHE_DURATION = "cz.sefira.obelisk.signingportal.cacheduration";
 
 
-  protected String language;
-  protected String hiddenDialogIds;
-  protected Boolean splashScreen;
-  protected NotificationType showNotifications;
-  protected Integer cacheDuration;
-  protected Boolean debugMode;
+  protected String language = null;
+  protected List<String> hiddenDialogIds = new ArrayList<>();
+  protected Boolean splashScreen = true;
+  protected NotificationType showNotifications = NotificationType.getDefault();
+  protected Integer cacheDuration = 0;
+  protected Boolean debugMode = false;
 
   public abstract void setLanguage(String language);
 
   public abstract void addHiddenDialogId(String hiddenDialogIds);
+
+  public abstract void setHiddenDialogIds(List<String> hiddenDialogs);
 
   public abstract void setSplashScreen(Boolean splashScreen);
 
@@ -49,12 +51,7 @@ public abstract class UserPreferences {
   public abstract void setDebugMode(Boolean debugMode);
 
   public List<String> getHiddenDialogIds() {
-    if(hiddenDialogIds != null) {
-      String[] dialogIds = hiddenDialogIds.split(",");
-      return new ArrayList<>(Arrays.asList(dialogIds));
-    } else {
-      return new ArrayList<>();
-    }
+    return Objects.requireNonNullElseGet(hiddenDialogIds, ArrayList::new);
   }
 
   public String getLanguage() {
@@ -74,7 +71,7 @@ public abstract class UserPreferences {
   }
 
   public Integer getCacheDuration() {
-    return cacheDuration;
+    return cacheDuration != null ? cacheDuration : 0;
   }
 
   protected int normalizeCacheDuration(Integer cacheDuration) {

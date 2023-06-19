@@ -11,6 +11,8 @@ package cz.sefira.obelisk.ipc;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -29,6 +31,7 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
  */
 public final class FileMessageQueue implements MessageQueue {
 
+  private static final Logger logger = LoggerFactory.getLogger(FileMessageQueue.class.getName());
   private static final String messageFilesDir = "queue";
   private static final String fileExt = ".obmsg";
   private static final String partExt = ".obmsg.part";
@@ -51,6 +54,7 @@ public final class FileMessageQueue implements MessageQueue {
       return filenameId + fileExt;
     }
     catch (Exception e) {
+      logger.error("Failed to push byte[] message to queue: "+e.getMessage(), e);
       throw new RuntimeException(e); // TODO - handle error
     }
   }
@@ -66,6 +70,7 @@ public final class FileMessageQueue implements MessageQueue {
       Files.move(filename, Paths.get(messagesDir, filenameId + fileExt), ATOMIC_MOVE);
       return filenameId + fileExt;
     } catch (Exception e) {
+      logger.error("Failed to push message object to queue: "+e.getMessage(), e);
       throw new RuntimeException(e); // TODO - handle error
     }
   }
@@ -93,6 +98,7 @@ public final class FileMessageQueue implements MessageQueue {
       return null;
     }
     catch (Exception e) {
+      logger.error("Failed to read message from queue: "+e.getMessage(), e);
       throw new RuntimeException(e); // TODO - handle error
     }
   }

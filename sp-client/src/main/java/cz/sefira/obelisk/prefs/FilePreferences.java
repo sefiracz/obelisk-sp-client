@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +37,10 @@ public class FilePreferences extends UserPreferences {
 
   private static final Logger logger = LoggerFactory.getLogger(FilePreferences.class.getName());
 
-  private PropertiesConfiguration config;
+  private DefaultFilePreferences defaultConfig;
+  protected PropertiesConfiguration config;
+
+  protected FilePreferences() {}
 
   public FilePreferences(AppConfig appConfig) {
     try {
@@ -44,7 +49,7 @@ public class FilePreferences extends UserPreferences {
         try {
           Files.createFile(configFile);
           try {
-            InputStream configStream = FilePreferences.class.getResourceAsStream("/user-preferences.properties");
+            InputStream configStream = FilePreferences.class.getResourceAsStream("/prefs/user-preferences-template.properties");
             if (configStream != null) {
               Files.copy(configStream, configFile, REPLACE_EXISTING);
               logger.info("New user-preferences.properties file created from template");
@@ -54,9 +59,10 @@ public class FilePreferences extends UserPreferences {
           }
         } catch (IOException e) {
           logger.error("Failed to create configuration file: "+e.getMessage(), e);
-          throw new RuntimeException(e);
         }
       }
+      // load default values
+      defaultConfig = new DefaultFilePreferences(appConfig);
 
       // config params
       FileBasedBuilderParameters fileBasedParams = new Parameters().fileBased();
@@ -70,28 +76,31 @@ public class FilePreferences extends UserPreferences {
 
       // config contains all properties read from the file
       config = builder.getConfiguration();
-      hiddenDialogIds = config.getString(HIDDEN_DIALOGS, null);
 
-      final String splashScreenValue = config.getString(SPLASH_SCREEN, "true");
-      splashScreen = splashScreenValue != null ? Boolean.parseBoolean(splashScreenValue) : null;
-
-      final String showNotificationsType = config.getString(SHOW_NOTIFICATIONS, null);
-      showNotifications = NotificationType.fromType(showNotificationsType);
-
-      final String debugModeValue = config.getString(DEBUG_MODE, "false");
-      debugMode = debugModeValue != null ? Boolean.parseBoolean(debugModeValue) : null;
-
-      language = config.getString(LANGUAGE, null);
-
-      try {
-        final String cacheDurationValue = config.getString(CACHE_DURATION, "0");
-        cacheDuration = normalizeCacheDuration(Integer.parseInt(cacheDurationValue));
-      } catch (NumberFormatException e) {
-        cacheDuration = 0;
+      // get values
+      String hiddenDialogIdsList = get(String.class, HIDDEN_DIALOGS, null);
+      if (hiddenDialogIdsList != null && !hiddenDialogIdsList.isEmpty()) {
+        String[] dialogIds = hiddenDialogIdsList.split(",");
+        hiddenDialogIds = new ArrayList<>(Arrays.asList(dialogIds));
+      } else {
+        hiddenDialogIds = defaultConfig.getHiddenDialogIds();
       }
-
+      splashScreen = get(Boolean.class, SPLASH_SCREEN, defaultConfig.isSplashScreen());
+      String notificationType = get(String.class, SHOW_NOTIFICATIONS, null);
+      showNotifications = (notificationType != null && !notificationType.isEmpty()) ? NotificationType.fromType(notificationType) : defaultConfig.getShowNotifications();
+      debugMode = get(Boolean.class, DEBUG_MODE, defaultConfig.isDebugMode());
+      language = get(String.class, LANGUAGE, defaultConfig.getLanguage());
+      cacheDuration = normalizeCacheDuration(get(Integer.class, CACHE_DURATION, defaultConfig.getCacheDuration()));
     } catch (Exception e) {
       logger.error("Failed to load configuration: "+e.getMessage(), e);
+    }
+  }
+
+  protected <T> T get(final Class<T> cls, final String key, final T defaultValue) {
+    try {
+      return config.get(cls, key, defaultValue);
+    } catch (Exception e) {
+      return defaultValue;
     }
   }
 
@@ -109,11 +118,19 @@ public class FilePreferences extends UserPreferences {
     this.debugMode = debugMode;
   }
 
+  public void setHiddenDialogIds(List<String> hiddenDialogIds){
+    this.hiddenDialogIds = hiddenDialogIds;
+    config.setProperty(HIDDEN_DIALOGS, String.join(",", hiddenDialogIds));
+  }
+
   public void addHiddenDialogId(String dialogId) {
-    List<String> list = getHiddenDialogIds();
-    list.add(dialogId);
-    this.hiddenDialogIds = String.join(",", list);
-    config.setProperty(HIDDEN_DIALOGS, hiddenDialogIds);
+    if (hiddenDialogIds == null) {
+      hiddenDialogIds = new ArrayList<>();
+    }
+    if (!hiddenDialogIds.contains(dialogId)) {
+      hiddenDialogIds.add(dialogId);
+    }
+    config.setProperty(HIDDEN_DIALOGS, String.join(",", hiddenDialogIds));
   }
 
   public void setSplashScreen(Boolean splashScreen) {
@@ -139,7 +156,12 @@ public class FilePreferences extends UserPreferences {
   @Override
   public void clear() {
     super.clear();
-    this.config.clear();
+    setDebugMode(defaultConfig.isDebugMode());
+    setHiddenDialogIds(defaultConfig.getHiddenDialogIds());
+    setSplashScreen(defaultConfig.isSplashScreen());
+    setShowNotifications(defaultConfig.getShowNotifications());
+    setLanguage(defaultConfig.getLanguage());
+    setCacheDuration(defaultConfig.getCacheDuration());
   }
 
 
