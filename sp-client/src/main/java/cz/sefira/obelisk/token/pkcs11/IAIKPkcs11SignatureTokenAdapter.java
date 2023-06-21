@@ -136,16 +136,17 @@ public class IAIKPkcs11SignatureTokenAdapter implements SignatureTokenConnection
     try {
       login();
       final EncryptionAlgorithm encryptionAlgorithm = keyEntry.getEncryptionAlgorithm();
-      final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
-          .getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
+      SignatureAlgorithm signatureAlgorithm;
       // prepare data to be signed
       byte[] signatureData;
       if (EncryptionAlgorithm.RSA.equals(encryptionAlgorithm)) {
-        if (mgf != null) {
+        if (mgf != null && token.isRsaPssSupportedMechanism(digestAlgorithm)) {
+          signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm, mgf);
           // RSA-PSS PKCS#1 v2.1
           signatureData = toBeSigned;
         }
         else {
+          signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
           // prepare ASN1 signature structure
           // RSA PKCS#1 v1.5
           byte[] digest = DSSUtils.digest(digestAlgorithm, toBeSigned);
@@ -155,6 +156,7 @@ public class IAIKPkcs11SignatureTokenAdapter implements SignatureTokenConnection
           signatureData = digestInfo.getEncoded();
         }
       } else {
+        signatureAlgorithm = SignatureAlgorithm.getAlgorithm(encryptionAlgorithm, digestAlgorithm);
         // TODO ? sign for non-RSA algorithms ?
         signatureData = toBeSigned;
       }
