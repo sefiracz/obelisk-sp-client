@@ -32,6 +32,7 @@ import iaik.pkcs.pkcs11.wrapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TokenHandler {
@@ -281,6 +282,45 @@ public class TokenHandler {
         throw new IllegalStateException("Unexpected key algorithm: "+signatureAlgorithm.getEncryptionAlgorithm());
     }
     return signatureMechanism;
+  }
+
+  public boolean isRsaPssSupportedMechanism(DigestAlgorithm digestAlgorithm) throws PKCS11Exception {
+    switch (digestAlgorithm) {
+      case SHA1:
+        return isSupportedMechanism(PKCS11Constants.CKM_SHA1_RSA_PKCS_PSS);
+      case SHA224:
+      case SHA3_224:
+        return isSupportedMechanism(PKCS11Constants.CKM_SHA224_RSA_PKCS_PSS);
+      case SHA256:
+      case SHA3_256:
+        return isSupportedMechanism(PKCS11Constants.CKM_SHA256_RSA_PKCS_PSS);
+      case SHA384:
+      case SHA3_384:
+        return isSupportedMechanism(PKCS11Constants.CKM_SHA384_RSA_PKCS_PSS);
+      case SHA512:
+      case SHA3_512:
+        return isSupportedMechanism(PKCS11Constants.CKM_SHA512_RSA_PKCS_PSS);
+      default:
+        log.error("Unexpected digest algorithm: "+digestAlgorithm.getName());
+        return false;
+    }
+  }
+
+  private boolean isSupportedMechanism(long mechanism) {
+    try {
+      long[] mechanismList = pkcs11Module.getMechanismList(tokenHandle);
+      if (mechanismList != null) {
+        log.info("Supported mechanisms: " + Arrays.toString(mechanismList));
+        for (long m : mechanismList) {
+          if (m == mechanism) {
+            return true;
+          }
+        }
+      }
+    } catch (PKCS11Exception e) {
+      log.error("Unable to get mechanism list: "+e.getMessage(), e);
+    }
+    return false;
   }
 
 }

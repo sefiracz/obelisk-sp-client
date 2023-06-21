@@ -433,7 +433,7 @@ public class PKCS11Module {
       log.debug("Initialize signature operation");
     try {
       if (log.isDebugEnabled())
-        log.debug("Call C_SignInit("+sessionHandle+", "+signatureMechanism+", "+key.getSignatureKeyHandle()+", true)");
+        log.debug("Call C_SignInit("+sessionHandle+", "+signatureMechanism.mechanism+", "+key.getSignatureKeyHandle()+", true)");
       pkcs11Module.C_SignInit(sessionHandle, signatureMechanism, key.getSignatureKeyHandle(), true);
     } catch (PKCS11Exception e) {
       // check if operation is already active (user might have cancelled re-authentication in previous attempt)
@@ -464,6 +464,18 @@ public class PKCS11Module {
       }
     }
     return signature;
+  }
+
+  /**
+   * Obtains a list of mechanisms supported by a token
+   * @param tokenHandle Token handle
+   * @return List of CK_MECHANISM_TYPE mechanisms
+   * @throws PKCS11Exception
+   */
+  public long[] getMechanismList(long tokenHandle) throws PKCS11Exception {
+    if (log.isDebugEnabled())
+      log.debug("Call C_GetMechanismList("+tokenHandle+")");
+    return pkcs11Module.C_GetMechanismList(tokenHandle);
   }
 
   /**
