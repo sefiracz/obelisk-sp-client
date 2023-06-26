@@ -17,6 +17,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
+import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.util.X509Utils;
 import cz.sefira.obelisk.api.*;
@@ -49,6 +50,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -188,6 +190,18 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 			}
 			return new ReadOnlyStringWrapper(validUntil);
 		});
+		keystoreNotAfterTableColumn.setComparator((t, t1) -> {
+			try {
+				String timeFormat = ResourceUtils.getBundle().getString("date.format.pattern");
+				SimpleDateFormat format = new SimpleDateFormat(timeFormat);
+				Date d1 = format.parse(t);
+				Date d2 = format.parse(t1);
+				return Long.compare(d1.getTime(), d2.getTime());
+			} catch (Exception p) {
+				logger.error("Unable to process dates: "+p.getMessage());
+			}
+			return 0;
+		});
     // keystore type
 		keystoreTypeTableColumn
 				.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getType().getSimpleLabel()));
@@ -218,7 +232,10 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
-		remove.setOnAction((event) -> observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem()));
+		remove.setOnAction((event) -> {
+			observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem());
+			keystoresTable.refresh();
+		});
 
 		observableKeystores.addListener((ListChangeListener<AbstractProduct>)(c) -> {
 			while(c.next()) {
