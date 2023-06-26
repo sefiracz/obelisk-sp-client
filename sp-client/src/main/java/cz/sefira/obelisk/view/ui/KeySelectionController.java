@@ -182,10 +182,14 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
   public void init(final Object... params) {
     StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "key.selection.title");
     final List<DSSPrivateKeyEntry> keys = (List<DSSPrivateKeyEntry>) params[0];
+    final boolean specificCertificateLookup = (boolean) params[1];
     keys.removeIf(k -> k instanceof EmptyKeyEntry);
     final ObservableList<DSSPrivateKeyEntry> items = FXCollections.observableArrayList(keys);
-    this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString("key.selection.empty"),
-        new Object[]{})));
+    String placeholder = "key.selection.empty";
+    if (specificCertificateLookup) {
+      placeholder = "key.selection.lookup.not.found";
+    }
+    this.listView.setPlaceholder(new Label(MessageFormat.format(resources.getString(placeholder), new Object[]{})));
     this.listView.setItems(items);
     borderPane.setPrefHeight(keys.size() > 2 ? 390 : 320);
   }

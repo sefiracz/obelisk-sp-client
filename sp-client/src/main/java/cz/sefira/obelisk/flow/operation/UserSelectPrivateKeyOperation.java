@@ -96,7 +96,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         if (userInteraction) {
             // let user select private key
             final OperationResult<Object> op =
-                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml", keys).perform();
+                this.operationFactory.getOperation(UIOperation.class, "/fxml/key-selection.fxml", keys, certificateFilter.getCertificateId() != null).perform();
             if(op.getStatus().equals(CoreOperationStatus.BACK)) {
                 return new OperationResult<>(CoreOperationStatus.BACK);
             }
