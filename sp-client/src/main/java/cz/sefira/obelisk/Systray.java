@@ -50,7 +50,7 @@ public class Systray {
     this.api = api;
     logger.info("Spawning system tray icon");
     final String tooltip = AppConfig.get().getApplicationName();
-    final URL trayIcon = Systray.class.getResource("/images/icon.png");
+    final URL trayIcon = Systray.class.getResource("/images/icon"+(Boolean.parseBoolean(System.getProperty("dev.icon")) ? "-dev" : "")+".png");
     if (SystemTray.isSupported()) {
       // AWT implementation
       systray = new AWTSystray(api, tooltip, trayIcon);
@@ -104,7 +104,6 @@ public class Systray {
       try {
         showing = false;
         Thread.sleep(DISPLAY_PERIOD - displayTime); // show last notification for longer
-
       } catch (InterruptedException e) {
         logger.error(e.getMessage(), e);
       }
