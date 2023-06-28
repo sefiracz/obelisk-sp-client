@@ -15,9 +15,7 @@
 package cz.sefira.obelisk.flow.operation;
 
 import cz.sefira.obelisk.CancelledOperationException;
-import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
-import cz.sefira.obelisk.api.Product;
 import cz.sefira.obelisk.api.ProductAdapter;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.flow.exceptions.AbstractTokenRuntimeException;
