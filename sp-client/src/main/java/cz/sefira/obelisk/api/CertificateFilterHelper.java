@@ -6,7 +6,6 @@ import cz.sefira.obelisk.dss.token.DSSPrivateKeyEntry;
 import cz.sefira.obelisk.dss.token.SignatureTokenConnection;
 import cz.sefira.obelisk.dss.KeyUsageBit;
 import cz.sefira.obelisk.dss.x509.CertificateToken;
-import cz.sefira.obelisk.token.keystore.EmptyKeyEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,25 +31,22 @@ public class CertificateFilterHelper {
 		for (DSSPrivateKeyEntry entry : fullList) {
 			// expired
 			if (!filter.getAllowExpired() && entry.getCertificateToken().isExpiredOn(new Date())) {
-				if(System.getProperty("allowExpired") == null) {
-					filteredList.add(entry);
-					continue;
-				}
+				filteredList.add(entry);
+				continue;
 			}
 			// filter certificates issued by CA
 			if (filter.getIssuer() != null) {
 				CertificateToken issuer = filter.getIssuer();
 				try {
-					if (!(entry instanceof EmptyKeyEntry)) {
-						X509Certificate certificate = entry.getCertificateToken().getCertificate();
-						certificate.verify(issuer.getPublicKey());
+					X509Certificate certificate = entry.getCertificateToken().getCertificate();
+					certificate.verify(issuer.getPublicKey());
+				} catch (Exception e) {
+					//  certificate not issued by given CA or unable to verify
+					if (!(e instanceof SignatureException)) {
+						logger.error("Unexpected error verifying issued certificate: "+e.getMessage());
 					}
-				} catch (SignatureException e) {
-					//  certificate not issued by given CA
 					filteredList.add(entry); // filter out
 					continue;
-				} catch (Exception e) {
-					logger.error("Unexpected error verifying issued certificates: "+e.getMessage());
 				}
 			}
 			// absolute certificate filter via SHA256 digest

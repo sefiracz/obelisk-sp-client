@@ -6,7 +6,7 @@
 
   <groupId>cz.sefira.obelisk</groupId>
   <artifactId>obelisk-sp-client</artifactId>
-  <version>2.0.3</version> <!-- !!! NEEDS ALSO CHANGE in resources/version.txt !!! -->
+  <version>2.0.4</version> <!-- !!! NEEDS ALSO CHANGE in resources/version.txt !!! -->
   <packaging>pom</packaging>
   <name>OBELISK Signing Portal Client</name>
 
