@@ -27,6 +27,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import cz.sefira.obelisk.api.model.OS;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
@@ -71,14 +73,38 @@ public class Pkcs11ParamsController extends AbstractUIOperationController<Pkcs11
         });
         this.ok.disableProperty().bind(Bindings.not(this.pkcs11FileSpecified));
         this.cancel.setOnAction(e -> this.signalUserCancel());
-        this.selectFile.setOnAction(e -> {
-            this.pkcs11File = this.getDisplay().displayFileChooser(new ExtensionFilter(
-                    OS.getNativeLibraryFileExtensionDescription(), OS.getNativeLibraryFileExtension()));
-            this.pkcs11FileSpecified.set(this.pkcs11File != null);
-            if (pkcs11File != null) {
-                selectFile.setText(pkcs11File.getName());
+        this.selectFile.setOnDragOver(e -> {
+            Dragboard db = e.getDragboard();
+            if (db.hasFiles() && db.getFiles() != null && db.getFiles().size() == 1) {
+                e.acceptTransferModes(TransferMode.ANY);
+            } else {
+                e.consume();
             }
         });
+        this.selectFile.setOnDragDropped(e -> {
+            Dragboard db = e.getDragboard();
+            boolean success = false;
+            if (db.hasFiles() && db.getFiles() != null && db.getFiles().size() == 1) {
+                processPkcs11File(db.getFiles().get(0));
+            }
+            e.setDropCompleted(success);
+            e.consume();
+        });
+        this.selectFile.setOnAction(e -> {
+            File selectedPkcs11File = this.getDisplay().displayFileChooser(
+                new ExtensionFilter(OS.getNativeLibraryFileExtensionDescription(), OS.getNativeLibraryFileExtension()),
+                new ExtensionFilter("All files", "*")
+            );
+            processPkcs11File(selectedPkcs11File);
+        });
+    }
+
+    private void processPkcs11File(File selectedPkcs11File) {
+        if (selectedPkcs11File != null) {
+            pkcs11File = selectedPkcs11File;
+            pkcs11FileSpecified.set(true);
+            selectFile.setText(pkcs11File.getName());
+        }
     }
 
 }

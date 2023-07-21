@@ -16,7 +16,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefWidth="700.0" prefHeight="400" fx:id="productsWindow" xmlns="http://javafx.com/javafx"
+<StackPane prefWidth="710.0" prefHeight="400" fx:id="productsWindow" xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.ProductSelectionController">
 
   <BorderPane fx:id="borderPane">
