@@ -27,6 +27,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -81,17 +83,42 @@ public class ConfigureKeystoreController extends AbstractUIOperationController<C
 		});
 		ok.disableProperty().bind(Bindings.not(keystoreFileSpecified));
 		cancel.setOnAction(e -> signalUserCancel());
+		selectFile.setOnDragOver(e -> {
+			Dragboard db = e.getDragboard();
+			if (db.hasFiles() && db.getFiles() != null && db.getFiles().size() == 1 &&
+					!(whichKeystoreType(db.getFiles().get(0)).equals(KeystoreType.UNKNOWN))) {
+				e.acceptTransferModes(TransferMode.ANY);
+			} else {
+				e.consume();
+			}
+		});
+		selectFile.setOnDragDropped(e -> {
+			Dragboard db = e.getDragboard();
+			boolean success = false;
+			if (db.hasFiles() && db.getFiles() != null && db.getFiles().size() == 1) {
+				success = processKeystoreFile(db.getFiles().get(0));
+			}
+			e.setDropCompleted(success);
+			e.consume();
+		});
 		selectFile.setOnAction(e -> {
-			keystoreFile = getDisplay().displayFileChooser(
+			File selectedKeystoreFile = getDisplay().displayFileChooser(
 					new ExtensionFilter("KeyStore files", "*.p12", "*.pfx", "*.P12", "*.PFX", "*.jks", "*.JKS", "*.jceks" ,"*.JCEKS"),
 					new ExtensionFilter("All files", "*")
 			);
-			if (keystoreFile != null) {
-        keystoreType = whichKeystoreType(keystoreFile);
-        selectFile.setText(keystoreFile.getName());
-        keystoreFileSpecified.set(!keystoreType.equals(KeystoreType.UNKNOWN));
-      }
+			processKeystoreFile(selectedKeystoreFile);
 		});
+	}
+
+	private boolean processKeystoreFile(File selectedKeystoreFile) {
+		if (selectedKeystoreFile != null) {
+			keystoreType = whichKeystoreType(selectedKeystoreFile);
+			keystoreFile = selectedKeystoreFile;
+			selectFile.setText(keystoreFile.getName());
+			keystoreFileSpecified.set(!keystoreType.equals(KeystoreType.UNKNOWN));
+			return true;
+		}
+		return false;
 	}
 
 	private KeystoreType whichKeystoreType(File keystoreFile){
