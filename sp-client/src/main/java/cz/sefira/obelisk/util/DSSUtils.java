@@ -65,14 +65,16 @@ public class DSSUtils {
       msg = "key.selection.error.password.incorrect";
     } else if(e.getCause() instanceof UnrecoverableKeyException) {
       msg = "key.selection.error.password.incorrect"; // TODO - different key x keystore password, other issues???
-    }  else if (exception.contains("CKR_PIN_LOCKED")) {
+    } else if (exception.contains("CKR_PIN_LOCKED")) {
       msg = "key.selection.error.pin.locked";
+    } else if (exception.contains("Integrity check failed: java.security.UnrecoverableKeyException")) {
+      msg = "key.selection.keystore.integrity.failed";
     } else {
       return false; // unknown exception - re-throw
     }
     SessionManager.getManager().destroy();
     operationFactory.getMessageDialog(api, new DialogMessage(msg, DialogMessage.Level.WARNING,
-            400, 150), true);
+            410, 155), true);
     return true;
   }
 
