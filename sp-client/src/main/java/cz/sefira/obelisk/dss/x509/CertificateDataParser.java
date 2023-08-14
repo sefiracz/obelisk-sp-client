@@ -304,33 +304,39 @@ public class CertificateDataParser {
         String type;
         switch ((int) name.get(0)) {
           case NAME_RFC822:
-            type = "RFC822 Name = ";
+            type = "RFC822 Name = {}";
             break;
           case NAME_DNS:
-            type = "DNS Name = ";
+            type = "DNS Name = {}";
             break;
           case NAME_X400:
-            type = "X.400 Address = ";
+            type = "X.400 Address = {}";
             break;
           case NAME_DIRECTORY:
-            type = "Directory Name = ";
+            type = "Directory Name = {}";
             break;
           case NAME_EDI:
-            type = "EDI Party Name = ";
+            type = "EDI Party Name = {}";
             break;
           case NAME_URI:
-            type = "URI = ";
+            type = "URI = {}";
             break;
           case NAME_IP:
-            type = "IP Address = ";
+            type = "IP Address = {}";
             break;
           case NAME_OID:
-            type = "OID = ";
+            type = "OID = {}";
             break;
           default:
-            type = "Other = ";
+            type = "Other = {}";
         }
-        names.add(type + "" + name.get(1));
+        String value = "";
+        if (name.get(1) instanceof String) {
+          value = (String) name.get(1);
+        } else if (name.get(1) instanceof byte[]) {
+          value = bytesToHex((byte[]) name.get(1), "", true);
+        }
+        names.add(type.replace("{}", value));
       }
       return new String[] {resources.getString("certificate.viewer.x509.san"), String.join("\n", names)};
     } catch (Exception e) {
@@ -393,18 +399,22 @@ public class CertificateDataParser {
   }
 
   private String bytesToHex(byte[] bytes) {
-    return bytesToHex(bytes, ":");
+    return bytesToHex(bytes, ":", false);
   }
 
-  private String bytesToHex(byte[] bytes, String delimiter) {
+  private String bytesToHex(byte[] bytes, String delimiter, boolean lowerCase) {
     int v;
-    StringBuilder sb = new StringBuilder();
+    List<String> byteValues = new ArrayList<>();
     for (byte b : bytes) {
+      StringBuilder sb = new StringBuilder();
       v = b & 0xFF;
-      sb.append(hexArray[v >>> 4]).append(hexArray[v & 0x0F]).append(delimiter);
+      byteValues.add(sb.append(hexArray[v >>> 4]).append(hexArray[v & 0x0F]).toString());
     }
-    String hex = sb.toString();
-    return hex.substring(0, hex.length() - 1);
+    String hex = String.join(delimiter != null ? delimiter : "", byteValues);
+    if (lowerCase) {
+      hex = hex.toLowerCase();
+    }
+    return hex;
   }
 
   public String getSubjectDN() {
