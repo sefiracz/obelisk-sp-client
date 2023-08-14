@@ -165,6 +165,9 @@ public class Dispatcher implements AppPlugin {
           notificationProperty = "notification.event.exception";
           notificationType = MessageType.ERROR;
         }
+      } else {
+        notificationProperty = "notification.event.finish";
+        notificationType = MessageType.INFO;
       }
     } catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
