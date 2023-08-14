@@ -24,9 +24,6 @@ import cz.sefira.obelisk.flow.FlowRegistry;
 import cz.sefira.obelisk.flow.operation.BasicOperationFactory;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
-import cz.sefira.obelisk.storage.EventsStorage;
-import cz.sefira.obelisk.storage.ProductStorage;
-import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -39,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
