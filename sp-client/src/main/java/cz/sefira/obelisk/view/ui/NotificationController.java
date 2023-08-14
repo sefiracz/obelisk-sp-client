@@ -182,12 +182,6 @@ public class NotificationController extends ControllerCore implements PropertyCh
     setLogoBackground(background, 230, 230);
   }
 
-  public double linear(double value, double x1, double y1, double x2, double y2) {
-    double a = x2 == x1 ? 0 : (y2 - y1) / (x2 - x1);
-    double b = a > 0 ? (y1 - (x1 * a)) : (Math.max(y1, y2));
-    return a * value + b;
-  }
-
   private void spawnInRightBottomCorner(Region r, double offsetX, double offsetY) {
     screenResolution = Screen.getPrimary().getBounds();
     posOffsetX = offsetX;
