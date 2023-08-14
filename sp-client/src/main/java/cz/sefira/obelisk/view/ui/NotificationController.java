@@ -40,6 +40,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Notification floating window
@@ -47,6 +48,11 @@ import java.util.concurrent.ScheduledExecutorService;
 public class NotificationController extends ControllerCore implements PropertyChangeListener, StandaloneUIController, Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(NotificationController.class.getName());
+
+  private static final int defaultResWidth = 1920;
+  private static final int defaultResHeight = 1080;
+  private double posOffsetX = 60;
+  private double posOffsetY = 60;
 
   @FXML
   private BorderPane background;
@@ -73,6 +79,10 @@ public class NotificationController extends ControllerCore implements PropertyCh
 
   private PropertyChangeSupport propertyChangeSupport;
   private ScheduledExecutorService executorService;
+  private final ScheduledExecutorService resolutionService = Executors.newSingleThreadScheduledExecutor();
+  private Rectangle2D screenResolution;
+  private double posX;
+  private double posY;
   private double xOffset;
   private double yOffset;
   private boolean hiddenFlag;
@@ -90,7 +100,11 @@ public class NotificationController extends ControllerCore implements PropertyCh
     stage.initStyle(StageStyle.UNDECORATED);
     stage.setTitle(ResourceUtils.getBundle().getString("notification.title"));
     stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> close());
-    spawnInRightBottomCorner(background);
+
+    screenResolution = Screen.getPrimary().getBounds();
+    double widthChange = screenResolution.getWidth() / defaultResWidth;
+    double heightChange = screenResolution.getHeight() / defaultResHeight;
+    spawnInRightBottomCorner(background, posOffsetX * widthChange, posOffsetY * heightChange);
 
     // asynchronous window content update
     asyncUpdate(executorService, false, () -> {
@@ -114,9 +128,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
           }
           // check if notification should be spawned
           if (!hiddenFlag) {
-            if (!stage.isShowing())
-              logger.info("Show notification");
-            stage.show();
+            showNotification();
           }
           if (currentNotification.isClose()) {
             if (!stage.isShowing() || currentNotification.getDelay() == 0) {
@@ -148,23 +160,50 @@ public class NotificationController extends ControllerCore implements PropertyCh
     });
 
     background.setOnMouseDragged(event -> {
-      stage.setX(event.getScreenX() + xOffset);
-      stage.setY(event.getScreenY() + yOffset);
+      posX = event.getScreenX() + xOffset;
+      posY = event.getScreenY() + yOffset;
+      stage.setX(posX);
+      stage.setY(posY);
     });
+
+    resolutionService.scheduleAtFixedRate(() -> {
+      try {
+        Rectangle2D newResolution = Screen.getPrimary().getBounds();
+        if (!screenResolution.equals(newResolution)) {
+          double widthChange = newResolution.getWidth() / screenResolution.getWidth();
+          double heightChange = newResolution.getHeight() / screenResolution.getHeight();
+          spawnInRightBottomCorner(background, posOffsetX * widthChange, posOffsetY * heightChange);
+        }
+      } catch (Exception e) {
+        // ignore problems
+      }
+    }, 1, 1, TimeUnit.SECONDS);
 
     setLogoBackground(background, 230, 230);
   }
 
-  private void spawnInRightBottomCorner(Region r) {
-    final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
-    stage.setX(screenResolution.getWidth() - 75 - r.getPrefWidth());
-    stage.setY(screenResolution.getHeight() - 75 - r.getPrefHeight());
+  public double linear(double value, double x1, double y1, double x2, double y2) {
+    double a = x2 == x1 ? 0 : (y2 - y1) / (x2 - x1);
+    double b = a > 0 ? (y1 - (x1 * a)) : (Math.max(y1, y2));
+    return a * value + b;
+  }
+
+  private void spawnInRightBottomCorner(Region r, double offsetX, double offsetY) {
+    screenResolution = Screen.getPrimary().getBounds();
+    posOffsetX = offsetX;
+    posOffsetY = offsetY;
+    posX = screenResolution.getWidth() - offsetX; // starting X position
+    posY = screenResolution.getHeight() - offsetY; // starting Y position
+    stage.setX(posX - r.getPrefWidth());
+    stage.setY(posY - r.getPrefHeight());
+    logger.info("Spawning notification at position: "+posX+"x"+posY);
   }
 
   @Override
   public void close() {
     stage.close();
     executorService.shutdown();
+    resolutionService.shutdown();
     propertyChangeSupport.removePropertyChangeListener(this);
   }
 
@@ -198,6 +237,11 @@ public class NotificationController extends ControllerCore implements PropertyCh
     icon.setVisible(visible);
   }
 
+  private void showNotification() {
+    if (!stage.isShowing())
+      logger.info("Show notification");
+    stage.show();
+  }
 
   public TimerService createHideTimer(long seconds) {
     TimerService service = new TimerService(seconds);
