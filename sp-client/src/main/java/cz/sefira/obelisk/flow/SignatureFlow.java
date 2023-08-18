@@ -167,8 +167,11 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
           return this.handleErrorOperationResult(selectPrivateKeyOperationResult);
         }
         else {
+          if (productAdapter == null) {
+            productAdapter = matchingProductAdapters.get(0).getAdapter();
+          }
           // repeat the process with certificate forgotten to make user find it again
-          productAdapter.removeProduct(selectedProduct);
+          productAdapter.removeProduct(selectedProduct); // fixme - NPE if user cancelled this action before
           QuickAccessProductsMap.access().remove(certificateId, selectedProduct);
           return process(api, req);
         }
