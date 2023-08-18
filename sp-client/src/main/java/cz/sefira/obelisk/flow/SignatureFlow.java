@@ -171,7 +171,7 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
             productAdapter = matchingProductAdapters.get(0).getAdapter();
           }
           // repeat the process with certificate forgotten to make user find it again
-          productAdapter.removeProduct(selectedProduct); // fixme - NPE if user cancelled this action before
+          productAdapter.removeProduct(selectedProduct);
           QuickAccessProductsMap.access().remove(certificateId, selectedProduct);
           return process(api, req);
         }
