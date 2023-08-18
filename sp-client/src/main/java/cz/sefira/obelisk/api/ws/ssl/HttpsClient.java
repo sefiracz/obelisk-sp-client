@@ -101,6 +101,7 @@ public class HttpsClient {
         .setSocketTimeout(SOCKET_TIMEOUT)
         .build());
     clientBuilder.setConnectionManager(connectionManager);
+    api.getProxyProvider().setupProxy(request, clientBuilder);
     setHardTimeout(request);
     try (BusyIndicator busyIndicator = new BusyIndicator(true, false);
          LongActivityNotifier notifier = new LongActivityNotifier(api, "notification.long.activity.server", LONG_ACTIVITY.toMilliseconds());
@@ -116,6 +117,7 @@ public class HttpsClient {
         }
         if (responseCode == SC_OK || responseCode == SC_ACCEPTED || responseCode == SC_NO_CONTENT ||
             responseCode == SC_MOVED_TEMPORARILY || responseCode == SC_SEE_OTHER) {
+          api.getProxyProvider().setInitFlag(true);
           return new HttpResponse(responseCode, response.getReasonPhrase(), response.getHeaders(), content);
         } else {
           throw new HttpResponseException(responseCode, response.getReasonPhrase(), response.getHeaders(), content);
@@ -188,10 +190,10 @@ public class HttpsClient {
         // did we find certificate issued by trust-anchor?
         List<X509Certificate> anchors = api.getSslCertificateProvider().getBySubject(issuer.getIssuerX500Principal());
         if (anchors != null) {
-          boolean trustedChain = X509Utils.validateCertificateChain(certificates); // validate certificate chain
+          boolean validChain = X509Utils.validateCertificateChain(certificates); // validate certificate chain
           for (X509Certificate anchor : anchors) {
             // find trusted-anchor that signs the chain
-            if (trustedChain && X509Utils.validateCertificateIssuer(issuer, anchor)) {
+            if (validChain && X509Utils.validateCertificateIssuer(issuer, anchor)) {
               logger.info("Found trusted certificate chain");
               return true;
             }

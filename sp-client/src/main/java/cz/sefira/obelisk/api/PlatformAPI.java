@@ -16,6 +16,7 @@ package cz.sefira.obelisk.api;
 
 import cz.sefira.obelisk.Systray;
 import cz.sefira.obelisk.api.notification.Notification;
+import cz.sefira.obelisk.api.ws.proxy.ProxyProvider;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.flow.OperationFactory;
@@ -94,6 +95,7 @@ public interface PlatformAPI {
 
 	SSLCertificateProvider getSslCertificateProvider();
 
+	ProxyProvider getProxyProvider();
 	Systray getSystray();
 
 	void pushIntegratedNotification(Notification notification);

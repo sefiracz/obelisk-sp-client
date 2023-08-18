@@ -18,7 +18,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane minWidth="550" prefHeight="250" prefWidth="660" xmlns="http://javafx.com/javafx"
+<BorderPane minWidth="550" prefHeight="270" prefWidth="660" xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.PreferencesController">
 
 	<top>
@@ -32,25 +32,41 @@
       <CheckBox fx:id="splashscreen" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="1"/>
       <!-- row 2 -->
       <Label text="%preferences.notifications" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-      <ComboBox fx:id="showNotifications" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="2"/>
+      <ComboBox fx:id="showNotifications" GridPane.columnIndex="3" prefWidth="170" minWidth="170" GridPane.rowIndex="2"/>
       <!-- row 3 -->
-      <Label text="%reauth.settings.label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+      <Label text="%preferences.qpin.cache" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
       <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-      <Button fx:id="minusDuration" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="minus" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+      <Button fx:id="minusDuration" prefWidth="25" minWidth="25" prefHeight="25" minHeight="25" styleClass="minus" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
       <TextField fx:id="durationTextField" promptText="0 minut" styleClass="durationTextField" prefWidth="120" minWidth="120"  GridPane.columnIndex="3" GridPane.rowIndex="3"/>
-      <Button fx:id="plusDuration" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+      <Button fx:id="plusDuration" prefWidth="25" minWidth="25" prefHeight="25" minHeight="25" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
       <!-- row 4 -->
       <Label text="%preferences.debugmode" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
       <CheckBox fx:id="debugMode" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="4"/>
-      <!-- row 5 -->
-<!--      <Label text="%preferences.notification.close.delay" GridPane.columnIndex="0" GridPane.rowIndex="5"/>-->
-<!--      <Label text=" " GridPane.columnIndex="1" GridPane.rowIndex="5"/>-->
-<!--      <Button fx:id="minusDelay" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="minus" GridPane.columnIndex="2" GridPane.rowIndex="5"/>-->
-<!--      <TextField fx:id="delayTextField" promptText="5 sekund" styleClass="durationTextField" prefWidth="100" minWidth="100"  GridPane.columnIndex="4" GridPane.rowIndex="5"/>-->
-<!--      <Button fx:id="plusDelay" prefWidth="26" minWidth="26" prefHeight="26" minHeight="26" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="5"/>-->
+      <!-- separator - row 5 -->
+      <Separator GridPane.columnSpan="5" GridPane.rowIndex="5"/>
       <!-- row 6 -->
-<!--      <Label text="%preferences.sslStoreFile" GridPane.columnIndex="0" GridPane.rowIndex="6"/>-->
-<!--      <Button fx:id="sslStoreFile" GridPane.columnIndex="3" prefWidth="100" minWidth="100" GridPane.rowIndex="6"/>-->
+      <Label text="%preferences.systemProxy" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+      <CheckBox fx:id="useSystemProxy" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+      <!-- row 7 -->
+      <Label text="%preferences.proxyServer" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+      <TextField fx:id="proxyServer" promptText="%preferences.proxyServer.prompt" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+      <!-- row 8 -->
+      <Label text="%preferences.proxyPort" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+      <TextField fx:id="proxyPort" promptText="%preferences.proxyPort.prompt" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+      <!-- row 9 -->
+      <Label text="%preferences.https" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+      <CheckBox fx:id="useHttps" GridPane.columnIndex="3" GridPane.rowIndex="9" />
+      <!-- row 10 -->
+      <Label text="%preferences.authenticationRequired" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+      <CheckBox fx:id="proxyAuthentication" GridPane.columnIndex="3" GridPane.rowIndex="10" />
+      <!-- row 11 -->
+      <Label text="%preferences.proxyUsername" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+      <TextField fx:id="proxyUsername" promptText="%preferences.proxyUsername.prompt" GridPane.columnIndex="3" GridPane.rowIndex="11"/>
+      <!-- row 12 -->
+      <Label text="%preferences.proxyPassword" GridPane.columnIndex="0" GridPane.rowIndex="12" />
+      <PasswordField fx:id="proxyPassword" promptText="%preferences.proxyPassword.prompt" GridPane.columnIndex="3" GridPane.rowIndex="12"/>
+      <!-- row 13 -->
+
       <!-- row n -->
     </GridPane>
   </center>

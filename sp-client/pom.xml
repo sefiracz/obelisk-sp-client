@@ -10,7 +10,7 @@
   <parent>
     <groupId>cz.sefira.obelisk</groupId>
     <artifactId>obelisk-sp-client</artifactId>
-    <version>2.0.4</version>
+    <version>2.0.5</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -144,7 +144,6 @@
     <dependency>
       <groupId>iaik</groupId>
       <artifactId>iaik_pkcs11wrapper</artifactId>
-      <version>${iaik.pkcs11.wrapper.version}</version>
     </dependency>
     <!-- 3rd party misc -->
     <dependency>
@@ -162,6 +161,10 @@
     <dependency>
       <groupId>net.lingala.zip4j</groupId>
       <artifactId>zip4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bidib.com.github.markusbernhardt</groupId>
+      <artifactId>proxy-vole</artifactId>
     </dependency>
 
     <!-- logging -->
@@ -306,6 +309,7 @@
                   <directory>src/main/resources/prefs</directory>
                   <includes>
                     <include>default-user-preferences.properties</include>
+                    <include>default-proxy-preferences.properties</include>
                   </includes>
                 </resource>
               </resources>

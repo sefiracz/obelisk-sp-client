@@ -33,15 +33,28 @@ public class LogUtils {
 
     private final long start;
     private final String logText;
+    private final boolean debug;
 
     public Time(String logText) {
+      this(logText, false);
+    }
+
+    public Time(String logText, boolean debug) {
       this.start = System.currentTimeMillis();
       this.logText = logText;
+      this.debug = debug;
     }
 
     @Override
     public void close() throws Exception {
-      logger.info(logText+": "+(System.currentTimeMillis()-start)+"ms");
+      if(debug) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(logText + ": " + (System.currentTimeMillis() - start) + "ms");
+        }
+      } else {
+        logger.info(logText+": "+(System.currentTimeMillis()-start)+"ms");
+      }
+
     }
   }
 

@@ -12,17 +12,18 @@ package cz.sefira.obelisk.prefs;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.notification.NotificationType;
+import cz.sefira.obelisk.util.annotation.NotNull;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.FileBasedBuilderParameters;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Property file-based preferences
@@ -31,12 +32,12 @@ public class DefaultFilePreferences extends FilePreferences {
 
   private static final Logger logger = LoggerFactory.getLogger(DefaultFilePreferences.class.getName());
 
-  public DefaultFilePreferences(AppConfig appConfig) {
+  public DefaultFilePreferences(@NotNull AppConfig appConfig, @NotNull String defaultPreferencesFile) {
     try {
       // load default config file
       Path defaultDir = appConfig.getDefaultUserConfigDir();
       if (defaultDir != null) {
-        Path defaultConfigFile = defaultDir.resolve("default-user-preferences.properties");
+        Path defaultConfigFile = defaultDir.resolve(defaultPreferencesFile);
         if (defaultConfigFile.toFile().exists()) {
           // config params
           FileBasedBuilderParameters fileBasedParams = new Parameters().fileBased();
@@ -64,6 +65,15 @@ public class DefaultFilePreferences extends FilePreferences {
           debugMode = get(Boolean.class, DEBUG_MODE, false);
           language = get(String.class, LANGUAGE, null);
           cacheDuration = normalizeCacheDuration(get(Integer.class, CACHE_DURATION, 0));
+          // proxy setup
+          proxyReadOnly = get(Boolean.class, FLAG_PROXY_READONLY, false);
+          useSystemProxy = get(Boolean.class, USE_SYSTEM_PROXY, false);
+          proxyServer = get(String.class, PROXY_SERVER, null);
+          proxyPort = get(Integer.class, PROXY_PORT, null);
+          proxyUseHttps = get(Boolean.class, PROXY_USE_HTTPS, false);
+          proxyAuthentication = get(Boolean.class, PROXY_AUTHENTICATION, false);
+          proxyUsername = get(String.class, PROXY_USERNAME, null);
+          proxyPassword = get(String.class, PROXY_PASSWORD, null);
         }
       }
     } catch (Exception e) {
@@ -98,6 +108,46 @@ public class DefaultFilePreferences extends FilePreferences {
 
   @Override
   public void setDebugMode(Boolean debugMode) {
+    // read-only
+  }
+
+  @Override
+  public void setHiddenDialogIds(List<String> hiddenDialogIds) {
+    // read-only
+  }
+
+  @Override
+  public void setUseSystemProxy(Boolean useSystemProxy) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyServer(String proxyServer) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyPort(Integer proxyPort) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyUseHttps(Boolean proxyUseHttps) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyAuthentication(Boolean proxyAuthentication) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyUsername(String proxyUsername) {
+    // read-only
+  }
+
+  @Override
+  public void setProxyPassword(String proxyPassword) {
     // read-only
   }
 

@@ -49,6 +49,22 @@ public class JavaPreferences extends UserPreferences {
 
     language = prefs.get(LANGUAGE, null);
 
+    final String useSystemProxyStr = prefs.get(USE_SYSTEM_PROXY, null);
+    useSystemProxy = (useSystemProxyStr != null) ? Boolean.valueOf(useSystemProxyStr) : null;
+
+    proxyServer = prefs.get(PROXY_SERVER, null);
+
+    final String proxyPortStr = prefs.get(PROXY_PORT, null);
+    proxyPort = (proxyPortStr != null) ? Integer.valueOf(proxyPortStr) : null;
+
+    final String proxyHttps = prefs.get(PROXY_USE_HTTPS, null);
+    proxyUseHttps = (proxyHttps != null) ? Boolean.valueOf(proxyHttps) : null;
+
+    final String proxyAuthenticationStr = prefs.get(PROXY_AUTHENTICATION, null);
+    proxyAuthentication = (proxyAuthenticationStr != null) ? Boolean.valueOf(proxyAuthenticationStr) : null;
+
+    proxyUsername = prefs.get(PROXY_USERNAME, null);
+    proxyPassword = prefs.get(PROXY_PASSWORD, null);
     try {
       final String cacheDurationValue = prefs.get(CACHE_DURATION, "0");
       cacheDuration = normalizeCacheDuration(Integer.parseInt(cacheDurationValue));
@@ -67,7 +83,7 @@ public class JavaPreferences extends UserPreferences {
   }
 
   public void setDebugMode(Boolean debugMode) {
-    if (debugMode) {
+    if(Boolean.TRUE.equals(debugMode)) {
       prefs.put(DEBUG_MODE, "true");
     } else {
       prefs.put(DEBUG_MODE, "false");
@@ -90,7 +106,7 @@ public class JavaPreferences extends UserPreferences {
   }
 
   public void setSplashScreen(Boolean splashScreen) {
-    if (splashScreen) {
+    if(Boolean.TRUE.equals(splashScreen)) {
       prefs.put(SPLASH_SCREEN, "true");
     } else {
       prefs.put(SPLASH_SCREEN, "false");
@@ -109,11 +125,96 @@ public class JavaPreferences extends UserPreferences {
     this.cacheDuration = cacheDuration;
   }
 
+
+  @Override
+  public void setUseSystemProxy(Boolean useSystemProxy) {
+    if(Boolean.TRUE.equals(useSystemProxy)) {
+      prefs.put(USE_SYSTEM_PROXY, "true");
+    } else {
+      prefs.put(USE_SYSTEM_PROXY, "false");
+    }
+    this.useSystemProxy = useSystemProxy;
+  }
+
+  @Override
+  public void setProxyServer(String proxyServer) {
+    if (language != null) {
+      prefs.put(LANGUAGE, language);
+    } else {
+      prefs.remove(LANGUAGE);
+    }
+    this.language = language;
+  }
+
+  @Override
+  public void setProxyPort(Integer proxyPort) {
+    if (proxyPort != null) {
+      prefs.put(PROXY_PORT, String.valueOf(proxyPort));
+    } else {
+      prefs.remove(PROXY_PORT);
+    }
+    this.proxyPort = proxyPort;
+  }
+
+  @Override
+  public void setProxyUseHttps(Boolean proxyUseHttps) {
+    if (proxyUseHttps) {
+      prefs.put(PROXY_USE_HTTPS, "true");
+    } else {
+      prefs.put(PROXY_USE_HTTPS, "false");
+    }
+    this.proxyUseHttps = proxyUseHttps;
+  }
+
+  @Override
+  public void setProxyAuthentication(Boolean proxyAuthentication) {
+    if (proxyAuthentication) {
+      prefs.put(PROXY_AUTHENTICATION, "true");
+    } else {
+      prefs.put(PROXY_AUTHENTICATION, "false");
+    }
+    this.proxyAuthentication = proxyAuthentication;
+  }
+
+  @Override
+  public void setProxyUsername(String proxyUsername) {
+    if (proxyUsername != null) {
+      prefs.put(PROXY_USERNAME, proxyUsername);
+    } else {
+      prefs.remove(PROXY_USERNAME);
+    }
+    this.proxyUsername = proxyUsername;
+  }
+
+  @Override
+  public void setProxyPassword(String proxyPassword) {
+    if (proxyPassword != null) {
+      prefs.put(PROXY_PASSWORD, proxyPassword);
+    } else {
+      prefs.remove(PROXY_PASSWORD);
+    }
+    this.proxyPassword = proxyPassword;
+  }
+
   @Override
   public void clear() {
-    super.clear();
     try {
       this.prefs.clear();
+      language = null;
+      hiddenDialogIds = new ArrayList<>();
+      splashScreen = true;
+      showNotifications = NotificationType.getDefault();
+      cacheDuration = 0;
+      debugMode = false;
+
+      // proxy setup
+      useSystemProxy = true;
+      proxyServer = null;
+      proxyPort = null;
+      proxyUseHttps = false;
+      proxyAuthentication = false;
+      proxyUsername = null;
+      proxyPassword = null;
     } catch (BackingStoreException e) {
       throw new IllegalStateException(e);
     }

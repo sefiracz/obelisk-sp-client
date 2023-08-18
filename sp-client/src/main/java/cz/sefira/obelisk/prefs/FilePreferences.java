@@ -37,7 +37,6 @@ public class FilePreferences extends UserPreferences {
 
   private static final Logger logger = LoggerFactory.getLogger(FilePreferences.class.getName());
 
-  private DefaultFilePreferences defaultConfig;
   protected PropertiesConfiguration config;
 
   protected FilePreferences() {}
@@ -62,7 +61,8 @@ public class FilePreferences extends UserPreferences {
         }
       }
       // load default values
-      defaultConfig = new DefaultFilePreferences(appConfig);
+      DefaultFilePreferences defaultUserConfig = new DefaultFilePreferences(appConfig, "default-user-preferences.properties");
+      DefaultFilePreferences defaultProxyConfig = new DefaultFilePreferences(appConfig, "default-proxy-preferences.properties");
 
       // config params
       FileBasedBuilderParameters fileBasedParams = new Parameters().fileBased();
@@ -78,19 +78,39 @@ public class FilePreferences extends UserPreferences {
       config = builder.getConfiguration();
 
       // get values
+      // user setup
       String hiddenDialogIdsList = get(String.class, HIDDEN_DIALOGS, null);
       if (hiddenDialogIdsList != null && !hiddenDialogIdsList.isEmpty()) {
         String[] dialogIds = hiddenDialogIdsList.split(",");
         hiddenDialogIds = new ArrayList<>(Arrays.asList(dialogIds));
       } else {
-        hiddenDialogIds = defaultConfig.getHiddenDialogIds();
+        hiddenDialogIds = defaultUserConfig.getHiddenDialogIds();
       }
-      splashScreen = get(Boolean.class, SPLASH_SCREEN, defaultConfig.isSplashScreen());
+      splashScreen = get(Boolean.class, SPLASH_SCREEN, defaultUserConfig.isSplashScreen());
       String notificationType = get(String.class, SHOW_NOTIFICATIONS, null);
-      showNotifications = (notificationType != null && !notificationType.isEmpty()) ? NotificationType.fromType(notificationType) : defaultConfig.getShowNotifications();
-      debugMode = get(Boolean.class, DEBUG_MODE, defaultConfig.isDebugMode());
-      language = get(String.class, LANGUAGE, defaultConfig.getLanguage());
-      cacheDuration = normalizeCacheDuration(get(Integer.class, CACHE_DURATION, defaultConfig.getCacheDuration()));
+      showNotifications = (notificationType != null && !notificationType.isEmpty()) ? NotificationType.fromType(notificationType) : defaultUserConfig.getShowNotifications();
+      debugMode = get(Boolean.class, DEBUG_MODE, defaultUserConfig.isDebugMode());
+      language = get(String.class, LANGUAGE, defaultUserConfig.getLanguage());
+      cacheDuration = normalizeCacheDuration(get(Integer.class, CACHE_DURATION, defaultUserConfig.getCacheDuration()));
+      // proxy setup
+      proxyReadOnly = defaultProxyConfig.isProxyReadOnly();
+      if (proxyReadOnly) {
+        useSystemProxy = defaultProxyConfig.isUseSystemProxy();
+        proxyServer = defaultProxyConfig.getProxyServer();
+        proxyPort = defaultProxyConfig.getProxyPort();
+        proxyUseHttps = defaultProxyConfig.isProxyUseHttps();
+        proxyAuthentication = defaultProxyConfig.isProxyAuthentication();
+        proxyUsername = defaultProxyConfig.getProxyUsername();
+        proxyPassword = defaultProxyConfig.getProxyPassword();
+      } else {
+        useSystemProxy = get(Boolean.class, USE_SYSTEM_PROXY, defaultProxyConfig.isUseSystemProxy());
+        proxyServer = get(String.class, PROXY_SERVER, defaultProxyConfig.getProxyServer());
+        proxyPort = get(Integer.class, PROXY_PORT, defaultProxyConfig.getProxyPort());
+        proxyUseHttps = get(Boolean.class, PROXY_USE_HTTPS, defaultProxyConfig.isProxyUseHttps());
+        proxyAuthentication = get(Boolean.class, PROXY_AUTHENTICATION, defaultProxyConfig.isProxyAuthentication());
+        proxyUsername = get(String.class, PROXY_USERNAME, defaultProxyConfig.getProxyUsername());
+        proxyPassword = get(String.class, PROXY_PASSWORD, defaultProxyConfig.getProxyPassword());
+      }
     } catch (Exception e) {
       logger.error("Failed to load configuration: "+e.getMessage(), e);
     }
@@ -105,12 +125,14 @@ public class FilePreferences extends UserPreferences {
   }
 
   public void setLanguage(String language) {
-    config.setProperty(LANGUAGE, language);
+    config.setProperty(LANGUAGE, Objects.requireNonNullElse(language, ""));
     this.language = language;
   }
 
   public void setDebugMode(Boolean debugMode) {
-    if(Boolean.TRUE.equals(debugMode)) {
+    if (null == debugMode) {
+      config.setProperty(DEBUG_MODE, "");
+    } else if(Boolean.TRUE.equals(debugMode)) {
       config.setProperty(DEBUG_MODE, "true");
     } else {
       config.setProperty(DEBUG_MODE, "false");
@@ -119,8 +141,12 @@ public class FilePreferences extends UserPreferences {
   }
 
   public void setHiddenDialogIds(List<String> hiddenDialogIds){
+    if (null == hiddenDialogIds) {
+      config.setProperty(HIDDEN_DIALOGS, "");
+    } else {
+      config.setProperty(HIDDEN_DIALOGS, String.join(",", hiddenDialogIds));
+    }
     this.hiddenDialogIds = hiddenDialogIds;
-    config.setProperty(HIDDEN_DIALOGS, String.join(",", hiddenDialogIds));
   }
 
   public void addHiddenDialogId(String dialogId) {
@@ -134,7 +160,9 @@ public class FilePreferences extends UserPreferences {
   }
 
   public void setSplashScreen(Boolean splashScreen) {
-    if(Boolean.TRUE.equals(splashScreen)) {
+    if (null == splashScreen) {
+      config.setProperty(SPLASH_SCREEN, "");
+    } else if(Boolean.TRUE.equals(splashScreen)) {
       config.setProperty(SPLASH_SCREEN, "true");
     } else {
       config.setProperty(SPLASH_SCREEN, "false");
@@ -143,25 +171,96 @@ public class FilePreferences extends UserPreferences {
   }
 
   public void setShowNotifications(NotificationType showNotifications) {
-    config.setProperty(SHOW_NOTIFICATIONS, Objects.requireNonNullElse(showNotifications, NotificationType.OFF).getType());
+    if (null == showNotifications) {
+      config.setProperty(SHOW_NOTIFICATIONS, "");
+    } else {
+      config.setProperty(SHOW_NOTIFICATIONS, showNotifications.getType());
+    }
     this.showNotifications = showNotifications;
   }
 
   public void setCacheDuration(Integer cacheDuration) {
-    cacheDuration = normalizeCacheDuration(cacheDuration);
-    config.setProperty(CACHE_DURATION, String.valueOf(cacheDuration));
+    if (null == cacheDuration) {
+      config.setProperty(CACHE_DURATION, "");
+    } else {
+      cacheDuration = normalizeCacheDuration(cacheDuration);
+      config.setProperty(CACHE_DURATION, String.valueOf(cacheDuration));
+    }
     this.cacheDuration = cacheDuration;
+  }
+
+  public void setUseSystemProxy(Boolean useSystemProxy) {
+    if (null == useSystemProxy) {
+      config.setProperty(USE_SYSTEM_PROXY, "");
+    } else if(Boolean.TRUE.equals(useSystemProxy)) {
+      config.setProperty(USE_SYSTEM_PROXY, "true");
+    } else {
+      config.setProperty(USE_SYSTEM_PROXY, "false");
+    }
+    this.useSystemProxy = useSystemProxy;
+  }
+
+  public void setProxyServer(String proxyServer) {
+    config.setProperty(PROXY_SERVER, Objects.requireNonNullElse(proxyServer, ""));
+    this.proxyServer = proxyServer;
+  }
+
+  public void setProxyPort(Integer proxyPort) {
+    config.setProperty(PROXY_PORT, Objects.requireNonNullElse(proxyPort, ""));
+    this.proxyPort = proxyPort;
+  }
+
+  public void setProxyUseHttps(Boolean proxyUseHttps) {
+    if (null == proxyUseHttps) {
+      config.setProperty(PROXY_USE_HTTPS, "");
+    } else if(Boolean.TRUE.equals(proxyUseHttps)) {
+      config.setProperty(PROXY_USE_HTTPS, "true");
+    } else {
+      config.setProperty(PROXY_USE_HTTPS, "false");
+    }
+    this.proxyUseHttps = proxyUseHttps;
+  }
+
+  public void setProxyAuthentication(Boolean proxyAuthentication) {
+    if (null == proxyAuthentication) {
+      config.setProperty(PROXY_AUTHENTICATION, "");
+    } else if(Boolean.TRUE.equals(proxyAuthentication)) {
+      config.setProperty(PROXY_AUTHENTICATION, "true");
+    } else {
+      config.setProperty(PROXY_AUTHENTICATION, "false");
+    }
+    this.proxyAuthentication = proxyAuthentication;
+  }
+
+  public void setProxyUsername(String proxyUsername) {
+    config.setProperty(PROXY_USERNAME, Objects.requireNonNullElse(proxyUsername, ""));
+    this.proxyUsername = proxyUsername;
+  }
+
+  public void setProxyPassword(String proxyPassword) {
+    config.setProperty(PROXY_PASSWORD, Objects.requireNonNullElse(proxyPassword, ""));
+    this.proxyPassword = proxyPassword;
   }
 
   @Override
   public void clear() {
-    super.clear();
-    setDebugMode(defaultConfig.isDebugMode());
-    setHiddenDialogIds(defaultConfig.getHiddenDialogIds());
-    setSplashScreen(defaultConfig.isSplashScreen());
-    setShowNotifications(defaultConfig.getShowNotifications());
-    setLanguage(defaultConfig.getLanguage());
-    setCacheDuration(defaultConfig.getCacheDuration());
+    setDebugMode(null);
+    setHiddenDialogIds(null);
+    setSplashScreen(null);
+    setShowNotifications(null);
+    setLanguage(null);
+    setCacheDuration(null);
+
+    // proxy setup
+    if (!proxyReadOnly) {
+      setUseSystemProxy(null);
+      setProxyServer(null);
+      setProxyPort(null);
+      setProxyUseHttps(null);
+      setProxyAuthentication(null);
+      setProxyUsername(null);
+      setProxyPassword(null);
+    }
   }
 
 
