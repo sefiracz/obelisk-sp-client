@@ -21,6 +21,7 @@ import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.model.ScAPI;
 import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.api.plugin.VersionPlugin;
+import cz.sefira.obelisk.api.ws.proxy.ProxyProvider;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.flow.Flow;
@@ -79,8 +80,8 @@ public class InternalAPI implements PlatformAPI {
   private final StorageHandler storageHandler;
   private final ExecutorService executor;
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
   private final Systray systray;
+  private final ProxyProvider proxyProvider;
   private Future<?> currentTask;
 
   public InternalAPI(UIDisplay display, StorageHandler storageHandler, FlowRegistry flowRegistry, OperationFactory operationFactory) {
@@ -90,6 +91,7 @@ public class InternalAPI implements PlatformAPI {
     this.flowRegistry = flowRegistry;
     this.operationFactory = operationFactory;
     this.pkcs11Manager = new PKCS11Manager(this, storageHandler.getSmartcardStorage());
+    this.proxyProvider = new ProxyProvider();
     this.executor = Executors.newSingleThreadExecutor(r -> {
       final Thread t = new Thread(EXECUTOR_THREAD_GROUP, r);
       t.setDaemon(true);
@@ -268,6 +270,10 @@ public class InternalAPI implements PlatformAPI {
 
   public SSLCertificateProvider getSslCertificateProvider() {
     return sslCertificateProvider;
+  }
+
+  public ProxyProvider getProxyProvider() {
+    return proxyProvider;
   }
 
   @Override

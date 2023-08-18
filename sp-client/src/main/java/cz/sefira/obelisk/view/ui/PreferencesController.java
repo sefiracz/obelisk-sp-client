@@ -34,6 +34,7 @@ import javafx.scene.layout.GridPane;
 import cz.sefira.obelisk.api.PlatformAPI;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,8 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 	@FXML
 	private Button export;
 
+	/////////////////////////// user setup
+
 	@FXML
 	private CheckBox splashscreen;
 
@@ -90,6 +93,29 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 
 	@FXML
 	private CheckBox debugMode;
+
+	/////////////////////////// proxy setup
+
+	@FXML
+	private CheckBox useSystemProxy;
+
+	@FXML
+	private TextField proxyServer;
+
+	@FXML
+	private TextField proxyPort;
+
+	@FXML
+	private CheckBox useHttps;
+
+	@FXML
+	private CheckBox proxyAuthentication;
+
+	@FXML
+	private TextField proxyUsername;
+
+	@FXML
+	private TextField proxyPassword;
 
 	private Stage primaryStage;
 
@@ -118,10 +144,12 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 		plusDuration.addEventFilter(MouseEvent.ANY, new PressedRepeatEventHandler(this::incrementDuration,
 				325, 125, TimeUnit.MILLISECONDS));
 
-		durationTextField.setTextFormatter(new TextFormatter<>(this::filter));
+		durationTextField.setTextFormatter(new TextFormatter<>(this::durationFilter));
 		durationTextField.setOnMouseClicked((e) -> setTextFieldDuration(true));
 
 		showNotifications.getItems().addAll(List.of(OFF, NATIVE, INTEGRATED));
+
+		proxyPort.setTextFormatter(new TextFormatter<>(this::portFilter));
 
 		ok.setOnAction((evt) -> {
 			userPreferences.setDebugMode(debugMode.selectedProperty().getValue());
@@ -131,7 +159,24 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 				SessionManager.getManager().destroySecret();
 			}
 			userPreferences.setCacheDuration(duration.getValue());
+			if (!userPreferences.isProxyReadOnly()) {
+				userPreferences.setUseSystemProxy(useSystemProxy.selectedProperty().getValue());
+				userPreferences.setProxyServer(proxyServer.getText());
+				Integer portNumber = null;
+				try {
+					portNumber = StringUtils.isNotBlank(proxyPort.getText()) ? Integer.parseInt(proxyPort.getText()) : null;
+					portNumber = validatePort(portNumber);
+				} catch (Exception e) {
+					logger.error("Invalid proxy port ("+proxyPort.getText()+"): "+e.getMessage(), e);
+				}
+				userPreferences.setProxyPort(portNumber);
+				userPreferences.setProxyUseHttps(useHttps.selectedProperty().getValue());
+				userPreferences.setProxyAuthentication(proxyAuthentication.selectedProperty().getValue());
+				userPreferences.setProxyUsername(proxyUsername.getText());
+				userPreferences.setProxyPassword(proxyPassword.getText());
+			}
 			AppConfigurer.applyUserPreferences(userPreferences);
+			api.getProxyProvider().setInitFlag(false);
 			windowClose(primaryStage);
 		});
 		cancel.setOnAction((e) -> windowClose(primaryStage));
@@ -163,17 +208,49 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 		this.api = (PlatformAPI) params[0];
 		this.userPreferences = (UserPreferences) params[1];
 		this.readOnly.set((boolean) params[2]);
+		// user
 		this.debugMode.selectedProperty().setValue(userPreferences.isDebugMode());
 		this.showNotifications.getSelectionModel().select(userPreferences.getShowNotifications());
 		this.splashscreen.selectedProperty().setValue(userPreferences.isSplashScreen());
 		this.duration = new SimpleIntegerProperty(userPreferences.getCacheDuration());
 		toggleCacheDurationButtons(duration.getValue());
 		duration.addListener((observable, oldValue, newValue) -> toggleCacheDurationButtons(newValue));
+		// proxy
+		this.useSystemProxy.selectedProperty().setValue(userPreferences.isUseSystemProxy());
+		this.proxyServer.setText(userPreferences.getProxyServer());
+		Integer proxyNumber = validatePort(userPreferences.getProxyPort());
+		this.proxyPort.setText(proxyNumber != null ? String.valueOf(proxyNumber) : null);
+		this.useHttps.selectedProperty().setValue(userPreferences.isProxyUseHttps());
+		this.proxyAuthentication.selectedProperty().setValue(userPreferences.isProxyAuthentication());
+		this.proxyUsername.setText(userPreferences.getProxyUsername());
+		this.proxyPassword.setText(userPreferences.getProxyPassword());
+		if (userPreferences.isProxyReadOnly()) {
+			useSystemProxy.setDisable(true);
+			proxyServer.setDisable(true);
+			proxyPort.setDisable(true);
+			useHttps.setDisable(true);
+			proxyAuthentication.setDisable(true);
+			proxyUsername.setDisable(true);
+			proxyPassword.setDisable(true);
+		}
 		setTextFieldDuration(true);
 		setLogoBackground(gridPane);
 	}
 
-  private TextFormatter.Change filter(TextFormatter.Change change) {
+	private TextFormatter.Change portFilter(TextFormatter.Change change) {
+		if (!change.getControlNewText().matches("^(1|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$")) {
+			change.setText("");
+		}
+		return change;
+	}
+
+	private Integer validatePort(Integer portNumber) {
+		if (portNumber != null && portNumber >= 1 && portNumber <= 65535)
+			return portNumber;
+		return null;
+	}
+
+  private TextFormatter.Change durationFilter(TextFormatter.Change change) {
     if (!change.getControlNewText().matches("\\b([0-9]|[12][0-9]|30)\\b")) {
       change.setText("");
     }
@@ -189,7 +266,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
     return change;
   }
 
-  void setTextFieldDuration(boolean clearText) {
+  private void setTextFieldDuration(boolean clearText) {
     String minutes = duration.getValue() == 0 || duration.getValue() > 4 ? resources.getString("preferences.minutes.1") :
         duration.getValue() == 1 ? resources.getString("preferences.minute") : resources.getString("preferences.minutes");
     if (clearText) {

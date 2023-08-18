@@ -15,7 +15,7 @@
 
 <?import javafx.scene.control.*?>
 
-<TabPane style="-fx-border-radius: 0" fx:id="tabPane" prefWidth="770.0" prefHeight="500" xmlns="http://javafx.com/javafx/8"
+<TabPane style="-fx-border-radius: 0" fx:id="tabPane" prefWidth="770.0" prefHeight="520" xmlns="http://javafx.com/javafx/8"
          xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.sefira.obelisk.view.ui.MainWindowController">
   <Tab fx:id="preferencesTab" text="%main.menu.preferences" closable="false">
     <fx:include fx:id="preferences" source="/fxml/preferences.fxml"/>

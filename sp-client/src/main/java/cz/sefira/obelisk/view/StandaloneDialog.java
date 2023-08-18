@@ -252,6 +252,7 @@ public class StandaloneDialog {
       userPreferences.clear();
       AppConfigurer.applyLocale(api, null);
       AppConfigurer.applyUserPreferences(userPreferences);
+      api.getProxyProvider().setInitFlag(false);
       if(stage != null)
         stage.close();
       if (primaryStage != null)
