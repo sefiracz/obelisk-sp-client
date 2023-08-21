@@ -29,7 +29,7 @@
     <GridPane fx:id="gridPane" alignment="CENTER" styleClass="dash-container" vgap="5" hgap="10">
       <!-- row 1 -->
       <Label text="%preferences.splashscreen" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-      <CheckBox fx:id="splashscreen" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="1"/>
+      <CheckBox fx:id="splashscreen" styleClass="checkbox-prefs" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="1"/>
       <!-- row 2 -->
       <Label text="%preferences.notifications" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
       <ComboBox fx:id="showNotifications" GridPane.columnIndex="3" prefWidth="170" minWidth="170" GridPane.rowIndex="2"/>
@@ -41,12 +41,12 @@
       <Button fx:id="plusDuration" prefWidth="25" minWidth="25" prefHeight="25" minHeight="25" styleClass="plus" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
       <!-- row 4 -->
       <Label text="%preferences.debugmode" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-      <CheckBox fx:id="debugMode" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="4"/>
+      <CheckBox fx:id="debugMode" styleClass="checkbox-prefs" GridPane.columnIndex="3" prefWidth="120" minWidth="120" GridPane.rowIndex="4"/>
       <!-- separator - row 5 -->
       <Separator GridPane.columnSpan="5" GridPane.rowIndex="5"/>
       <!-- row 6 -->
       <Label text="%preferences.systemProxy" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-      <CheckBox fx:id="useSystemProxy" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+      <CheckBox fx:id="useSystemProxy" styleClass="checkbox-prefs" GridPane.columnIndex="3" GridPane.rowIndex="6" />
       <!-- row 7 -->
       <Label text="%preferences.proxyServer" GridPane.columnIndex="0" GridPane.rowIndex="7" />
       <TextField fx:id="proxyServer" promptText="%preferences.proxyServer.prompt" GridPane.columnIndex="3" GridPane.rowIndex="7" />
@@ -55,10 +55,10 @@
       <TextField fx:id="proxyPort" promptText="%preferences.proxyPort.prompt" GridPane.columnIndex="3" GridPane.rowIndex="8" />
       <!-- row 9 -->
       <Label text="%preferences.https" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-      <CheckBox fx:id="useHttps" GridPane.columnIndex="3" GridPane.rowIndex="9" />
+      <CheckBox fx:id="useHttps" styleClass="checkbox-prefs" GridPane.columnIndex="3" GridPane.rowIndex="9" />
       <!-- row 10 -->
       <Label text="%preferences.authenticationRequired" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-      <CheckBox fx:id="proxyAuthentication" GridPane.columnIndex="3" GridPane.rowIndex="10" />
+      <CheckBox fx:id="proxyAuthentication" styleClass="checkbox-prefs" GridPane.columnIndex="3" GridPane.rowIndex="10" />
       <!-- row 11 -->
       <Label text="%preferences.proxyUsername" GridPane.columnIndex="0" GridPane.rowIndex="11" />
       <TextField fx:id="proxyUsername" promptText="%preferences.proxyUsername.prompt" GridPane.columnIndex="3" GridPane.rowIndex="11"/>
