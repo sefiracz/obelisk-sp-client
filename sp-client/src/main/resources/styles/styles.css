@@ -99,14 +99,14 @@ ComboBox:selected {
 
 }
 
-.check-box {
+.checkbox-prefs {
 
     -fx-pref-height: 25;
     -fx-pref-width: 25;
 
 }
 
-.check-box > .box {
+.checkbox-prefs > .box {
 
     /* background color of unselected checkbox */
     -fx-padding: 13px 26px 14px 26px;
@@ -116,14 +116,14 @@ ComboBox:selected {
 
 }
 
-.check-box:hover > .box {
+.checkbox-prefs:hover > .box {
 
     -fx-border-color: #4A76E7;
     -fx-background-color: #4A76E7;
 
 }
 
-.check-box:selected > .box {
+.checkbox-prefs:selected > .box {
 
     /* background color for selected checkbox */
     -fx-padding: 13px 26px 14px 26px;
@@ -133,21 +133,21 @@ ComboBox:selected {
 
 }
 
-.check-box:selected:hover > .box {
+.checkbox-prefs:selected:hover > .box {
 
     -fx-border-color: #4AA9E7;
     -fx-background-color: #4AA9E7;
 
 }
 
-.check-box > .box > .mark {
+.checkbox-prefs > .box > .mark {
 
     -fx-padding: 0px;
 
 }
 
 
-.check-box:pressed > .box {
+.checkbox-prefs:pressed > .box {
 
     -fx-border-color: #99CDEF;
     -fx-background-color: #99CDEF;
