@@ -41,18 +41,18 @@ public abstract class UserPreferences {
 
   protected String language = null;
   protected List<String> hiddenDialogIds = new ArrayList<>();
-  protected Boolean splashScreen = true;
-  protected NotificationType showNotifications = NotificationType.getDefault();
-  protected Integer cacheDuration = 0;
-  protected Boolean debugMode = false;
+  protected Boolean splashScreen = null;
+  protected NotificationType showNotifications = null;
+  protected Integer cacheDuration = null;
+  protected Boolean debugMode = null;
 
   // proxy setup
-  protected Boolean proxyReadOnly = false;
-  protected Boolean useSystemProxy = true;
+  protected Boolean proxyReadOnly = null;
+  protected Boolean useSystemProxy = null;
   protected String proxyServer = null;
   protected Integer proxyPort = null;
-  protected Boolean proxyUseHttps = false;
-  protected Boolean proxyAuthentication = false;
+  protected Boolean proxyUseHttps = null;
+  protected Boolean proxyAuthentication = null;
   protected String proxyUsername = null;
   protected String proxyPassword = null;
 
@@ -154,7 +154,7 @@ public abstract class UserPreferences {
   @Override
   public String toString() {
     return "hiddenDialogIds=" + hiddenDialogIds + "\n" +
-        "showNotifications=" + showNotifications.getType() + "\n" +
+        "showNotifications=" + (showNotifications != null ? showNotifications.getType() : null) + "\n" +
         "splashScreen=" + splashScreen + "\n" +
         "debugMode=" + debugMode + "\n" +
         "cacheDuration=" + cacheDuration + "\n" +
