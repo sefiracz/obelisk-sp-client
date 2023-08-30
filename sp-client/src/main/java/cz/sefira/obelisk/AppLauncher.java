@@ -67,6 +67,7 @@ public class AppLauncher {
             URI uri = e.getURI();
             if (uri != null) {
               queueMessage(uri.toString()); // queue message via URI handler
+              Desktop.getDesktop().requestForeground(true); // request attention
             } else {
               logger.info("URI handler called with no message");
             }
