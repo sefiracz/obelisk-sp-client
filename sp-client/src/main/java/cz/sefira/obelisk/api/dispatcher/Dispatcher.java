@@ -4,7 +4,7 @@ package cz.sefira.obelisk.api.dispatcher;
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.api.Dispatcher
+ * cz.sefira.obelisk.api.dispatcher.Dispatcher
  *
  * Created: 26.01.2023
  * Author: hlavnicka
@@ -180,11 +180,18 @@ public class Dispatcher implements AppPlugin {
       StandaloneDialog.runLater(() -> StandaloneDialog.showSslErrorDialog(e, api, message));
       notificationProperty = "notification.event.fatal";
       notificationType = MessageType.ERROR;
+    } catch (AuthenticationProviderException e) {
+      logger.error(e.getMessage(), e);
+      DialogMessage errMsg = new DialogMessage("dispatcher.auth.error", DialogMessage.Level.ERROR);
+      Throwable ex = e.getCause() != null ? e.getCause() : e;
+      StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, ex));
+      notificationProperty = "notification.event.fatal";
+      notificationType = MessageType.ERROR;
     } catch (HttpResponseException e) {
       logger.error(e.getMessage(), e);
       DialogMessage dialogMessage;
       Problem p = null;
-      if ((p = HttpUtils.processProblem(e)) != null) {
+      if ((p = HttpUtils.processProblem(e)) != null && p.getTitle() != null) {
         // SP-API error
         dialogMessage = new DialogMessage("dispatcher.api.error", DialogMessage.Level.ERROR,
             new String[]{ p.getTitle() }, 500, 200);
@@ -213,8 +220,8 @@ public class Dispatcher implements AppPlugin {
     }
   }
 
-  private Execution<?> processMessage(AuthenticationProvider tokenProvider)
-      throws GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
+  private Execution<?> processMessage(AuthenticationProvider tokenProvider) throws AuthenticationProviderException,
+      GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
     String url = tokenProvider.getRedirectUri();
     boolean sync = performSync();
     Execution<?> result;
@@ -293,7 +300,7 @@ public class Dispatcher implements AppPlugin {
   }
 
   private boolean checkSession(SessionValue sessionValue, String url, AuthenticationProvider tokenProvider)
-      throws GeneralSecurityException, URISyntaxException, IOException {
+      throws AuthenticationProviderException, GeneralSecurityException, URISyntaxException, IOException {
     Execution<?> result = api.checkSession(sessionValue);
     if (!result.isSuccess()) {
       client.call("POST", url, tokenProvider, result, false);

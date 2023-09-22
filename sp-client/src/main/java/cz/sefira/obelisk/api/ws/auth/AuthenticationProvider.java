@@ -10,10 +10,6 @@ package cz.sefira.obelisk.api.ws.auth;
  * Author: hlavnicka
  */
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
-
 /**
  * description
  */
@@ -21,5 +17,5 @@ public interface AuthenticationProvider {
 
   String getRedirectUri();
 
-  String getEndpointAuthentication() throws GeneralSecurityException, URISyntaxException, IOException;
+  String getEndpointAuthentication() throws AuthenticationProviderException;
 }

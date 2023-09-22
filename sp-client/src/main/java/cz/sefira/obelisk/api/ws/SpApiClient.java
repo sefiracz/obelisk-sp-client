@@ -14,6 +14,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.model.Platform;
 import cz.sefira.obelisk.api.ws.auth.AuthenticationProvider;
+import cz.sefira.obelisk.api.ws.auth.AuthenticationProviderException;
 import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
 import cz.sefira.obelisk.json.GsonHelper;
@@ -47,7 +48,7 @@ public class SpApiClient {
   }
 
   public HttpResponse call(String method, String url, AuthenticationProvider authProvider, Object payload, boolean sync)
-          throws URISyntaxException, GeneralSecurityException, IOException {
+          throws AuthenticationProviderException, URISyntaxException, GeneralSecurityException, IOException {
     // URI builder
     URIBuilder uriBuilder = new URIBuilder(url);
     uriBuilder.addParameter(new BasicNameValuePair("version", AppConfig.get().getApplicationVersion()));
