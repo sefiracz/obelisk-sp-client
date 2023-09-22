@@ -335,6 +335,7 @@ public class CardDetector {
 	}
 
 	private void closeCardTerminals() throws Exception {
+		// --add-opens java.smartcardio/sun.security.smartcardio=ALL-UNNAMED
 		logger.info("Closing card terminals");
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
 		final Field contextIdField = pcscTerminalsClass.getDeclaredField("contextId");
@@ -367,6 +368,7 @@ public class CardDetector {
 	}
 
 	private void establishNewContext() throws Exception {
+		// --add-opens java.smartcardio/sun.security.smartcardio=ALL-UNNAMED
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
 		final Method initContextMethod = pcscTerminalsClass.getDeclaredMethod("initContext");
 		initContextMethod.setAccessible(true);
