@@ -53,8 +53,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
   private transient String sessionState = null;
   private transient BearerToken currentToken = null;
 
-  public BearerTokenProvider(String magicLink, PlatformAPI api)
-          throws GeneralSecurityException, URISyntaxException, IOException {
+  public BearerTokenProvider(String magicLink, PlatformAPI api) throws AuthenticationProviderException {
     this.magicLink = magicLink;
     this.api = api;
     this.currentToken = initToken();
@@ -64,7 +63,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     return redirectUri;
   }
 
-  public String getEndpointAuthentication() throws GeneralSecurityException, URISyntaxException, IOException {
+  public String getEndpointAuthentication() throws AuthenticationProviderException {
     if (currentToken == null) {
       currentToken = initToken();
       return AUTH_TYPE + currentToken.getAccessToken();
@@ -82,7 +81,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     }
   }
 
-  private BearerToken initToken() throws GeneralSecurityException, URISyntaxException, IOException {
+  private BearerToken initToken() throws AuthenticationProviderException {
     client = new HttpsClient(api);
     parseAuthServerURL();
     // MAGIC LINK
@@ -99,55 +98,67 @@ public class BearerTokenProvider implements AuthenticationProvider {
     return currentToken = token(params);
   }
 
-  private BearerToken refreshToken() throws GeneralSecurityException, URISyntaxException, IOException {
-    // REFRESH BEARER TOKEN
-    List<NameValuePair> params = new ArrayList<>();
-    params.add(new BasicNameValuePair("client_id", CLIENT_ID));
-    params.add(new BasicNameValuePair("grant_type", "refresh_token"));
-    params.add(new BasicNameValuePair("refresh_token", currentToken.getRefreshToken()));
-    params.add(new BasicNameValuePair("code", code));
-    params.add(new BasicNameValuePair("session_state", sessionState));
-    logger.info("Refreshing bearer token");
-    return currentToken = token(params);
+  private BearerToken refreshToken() throws AuthenticationProviderException {
+    try {
+      // REFRESH BEARER TOKEN
+      List<NameValuePair> params = new ArrayList<>();
+      params.add(new BasicNameValuePair("client_id", CLIENT_ID));
+      params.add(new BasicNameValuePair("grant_type", "refresh_token"));
+      params.add(new BasicNameValuePair("refresh_token", currentToken.getRefreshToken()));
+      params.add(new BasicNameValuePair("code", code));
+      params.add(new BasicNameValuePair("session_state", sessionState));
+      logger.info("Refreshing bearer token");
+      return currentToken = token(params);
+    } catch (Exception e) {
+      throw new AuthenticationProviderException(e);
+    }
   }
 
-  private void actionToken() throws URISyntaxException, GeneralSecurityException, IOException {
-    URIBuilder uriBuilder = new URIBuilder(magicLink);
-    HttpUriRequestBase request = new HttpUriRequestBase("GET", uriBuilder.build());
-    HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
-    HttpResponse response = client.execute(request, clientBuilder);
-    int responseCode = response.getCode();
-    if (responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-      String location = HttpUtils.getLocationURI(response);
-      if (location != null) {
-        URIBuilder builder = new URIBuilder(location);
-        List<NameValuePair> queryParams = builder.getQueryParams();
-        for (NameValuePair pair : queryParams) {
-          if ("code".equals(pair.getName())) {
-            code = pair.getValue();
-            builder.removeParameter("code");
+  private void actionToken() throws AuthenticationProviderException {
+    try {
+      URIBuilder uriBuilder = new URIBuilder(magicLink);
+      HttpUriRequestBase request = new HttpUriRequestBase("GET", uriBuilder.build());
+      HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
+      HttpResponse response = client.execute(request, clientBuilder);
+      int responseCode = response.getCode();
+      if (responseCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+        String location = HttpUtils.getLocationURI(response);
+        if (location != null) {
+          URIBuilder builder = new URIBuilder(location);
+          List<NameValuePair> queryParams = builder.getQueryParams();
+          for (NameValuePair pair : queryParams) {
+            if ("code".equals(pair.getName())) {
+              code = pair.getValue();
+              builder.removeParameter("code");
+            }
+            if ("session_state".equals(pair.getName())) {
+              sessionState = pair.getValue();
+              builder.removeParameter("session_state");
+            }
           }
-          if ("session_state".equals(pair.getName())) {
-            sessionState = pair.getValue();
-            builder.removeParameter("session_state");
-          }
+          redirectUri = builder.build().toString();
         }
-        redirectUri = builder.build().toString();
       }
-    }
-    if (redirectUri == null) {
-      throw new IllegalStateException("Magic-link did not provide redirect URI.");
+      if (redirectUri == null) {
+        throw new IllegalStateException("Magic-link did not provide redirect URI.");
+      }
+    } catch (Exception e) {
+      throw new AuthenticationProviderException(e);
     }
   }
 
-  private BearerToken token(List<NameValuePair> params) throws URISyntaxException, GeneralSecurityException, IOException {
-    URIBuilder uriBuilder = new URIBuilder(authServerUrl);
-    uriBuilder.appendPath(AppConfig.get().getTokenEndpoint()); // /protocol/openid-connect/token
-    HttpUriRequestBase request = new HttpUriRequestBase("POST", uriBuilder.build());
-    request.setEntity(new UrlEncodedFormEntity(params));
-    HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
-    HttpResponse response = client.execute(request, clientBuilder);
-    return GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
+  private BearerToken token(List<NameValuePair> params) throws AuthenticationProviderException {
+    try {
+      URIBuilder uriBuilder = new URIBuilder(authServerUrl);
+      uriBuilder.appendPath(AppConfig.get().getTokenEndpoint()); // /protocol/openid-connect/token
+      HttpUriRequestBase request = new HttpUriRequestBase("POST", uriBuilder.build());
+      request.setEntity(new UrlEncodedFormEntity(params));
+      HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
+      HttpResponse response = client.execute(request, clientBuilder);
+      return GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
+    } catch (Exception e) {
+      throw new AuthenticationProviderException(e);
+    }
   }
 
   private void parseAuthServerURL() {
