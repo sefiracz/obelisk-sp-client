@@ -112,13 +112,11 @@ public class ProxyProvider {
    */
   public void setInitFlag(boolean initFlag) {
     synchronized (sync) {
-      if (setup != null && initFlag) {
-        this.initFlag = true;
-      } else {
+      if (setup != null && !initFlag) {
         logger.info("Resetting proxy setup");
         this.setup = null;
-        this.initFlag = false;
       }
+      this.initFlag = initFlag;
     }
   }
 
