@@ -14,12 +14,6 @@
  */
 package cz.sefira.obelisk.api.model;
 
-//import javax.xml.bind.annotation.XmlEnum;
-//import javax.xml.bind.annotation.XmlEnumValue;
-//import javax.xml.bind.annotation.XmlType;
-
-//@XmlType(name = "scAPI")
-//@XmlEnum
 public enum ScAPI {
 
 //	@XmlEnumValue("MSCAPI")

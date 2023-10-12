@@ -14,22 +14,8 @@
  */
 package cz.sefira.obelisk.api.model;
 
-//import javax.xml.bind.annotation.XmlAccessType;
-//import javax.xml.bind.annotation.XmlAccessorType;
-//import javax.xml.bind.annotation.XmlRootElement;
-//import javax.xml.bind.annotation.XmlType;
-
 import java.util.Properties;
 
-/**
- * Represents the information collected on the user environment
- *
- * @author David Naramski
- *
- */
-//@XmlRootElement
-//@XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(name = "environment", propOrder = { "jreVendor", "osName", "osArch", "osVersion", "arch", "os" })
 public class EnvironmentInfo {
 
 	private static final String OS_VERSION = "os.version";
