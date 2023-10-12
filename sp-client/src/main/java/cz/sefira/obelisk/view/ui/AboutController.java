@@ -17,26 +17,35 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.view.StandaloneUIController;
-import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class AboutController extends ControllerCore implements StandaloneUIController, Initializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(AboutController.class.getName());
 
 	@FXML
 	private GridPane gridPane;
 
 	@FXML
 	private Label aboutTitle;
+
+	@FXML
+	private Hyperlink sourceCodeLink;
 
 	@FXML
 	private Button cancel;
@@ -59,6 +68,14 @@ public class AboutController extends ControllerCore implements StandaloneUIContr
 		StageHelper.getInstance().setTitle("", "about.header");
 		final String applicationVersion = AppConfig.get().getApplicationVersion();
 		this.applicationVersion.setText(applicationVersion);
+		this.sourceCodeLink.setOnAction(link -> {
+			logger.info("User clicked source code URL");
+			try {
+				Desktop.getDesktop().browse(new URI(this.sourceCodeLink.getText()));
+			} catch (Exception e) {
+				logger.error("Unable to open URL: " + e.getMessage());
+			}
+		});
 		setLogoBackground(gridPane);
 	}
 

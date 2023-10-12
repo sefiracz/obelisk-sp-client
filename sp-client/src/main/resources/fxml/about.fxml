@@ -31,10 +31,10 @@
       <Label fx:id="applicationVersion" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
       <Label text="%about.copyright" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
       <Label text="%about.copyright.value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-      <Label text="%about.license" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-      <Label text="%about.license.value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-      <Label text="%about.forked" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-      <Label text="%about.forked.value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+      <Label text="%about.sourcecode" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+      <Hyperlink fx:id="sourceCodeLink" styleClass="srcCodeLink" text="%about.sourcecode.value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+      <Label text="%about.license" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+      <Label text="%about.license.value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
       <Label text="%about.3rd.licenses" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
       <Label text="%about.3rd.licenses.1" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
       <Label text="%about.3rd.licenses.2" GridPane.columnIndex="1" GridPane.rowIndex="5"/>

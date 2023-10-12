@@ -93,7 +93,7 @@ public class AppConfig {
       }
     } catch (final IOException e) {
       logger.error("Cannot retrieve application version: " + e.getMessage(), e);
-      this.applicationVersion = "2.0.0";
+      this.applicationVersion = "2.0.x";
     }
   }
 

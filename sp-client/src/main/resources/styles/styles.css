@@ -663,3 +663,28 @@ ComboBox:selected {
     -fx-table-cell-border-color: #FF7D7D !important;
 
 }
+
+.srcCodeLink {
+
+    -fx-text-fill: #4A76E7;
+    -fx-padding: 0 0 0 -1;
+
+}
+
+.srcCodeLink:hover {
+
+    -fx-text-fill: #4AA9E7;
+
+}
+
+.srcCodeLink:visited {
+
+    -fx-text-fill: #4A76E7;
+
+}
+
+.srcCodeLink:visited:hover {
+
+    -fx-text-fill: #4AA9E7;
+
+}
