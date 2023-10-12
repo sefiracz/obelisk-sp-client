@@ -5,7 +5,6 @@ The client supports guaranteed or qualified signatures.
 
 https://www.sefira.cz/en/obelisk-signing-portal-electronic-signature/
 
-
 Licensed as EUPL-1.2
 
 Forked and heavily modified from Nowina's NexU signing application 
@@ -14,7 +13,7 @@ https://github.com/nowina-solutions/nexu
 ## Features
 
 - Support of qualified devices eObčanka, Starcos, SafeNet, TokenME, etc.
-- Support for PKCS#11 and MSCAPI interfaces
+- Support for PKCS#11, MSCAPI and Apple Keychain interfaces
 - Keystore support for PFX, JKS, JCEKS formats
 - Compatible with Windows, Mac and Linux
 - Ability to configure temporary QPIN caching (qualified signature PIN code)
