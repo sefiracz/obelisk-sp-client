@@ -14,6 +14,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
+import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.json.GsonHelper;
 import cz.sefira.obelisk.util.HttpUtils;
 import cz.sefira.obelisk.util.JwtTokenUtils;
@@ -26,10 +27,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +51,8 @@ public class BearerTokenProvider implements AuthenticationProvider {
   private transient String sessionState = null;
   private transient BearerToken currentToken = null;
 
-  public BearerTokenProvider(String magicLink, PlatformAPI api) throws AuthenticationProviderException {
+  public BearerTokenProvider(String magicLink, PlatformAPI api)
+      throws AuthenticationProviderException, SSLCommunicationException {
     this.magicLink = magicLink;
     this.api = api;
     this.currentToken = initToken();
@@ -63,7 +62,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     return redirectUri;
   }
 
-  public String getEndpointAuthentication() throws AuthenticationProviderException {
+  public String getEndpointAuthentication() throws AuthenticationProviderException, SSLCommunicationException {
     if (currentToken == null) {
       currentToken = initToken();
       return AUTH_TYPE + currentToken.getAccessToken();
@@ -81,7 +80,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     }
   }
 
-  private BearerToken initToken() throws AuthenticationProviderException {
+  private BearerToken initToken() throws AuthenticationProviderException, SSLCommunicationException {
     client = new HttpsClient(api);
     parseAuthServerURL();
     // MAGIC LINK
@@ -98,7 +97,7 @@ public class BearerTokenProvider implements AuthenticationProvider {
     return currentToken = token(params);
   }
 
-  private BearerToken refreshToken() throws AuthenticationProviderException {
+  private BearerToken refreshToken() throws AuthenticationProviderException, SSLCommunicationException {
     try {
       // REFRESH BEARER TOKEN
       List<NameValuePair> params = new ArrayList<>();
@@ -109,12 +108,14 @@ public class BearerTokenProvider implements AuthenticationProvider {
       params.add(new BasicNameValuePair("session_state", sessionState));
       logger.info("Refreshing bearer token");
       return currentToken = token(params);
+    } catch (SSLCommunicationException e) {
+      throw e;
     } catch (Exception e) {
       throw new AuthenticationProviderException(e);
     }
   }
 
-  private void actionToken() throws AuthenticationProviderException {
+  private void actionToken() throws AuthenticationProviderException, SSLCommunicationException {
     try {
       URIBuilder uriBuilder = new URIBuilder(magicLink);
       HttpUriRequestBase request = new HttpUriRequestBase("GET", uriBuilder.build());
@@ -142,12 +143,15 @@ public class BearerTokenProvider implements AuthenticationProvider {
       if (redirectUri == null) {
         throw new IllegalStateException("Magic-link did not provide redirect URI.");
       }
+    } catch (SSLCommunicationException e) {
+      throw e;
     } catch (Exception e) {
       throw new AuthenticationProviderException(e);
     }
   }
 
-  private BearerToken token(List<NameValuePair> params) throws AuthenticationProviderException {
+  private BearerToken token(List<NameValuePair> params)
+      throws AuthenticationProviderException, SSLCommunicationException {
     try {
       URIBuilder uriBuilder = new URIBuilder(authServerUrl);
       uriBuilder.appendPath(AppConfig.get().getTokenEndpoint()); // /protocol/openid-connect/token
@@ -156,6 +160,8 @@ public class BearerTokenProvider implements AuthenticationProvider {
       HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
       HttpResponse response = client.execute(request, clientBuilder);
       return GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
+    } catch (SSLCommunicationException e) {
+      throw e;
     } catch (Exception e) {
       throw new AuthenticationProviderException(e);
     }
