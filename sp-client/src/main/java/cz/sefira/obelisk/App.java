@@ -51,6 +51,7 @@ public class App extends Application {
 	});
 
 	private StorageHandler storageHandler;
+	private PlatformAPI api;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -69,7 +70,7 @@ public class App extends Application {
 		initThread.submit(() -> {
 			try {
 				logger.info("Initializing platform API");
-				final PlatformAPI api = buildAPI(uiDisplay, operationFactory);
+				api = buildAPI(uiDisplay, operationFactory);
 				AppConfigurer.applyLocale(api, null);
 				logger.info("Detect all available products");
 				api.detectAll();
@@ -117,6 +118,11 @@ public class App extends Application {
 		SessionManager.getManager().destroy();
 		if (storageHandler != null) {
 			storageHandler.close();
+		}
+		// finalize all initialized PKCS11 modules
+		logger.info("Finalizing all initialized PKCS11 modules...");
+		if (api != null && api.getPKCS11Manager() != null) {
+			api.getPKCS11Manager().finalizeAllModules();
 		}
 		System.exit(0);
 	}
