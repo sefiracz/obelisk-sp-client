@@ -29,7 +29,6 @@ import cz.sefira.obelisk.dss.DSSException;
 import cz.sefira.obelisk.dss.DigestAlgorithm;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.view.DialogMessage;
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -118,7 +117,7 @@ public class DSSUtils {
       if (X509ObjectIdentifiers.id_ad_caIssuers.equals(accessDescription.getAccessMethod())) {
         GeneralName gn = accessDescription.getAccessLocation();
         if (GeneralName.uniformResourceIdentifier == gn.getTagNo()) {
-          DERIA5String str = (DERIA5String) ((DERTaggedObject) gn.toASN1Primitive()).getObject();
+          DERIA5String str = (DERIA5String) ((DERTaggedObject) gn.toASN1Primitive()).getBaseObject();
           locationsUrls.add(str.getString());
         }
       }
