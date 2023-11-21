@@ -71,6 +71,7 @@ public class DSSUtils {
     } else {
       return false; // unknown exception - re-throw
     }
+    logger.info("Unable to open device: "+e.getMessage(), e);
     SessionManager.getManager().destroy();
     operationFactory.getMessageDialog(api, new DialogMessage(msg, DialogMessage.Level.WARNING,
             410, 155), true);
