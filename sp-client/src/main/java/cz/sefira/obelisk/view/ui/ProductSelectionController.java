@@ -104,7 +104,14 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   }
 
   private Product getSelectedProduct() {
-    return (Product) product.getSelectedToggle().getUserData();
+    Product p = (Product) product.getSelectedToggle().getUserData();
+    if (p != null) {
+      logger.info("Product selected: " + p.getSimpleLabel());
+      if (p instanceof DetectedCard card) {
+        logger.info("Selected card ATR: " + card.getAtr());
+      }
+    }
+    return p;
   }
 
   @Override

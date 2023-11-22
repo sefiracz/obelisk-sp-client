@@ -229,6 +229,7 @@ public class StandaloneDialog {
   }
 
   public static void showConfirmResetDialog(Stage primaryStage, PlatformAPI api, final UserPreferences userPreferences) {
+    logger.info("User tries to reset to factory settings");
     ResourceBundle resources = ResourceUtils.getBundle();
     DialogMessage message = new DialogMessage("preferences.reset.dialog",
         DialogMessage.Level.WARNING, 400, 150);
@@ -240,6 +241,7 @@ public class StandaloneDialog {
     cancel.setText(resources.getString("button.cancel"));
     cancel.getStyleClass().add("btn-default");
     message.addButton(new DialogMessage.MessageButton(cancel, (stage, controller) -> {
+      logger.info("Factory reset cancelled");
       if(stage != null)
         stage.hide();
     }));
@@ -257,6 +259,7 @@ public class StandaloneDialog {
         stage.close();
       if (primaryStage != null)
         primaryStage.close();
+      logger.info("Factory reset applied");
     }));
 
     showDialog(api, message, true);

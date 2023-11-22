@@ -26,7 +26,6 @@ import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.token.macos.MacOSKeychain;
 import cz.sefira.obelisk.token.windows.WindowsKeystore;
-import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import cz.sefira.obelisk.view.core.UIOperation;
 import cz.sefira.obelisk.dss.token.DSSPrivateKeyEntry;
@@ -35,9 +34,8 @@ import cz.sefira.obelisk.dss.x509.CertificateToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCertificateResponse> {
 
@@ -136,6 +134,8 @@ class GetCertificateFlow extends AbstractCoreFlow<GetCertificateRequest, GetCert
             if (certificateChain != null) {
               resp.setCertificateChain(certificateChain);
             }
+            String chain = resp.getCertificateChain() != null ? Arrays.stream(resp.getCertificateChain()).map(c -> "'"+c.getCertificate().getSubjectX500Principal().toString()+"'").collect(Collectors.joining(",")) : "";
+            logger.info("Response: '" + resp.getCertificate().getSubjectX500Principal().toString() + "' CertificateChain[" + chain + "]");
             return new Execution<>(resp, product);
           } else if (selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.BACK)) {
             continue; // go back from key selection

@@ -83,6 +83,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     api = (PlatformAPI) params[0];
     StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title.information");
     certificateToken = (CertificateToken) params[1];
+    logger.info("Unknown certificate: '" + certificateToken.getSubjectX500Principal() + "'");
     message.setText(MessageFormat.format(resources.getString("certificates.flow.manual"), new Object[]{}));
     setLogoBackground(messageBox, 250, 250);
   }

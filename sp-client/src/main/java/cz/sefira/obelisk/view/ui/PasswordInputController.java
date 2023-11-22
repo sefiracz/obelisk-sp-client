@@ -19,6 +19,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -75,6 +76,9 @@ public class PasswordInputController extends AbstractUIOperationController<char[
     final String passwordPrompt = (String) params[0];
 		if(params.length > 1) {
 			product = (AbstractProduct) params[1];
+		}
+		if (product != null) {
+			logger.info("Password for: "+ TextUtils.getProductLabel(product));
 		}
 		String titleKey = "password.title";
     String promptKey = "password.default.prompt";

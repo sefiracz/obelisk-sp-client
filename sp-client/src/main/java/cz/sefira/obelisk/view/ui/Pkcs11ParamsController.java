@@ -30,12 +30,16 @@ import cz.sefira.obelisk.api.model.OS;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Pkcs11ParamsController extends AbstractUIOperationController<Pkcs11Params> implements Initializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(Pkcs11ParamsController.class.getName());
 
     private static final OS OS = EnvironmentInfo.buildFromSystemProperties(System.getProperties()).getOs();
 
@@ -101,6 +105,7 @@ public class Pkcs11ParamsController extends AbstractUIOperationController<Pkcs11
 
     private void processPkcs11File(File selectedPkcs11File) {
         if (selectedPkcs11File != null) {
+            logger.info("Selected PKCS11 driver file: "+selectedPkcs11File.getAbsolutePath());
             pkcs11File = selectedPkcs11File;
             pkcs11FileSpecified.set(true);
             selectFile.setText(pkcs11File.getName());

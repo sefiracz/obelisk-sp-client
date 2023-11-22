@@ -176,6 +176,7 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 				userPreferences.setProxyPassword(proxyPassword.getText());
 			}
 			AppConfigurer.applyUserPreferences(userPreferences);
+			logger.info("Save preferences: "+userPreferences);
 			api.getProxyProvider().setInitFlag(false);
 			windowClose(primaryStage);
 		});
