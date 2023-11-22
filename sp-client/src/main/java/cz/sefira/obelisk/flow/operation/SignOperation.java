@@ -113,14 +113,28 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 				}
 
 				/*
-					Bug/Error usually happens when MSCAPI key container name contains illegal (non-ASCII) characters (e.g. diacritics)
+				  Try downgrading to RSA #PKCS1.5
+					- Bug/Error usually happens when MSCAPI key container name contains illegal (non-ASCII) characters (e.g. diacritics)
 					and RSA-PSS signature algorithm is used
+					- Or unknown error happens (maybe RSA-PSS signature algorithm is not supported)
+					SCARD_F_UNKNOWN_ERROR - 0x80100014 - error 2148532244 - An internal error has been detected, but the source is unknown.
 					NTE_BUFFER_TOO_SMALL - 0x80090028 - error 2148073512 - The buffer supplied to a function was too small.
 				*/
-				if (message.contains("error 2148073512") && maskGenerationFunction != null) {
-					logger.error("NTE_BUFFER_TOO_SMALL - 0x80090028 - error 2148073512 - The buffer supplied to a function was too small.");
-					logger.info("Retry signature with downgraded algorithm: "+SignatureAlgorithm.getAlgorithm(key.getEncryptionAlgorithm(), digestAlgorithm));
-					return sign(toBeSigned, digestAlgorithm, null, key); // fallback without RSA-PSS (MGF1)
+				if (maskGenerationFunction != null) {
+					boolean fallback = false;
+					if (message.contains("error 2148073512")) {
+						logger.error("NTE_BUFFER_TOO_SMALL - 0x80090028 - error 2148073512 - The buffer supplied to a function was too small.");
+						fallback = true;
+					} else if (message.contains("error 2148532244")) {
+						logger.error("SCARD_F_UNKNOWN_ERROR - 0x80100014 - error 2148532244 - An internal error has been detected, but the source is unknown.");
+						fallback = true;
+					} else {
+						logger.error("Unexpected error: "+message); // https://learn.microsoft.com/cs-cz/windows/win32/com/com-error-codes-4
+					}
+					if (fallback) {
+						logger.info("Retry signature with downgraded algorithm: " + SignatureAlgorithm.getAlgorithm(key.getEncryptionAlgorithm(), digestAlgorithm));
+						return sign(toBeSigned, digestAlgorithm, null, key); // fallback without RSA-PSS (MGF1)
+					}
 				}
 			}
 			if (!DSSUtils.checkWrongPasswordInput(e, operationFactory, api))
