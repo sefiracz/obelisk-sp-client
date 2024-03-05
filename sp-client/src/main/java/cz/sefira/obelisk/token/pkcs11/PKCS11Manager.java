@@ -13,7 +13,6 @@
  */
 package cz.sefira.obelisk.token.pkcs11;
 
-import cz.sefira.obelisk.InternalAPI;
 import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.api.model.KeystoreType;
 import cz.sefira.obelisk.api.PlatformAPI;

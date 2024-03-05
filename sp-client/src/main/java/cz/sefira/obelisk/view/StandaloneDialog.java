@@ -145,18 +145,8 @@ public class StandaloneDialog {
     centerBox.getStyleClass().add("center");
     centerBox.setAlignment(Pos.CENTER);
     // set message
-    String messageText;
-    if (dialogMessage.getMessageProperty() != null) {
-      // message from property
-      messageText = MessageFormat.format(resources.getString(dialogMessage.getMessageProperty()),
-              dialogMessage.getMessageParameters());
-    } else if (dialogMessage.getMessage() != null) {
-      // pre-set message
-      messageText = dialogMessage.getMessage();
-    } else {
-      // default value
-      messageText = resources.getString("error");
-    }
+    String messageText = getMessageText(dialogMessage);
+    logger.info("Show dialog: "+messageText.replace("\n", "_"));
     Label messageLabel = new Label(messageText);
     messageLabel.setWrapText(true);
     messageLabel.getStyleClass().add("message");
@@ -389,12 +379,14 @@ public class StandaloneDialog {
       errMsg.addButton(new DialogMessage.MessageButton(detail, (start, controller) -> {
         // text area with exception stacktrace
         TextArea area = new TextArea();
-        area.setText(printedStacktrace);
+        String messageText = getMessageText(errMsg);
+        area.setText(messageText+"\n\n"+printedStacktrace);
         area.setStyle("-fx-highlight-fill: #4AA9E7; -fx-highlight-text-fill: #000000;");
         area.setEditable(false);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setStyle("-fx-control-inner-background: white; -fx-background-color: white;");
+        borderPane.setPrefSize(700, 450);
         borderPane.setCenter(area);
 
         Stage detailStage = new Stage();
@@ -412,6 +404,7 @@ public class StandaloneDialog {
             detailStage.close();
           }
         });
+        StageHelper.getInstance().setMinSize(borderPane, detailStage);
         detailStage.show();
       }));
     }
@@ -425,6 +418,23 @@ public class StandaloneDialog {
       logger.error(e.getMessage(), e);
       // TODO - fallback error dialog?
     }
+  }
+
+  private static String getMessageText(DialogMessage dialogMessage) {
+    ResourceBundle resources = ResourceUtils.getBundle();
+    String messageText;
+    if (dialogMessage.getMessageProperty() != null) {
+      // message from property
+      messageText = MessageFormat.format(resources.getString(dialogMessage.getMessageProperty()),
+          dialogMessage.getMessageParameters());
+    } else if (dialogMessage.getMessage() != null) {
+      // pre-set message
+      messageText = dialogMessage.getMessage();
+    } else {
+      // default value
+      messageText = resources.getString("error");
+    }
+    return messageText;
   }
 
 }
