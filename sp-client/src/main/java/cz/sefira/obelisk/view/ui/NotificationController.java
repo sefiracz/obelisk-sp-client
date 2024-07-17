@@ -98,7 +98,7 @@ public class NotificationController extends ControllerCore implements PropertyCh
   private double posY;
   private double xOffset;
   private double yOffset;
-  private boolean hiddenFlag;
+  private boolean hiddenFlag; // hides notification for duration of current operation
 
   private Notification notification;
   private TimerService service;
@@ -259,6 +259,10 @@ public class NotificationController extends ControllerCore implements PropertyCh
     return service;
   }
 
+  /**
+   * Hides notification
+   * @param flag True if notification is supposed to hide for duration of operation. False to reset for new
+   */
   private void hideNotification(boolean flag) {
     logger.info("Hiding notification (flag=" + flag + ")");
     hiddenFlag = flag;

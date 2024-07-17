@@ -81,8 +81,11 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   @FXML
   private Pane productsContainer;
 
+//  @FXML
+//  private Button dashButton;
+
   @FXML
-  private Button dashButton;
+  private Button settings;
 
   @FXML
   private Button select;
@@ -198,7 +201,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       progressIndicatorVisible(false);
     });
 
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
+    settings.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 

@@ -112,7 +112,11 @@ public class Dispatcher implements AppPlugin {
           initialized = true;
           initializedDate = new Date();
         }
-        validateMessage(messageQueue.getMessage());
+        try {
+          validateMessage(messageQueue.getMessage());
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
       }, 1000, 500, TimeUnit.MILLISECONDS);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);

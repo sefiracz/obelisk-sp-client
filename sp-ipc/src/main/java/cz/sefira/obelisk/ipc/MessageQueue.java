@@ -36,7 +36,7 @@ public interface MessageQueue {
   String addMessage(byte[] message);
 
   /**
-   * Add message to thq queue and return message ID
+   * Add message to the queue and return message ID
    * @param message Message instance
    * @return Message identification
    */
@@ -46,6 +46,6 @@ public interface MessageQueue {
    * Retrieve message from queue
    * @return Message instance
    */
-  Message getMessage();
+  Message getMessage() throws Exception;
 
 }

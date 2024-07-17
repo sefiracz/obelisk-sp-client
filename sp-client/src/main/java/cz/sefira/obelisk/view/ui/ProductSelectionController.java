@@ -67,8 +67,11 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   @FXML
   private VBox productsContainer;
 
+//  @FXML
+//  private Button dashButton;
+
   @FXML
-  private Button dashButton;
+  private Button settings;
 
   @FXML
   private Button select;
@@ -195,7 +198,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     });
 
     // create context menu
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
+    settings.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 

@@ -68,8 +68,8 @@ public final class FileMessageQueue implements MessageQueue {
     }
     catch (Exception e) {
       logger.error("Failed to push byte[] message to queue: "+e.getMessage(), e);
-      throw new RuntimeException(e); // TODO - handle error
     }
+    return null;
   }
 
   public String addMessage(Message message) {
@@ -84,11 +84,11 @@ public final class FileMessageQueue implements MessageQueue {
       return filenameId + fileExt;
     } catch (Exception e) {
       logger.error("Failed to push message object to queue: "+e.getMessage(), e);
-      throw new RuntimeException(e); // TODO - handle error
     }
+    return null;
   }
 
-  public Message getMessage() {
+  public Message getMessage() throws Exception {
     try {
       String messagesDir = getMessagesDirectory();
       try (Stream<Path> list = Files.list(Paths.get(messagesDir))) {
@@ -112,8 +112,8 @@ public final class FileMessageQueue implements MessageQueue {
     }
     catch (Exception e) {
       logger.error("Failed to read message from queue: "+e.getMessage(), e);
-      throw new RuntimeException(e); // TODO - handle error
     }
+    return null;
   }
 
   private String getFileMessageId() throws NoSuchAlgorithmException {

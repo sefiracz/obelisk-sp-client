@@ -100,24 +100,12 @@ public class AWTSystray extends AbstractSystray {
   }
 
   private TrayIcon.MessageType getAWTMessageType(MessageType messageType) {
-    TrayIcon.MessageType type;
-    switch (messageType) {
-      case WARNING:
-        type = TrayIcon.MessageType.WARNING;
-        break;
-      case ERROR:
-        type = TrayIcon.MessageType.ERROR;
-        break;
-      case INFO:
-        type = TrayIcon.MessageType.INFO;
-        break;
-      case SUCCESS:
-      case NONE:
-      default:
-        type = TrayIcon.MessageType.NONE;
-        break;
-    }
-    return type;
+    return switch (messageType) {
+      case WARNING -> TrayIcon.MessageType.WARNING;
+      case ERROR -> TrayIcon.MessageType.ERROR;
+      case INFO -> TrayIcon.MessageType.INFO;
+      default -> TrayIcon.MessageType.NONE;
+    };
   }
 
 }

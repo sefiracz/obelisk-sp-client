@@ -95,7 +95,7 @@ public class CardDetector {
 					logger.warn("Exception when closing cardTerminals", e);
 				}
 			}
-		}));
+		}, "ShutdownThread-CardTerminals"));
 
 		final String libraryName = OS.isWindows() ? WINDOWS_PATH : OS.isMacOS() ? MAC_PATH : PCSC_PATH;
 		this.lib = Native.load(libraryName, WinscardLibrary.class);
