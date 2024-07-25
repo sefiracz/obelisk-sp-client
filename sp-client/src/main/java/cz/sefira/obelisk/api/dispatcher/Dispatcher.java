@@ -188,7 +188,7 @@ public class Dispatcher implements AppPlugin {
       }
     } catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
-      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 475, 170);
+      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 500, 170);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
       notificationType = MessageType.ERROR;
