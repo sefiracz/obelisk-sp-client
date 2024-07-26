@@ -114,15 +114,20 @@ public class CertificateViewerController implements StandaloneUIController, Init
     stage.setTitle(resourceBundle.getString("certificate.viewer.title"));
     stage.getScene().getStylesheets().add(this.getClass().getResource("/styles/styles.css").toString());
     List<X509Certificate> certificates = (List<X509Certificate>) params[0];
-    if (params.length == 4) {
-      this.api = (PlatformAPI) params[1];
-      this.sslTrust = (boolean) params[2];
-      this.queueMessage = (Message) params[3];
+    boolean saveOption = (boolean) params[1];
+    if (params.length == 5) {
+      this.api = (PlatformAPI) params[2];
+      this.sslTrust = (boolean) params[3];
+      this.queueMessage = (Message) params[4];
     }
     // no API interaction, hide trust SSL button
     if (api == null || !sslTrust) {
       trust.setVisible(false);
       trust.setManaged(false);
+    }
+    if (!saveOption) {
+      save.setVisible(false);
+      save.setManaged(false);
     }
     try {
       int fieldsCount = 0;

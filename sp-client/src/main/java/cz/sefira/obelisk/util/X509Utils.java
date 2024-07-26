@@ -115,11 +115,11 @@ public class X509Utils {
     }
   }
 
-  public static void openPEMCertificate(Stage owner, String pemCertificate) {
+  public static void openPEMCertificate(Stage owner, String pemCertificate, boolean saveOption) {
     try {
       X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X509").generateCertificate(
           new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8)));
-      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, List.of(certificate));
+      StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", owner, StageState.NONBLOCKING, List.of(certificate), saveOption);
     }
     catch (CertificateException e) {
       logger.error(e.getMessage(), e);

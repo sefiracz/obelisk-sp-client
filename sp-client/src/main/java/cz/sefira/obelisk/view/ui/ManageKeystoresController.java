@@ -148,7 +148,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-					X509Utils.openPEMCertificate(primaryStage, X509Utils.wrapPEMCertificate(row.getItem().getCertificate()));
+					X509Utils.openPEMCertificate(primaryStage, X509Utils.wrapPEMCertificate(row.getItem().getCertificate()), true);
 				}
 			});
 			return row;
@@ -216,7 +216,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(primaryStage,
-				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
+				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate()), true));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		remove.setOnAction((event) -> {

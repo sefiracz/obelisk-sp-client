@@ -353,7 +353,7 @@ public class StandaloneDialog {
     errMsg.addButton(new DialogMessage.MessageButton(certs, (start, controller) -> {
       if (ex.getCertificateChain() != null) {
         StandaloneDialog.createDialogFromFXML("/fxml/certificate-viewer.fxml", errMsg.getOwner(),
-            StageState.NONBLOCKING, ex.getCertificateChain(), api, sslTrust.get(), message);
+            StageState.NONBLOCKING, ex.getCertificateChain(), true, api, sslTrust.get(), message);
       }
     }));
     StandaloneDialog.showErrorDialog(errMsg, null, ex.getSSLException());
