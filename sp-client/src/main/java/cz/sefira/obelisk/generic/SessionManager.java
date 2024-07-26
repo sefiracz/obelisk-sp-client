@@ -78,6 +78,10 @@ public class SessionManager {
     return tokenStorage.getToken();
   }
 
+  public boolean isCurrentlyInitializedToken(AbstractProduct product) {
+    return product != null && product.getCertificateId() != null && product.matchToken(this.product);
+  }
+
   public void setToken(AbstractProduct product, SignatureTokenConnection token) {
     this.product = product;
     if(this.tokenStorage != null) {

@@ -103,6 +103,17 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
       else if (products.size() > 1) {
         // private key is found on multiple devices - selection dialog
         while (true) {
+          // check current session if we already don't use one of the colliding device
+          for (AbstractProduct p : products) {
+            if (SessionManager.getManager().isCurrentlyInitializedToken(p)) {
+              selectedProduct = p;
+              break;
+            }
+          }
+          if (selectedProduct != null) {
+            break;
+          }
+          // present collision to user to select device
           final Operation<AbstractProduct> operation = this.getOperationFactory()
               .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
           final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
