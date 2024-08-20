@@ -67,8 +67,11 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   @FXML
   private VBox productsContainer;
 
+//  @FXML
+//  private Button dashButton;
+
   @FXML
-  private Button dashButton;
+  private Button settings;
 
   @FXML
   private Button select;
@@ -104,7 +107,14 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
   }
 
   private Product getSelectedProduct() {
-    return (Product) product.getSelectedToggle().getUserData();
+    Product p = (Product) product.getSelectedToggle().getUserData();
+    if (p != null) {
+      logger.info("Product selected: " + p.getSimpleLabel());
+      if (p instanceof DetectedCard card) {
+        logger.info("Selected card ATR: " + card.getAtr());
+      }
+    }
+    return p;
   }
 
   @Override
@@ -188,7 +198,7 @@ public class ProductSelectionController extends AbstractUIOperationController<Pr
     });
 
     // create context menu
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
+    settings.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 

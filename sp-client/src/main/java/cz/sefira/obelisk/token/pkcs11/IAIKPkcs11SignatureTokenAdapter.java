@@ -66,7 +66,7 @@ public class IAIKPkcs11SignatureTokenAdapter implements SignatureTokenConnection
                                          final DetectedCard detectedCard) {
     String pkcs11Path = pkcs11Lib.getAbsolutePath();
     this.detectedCard = detectedCard;
-    logger.info("Module library: " + pkcs11Path);
+    logger.info("Initializing token ATR: "+detectedCard.getAtr() + " with module library: " + pkcs11Path);
     this.callback = callback;
     this.reauthCallback = api.getDisplay().getReauthCallback();
     try {

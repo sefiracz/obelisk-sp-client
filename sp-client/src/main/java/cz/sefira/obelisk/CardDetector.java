@@ -15,6 +15,7 @@
 package cz.sefira.obelisk;
 
 import com.sun.jna.*;
+import cz.sefira.obelisk.util.LogUtils;
 import cz.sefira.obelisk.view.BusyIndicator;
 import iaik.pkcs.pkcs11.TokenException;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
@@ -60,6 +61,7 @@ public class CardDetector {
 	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 	private volatile boolean terminalsOpened = false;
+	private volatile boolean disableLogger = false;
 	private ScheduledExecutorService monitor;
 	private long tokenThreadTouch;
 	private CardTerminals cardTerminals;
@@ -93,7 +95,7 @@ public class CardDetector {
 					logger.warn("Exception when closing cardTerminals", e);
 				}
 			}
-		}));
+		}, "ShutdownThread-CardTerminals"));
 
 		final String libraryName = OS.isWindows() ? WINDOWS_PATH : OS.isMacOS() ? MAC_PATH : PCSC_PATH;
 		this.lib = Native.load(libraryName, WinscardLibrary.class);
@@ -118,14 +120,14 @@ public class CardDetector {
 		} catch(final Exception e) {
 			final Throwable cause = e.getCause();
 			if((cause != null) && RESET_CONTEXT_ERRORS.contains(cause.getMessage()) && !cardTerminalsCreated) {
-				logger.warn("Error class: " + cause.getClass().getName() + ". Message: " + cause.getMessage() +
-						". Re-establish a new connection.");
+				LogUtils.logMessage(logger::warn, "Error class: " + cause.getClass().getName() + "." +
+						" Message: " + cause.getMessage() + ". Re-establish a new connection.", null, disableLogger);
 				// close card terminals
 				try {
 					closeCardTerminals();
 				}
 				catch (final Exception e1) {
-					logger.warn("Exception when closing cardTerminals", e1);
+					LogUtils.logMessage(logger::warn, "Exception when closing cardTerminals", e1, disableLogger);
 				}
 				// open new context for card terminals
 				try {
@@ -134,12 +136,12 @@ public class CardDetector {
 				catch (final Exception e1) {
 					// opening new context failed - re-try with delay
 					try {
-						logger.warn("Try to establish new PCSCTerminals context after delay.");
+						LogUtils.logMessage(logger::warn, "Try to establish new PCSCTerminals context after delay.", null, disableLogger);
 						Thread.sleep(1500);
 						establishNewContext(); // try again to open new context for card terminals
 					} catch (final Exception retryError) {
 						// unable to re-establish connection, return empty list and raise error flag
-						logger.error("Unable to establish new PCSCTerminals context, returning empty terminals list.");
+						LogUtils.logMessage(logger::error, "Unable to establish new PCSCTerminals context, returning empty terminals list.", null, disableLogger);
 						this.cardTerminals = null;
 						this.contextError = true;
 						return Collections.emptyList();
@@ -264,7 +266,8 @@ public class CardDetector {
 			return detectedCard;
 		} catch (IOException | TokenException | CardException e) {
 			// Card not present or unreadable
-			logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+			LogUtils.logMessage(logger::warn, MessageFormat.format("No card present in terminal {0}, or not readable.",
+					Integer.toString(terminalIndex)), null, disableLogger);
 		}
 		return null;
 	}
@@ -319,14 +322,14 @@ public class CardDetector {
 				}
 			} catch(final CardException e) {
 				// Log exception and continue
-				logger.debug("CardException on connect", e);
+				LogUtils.logMessage(logger::debug, "CardException on connect", e, disableLogger);
 			} finally {
 				try {
 					if(card != null) {
 						card.disconnect(false);
 					}
 				} catch (CardException e) {
-					logger.warn("CardException on disconnect.", e);
+					LogUtils.logMessage(logger::warn, "CardException on disconnect.", e, disableLogger);
 				}
 			}
 		}
@@ -336,7 +339,7 @@ public class CardDetector {
 
 	private void closeCardTerminals() throws Exception {
 		// --add-opens java.smartcardio/sun.security.smartcardio=ALL-UNNAMED
-		logger.info("Closing card terminals");
+		LogUtils.logMessage(logger::info, "Closing card terminals", null, disableLogger);
 		final Class<?> pcscTerminalsClass = Class.forName("sun.security.smartcardio.PCSCTerminals");
 		final Field contextIdField = pcscTerminalsClass.getDeclaredField("contextId");
 		contextIdField.setAccessible(true);
@@ -346,10 +349,10 @@ public class CardDetector {
 			// Release current context
 			final Dword result = lib.SCardReleaseContext(new SCardContext(contextId));
 			if (result.longValue() != 0L) {
-				logger.warn("Error when releasing context: " + result.longValue());
+				LogUtils.logMessage(logger::warn, "Error when releasing context: " + result.longValue(), null, disableLogger);
 			}
 			else {
-				logger.debug("Context was released successfully.");
+				LogUtils.logMessage(logger::debug, "Context was released successfully.", null, disableLogger);
 			}
 			terminalsOpened = false;
 
@@ -361,9 +364,6 @@ public class CardDetector {
 			terminalsField.setAccessible(true);
 			final Map<?, ?> terminals = (Map<?, ?>) terminalsField.get(null);
 			terminals.clear();
-
-			// finalize all initialized modules
-			api.getPKCS11Manager().finalizeAllModules();
 		}
 	}
 
@@ -373,7 +373,7 @@ public class CardDetector {
 		final Method initContextMethod = pcscTerminalsClass.getDeclaredMethod("initContext");
 		initContextMethod.setAccessible(true);
 		initContextMethod.invoke(null);
-		logger.info("New connection to PCSCTerminals context was established.");
+		LogUtils.logMessage(logger::info, "New connection to PCSCTerminals context was established.", null, disableLogger);
 	}
 
 	private boolean isPresent(DetectedCard card) {
@@ -420,21 +420,37 @@ public class CardDetector {
 							if (card != null) {
 								propertyChangeSupport.firePropertyChange(ADD_CARD, new Object(), card);
 							} else {
-								logger.error("Terminal is connected, isCardPresent() returns true, but no card detected");
+								LogUtils.logMessage(logger::error, "Terminal is connected, isCardPresent() returns true, but no card detected", null, disableLogger);
 								// close the terminals and set error state to establish new connection
-								closeCardTerminals();
-								cardTerminals = null;
-								contextError = true;
+								raiseErrorAndClose();
 								break;
 							}
 						}
 					} catch (Exception e) {
-						logger.error("Unable to get present cards from terminal '"+cardTerminal.getName()+"'", e);
+						LogUtils.logMessage(logger::error, "Unable to get present cards from terminal '"+cardTerminal.getName()+"'", e, disableLogger);
+						raiseErrorAndClose();
 					}
 					terminalIndex++;
 				}
+			} else {
+				// enable full logging
+				disableLogger = false;
 			}
-		}, 0, 100, TimeUnit.MILLISECONDS);
+		}, 0, 250, TimeUnit.MILLISECONDS);
+	}
+
+	private void raiseErrorAndClose() {
+		try {
+			// close the terminals and set error state to establish new connection
+			closeCardTerminals();
+			cardTerminals = null;
+			contextError = true;
+		} catch (Exception e) {
+			LogUtils.logMessage(logger::error, "Unable to close terminals: "+e.getMessage(), null, disableLogger);
+		} finally {
+			// disable full logging
+			LogUtils.logMessage(logger::info, "Disable full log", null, disableLogger = true);
+		}
 	}
 
 	private void threadMonitor() {

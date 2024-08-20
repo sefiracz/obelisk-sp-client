@@ -179,6 +179,6 @@ public abstract class UserPreferences {
         "proxyUseHttps=" + proxyUseHttps + "\n" +
         "proxyAuthentication=" + proxyAuthentication + "\n" +
         "proxyUsername=" + proxyUsername + "\n" +
-        "proxyPassword=[REDACTED]";
+        "proxyPassword=" + (proxyPassword != null ? "[REDACTED]" : "");
   }
 }

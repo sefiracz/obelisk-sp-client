@@ -51,10 +51,12 @@ public class App extends Application {
 	});
 
 	private StorageHandler storageHandler;
+	private PlatformAPI api;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		Platform.setImplicitExit(false);
+		Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "ShutdownThread"));
 
 		// starting params
 		Parameters params = getParameters(); // currently not used
@@ -69,7 +71,7 @@ public class App extends Application {
 		initThread.submit(() -> {
 			try {
 				logger.info("Initializing platform API");
-				final PlatformAPI api = buildAPI(uiDisplay, operationFactory);
+				api = buildAPI(uiDisplay, operationFactory);
 				AppConfigurer.applyLocale(api, null);
 				logger.info("Detect all available products");
 				api.detectAll();
@@ -87,15 +89,8 @@ public class App extends Application {
 		logger.info("Start finished");
 	}
 
-	private PlatformAPI buildAPI(final UIDisplay uiDisplay, final OperationFactory operationFactory) {
-		try {
-			storageHandler = new StorageHandler();
-		} catch (IOException e) {
-			StandaloneDialog.showDialog(null, new DialogMessage("preloader.error.occurred",
-					DialogMessage.Level.ERROR, new String[] {e.getMessage()}), true);
-			System.exit(1);
-		}
-
+	private PlatformAPI buildAPI(final UIDisplay uiDisplay, final OperationFactory operationFactory) throws IOException {
+		storageHandler = new StorageHandler();
 		AppConfigurer.applyUserPreferences(PreferencesFactory.getInstance(AppConfig.get()));
 		final APIBuilder builder = new APIBuilder();
 		final PlatformAPI api = builder.build(uiDisplay, getFlowRegistry(), storageHandler, operationFactory);
@@ -113,12 +108,20 @@ public class App extends Application {
 
 	@Override
 	public void stop() {
+		System.exit(0);
+	}
+
+	private void shutdown() {
 		logger.info("Stopping application...");
 		SessionManager.getManager().destroy();
 		if (storageHandler != null) {
 			storageHandler.close();
 		}
-		System.exit(0);
+		// finalize all initialized PKCS11 modules
+		logger.info("Finalizing all initialized PKCS11 modules...");
+		if (api != null && api.getPKCS11Manager() != null) {
+			api.getPKCS11Manager().finalizeAllModules();
+		}
 	}
 
 	private void notifyPreloader(final List<InitErrorMessage> messages) {

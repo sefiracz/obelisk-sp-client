@@ -25,16 +25,54 @@ package cz.sefira.obelisk.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import org.slf4j.Logger;
+import cz.sefira.obelisk.util.annotation.NotNull;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * description
+ * Logging utils
  */
 public class LogUtils {
 
-  private static final Logger logger = LoggerFactory.getLogger(LogUtils.class.getName());
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LogUtils.class.getName());
 
+  private static final Set<Integer> logCodes = ConcurrentHashMap.newKeySet();
+
+  /**
+   * Helper logging method that prevents repeatable logging of the same messages.
+   * Example: logMessage(logger::info, "Log this message", null, disabledLogFlag);
+   * @param logger Method reference to the logger
+   * @param message Logged message
+   * @param t Thrown exception to get logged
+   * @param disableLog Flag that disabled repeated log of this message + throwable
+   */
+  public static void logMessage(LoggingMethod logger, @NotNull String message, Throwable t, boolean disableLog) {
+    int logCode = (message + (t != null ? t.getMessage() : "")).hashCode();
+    if (disableLog && !logCodes.contains(logCode)) {
+      // disabled log, but message (identified by logCode) has not been logged yet
+      logCodes.add(logCode);
+      logger.log(message, t);
+    } else if (!disableLog) {
+      // enabled log, remove this logCode from Set and log the message
+      logCodes.remove(logCode);
+      logger.log(message, t);
+    }
+    // else do not log anything
+  }
+
+  @FunctionalInterface
+  public interface LoggingMethod {
+
+    void log(String message, Throwable t);
+
+  }
+
+  /**
+   * Sets given log level to the ROOT logger
+   * @param logLevel Logging level to set to the ROOT logger
+   */
   public static void setLogLevel(Level logLevel) {
     LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
     ch.qos.logback.classic.Logger log = loggerContext.getLogger("ROOT");
@@ -42,6 +80,9 @@ public class LogUtils {
     logger.info("Log level: " + logLevel);
   }
 
+  /**
+   * Calculate execution time of block of code and log message with the time duration
+   */
   public static class Time implements AutoCloseable {
 
     private final long start;

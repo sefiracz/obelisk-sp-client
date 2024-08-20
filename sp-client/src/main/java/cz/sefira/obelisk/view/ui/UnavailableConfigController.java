@@ -82,12 +82,11 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
         StageHelper.getInstance().setTitle(applicationName, "unavailable.configuration.title");
 
         Platform.runLater(() -> {
-          this.message.setText(StringEscapeUtils.unescapeJava(MessageFormat
-                  .format(resources.getString("unavailable.configuration.header"), applicationName)));
-
+          String deviceName = ".";
           // TODO - button to show descriptions, and known information about token
           if (params.length == 1) {
             SmartcardInfo info = (SmartcardInfo) params[0];
+            deviceName = info != null ? ": "+info.getModelName()+" (ATR: "+info.getAtr()+")" : deviceName;
             boolean hasKnownDrivers = info != null && info.getDrivers() != null && !info.getDrivers().isEmpty();
             if (hasKnownDrivers && info.getDownloadUrl() != null && !info.getDownloadUrl().isEmpty()) {
               Label driverUrl = new Label();
@@ -111,7 +110,8 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
               messageContainer.getChildren().add(hBox);
             }
           }
-
+          this.message.setText(StringEscapeUtils.unescapeJava(MessageFormat
+              .format(resources.getString("unavailable.configuration.header"), applicationName, deviceName)));
         });
         setLogoBackground(messageContainer);
     }

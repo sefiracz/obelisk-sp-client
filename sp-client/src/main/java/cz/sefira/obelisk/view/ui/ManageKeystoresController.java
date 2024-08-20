@@ -148,7 +148,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-					X509Utils.openPEMCertificate(primaryStage, X509Utils.wrapPEMCertificate(row.getItem().getCertificate()));
+					X509Utils.openPEMCertificate(primaryStage, X509Utils.wrapPEMCertificate(row.getItem().getCertificate()), true);
 				}
 			});
 			return row;
@@ -207,20 +207,7 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 				.setCellValueFactory((param) -> new ReadOnlyStringWrapper(param.getValue().getType().getSimpleLabel()));
 		keystoresTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue != null) {
-				if(newValue instanceof ConfiguredKeystore) {
-					String path = ((ConfiguredKeystore) newValue).getUrl();
-					try {
-						path = Paths.get(new URI(path)).toFile().getAbsolutePath();
-					}
-					catch (URISyntaxException e) {
-						logger.error(e.getMessage(), e);
-					}
-					keystoreLabel.setText(path);
-				} else if(newValue instanceof DetectedCard) {
-					keystoreLabel.setText(newValue.getSimpleLabel());
-				} else {
-					keystoreLabel.setText(newValue.getLabel());
-				}
+				keystoreLabel.setText(TextUtils.getProductLabel(newValue));
 			} else {
 				keystoreLabel.setText(null);
 			}
@@ -229,11 +216,18 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 
 		certificate.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(primaryStage,
-				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate())));
+				X509Utils.wrapPEMCertificate(keystoresTable.getSelectionModel().getSelectedItem().getCertificate()), true));
 
 		remove.disableProperty().bind(keystoresTable.getSelectionModel().selectedItemProperty().isNull());
 		remove.setOnAction((event) -> {
-			observableKeystores.remove(keystoresTable.getSelectionModel().getSelectedItem());
+		  AbstractProduct p =	keystoresTable.getSelectionModel().getSelectedItem();
+			try {
+				X509Certificate cert = X509Utils.getCertificateFromBase64(p.getCertificate());
+				logger.info("Remove certificate '" + cert.getSubjectX500Principal() + "' stored on device '" + TextUtils.getProductLabel(p) + "'");
+			} catch (Exception e) {
+				logger.error("Unable to process product certificate: " + e.getMessage(), e);
+			}
+			observableKeystores.remove(p);
 			keystoresTable.refresh();
 		});
 
@@ -278,4 +272,5 @@ public class ManageKeystoresController extends ControllerCore implements Standal
 	public void close() throws IOException {
 
 	}
+
 }

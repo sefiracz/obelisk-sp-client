@@ -74,7 +74,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     this.resources = resources;
     this.ok.setOnAction(e -> signalEnd(null));
     this.cancel.setOnAction((e) -> this.signalUserCancel());
-    this.certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(getDisplay().getStage(true), X509Utils.convertToPEM(certificateToken)));
+    this.certificate.setOnAction(actionEvent -> X509Utils.openPEMCertificate(getDisplay().getStage(true), X509Utils.convertToPEM(certificateToken), false));
   }
 
   @Override
@@ -83,6 +83,7 @@ public class UnknownCertificateMessageController extends AbstractUIOperationCont
     api = (PlatformAPI) params[0];
     StageHelper.getInstance().setTitle(AppConfig.get().getApplicationName(), "message.title.information");
     certificateToken = (CertificateToken) params[1];
+    logger.info("Unknown certificate: '" + certificateToken.getSubjectX500Principal() + "'");
     message.setText(MessageFormat.format(resources.getString("certificates.flow.manual"), new Object[]{}));
     setLogoBackground(messageBox, 250, 250);
   }

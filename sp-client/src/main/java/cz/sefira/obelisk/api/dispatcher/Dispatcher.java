@@ -79,7 +79,7 @@ public class Dispatcher implements AppPlugin {
   private static final long SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
   private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.SECONDS.toMillis(2);
   private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.SECONDS.toMillis(60);
-  private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(10);
+  private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(6);
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -89,8 +89,10 @@ public class Dispatcher implements AppPlugin {
   private boolean initialized;
 
   private long lastSyncTimestamp = 0L;
-  private long idleTime = 0L;
-  private LongActivityNotifier activityNotifier;
+
+  private long idleWaitStart = 0L;
+  private BusyIndicator idleIndicator = null;
+  private LongActivityNotifier activityNotifier = null;
 
   private final ScheduledExecutorService dispatcher = Executors.newSingleThreadScheduledExecutor(r -> {
     Thread t = new Thread(r, "Dispatcher");
@@ -112,7 +114,11 @@ public class Dispatcher implements AppPlugin {
           initialized = true;
           initializedDate = new Date();
         }
-        validateMessage(messageQueue.getMessage());
+        try {
+          validateMessage(messageQueue.getMessage());
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
       }, 1000, 500, TimeUnit.MILLISECONDS);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
@@ -184,7 +190,7 @@ public class Dispatcher implements AppPlugin {
       }
     } catch (GenericApiException e) {
       logger.error(e.getMessage(), e);
-      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 475, 170);
+      DialogMessage errMsg = new DialogMessage(e.getMessageProperty(), DialogMessage.Level.ERROR, 500, 170);
       StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
       notificationProperty = "notification.event.fatal";
       notificationType = MessageType.ERROR;
@@ -324,15 +330,16 @@ public class Dispatcher implements AppPlugin {
   }
 
   private void idle() throws InterruptedException {
-    if (idleTime > IDLE_TIMEOUT_MILLISECONDS) {
-      throw new GenericApiException("Operation timeout, server communication stalled", "dispatcher.idle.error");
+    if (idleIndicator == null) {
+      idleIndicator = new BusyIndicator(true, true);
+      idleWaitStart = System.currentTimeMillis();
     }
-    try (BusyIndicator busyIndicator = new BusyIndicator(true, false)) {
-      Thread.sleep(IDLE_PERIOD_MILLISECONDS);
-    }
-    idleTime += IDLE_PERIOD_MILLISECONDS;
     if (activityNotifier == null) {
       activityNotifier = new LongActivityNotifier(api, "notification.long.activity.idle", LONG_ACTIVITY_IDLE_MILLISECONDS);
+    }
+    Thread.sleep(IDLE_PERIOD_MILLISECONDS);
+    if (System.currentTimeMillis() - idleWaitStart > IDLE_TIMEOUT_MILLISECONDS) {
+      throw new GenericApiException("Operation timeout, server communication stalled", "dispatcher.idle.error");
     }
   }
 
@@ -360,7 +367,7 @@ public class Dispatcher implements AppPlugin {
   }
 
   /**
-   * Flow finished, perform specific finishg tasks
+   * Flow finished, perform specific finishing tasks
    * @param req Flow request
    * @param result Flow result
    */
@@ -380,7 +387,11 @@ public class Dispatcher implements AppPlugin {
    * Close long activity (idle) notifier
    */
   private void closeIdleNotifier() {
-    idleTime = 0;
+    idleWaitStart = 0L;
+    if (idleIndicator != null) {
+      idleIndicator.close();
+      idleIndicator = null;
+    }
     if (activityNotifier != null) {
       activityNotifier.close();
       activityNotifier = null;

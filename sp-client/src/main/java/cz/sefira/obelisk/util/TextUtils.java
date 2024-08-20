@@ -23,19 +23,21 @@ package cz.sefira.obelisk.util;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AbstractProduct;
+import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
+import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.util.annotation.NotNull;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.cert.CertificateExpiredException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * Text utility methods
@@ -91,6 +93,23 @@ public class TextUtils {
       }
     }
     return false;
+  }
+
+  public static String getProductLabel(AbstractProduct value) {
+    if(value instanceof ConfiguredKeystore) {
+      String path = ((ConfiguredKeystore) value).getUrl();
+      try {
+        path = Paths.get(new URI(path)).toFile().getAbsolutePath();
+      }
+      catch (URISyntaxException e) {
+        logger.error(e.getMessage(), e);
+      }
+      return path;
+    } else if(value instanceof DetectedCard) {
+      return value.getSimpleLabel();
+    } else {
+      return value.getLabel();
+    }
   }
 
 }

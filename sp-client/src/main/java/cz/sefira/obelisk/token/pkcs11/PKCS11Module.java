@@ -224,6 +224,8 @@ public class PKCS11Module {
     if (log.isDebugEnabled())
       log.debug("Call C_FindObjectsInit("+sessionHandle+", {CKA_CLASS, CKO_PRIVATE_KEY})");
     pkcs11Module.C_FindObjectsInit(sessionHandle, attributeTemplateList, true);
+    if (log.isDebugEnabled())
+      log.debug("Call C_FindObjects("+sessionHandle+", 100)");
     long[] objects = pkcs11Module.C_FindObjects(sessionHandle, 100);
     if (objects == null || objects.length == 0) {
       log.info("No signature key found");
@@ -534,6 +536,8 @@ public class PKCS11Module {
       while(iterator.hasNext()) {
         String keyLabel = iterator.next();
         if(getCertificateHandle(sessionHandle, keyLabel) == -1) {
+          if (log.isDebugEnabled())
+            log.debug("Key "+keyLabel+" has no certificate, removing.");
           iterator.remove();
         }
       }

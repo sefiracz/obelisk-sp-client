@@ -15,7 +15,6 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
@@ -105,6 +104,7 @@ public abstract class ControllerCore  {
   }
 
   public void windowClose(Stage stage) {
+    logger.info("Closing window: "+this.getClass().getSimpleName());
     stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
   }
 

@@ -25,6 +25,7 @@ import cz.sefira.obelisk.dss.x509.CertificateToken;
 import cz.sefira.obelisk.flow.operation.*;
 import cz.sefira.obelisk.generic.QuickAccessProductsMap;
 import cz.sefira.obelisk.generic.SessionManager;
+import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import cz.sefira.obelisk.dss.SignatureValue;
@@ -102,6 +103,17 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
       else if (products.size() > 1) {
         // private key is found on multiple devices - selection dialog
         while (true) {
+          // check current session if we already don't use one of the colliding device
+          for (AbstractProduct p : products) {
+            if (SessionManager.getManager().isCurrentlyInitializedToken(p)) {
+              selectedProduct = p;
+              break;
+            }
+          }
+          if (selectedProduct != null) {
+            break;
+          }
+          // present collision to user to select device
           final Operation<AbstractProduct> operation = this.getOperationFactory()
               .getOperation(UIOperation.class, "/fxml/product-collision.fxml", api, products);
           final OperationResult<AbstractProduct> selectProductOperationResult = operation.perform();
@@ -147,13 +159,17 @@ class SignatureFlow extends AbstractCoreFlow<SignatureRequest, SignatureResponse
         }
       }
       logger.info("Token: " + token.getClass().getSimpleName());
+      logger.info("Using product: " + TextUtils.getProductLabel(selectedProduct));
+      if (selectedProduct instanceof DetectedCard card) {
+        logger.info("Using card ATR: " + card.getAtr());
+      }
 
       // select key
       DSSPrivateKeyEntry key;
       final OperationResult<DSSPrivateKeyEntry> selectPrivateKeyOperationResult = getOperationFactory().getOperation(TokenPrivateKeyOperation.class, token, api, certificateId).perform();
       if (selectPrivateKeyOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
         key = selectPrivateKeyOperationResult.getResult();
-        logger.info("Key " + key + " " + key.getCertificateToken().getCertificate().getSubjectDN() + " from " + key.getCertificateToken().getCertificate().getIssuerDN());
+        logger.info("Key " + key + " '" + key.getCertificateToken().getCertificate().getSubjectX500Principal() + "' issued by '" + key.getCertificateToken().getCertificate().getIssuerX500Principal()+"'");
       }
       // TODO mandatory user interaction at signature flow?
       else if (req.isUserInteraction() && selectPrivateKeyOperationResult.getStatus().equals(CoreOperationStatus.NO_KEY)) {

@@ -15,21 +15,10 @@
 package cz.sefira.obelisk.view.core;
 
 import cz.sefira.obelisk.api.flow.OperationStatus;
-import javafx.application.Platform;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Convenient base class for {@link UIOperationController}.
@@ -37,6 +26,8 @@ import java.util.concurrent.TimeUnit;
  * @author Jean Lepropre (jean.lepropre@nowina.lu)
  */
 public abstract class AbstractUIOperationController<R> extends ControllerCore implements UIOperationController<R> {
+
+	private static final Logger logger = LoggerFactory.getLogger(AbstractUIOperationController.class.getName());
 
 	private UIOperation<R> uiOperation;
 	private UIDisplay display;
@@ -69,6 +60,7 @@ public abstract class AbstractUIOperationController<R> extends ControllerCore im
 	}
 
   public final void signalUserCancel() {
+		logger.info("User cancelled action: "+this.getClass().getSimpleName());
 		uiOperation.signalUserCancel();
 	}
 

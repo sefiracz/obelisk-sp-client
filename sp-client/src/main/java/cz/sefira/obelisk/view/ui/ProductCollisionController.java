@@ -26,6 +26,7 @@ package cz.sefira.obelisk.view.ui;
 import cz.sefira.obelisk.CardDetector;
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.Product;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -80,8 +81,11 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
   @FXML
   private Pane productsContainer;
 
+//  @FXML
+//  private Button dashButton;
+
   @FXML
-  private Button dashButton;
+  private Button settings;
 
   @FXML
   private Button select;
@@ -125,9 +129,15 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
     });
 
   }
-
   private AbstractProduct getSelectedProduct() {
-    return (AbstractProduct) product.getSelectedToggle().getUserData();
+    AbstractProduct p = (AbstractProduct) product.getSelectedToggle().getUserData();
+    if (p != null) {
+      logger.info("Product selected: " + p.getSimpleLabel());
+      if (p instanceof DetectedCard card) {
+        logger.info("Selected card ATR: " + card.getAtr());
+      }
+    }
+    return p;
   }
 
   private List<DetectedCard> getCards(List<AbstractProduct> products) {
@@ -191,7 +201,7 @@ public class ProductCollisionController extends AbstractUIOperationController<Ab
       progressIndicatorVisible(false);
     });
 
-    dashButton.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
+    settings.setOnAction(e -> StandaloneDialog.createDialogFromFXML("/fxml/main-window.fxml", null, StageState.BLOCKING, api));
     setLogoBackground(productsContainer);
   }
 
