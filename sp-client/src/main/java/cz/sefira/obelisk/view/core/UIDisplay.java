@@ -17,6 +17,7 @@ package cz.sefira.obelisk.view.core;
 import cz.sefira.obelisk.api.Product;
 import cz.sefira.obelisk.api.ReauthCallback;
 import cz.sefira.obelisk.dss.token.PasswordInputCallback;
+import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -31,7 +32,7 @@ public interface UIDisplay {
 
 	PasswordInputCallback getPasswordInputCallback(Product p);
 
-	ReauthCallback getReauthCallback();
+	ReauthCallback getReauthCallback(DetectedCard detectedCard);
 
 	File displayFileChooser(ExtensionFilter...extensionFilters);
 

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
 
 public class PKCS11Manager {
 
-  private static final Logger log = LoggerFactory.getLogger(PKCS11Module.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(PKCS11Manager.class.getName());
+  private final List<String> notPresent = new ArrayList<>();
 
   private final PlatformAPI api;
 
@@ -205,6 +207,10 @@ public class PKCS11Manager {
     return info == null ? supported.get(atr) : info;
   }
 
+  public SmartcardInfo getSupportedSmartcardInfo(String atr) {
+    return supported.get(atr);
+  }
+
   /**
    * Get list of all currently initialized PKCS11 modules
    * @return List of initialized modules
@@ -224,7 +230,10 @@ public class PKCS11Manager {
         if(driver != null && new File(driver).exists() && new File(driver).canRead()) {
           return driver;
         } else {
-          log.warn("PKCS11 driver '"+driver+"' is not present.");
+          if (!notPresent.contains(driver)) {
+            log.warn("PKCS11 driver '{}' is not present.", driver);
+            notPresent.add(driver);
+          }
         }
       }
     }

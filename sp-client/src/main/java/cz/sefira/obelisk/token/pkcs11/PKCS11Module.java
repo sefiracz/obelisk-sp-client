@@ -42,6 +42,7 @@ import static iaik.pkcs.pkcs11.wrapper.PKCS11Constants.*;
 public class PKCS11Module {
 
   private static final Logger log = LoggerFactory.getLogger(PKCS11Module.class.getName());
+  private static final String SLOVAKIAN_eID_ZEP_SLOT = "Sig_ZEP";
 
   private final String pkcs11ModulePath;
   private final PKCS11 pkcs11Module;
@@ -74,15 +75,41 @@ public class PKCS11Module {
     if (log.isDebugEnabled())
       log.debug("Get token in terminal: "+terminalLabel);
     long[] tokens = getSlotList(true);
-    for (long token : tokens) {
-      String slotTerminal = getSlotDescription(token);
-      if(slotTerminal != null)
-        slotTerminal = slotTerminal.trim();
-      if(terminalLabel.trim().equals(slotTerminal)) {
-        return token;
+    if (tokens != null) {
+      // log all slots
+      for (long token : tokens) {
+        CK_SLOT_INFO slotInfo = getSlotInfo(token);
+        if (slotInfo != null) {
+          log.info("Found slot {}: \n{}", token, slotInfo);
+        }
+      }
+      // find the correct token in the slot of the terminal
+      for (long token : tokens) {
+        String slotTerminal = getSlotDescription(token);
+        slotTerminal = slotTerminal != null ? slotTerminal.trim() : null;
+        if(slotTerminal != null && (terminalLabel.trim().equals(slotTerminal) ||
+            isSlovakianZEPSlot(terminalLabel, slotTerminal))) {
+          log.info("Token present in terminal: {}", slotTerminal);
+          return token;
+        }
       }
     }
     return -1;
+  }
+
+  /**
+   * Workaround for Slovakian eID driver which creates two virtual slots from physical card reader.
+   * The virtual slots take on the name of the terminal and add Sig_ZEP or Sig_EP at the end respectively depending on
+   * which type of certificates that slot serves. ZEP for qualified certificates, EP for regular certificates.
+   * This application currently only checks for ZEP slot, EP slot is ignored and not supported.
+   *
+   * @param terminalLabel Label of actual physical terminal (reader)
+   * @param slotTerminal Slot description (terminal name)
+   * @return True if slotTerminal starts with the terminalLabel and ends with added Sig_ZEP postfix
+   */
+  private boolean isSlovakianZEPSlot(String terminalLabel, String slotTerminal) {
+    // FIXME add Sig_EP support - currently not possible to have card in two slots at the same time
+    return slotTerminal.startsWith(terminalLabel) && slotTerminal.endsWith(SLOVAKIAN_eID_ZEP_SLOT);
   }
 
   /**

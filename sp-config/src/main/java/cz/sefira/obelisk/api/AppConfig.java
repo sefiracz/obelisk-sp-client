@@ -119,7 +119,7 @@ public class AppConfig {
   }
 
   public void loadFromProperties(final Properties props) {
-    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client v2"));
+    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client"));
     this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "OBELISK Signing Portal client"));
     this.setCompanyName(props.getProperty(COMPANY_NAME, "SEFIRA"));
 
@@ -146,7 +146,7 @@ public class AppConfig {
   }
 
   public String getApplicationName() {
-    return MessageFormat.format(applicationName, "Client v2");
+    return MessageFormat.format(applicationName, "Client");
   }
 
   public String getApplicationPathName() {

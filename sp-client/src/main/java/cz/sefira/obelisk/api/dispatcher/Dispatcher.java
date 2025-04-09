@@ -43,10 +43,7 @@ import cz.sefira.obelisk.ipc.Message;
 import cz.sefira.obelisk.ipc.MessageQueue;
 import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.json.GsonHelper;
-import cz.sefira.obelisk.util.DSSUtils;
-import cz.sefira.obelisk.util.HttpUtils;
-import cz.sefira.obelisk.util.ResourceUtils;
-import cz.sefira.obelisk.util.TextUtils;
+import cz.sefira.obelisk.util.*;
 import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -207,6 +204,7 @@ public class Dispatcher implements AppPlugin {
       notificationProperty = "notification.event.fatal";
       notificationType = MessageType.ERROR;
     } catch (HttpResponseException e) {
+      LogUtils.logHttpResponseException(e); // log headers from error response
       logger.error(e.getMessage(), e);
       DialogMessage dialogMessage;
       Problem p = null;
@@ -231,6 +229,7 @@ public class Dispatcher implements AppPlugin {
       notificationType = MessageType.ERROR;
     } finally {
       closeIdleNotifier();
+      BusyIndicator.destroyInstance();
       if (notificationProperty != null) {
         // close notification
         String messageText = ResourceUtils.getBundle().getString(notificationProperty);
@@ -243,7 +242,7 @@ public class Dispatcher implements AppPlugin {
       GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
     String url = tokenProvider.getRedirectUri();
     boolean sync = performSync();
-    Execution<?> result;
+    Execution<?> result = null;
     do {
       // GET work request
       HttpResponse response = client.call("GET", url, tokenProvider, null, sync);
@@ -251,7 +250,7 @@ public class Dispatcher implements AppPlugin {
         idle(); // wait operation = go back to GET method
         continue;
       } else if (response.getCode() == HttpStatus.SC_NO_CONTENT) {
-        return null; // no work - finish process
+        return result; // no work - finish process
       } else if (response.getCode() != HttpStatus.SC_OK) {
         // unexpected status code result
         throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
@@ -266,7 +265,7 @@ public class Dispatcher implements AppPlugin {
         }
         // check session
         if (!checkSession(req.getSession(), url, tokenProvider)) {
-          return null;
+          return null; // invalid session
         }
         // notification
         api.getSystray().pushNotification(new EventNotification(req.getDescription()));
@@ -311,6 +310,7 @@ public class Dispatcher implements AppPlugin {
         SignatureRequest signatureRequest = GsonHelper.fromJson(new String(requestData, StandardCharsets.UTF_8), SignatureRequest.class);
         result = api.sign(signatureRequest);
         result.setStepId(signatureRequest.getSignParams().getStepId());
+        result.setSignatureId(signatureRequest.getSignParams().getSignatureId());
         break;
       default:
         throw new IllegalStateException("Unknown operation: " + req.getOperation());
@@ -331,7 +331,7 @@ public class Dispatcher implements AppPlugin {
 
   private void idle() throws InterruptedException {
     if (idleIndicator == null) {
-      idleIndicator = new BusyIndicator(true, true);
+      idleIndicator = BusyIndicator.getInstance();
       idleWaitStart = System.currentTimeMillis();
     }
     if (activityNotifier == null) {

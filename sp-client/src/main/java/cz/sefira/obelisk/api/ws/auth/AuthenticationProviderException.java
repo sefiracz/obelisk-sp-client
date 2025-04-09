@@ -28,6 +28,10 @@ package cz.sefira.obelisk.api.ws.auth;
  */
 public class AuthenticationProviderException extends Exception {
 
+  public AuthenticationProviderException(String message) {
+    super(message);
+  }
+
   public AuthenticationProviderException(Throwable cause) {
     super(cause);
   }

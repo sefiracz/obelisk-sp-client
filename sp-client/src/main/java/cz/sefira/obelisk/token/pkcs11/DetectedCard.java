@@ -83,9 +83,11 @@ public class DetectedCard extends AbstractProduct {
 	private transient boolean opened = false;
 
   /**
-   * Token has known configuration
+   * Token has known/supported configuration
    */
   private transient SmartcardInfo knownToken;
+
+	private transient SmartcardInfo supportedInfo;
 
 	private ConnectionInfo connectionInfo;
 
@@ -312,7 +314,7 @@ public class DetectedCard extends AbstractProduct {
 	public void initializeToken(PlatformAPI api, String pkcs11Path, boolean showBusy) throws IOException, TokenException {
 		PKCS11Module module = api.getPKCS11Manager().getModule(atr, pkcs11Path);
 		if (module != null) {
-			try (BusyIndicator busyIndicator = new BusyIndicator(showBusy)) {
+			try (BusyIndicator busyIndicator = BusyIndicator.getInstance(showBusy)) {
 				tokenHandler = new TokenHandler(module, terminalLabel);
 				tokenHandler.initialize();
 				tokenLabel = tokenHandler.getTokenLabel();
@@ -323,11 +325,19 @@ public class DetectedCard extends AbstractProduct {
 			}
 		}
 		knownToken = api.getPKCS11Manager().getAvailableSmartcardInfo(atr);
+		supportedInfo = api.getPKCS11Manager().getSupportedSmartcardInfo(atr);
+	}
+
+	public boolean isSlovakianEID() {
+		if (initialized && supportedInfo != null) {
+			return "eID Slovensko".equals(supportedInfo.getModelName());
+		}
+		return false;
 	}
 
 	public void openToken() {
 		if (initialized) {
-			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+			try (BusyIndicator busyIndicator = BusyIndicator.getInstance()) {
 				// open session
 				if (tokenHandler.openSession() > -1) {
 					opened = true;

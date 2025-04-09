@@ -73,7 +73,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
     @SuppressWarnings("unchecked")
     public OperationResult<DSSPrivateKeyEntry> perform() {
         final List<DSSPrivateKeyEntry> keys;
-        try (BusyIndicator busyIndicator = new BusyIndicator()){
+        try (BusyIndicator busyIndicator = BusyIndicator.getInstance()){
             keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
         } catch (final CancelledOperationException e) {
           return new OperationResult<>(BasicOperationStatus.USER_CANCEL);

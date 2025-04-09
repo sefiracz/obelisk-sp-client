@@ -30,6 +30,8 @@ public class SignParameters {
 
   private Long stepId;
 
+  private Long signatureId;
+
   private CertificateToken certificate;
 
   private byte[] toBeSigned;
@@ -44,6 +46,14 @@ public class SignParameters {
 
   public void setStepId(Long stepId) {
     this.stepId = stepId;
+  }
+
+  public Long getSignatureId() {
+    return signatureId;
+  }
+
+  public void setSignatureId(Long signatureId) {
+    this.signatureId = signatureId;
   }
 
   public CertificateToken getCertificate() {

@@ -57,8 +57,9 @@ public class AppLauncher {
       Level logLevel = PreferencesFactory.getInstance(appConfig).isDebugMode() ? Level.DEBUG : Level.INFO;
       LogUtils.setLogLevel(logLevel);
       // add message to the queue
+      String input = null;
       if (args.length > 0) {
-        String input = args[0];
+        input = args[0];
         queueMessage(input); // queue message via input argument
       } else {
         // register Mac OS URI handler
@@ -76,7 +77,7 @@ public class AppLauncher {
           logger.info("Launcher initiated with no message");
         }
       }
-      checkDevMode();
+      checkDevMode(input);
       // check lock
       checkForRunningProcess();
       // start app
@@ -107,9 +108,9 @@ public class AppLauncher {
     s.checkRunning();
   }
 
-  private static void checkDevMode() {
+  private static void checkDevMode(String input) {
     String devMode = System.getProperty("dev.mode");
-    if (Boolean.parseBoolean(devMode)) {
+    if (Boolean.parseBoolean(devMode) || (input != null && input.contains("&dev=true"))) {
       logger.info("DEV MODE enabled, exiting.");
       System.exit(0);
     }

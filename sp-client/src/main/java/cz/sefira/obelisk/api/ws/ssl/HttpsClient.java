@@ -116,7 +116,7 @@ public class HttpsClient {
     clientBuilder.setConnectionManager(connectionManager);
     api.getProxyProvider().setupProxy(request, clientBuilder);
     setHardTimeout(request);
-    try (BusyIndicator busyIndicator = new BusyIndicator(true, false);
+    try (BusyIndicator busyIndicator = BusyIndicator.getInstance(true, false);
          LongActivityNotifier notifier = new LongActivityNotifier(api, "notification.long.activity.server", LONG_ACTIVITY.toMilliseconds());
          CloseableHttpClient httpClient = clientBuilder.build()) {
       HttpClientContext context = HttpClientContext.create();

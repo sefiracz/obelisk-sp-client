@@ -136,12 +136,12 @@ public class CardDetector {
 				catch (final Exception e1) {
 					// opening new context failed - re-try with delay
 					try {
-						LogUtils.logMessage(logger::warn, "Try to establish new PCSCTerminals context after delay.", null, disableLogger);
+						LogUtils.logMessage(logger::warn, "Try to establish new PCSCTerminals context after delay: "+e1.getMessage(), null, disableLogger);
 						Thread.sleep(1500);
 						establishNewContext(); // try again to open new context for card terminals
 					} catch (final Exception retryError) {
 						// unable to re-establish connection, return empty list and raise error flag
-						LogUtils.logMessage(logger::error, "Unable to establish new PCSCTerminals context, returning empty terminals list.", null, disableLogger);
+						LogUtils.logMessage(logger::error, "Unable to establish new PCSCTerminals context, returning empty terminals list: "+retryError.getMessage(), null, disableLogger);
 						this.cardTerminals = null;
 						this.contextError = true;
 						return Collections.emptyList();
@@ -238,6 +238,7 @@ public class CardDetector {
 		final List<DetectedCard> listCardDetect = new ArrayList<DetectedCard>();
 		int terminalIndex = 0;
 		for (CardTerminal cardTerminal : getCardTerminals()) {
+			logger.info(MessageFormat.format("Checking card in terminal {0}.", terminalIndex));
 			DetectedCard card = getCardFromTerminal(showBusy, cardTerminal, terminalIndex);
 			if (card != null) {
 				listCardDetect.add(card);
@@ -250,7 +251,7 @@ public class CardDetector {
 	private DetectedCard getCardFromTerminal(boolean showBusy, CardTerminal cardTerminal, int terminalIndex) {
 		try {
 			DetectedCard detectedCard;
-			try (BusyIndicator busyIndicator = new BusyIndicator()) {
+			try (BusyIndicator busyIndicator = BusyIndicator.getInstance()) {
 				final Card card = cardTerminal.connect("*");
 				final ATR atr = card.getATR();
 				detectedCard = new DetectedCard(atr.getBytes(), cardTerminal, terminalIndex, api);
@@ -262,12 +263,13 @@ public class CardDetector {
 			} else {
 				detectedCard = presentCards.get(detectedCard); // already is present, use the existing one
 			}
-			logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, detectedCard.getAtr()));
+			String ATR = detectedCard != null ? detectedCard.getAtr() : null;
+			logger.info(MessageFormat.format("Found card in terminal {0} with ATR {1}.", terminalIndex, ATR));
 			return detectedCard;
 		} catch (IOException | TokenException | CardException e) {
 			// Card not present or unreadable
-			LogUtils.logMessage(logger::warn, MessageFormat.format("No card present in terminal {0}, or not readable.",
-					Integer.toString(terminalIndex)), null, disableLogger);
+			LogUtils.logMessage(logger::warn, MessageFormat.format("No card present in terminal {0}, or not readable: {1}",
+					Integer.toString(terminalIndex), e.getMessage()), null, disableLogger);
 		}
 		return null;
 	}
@@ -300,7 +302,7 @@ public class CardDetector {
 						return;
 					}
 				} catch (Exception e) {
-					logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable.", Integer.toString(terminalIndex)));
+					logger.warn(MessageFormat.format("No card present in terminal {0}, or not readable: {1}", Integer.toString(terminalIndex), e.getMessage()));
 				}
 				terminalIndex++;
 			}
