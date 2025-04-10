@@ -90,9 +90,6 @@ public class AppPreloader extends Preloader {
 	}
 
 	private void showSplashScreen(Stage primaryStage) {
-		if (true) {
-			throw new IllegalStateException("Test fail");
-		}
 		logger.info("Showing splashscreen");
 		final String appName = AppConfig.get().getApplicationName();
 		primaryStage.setTitle(appName);
