@@ -15,10 +15,12 @@
 package cz.sefira.obelisk;
 
 import com.sun.javafx.application.LauncherImpl;
+import com.sun.javafx.application.ParametersImpl;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.util.ResourceUtils;
+import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Implementation;
@@ -66,19 +68,31 @@ public class AppPreloader extends Preloader {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parameters params = getParameters();
-		if (params.getNamed().get("error") != null) {
-			String stacktrace = params.getNamed().get("stacktrace");
-			logger.error(stacktrace);
-			StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
-							DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
-			System.exit(1);
-		} else if (PreferencesFactory.getInstance(AppConfig.get()).isSplashScreen()) {
-			showSplashScreen(primaryStage);
+		try {
+			Parameters params = getParameters();
+			if (params.getNamed().get("error") != null) {
+				exitOnFail(params);
+			} else if (PreferencesFactory.getInstance(AppConfig.get()).isSplashScreen()) {
+				showSplashScreen(primaryStage);
+			}
+		} catch (Exception e) {
+			String[] args = new String[]{"--error=true", "--stacktrace=" + TextUtils.printException(e)};
+			exitOnFail(new ParametersImpl(args));
 		}
 	}
 
+	private void exitOnFail(Parameters params) {
+		String stacktrace = params.getNamed().get("stacktrace");
+		logger.error(stacktrace);
+		StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
+				DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
+		System.exit(1);
+	}
+
 	private void showSplashScreen(Stage primaryStage) {
+		if (true) {
+			throw new IllegalStateException("Test fail");
+		}
 		logger.info("Showing splashscreen");
 		final String appName = AppConfig.get().getApplicationName();
 		primaryStage.setTitle(appName);
