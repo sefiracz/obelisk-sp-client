@@ -16,12 +16,12 @@ package cz.sefira.obelisk.api;
 
 import cz.sefira.obelisk.Systray;
 import cz.sefira.obelisk.api.notification.Notification;
+import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.api.ws.proxy.ProxyProvider;
 import cz.sefira.obelisk.storage.EventsStorage;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
-import cz.sefira.obelisk.api.plugin.VersionPlugin;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.storage.StorageHandler;
@@ -73,7 +73,11 @@ public interface PlatformAPI {
 
 	// Utils API
 
-	VersionPlugin getVersionPlugin();
+	void registerPlugin(AppPlugin plugin);
+
+	List<AppPlugin> getPlugins();
+
+	AppPlugin getPlugin(Class<? extends AppPlugin> pluginClass);
 
 	String getLabel(Product p);
 
