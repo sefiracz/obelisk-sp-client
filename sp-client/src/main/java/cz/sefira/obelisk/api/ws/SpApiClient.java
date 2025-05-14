@@ -60,7 +60,11 @@ public class SpApiClient {
     this.client = new HttpsClient(api);
   }
 
-  public HttpResponse call(String method, String url, AuthenticationProvider authProvider, Object payload, boolean sync)
+  public HttpResponse call(HttpMethod method, String url) throws GeneralSecurityException, AuthenticationProviderException, URISyntaxException, IOException {
+    return call(method, url, null, null, false);
+  }
+
+  public HttpResponse call(HttpMethod method, String url, AuthenticationProvider authProvider, Object payload, boolean sync)
           throws AuthenticationProviderException, URISyntaxException, GeneralSecurityException, IOException {
     // URI builder
     URIBuilder uriBuilder = new URIBuilder(url);
@@ -69,9 +73,11 @@ public class SpApiClient {
     uriBuilder.addParameter(new BasicNameValuePair("devices", String.valueOf(sync)));
     // execute request
     URI requestUri = uriBuilder.build();
-    logger.info(method+" "+requestUri);
-    HttpUriRequestBase request = new HttpUriRequestBase(method, requestUri);
-    request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
+    logger.info("{} {}", method, requestUri);
+    HttpUriRequestBase request = new HttpUriRequestBase(method.getMethod(), requestUri);
+    if (authProvider != null) {
+      request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
+    }
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
         .setConnectionRequestTimeout(5, TimeUnit.SECONDS)

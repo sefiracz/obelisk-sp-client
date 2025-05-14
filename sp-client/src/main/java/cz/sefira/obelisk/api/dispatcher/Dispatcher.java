@@ -31,7 +31,9 @@ import cz.sefira.obelisk.api.notification.LongActivityNotifier;
 import cz.sefira.obelisk.api.notification.MessageType;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
+import cz.sefira.obelisk.api.plugin.CookiesPlugin;
 import cz.sefira.obelisk.api.ws.GenericApiException;
+import cz.sefira.obelisk.api.ws.HttpMethod;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.SpApiClient;
 import cz.sefira.obelisk.api.ws.auth.*;
@@ -53,8 +55,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -73,10 +77,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Dispatcher implements AppPlugin {
 
   private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class.getName());
+  private static final Object sync = new Object();
   private static final long SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
   private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.SECONDS.toMillis(2);
   private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.SECONDS.toMillis(60);
   private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(6);
+  private static final long AUTH_SESSION_MILLISECONDS = TimeUnit.MINUTES.toMillis(20) ;
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -86,7 +92,7 @@ public class Dispatcher implements AppPlugin {
   private boolean initialized;
 
   private long lastSyncTimestamp = 0L;
-
+  private long lastAuthCheckTimestamp = 0L;
   private long idleWaitStart = 0L;
   private BusyIndicator idleIndicator = null;
   private LongActivityNotifier activityNotifier = null;
@@ -166,10 +172,26 @@ public class Dispatcher implements AppPlugin {
         }
       }
       // process version
-      // TODO
+      // TODO version
+
+      // authentication
       String magicLink = URLDecoder.decode(magicParam.getValue(), UTF_8);
+      // obtain cookies if initialized plugin is present
+      CookiesPlugin cookiesPlugin = (CookiesPlugin) api.getPlugin(CookiesPlugin.class);
+      if (cookiesPlugin != null) {
+        synchronized (sync) {
+          String statusPage = HttpUtils.parseDiscoveryEndpoint(magicLink);
+          boolean accessTimeout = System.currentTimeMillis() - lastAuthCheckTimestamp >= AUTH_SESSION_MILLISECONDS; // use webview every 20 mins irregardless of status page access
+          if (!cookiesPlugin.checkAccess(client, statusPage) || accessTimeout) {
+            // HTTP client could not access /status page (or access timeout expired), load() cookies through plugin
+            cookiesPlugin.load(sync, api, statusPage);
+            sync.wait(); // wait for cookie plugin to load and notify
+            lastAuthCheckTimestamp = System.currentTimeMillis();
+          }
+        }
+      }
       AuthenticationProvider tokenProvider = new BearerTokenProvider(magicLink, api); // obtain authorization credentials
-      Execution<?> result = processMessage(tokenProvider);
+      Execution<?> result = processMessage(tokenProvider); // process message
       if (result != null) {
         if (result.isSuccess()) {
           notificationProperty = "notification.event.success";
@@ -245,7 +267,7 @@ public class Dispatcher implements AppPlugin {
     Execution<?> result = null;
     do {
       // GET work request
-      HttpResponse response = client.call("GET", url, tokenProvider, null, sync);
+      HttpResponse response = client.call(HttpMethod.GET, url, tokenProvider, null, sync);
       if (response.getCode() == HttpStatus.SC_ACCEPTED) {
         idle(); // wait operation = go back to GET method
         continue;
@@ -276,7 +298,7 @@ public class Dispatcher implements AppPlugin {
         if (result != null) {
           audit(result, response);
           // send results
-          response = client.call("POST", url, tokenProvider, result, false);
+          response = client.call(HttpMethod.POST, url, tokenProvider, result, false);
           // flow finished and result successfully transmitted
           flowFinished(req, result);
           // process response
@@ -322,7 +344,7 @@ public class Dispatcher implements AppPlugin {
       throws AuthenticationProviderException, GeneralSecurityException, URISyntaxException, IOException {
     Execution<?> result = api.checkSession(sessionValue);
     if (!result.isSuccess()) {
-      client.call("POST", url, tokenProvider, result, false);
+      client.call(HttpMethod.POST, url, tokenProvider, result, false);
       logger.error("Session invalid, stop process");
       return false;
     }

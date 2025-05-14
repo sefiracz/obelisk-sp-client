@@ -20,7 +20,7 @@ import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
 import cz.sefira.obelisk.api.model.ScAPI;
 import cz.sefira.obelisk.api.notification.Notification;
-import cz.sefira.obelisk.api.plugin.VersionPlugin;
+import cz.sefira.obelisk.api.plugin.AppPlugin;
 import cz.sefira.obelisk.api.ws.proxy.ProxyProvider;
 import cz.sefira.obelisk.api.ws.model.*;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
@@ -77,6 +77,7 @@ public class InternalAPI implements PlatformAPI {
 
   private SSLCertificateProvider sslCertificateProvider;
 
+  private final List<AppPlugin> plugins = new ArrayList<>();
   private final StorageHandler storageHandler;
   private final ExecutorService executor;
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
@@ -234,7 +235,23 @@ public class InternalAPI implements PlatformAPI {
     return executeRequest(flow, sessionValue);
   }
 
-  public VersionPlugin getVersionPlugin() {
+  @Override
+  public void registerPlugin(AppPlugin plugin) {
+    plugins.add(plugin);
+  }
+
+  @Override
+  public List<AppPlugin> getPlugins() {
+    return plugins;
+  }
+
+  @Override
+  public AppPlugin getPlugin(Class<? extends AppPlugin> pluginClass) {
+    for (AppPlugin plugin : plugins) {
+      if (pluginClass.isInstance(plugin)) {
+        return plugin;
+      }
+    }
     return null;
   }
 

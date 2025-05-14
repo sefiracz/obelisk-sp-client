@@ -39,12 +39,38 @@
     <identityconnectors.framework.version>0.4.3</identityconnectors.framework.version>
     <zip4j.version>2.11.5</zip4j.version>
     <proxy.vole.version>1.1.0</proxy.vole.version>
+    <windpapi4j.version>2.1.0</windpapi4j.version>
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.13.2</junit.version>
     <powermock.version>1.7.1</powermock.version>
     <org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>webview</id>
+
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+            <scope>compile</scope>
+          </dependency>
+          <dependency>
+            <groupId>com.github.peter-gergely-horvath</groupId>
+            <artifactId>windpapi4j</artifactId>
+            <version>${windpapi4j.version}</version>
+            <scope>compile</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+
+    </profile>
+  </profiles>
 
   <repositories>
     <repository>
@@ -96,6 +122,13 @@
         <version>${javafx.version}</version>
         <classifier>win</classifier>
       </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-web</artifactId>
+        <version>${javafx.version}</version>
+        <classifier>win</classifier>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview -->
+      </dependency>
 
       <!-- JavaFX Linux -->
       <dependency>
@@ -135,6 +168,14 @@
         <artifactId>javafx-graphics</artifactId>
         <version>${javafx.version}</version>
         <classifier>mac</classifier>
+      </dependency>
+
+      <!-- Windows DPAPI -->
+      <dependency>
+        <groupId>com.github.peter-gergely-horvath</groupId>
+        <artifactId>windpapi4j</artifactId>
+        <version>${windpapi4j.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview -->
       </dependency>
 
       <!-- SEFIRA MS CRYPTO -->
