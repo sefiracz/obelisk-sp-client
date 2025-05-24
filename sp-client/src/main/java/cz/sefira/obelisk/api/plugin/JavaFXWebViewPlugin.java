@@ -29,9 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
-public class WebViewPlugin extends CookiesPlugin {
+public class JavaFXWebViewPlugin extends CookiesPlugin {
 
-  private static final Logger logger = LoggerFactory.getLogger(WebViewPlugin.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(JavaFXWebViewPlugin.class.getName());
 
   private boolean initSSL = true;
   private WebView webView;
@@ -73,7 +73,7 @@ public class WebViewPlugin extends CookiesPlugin {
       return init.get();
     } catch (Throwable e) {
       if (isOptional() && e instanceof NoClassDefFoundError) {
-        throw new OptionalPluginException("Optional plugin '"+WebViewPlugin.class.getName()+"' not available");
+        throw new OptionalPluginException("Optional plugin '"+ JavaFXWebViewPlugin.class.getName()+"' not available");
       }
       logger.error(e.getMessage(), e);
       return List.of(new InitErrorMessage(this.getClass().getSimpleName(), "error.application.init", e));
