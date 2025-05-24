@@ -18,6 +18,21 @@
     <main.class>cz.sefira.obelisk.AppLauncher</main.class>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>webview-jfx</id>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-web</artifactId>
+          <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
   <dependencies>
     <!-- project dependencies -->
     <dependency>
@@ -44,6 +59,12 @@
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-graphics</artifactId>
       <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-web</artifactId>
+      <classifier>win</classifier>
+      <scope>provided</scope>
     </dependency>
 
     <!-- JavaFX Linux -->
@@ -78,6 +99,12 @@
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-graphics</artifactId>
       <classifier>mac</classifier>
+    </dependency>
+
+    <!-- Windows DPAPI -->
+    <dependency>
+      <groupId>com.github.peter-gergely-horvath</groupId>
+      <artifactId>windpapi4j</artifactId>
     </dependency>
 
     <!-- SEFIRA MS CRYPTO -->

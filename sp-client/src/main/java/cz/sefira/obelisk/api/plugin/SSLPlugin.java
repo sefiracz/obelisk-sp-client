@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -84,7 +85,7 @@ public class SSLPlugin implements AppPlugin {
             remove.add(chain);
           }
         }
-        if (remove.size() > 0) {
+        if (!remove.isEmpty()) {
           logger.info("Removing " + remove.size() + " from SSL cache");
         }
         // remove untrusted certificates from cache
@@ -94,7 +95,7 @@ public class SSLPlugin implements AppPlugin {
       } catch (Exception e) {
         logger.error("Unable to load SSL cache: "+e.getMessage(), e);
       }
-
+      SSLContext.setDefault(sslProvider.getSSLContext());
       api.setSslCertificateProvider(sslProvider);
       logger.info("Trusted SSL certificates in total: "+sslProvider.getUnique().size());
     } catch (Exception e) {

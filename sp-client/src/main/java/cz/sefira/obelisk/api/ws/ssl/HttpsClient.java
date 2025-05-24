@@ -24,6 +24,8 @@ package cz.sefira.obelisk.api.ws.ssl;
  */
 
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.plugin.CookiesPlugin;
+import cz.sefira.obelisk.api.ws.ApacheCookieManager;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.auth.CommunicationExpirationException;
 import cz.sefira.obelisk.api.notification.LongActivityNotifier;
@@ -51,10 +53,7 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import static org.apache.hc.core5.http.HttpStatus.*;
 
@@ -101,6 +100,10 @@ public class HttpsClient {
                                boolean reloadSSL) throws GeneralSecurityException, IOException, URISyntaxException {
 
     BasicHttpClientConnectionManager connectionManager;
+    if (api.getPlugin(CookiesPlugin.class) != null) {
+      ApacheCookieManager cookies = ((CookiesPlugin) api.getPlugin(CookiesPlugin.class)).getCookieManager();
+      clientBuilder.setDefaultCookieStore(cookies.getApacheCookieStore());
+    }
     if (api.getSslCertificateProvider() != null) {
       connectionManager = new BasicHttpClientConnectionManager(api.getSslCertificateProvider().getSocketFactory());
     } else {

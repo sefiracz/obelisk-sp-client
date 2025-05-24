@@ -23,6 +23,7 @@ package cz.sefira.obelisk.util;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.dispatcher.Dispatcher;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.model.Problem;
@@ -44,7 +45,7 @@ import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
  */
 public class HttpUtils {
 
-  private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class.getName());
 
   public static String getLocationURI(HttpResponse response) {
     for (Header h : response.getHeaders()) {
@@ -77,6 +78,15 @@ public class HttpUtils {
       logger.error(e.getMessage(), e);
     }
     return null;
+  }
+
+  public static String parseDiscoveryEndpoint(String url) {
+    int index = url.lastIndexOf(AppConfig.get().getActionTokenEndpoint());
+    if (index == -1) {
+      URI uri = URI.create(url);
+      return uri.getScheme()+"://"+uri.getRawAuthority()+"/obelisk-sp-api/status"; // fallback to /status page
+    }
+    return url.substring(0, index) + "/.well-known/openid-configuration";
   }
 
 }

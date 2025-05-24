@@ -14,25 +14,19 @@
  */
 package cz.sefira.obelisk;
 
-import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.plugin.OptionalPluginException;
 import cz.sefira.obelisk.flow.FlowRegistry;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.flow.OperationFactory;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
-import cz.sefira.obelisk.storage.EventsStorage;
-import cz.sefira.obelisk.storage.ProductStorage;
-import cz.sefira.obelisk.storage.SmartcardStorage;
 import cz.sefira.obelisk.storage.StorageHandler;
 import cz.sefira.obelisk.view.core.UIDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,9 +47,7 @@ public class APIBuilder {
 	 * Builds and returns an instance of {@link PlatformAPI}.
 	 * @param display The implementation of {@link UIDisplay} used to display UI elements.
 	 * @param flowRegistry The implementation of {@link FlowRegistry} to use.
-	 * @param productStorage The local product database.
-	 * @param smartcardStorage The local database of supported smartcard information.
-	 * @param eventsStorage The local events database
+	 * @param storageHandler Storage handler {@link StorageHandler} providing access to each storage.
 	 * @param operationFactory The implementation of {@link OperationFactory} to use.
 	 * @return The built instance of {@link PlatformAPI}.
 	 */
@@ -90,11 +82,11 @@ public class APIBuilder {
 			}
 		}
 		// sort plugins by given order
-		plugins.sort(Comparator.comparing(PluginInit::getPluginOrder));
+		plugins.sort(Comparator.comparing(PluginInit::pluginOrder));
 		// initialize plugins in order
 		for(PluginInit plugin : plugins) {
-			LOGGER.info(" + Plugin " + plugin.getPluginClassName());
-			messages.addAll(buildAndRegisterPlugin((InternalAPI) api, plugin.getPluginClassName(), plugin.getPluginId()));
+			LOGGER.info(" + Plugin " + plugin.pluginClassName());
+			messages.addAll(buildAndRegisterPlugin((InternalAPI) api, plugin.pluginClassName(), plugin.pluginId()));
 		}
 		return messages;
 	}
@@ -103,35 +95,18 @@ public class APIBuilder {
 		try {
 			final Class<? extends AppPlugin> clazz = Class.forName(pluginClassName).asSubclass(AppPlugin.class);
 			final AppPlugin plugin = clazz.getDeclaredConstructor().newInstance();
-			return plugin.init(pluginId, api);
-		} catch (final Exception e) {
+			List<InitErrorMessage> errorMessages = plugin.init(pluginId, api);
+			api.registerPlugin(plugin);
+			return errorMessages;
+		} catch (OptionalPluginException e) {
+			LOGGER.info(e.getMessage()); // optional plugin not initialized
+			return Collections.emptyList();
+		} catch (Throwable e) {
 			LOGGER.error(MessageFormat.format("Cannot register plugin {0} (id: {1})", pluginClassName, pluginId), e);
 			throw new AppException(e);
 		}
 	}
 
-	private static class PluginInit {
+	private record PluginInit(int pluginOrder, String pluginId, String pluginClassName) {}
 
-		private final int pluginOrder;
-		private final String pluginClassName;
-		private final String pluginId;
-
-		public PluginInit(int pluginOrder, String pluginId, String pluginClassName) {
-			this.pluginOrder = pluginOrder;
-			this.pluginClassName = pluginClassName;
-			this.pluginId = pluginId;
-		}
-
-		public int getPluginOrder() {
-			return pluginOrder;
-		}
-
-		public String getPluginClassName() {
-			return pluginClassName;
-		}
-
-		public String getPluginId() {
-			return pluginId;
-		}
-	}
 }
