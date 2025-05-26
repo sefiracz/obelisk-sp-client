@@ -1,30 +1,27 @@
 package cz.sefira.obelisk.api.plugin;
 
 import cz.sefira.obelisk.api.PlatformAPI;
-import cz.sefira.obelisk.api.plugin.webview.JavaFXWebView;
-import javafx.application.Platform;
+import cz.sefira.obelisk.api.plugin.webview.JCEFWebView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.FutureTask;
 
-public class JavaFXWebViewPlugin extends CookiesPlugin {
+public class JCEFWebViewPlugin extends CookiesPlugin {
 
-  private static final Logger logger = LoggerFactory.getLogger(JavaFXWebViewPlugin.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(JCEFWebViewPlugin.class.getName());
 
-  private JavaFXWebView webView;
+  private JCEFWebView webView;
 
   @Override
   public List<InitErrorMessage> init(String pluginId, PlatformAPI api) {
     try {
-      webView = new JavaFXWebView();
-      FutureTask<List<InitErrorMessage>> futureTask = webView.init(api);
-      Platform.runLater(futureTask);
-      return futureTask.get();
+      webView = new JCEFWebView();
+      webView.init(api);
+      return List.of();
     } catch (Throwable e) {
       if (isOptional() && e instanceof NoClassDefFoundError) {
-        throw new OptionalPluginException("Optional plugin '"+ JavaFXWebViewPlugin.class.getName()+"' not available");
+        throw new OptionalPluginException("Optional plugin '"+ JCEFWebViewPlugin.class.getName()+"' not available");
       }
       logger.error(e.getMessage(), e);
       return List.of(new InitErrorMessage(this.getClass().getSimpleName(), "error.application.init", e));
@@ -33,12 +30,12 @@ public class JavaFXWebViewPlugin extends CookiesPlugin {
 
   @Override
   public void load(Object sync, PlatformAPI api, String url) {
-    webView.load(sync, api, url);
+    webView.load(sync, cookieStore, url);
   }
 
   @Override
   public void dispose() {
-    // no-op
+    webView.dispose();
   }
 
   @Override

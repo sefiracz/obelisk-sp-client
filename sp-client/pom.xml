@@ -21,12 +21,21 @@
   <profiles>
     <profile>
       <id>webview-jfx</id>
-
       <dependencies>
         <dependency>
           <groupId>org.openjfx</groupId>
           <artifactId>javafx-web</artifactId>
           <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>webview-jcef</id>
+      <dependencies>
+        <dependency>
+          <groupId>me.friwi</groupId>
+          <artifactId>jcefmaven</artifactId>
           <scope>compile</scope>
         </dependency>
       </dependencies>
@@ -99,6 +108,13 @@
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-graphics</artifactId>
       <classifier>mac</classifier>
+    </dependency>
+
+    <!-- JCEF -->
+    <dependency>
+      <groupId>me.friwi</groupId>
+      <artifactId>jcefmaven</artifactId>
+      <scope>provided</scope> <!-- optional, available for compile via profile webview-jcef -->
     </dependency>
 
     <!-- Windows DPAPI -->

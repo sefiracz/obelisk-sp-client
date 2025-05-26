@@ -89,4 +89,9 @@ public class HttpUtils {
     return url.substring(0, index) + "/.well-known/openid-configuration";
   }
 
+  public static boolean isDiscoveryEndpoint(String html) {
+    return (html.contains("issuer") && html.contains("authorization_endpoint") && html.contains("token_endpoint") && html.contains("jwks_uri")) || // /.well-known/openid-configuration
+        (html.contains("RUNNING") && html.contains("isSecure:") && html.contains("host:")); // /obelisk-sp-api/status
+  }
+
 }
