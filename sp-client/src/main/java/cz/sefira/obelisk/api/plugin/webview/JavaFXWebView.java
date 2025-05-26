@@ -51,7 +51,7 @@ public class JavaFXWebView {
           if (t1 != null) {
             String message = t1.getMessage();
             webEngine.loadContent(message); // show the error message instead of white page
-            logger.error("Received exception: {}", message);
+            logger.error("Received exception: "+message, t1);
           }
         });
         return List.of();
