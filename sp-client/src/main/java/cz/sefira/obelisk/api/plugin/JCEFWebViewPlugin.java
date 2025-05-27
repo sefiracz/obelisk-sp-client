@@ -2,6 +2,8 @@ package cz.sefira.obelisk.api.plugin;
 
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.plugin.webview.JCEFWebView;
+import cz.sefira.obelisk.view.DialogMessage;
+import cz.sefira.obelisk.view.StandaloneDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,16 @@ public class JCEFWebViewPlugin extends CookiesPlugin {
 
   @Override
   public void load(Object sync, PlatformAPI api, String url) {
-    webView.load(sync, cookieStore, url);
+    try {
+      webView.load(sync, cookieStore, url);
+    } catch (Throwable e) {
+      logger.error("JCEF failed to load URL "+url+": "+e.getMessage(), e);
+      DialogMessage errMsg = new DialogMessage("webview.load.failure", DialogMessage.Level.ERROR, 500, 170);
+      StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, e));
+      synchronized (sync) {
+        sync.notify();
+      }
+    }
   }
 
   @Override

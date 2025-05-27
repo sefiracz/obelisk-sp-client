@@ -39,7 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-import static org.cef.CefSettings.LogSeverity.LOGSEVERITY_FATAL;
+import static org.cef.CefSettings.LogSeverity.*;
 
 public class JCEFWebView {
 
@@ -77,7 +77,12 @@ public class JCEFWebView {
     builder.getCefSettings().windowless_rendering_enabled = false;
     UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
     builder.getCefSettings().locale = prefs.getLanguage();
-    builder.getCefSettings().log_severity = LOGSEVERITY_FATAL;
+    if (logger.isDebugEnabled()) {
+      builder.getCefSettings().log_severity = LOGSEVERITY_VERBOSE;
+    } else {
+      builder.getCefSettings().log_severity = LOGSEVERITY_INFO;
+    }
+    builder.getCefSettings().log_file = AppConfig.get().getAppUserHome().toPath().resolve("logs").resolve("cef.log").toFile().getAbsolutePath();
     Path jcefRootPath = AppConfig.get().getAppProcessDirectory().resolve("jcef_cache");
     builder.getCefSettings().root_cache_path = jcefRootPath.toFile().getAbsolutePath();
     builder.getCefSettings().cache_path = jcefRootPath.resolve("Cache Data").toFile().getAbsolutePath();
@@ -89,6 +94,8 @@ public class JCEFWebView {
 
     // create JFrame to hold JCEF browser
     browserWindow = new JFrame();
+    browserWindow.setSize(800, 600);
+    browserWindow.setResizable(true);
     try (InputStream in = AppConfig.get().getIconLogoStream()) {
       browserWindow.setIconImage(Toolkit.getDefaultToolkit().createImage(IOUtils.toByteArray(in)));
     } catch (IOException e) {
@@ -206,9 +213,9 @@ public class JCEFWebView {
   }
 
   public void load(Object sync, ApacheCookieStore cookieStore, String url) {
-    logger.info("Loading webview URL: {}", url);
     // initialize listeners
     if (!initialized) {
+      logger.info("Create browser instance with URL: {}", url);
       cefBrowser = cefClient.createBrowser(url, false, false);
       logger.info("Initializing JCEF window close handlers");
       CefMessageRouter msgRouter = CefMessageRouter.create();
@@ -244,14 +251,14 @@ public class JCEFWebView {
       browserWindow.getContentPane().add(cefBrowser.getUIComponent(), BorderLayout.CENTER);
       initialized = true;
     } else {
+      logger.info("Loading webview URL: {}", url);
       cefBrowser.loadURL(url);
     }
 
     addressBar.setText(url);
     browserWindow.pack();
-    browserWindow.setSize(800, 600);
-    browserWindow.setResizable(true);
     browserWindow.setVisible(true);
+    logger.info("Show browser window");
   }
 
   public void dispose() {
