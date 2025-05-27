@@ -64,6 +64,10 @@ public class ZipUtils {
     File[] list = folder.listFiles();
     if (list != null) {
       for (File file : list) {
+        // skip JCEF files
+        if (file.isDirectory() && file.toPath().getFileName().toString().startsWith("jcef")) {
+          continue;
+        }
         if (file.isDirectory()) {
           zipDirectory(file, parentFolder + "/" + file.getName(), zos, zipParams);
         }
