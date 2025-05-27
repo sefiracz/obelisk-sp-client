@@ -323,6 +323,11 @@
                     <exclude>com/sun/jna/*-ppc64le/**</exclude>
                     <exclude>com/sun/jna/*-riscv64/**</exclude>
                     <exclude>com/sun/jna/*-s390x/**</exclude>
+                    <!-- JOGL unused natives -->
+                    <exclude>natives/linux-aarch64/**</exclude>
+                    <exclude>natives/linux-armv6hf/**</exclude>
+                    <exclude>natives/linux-i586/**</exclude>
+                    <exclude>natives/windows-i586/**</exclude>
                   </excludes>
                 </filter>
               </filters>
