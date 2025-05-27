@@ -3,7 +3,6 @@ package cz.sefira.obelisk.api.plugin.webview;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.model.OS;
-import cz.sefira.obelisk.api.plugin.JCEFWebViewPlugin;
 import cz.sefira.obelisk.api.ws.ApacheCookieStore;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
@@ -11,7 +10,6 @@ import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.HttpUtils;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.EnumProgress;
-import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.apache.hc.client5.http.utils.DateUtils;
@@ -20,10 +18,7 @@ import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
-import org.cef.callback.CefCallback;
-import org.cef.callback.CefContextMenuParams;
-import org.cef.callback.CefMenuModel;
-import org.cef.callback.CefQueryCallback;
+import org.cef.callback.*;
 import org.cef.handler.*;
 import org.cef.network.CefCookieManager;
 import org.slf4j.Logger;
@@ -42,6 +37,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
 
 import static org.cef.CefSettings.LogSeverity.LOGSEVERITY_FATAL;
 
@@ -85,16 +81,7 @@ public class JCEFWebView {
     Path jcefRootPath = AppConfig.get().getAppProcessDirectory().resolve("jcef_cache");
     builder.getCefSettings().root_cache_path = jcefRootPath.toFile().getAbsolutePath();
     builder.getCefSettings().cache_path = jcefRootPath.resolve("Cache Data").toFile().getAbsolutePath();
-    builder.setAppHandler(new MavenCefAppHandlerAdapter() {
-      @Override
-      public void stateHasChanged(org.cef.CefApp.CefAppState state) {
-        // Shutdown the app if the native CEF part is terminated
-        if (state == CefApp.CefAppState.TERMINATED) {
-          logger.info("CefApp terminated");
-          System.exit(0);
-        }
-      }
-    });
+    CefApp.addAppHandler(new LanguageAwareCefAppHandlerAdapter());
 
     // build CefApp
     CefApp cefApp = builder.build();
@@ -322,6 +309,55 @@ public class JCEFWebView {
     return false;
   }
 
+  /**
+   * CEF AppHandler that sets accept-language to a value from UserPreferences
+   */
+  private static class LanguageAwareCefAppHandlerAdapter extends CefAppHandlerAdapter {
 
+    public LanguageAwareCefAppHandlerAdapter() {
+      super(null);
+    }
+
+    @Override
+    public void stateHasChanged(org.cef.CefApp.CefAppState state) {
+      // Shutdown the app if the native CEF part is terminated
+      if (state == CefApp.CefAppState.TERMINATED) {
+        logger.info("CefApp terminated");
+        System.exit(0);
+      }
+    }
+
+    @Override
+    public void onBeforeCommandLineProcessing(String process_type, CefCommandLine command_line) {
+      command_line.appendSwitchWithValue("accept-lang", buildAcceptLanguageHeader());
+      super.onBeforeCommandLineProcessing(process_type, command_line);
+    }
+
+
+    private String buildAcceptLanguageHeader() {
+      UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
+      String lang = prefs.getLanguage();
+      if (lang == null) {
+        lang = Locale.getDefault().getLanguage();
+      }
+      String country;
+      switch (lang) {
+        case "en" -> country = "US";
+        case "cs" -> country = "CZ";
+        case "sk" -> country = "SK";
+        default -> {
+          lang = "en";
+          country = "US";
+        }
+      }
+      // Most specific: lang-COUNTRY
+      StringBuilder sb = new StringBuilder();
+      sb.append(lang).append("-").append(country);
+      if (!"en".equals(lang)) {
+        sb.append(",").append("en-US"); // fallback to english
+      }
+      return sb.toString();
+    }
+  }
 
 }
