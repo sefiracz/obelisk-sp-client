@@ -36,6 +36,7 @@ public abstract class CookiesPlugin implements AppPlugin {
    */
   public boolean checkAccess(SpApiClient client, String statusPage) throws SSLCommunicationException {
     try {
+      logger.info("Checking status page accessibility");
       HttpResponse response = client.call(HttpMethod.GET, statusPage);
       int responseCode = response.getCode();
       if (responseCode == HttpStatus.SC_OK) {
@@ -50,7 +51,7 @@ public abstract class CookiesPlugin implements AppPlugin {
       logger.error("Status page SSL error: {}", e.getMessage());
       throw e;
     } catch (Exception e) {
-      logger.error("WebView access check failed: "+e.getMessage(), e);
+      logger.error("Status page access check failed: "+e.getMessage(), e);
     }
     return false;
   }

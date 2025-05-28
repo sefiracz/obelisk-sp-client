@@ -21,14 +21,13 @@ import org.cef.browser.CefMessageRouter;
 import org.cef.callback.*;
 import org.cef.handler.*;
 import org.cef.network.CefCookieManager;
+import org.cef.network.CefRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -44,6 +43,9 @@ import static org.cef.CefSettings.LogSeverity.*;
 public class JCEFWebView {
 
   private static final Logger logger = LoggerFactory.getLogger(JCEFWebView.class.getName());
+
+  private static final int FRAME_WIDTH = 1024;
+  private static final int FRAME_HEIGHT = 768;
 
   private boolean initialized = false;
 
@@ -94,18 +96,24 @@ public class JCEFWebView {
 
     // create JFrame to hold JCEF browser
     browserWindow = new JFrame();
-    browserWindow.setSize(800, 600);
+    browserWindow.setSize(FRAME_WIDTH, FRAME_HEIGHT);
     browserWindow.setResizable(true);
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = (screenSize.width - FRAME_WIDTH) / 2;
+    int y = (screenSize.height - FRAME_HEIGHT) / 2;
+    browserWindow.setLocation(x, y);
+    browserWindow.setAlwaysOnTop(true);
     try (InputStream in = AppConfig.get().getIconLogoStream()) {
       browserWindow.setIconImage(Toolkit.getDefaultToolkit().createImage(IOUtils.toByteArray(in)));
     } catch (IOException e) {
       logger.error("Unable to set browser window icon: {}", e.getMessage());
     }
+
     // URL bar
     addressBar = new JTextField(100);
     addressBar.setMargin(new Insets(0, 2, 0, 0));
     addressBar.setEditable(false);
-    addressBar.addActionListener(e -> cefBrowser.loadURL(addressBar.getText()));
+    addressBar.setFocusable(false);
 
     // add request handler - handling SSL errors and cross-checking them with Java config
     cefClient.addRequestHandler(new CefRequestHandlerAdapter() {
@@ -125,11 +133,33 @@ public class JCEFWebView {
 
     // add load handler - execute Javascript to obtain HTML of loaded page
     cefClient.addLoadHandler(new CefLoadHandlerAdapter() {
+
+      @Override
+      public void onLoadStart(CefBrowser browser, CefFrame frame, CefRequest.TransitionType transitionType) {
+        logger.info("Loading starts: {}", browser.getURL());
+      }
+
+      @Override
+      public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
+        if (!isLoading) {
+          SwingUtilities.invokeLater(() -> addressBar.setText(browser.getURL()));
+        }
+      }
+
       @Override
       public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
         // loads HTML content of loaded page
+        logger.info("Loading ends {}: {} ", httpStatusCode, browser.getURL());
         String jsCode = "window.cefQuery({request: document.documentElement.outerHTML});";
         browser.executeJavaScript(jsCode, browser.getURL(), 0);
+      }
+
+      @Override
+      public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
+        if (errorCode != null) {
+          logger.info("Loading fails: {} | {}", errorCode.name(), failedUrl);
+        }
+        SwingUtilities.invokeLater(() -> addressBar.setText(browser.getURL()));
       }
     });
 
@@ -172,26 +202,10 @@ public class JCEFWebView {
 
     // add display handler - to change URL in address bar and window title to correspond with the page title
     cefClient.addDisplayHandler(new CefDisplayHandlerAdapter() {
-      @Override
-      public void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
-        logger.info("Address change: {}", url);
-        addressBar.setText(url);
-      }
 
       @Override
       public void onTitleChange(CefBrowser browser, String title) {
-        browserWindow.setTitle(title);
-      }
-    });
-
-    // add focus listener
-    addressBar.addFocusListener(new FocusAdapter() {
-      @Override
-      public void focusGained(FocusEvent e) {
-        if (!browserFocus) return;
-        browserFocus = false;
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
-        addressBar.requestFocus();
+        SwingUtilities.invokeLater(() -> browserWindow.setTitle(title));
       }
     });
 
@@ -255,12 +269,20 @@ public class JCEFWebView {
       cefBrowser.loadURL(url);
     }
 
-    addressBar.setText(url);
-    browserWindow.pack();
-    browserWindow.setVisible(true);
-    logger.info("Show browser window");
+    SwingUtilities.invokeLater(() -> {
+      if (!initialized)
+        browserWindow.pack();
+      if (!browserWindow.isVisible()) {
+        logger.info("Show browser window");
+        browserWindow.setVisible(true);
+        logger.info("Browser window visible");
+      }
+    });
   }
 
+  /**
+   * Dispose of webview
+   */
   public void dispose() {
     logger.info("Dispose JCEF application");
     CefApp.getInstance().dispose();
@@ -270,8 +292,13 @@ public class JCEFWebView {
    * Hide browser window
    */
   private void hideWindow() {
-    logger.info("Hide browser window");
-    browserWindow.setVisible(false);
+    SwingUtilities.invokeLater(() -> {
+      if (browserWindow.isVisible()) {
+        logger.info("Hide browser window");
+        browserWindow.setVisible(false);
+        logger.info("Browser window is not visible");
+      }
+    });
   }
 
   /**
@@ -357,7 +384,7 @@ public class JCEFWebView {
           country = "US";
         }
       }
-      // Most specific: lang-COUNTRY
+      // most specific lang-COUNTRY
       StringBuilder sb = new StringBuilder();
       sb.append(lang).append("-").append(country);
       if (!"en".equals(lang)) {
