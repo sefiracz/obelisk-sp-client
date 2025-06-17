@@ -75,7 +75,8 @@ public class JCEFWebView {
         }
       }
     });
-    // builder.addJcefArgs("--disable-gpu"); //Just an example
+    builder.addJcefArgs("--disable-gpu");
+    builder.addJcefArgs("--disable-gpu-compositing");
     builder.getCefSettings().windowless_rendering_enabled = false;
     UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
     builder.getCefSettings().locale = prefs.getLanguage();
@@ -364,6 +365,8 @@ public class JCEFWebView {
     @Override
     public void onBeforeCommandLineProcessing(String process_type, CefCommandLine command_line) {
       command_line.appendSwitchWithValue("accept-lang", buildAcceptLanguageHeader());
+      command_line.appendSwitch("disable-gpu");
+      command_line.appendSwitch("disable-gpu-compositing");
       super.onBeforeCommandLineProcessing(process_type, command_line);
     }
 
