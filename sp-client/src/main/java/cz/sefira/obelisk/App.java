@@ -17,6 +17,7 @@ package cz.sefira.obelisk;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.flow.OperationFactory;
+import cz.sefira.obelisk.api.plugin.CookiesPlugin;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.flow.BasicFlowRegistry;
 import cz.sefira.obelisk.flow.Flow;
@@ -121,6 +122,10 @@ public class App extends Application {
 		logger.info("Finalizing all initialized PKCS11 modules...");
 		if (api != null && api.getPKCS11Manager() != null) {
 			api.getPKCS11Manager().finalizeAllModules();
+		}
+		if (api != null && api.getPlugin(CookiesPlugin.class) != null) {
+			CookiesPlugin cookiesPlugin = (CookiesPlugin) api.getPlugin(CookiesPlugin.class);
+			cookiesPlugin.dispose();
 		}
 	}
 

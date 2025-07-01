@@ -230,7 +230,7 @@ public class X509Utils {
               X509Certificate certificate = X509Utils.getCertificateFromStream(in);
               count += X509Utils.addToTrust(certificate, truststore, provider);
             } catch (Exception e) {
-              logger.error(e.getMessage());
+              logger.error("Failed to load certificate '"+certPath+"': "+e.getMessage());
             }
           }
         } catch (Exception e) {

@@ -87,7 +87,11 @@ public class LogUtils {
       }
       // log error response body
       if (e.getContent() != null && e.getContent().length > 0) {
-        logger.error("Body: {}", Base64.encodeBase64String(Arrays.copyOfRange(e.getContent(), 0, Math.min(e.getContent().length, 4096))));
+        int maxLen = 4096; // 4kiB
+        if (logger.isDebugEnabled()) {
+          maxLen = 1024 * 1024; // 1MiB
+        }
+        logger.error("Body: {}", Base64.encodeBase64String(Arrays.copyOfRange(e.getContent(), 0, Math.min(e.getContent().length, maxLen))));
       }
     } catch (Throwable t) {
       logger.error("Unable to process HttpResponseException: "+t.getMessage(), t);

@@ -27,7 +27,7 @@
     <apache-httpclient5.version>5.2.1</apache-httpclient5.version>
     <bouncycastle.version>1.77</bouncycastle.version>
     <commons-lang.version>2.6</commons-lang.version>
-    <commons-io.version>2.7</commons-io.version>
+    <commons-io.version>2.18.0</commons-io.version>
     <commons-codec.version>1.15</commons-codec.version>
     <commons-configuration2.version>2.9.0</commons-configuration2.version>
     <beanutils.version>1.9.4</beanutils.version>
@@ -40,6 +40,7 @@
     <zip4j.version>2.11.5</zip4j.version>
     <proxy.vole.version>1.1.0</proxy.vole.version>
     <windpapi4j.version>2.1.0</windpapi4j.version>
+    <jcef.version>135.0.20</jcef.version>
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.13.2</junit.version>
@@ -50,7 +51,6 @@
   <profiles>
     <profile>
       <id>webview-jfx</id>
-
       <dependencyManagement>
         <dependencies>
           <dependency>
@@ -62,7 +62,19 @@
           </dependency>
         </dependencies>
       </dependencyManagement>
-
+    </profile>
+    <profile>
+      <id>webview-jcef</id>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>me.friwi</groupId>
+            <artifactId>jcefmaven</artifactId>
+            <version>${jcef.version}</version>
+            <scope>compile</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
     </profile>
   </profiles>
 
@@ -162,6 +174,14 @@
         <artifactId>javafx-graphics</artifactId>
         <version>${javafx.version}</version>
         <classifier>mac</classifier>
+      </dependency>
+
+      <!-- JCEF -->
+      <dependency>
+        <groupId>me.friwi</groupId>
+        <artifactId>jcefmaven</artifactId>
+        <version>${jcef.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-jcef -->
       </dependency>
 
       <!-- Windows DPAPI -->

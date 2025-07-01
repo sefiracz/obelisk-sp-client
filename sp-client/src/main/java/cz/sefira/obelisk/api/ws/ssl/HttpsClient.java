@@ -25,7 +25,7 @@ package cz.sefira.obelisk.api.ws.ssl;
 
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.plugin.CookiesPlugin;
-import cz.sefira.obelisk.api.ws.ApacheCookieManager;
+import cz.sefira.obelisk.api.ws.ApacheCookieStore;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.auth.CommunicationExpirationException;
 import cz.sefira.obelisk.api.notification.LongActivityNotifier;
@@ -101,8 +101,8 @@ public class HttpsClient {
 
     BasicHttpClientConnectionManager connectionManager;
     if (api.getPlugin(CookiesPlugin.class) != null) {
-      ApacheCookieManager cookies = ((CookiesPlugin) api.getPlugin(CookiesPlugin.class)).getCookieManager();
-      clientBuilder.setDefaultCookieStore(cookies.getApacheCookieStore());
+      ApacheCookieStore cookies = ((CookiesPlugin) api.getPlugin(CookiesPlugin.class)).getCookieStore();
+      clientBuilder.setDefaultCookieStore(cookies.getCookieStore());
     }
     if (api.getSslCertificateProvider() != null) {
       connectionManager = new BasicHttpClientConnectionManager(api.getSslCertificateProvider().getSocketFactory());

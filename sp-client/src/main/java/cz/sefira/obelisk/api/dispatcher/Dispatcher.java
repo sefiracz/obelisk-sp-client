@@ -55,10 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -83,6 +81,7 @@ public class Dispatcher implements AppPlugin {
   private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.SECONDS.toMillis(60);
   private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(6);
   private static final long AUTH_SESSION_MILLISECONDS = TimeUnit.MINUTES.toMillis(20) ;
+  private static final long WEBVIEW_WAIT_TIMEOUT_MILLISECONDS = TimeUnit.MINUTES.toMillis(10) ;
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -185,7 +184,7 @@ public class Dispatcher implements AppPlugin {
           if (!cookiesPlugin.checkAccess(client, statusPage) || accessTimeout) {
             // HTTP client could not access /status page (or access timeout expired), load() cookies through plugin
             cookiesPlugin.load(sync, api, statusPage);
-            sync.wait(); // wait for cookie plugin to load and notify
+            sync.wait(WEBVIEW_WAIT_TIMEOUT_MILLISECONDS); // wait for cookie plugin to load and notify (or timeout in 10minutes)
             lastAuthCheckTimestamp = System.currentTimeMillis();
           }
         }
