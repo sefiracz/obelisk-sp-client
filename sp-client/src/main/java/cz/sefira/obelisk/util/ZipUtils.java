@@ -23,6 +23,9 @@ package cz.sefira.obelisk.util;
  * Author: hlavnicka
  */
 
+import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.util.annotation.NotNull;
 import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
@@ -65,8 +68,17 @@ public class ZipUtils {
     if (list != null) {
       for (File file : list) {
         // skip all .files/jcef* files
-        if (file.isDirectory() && file.toPath().getFileName().toString().startsWith("jcef")
-            && file.toPath().getParent().getFileName().toString().equals(".files")) {
+        if (file.isDirectory() && file.getName().startsWith("jcef")
+            && file.getParentFile().getName().equals(".files")) {
+          continue;
+        }
+        // replace user-preferences with current runtime values (and redact any secrets) and skip the actual file
+        if (file.getName().equals("user-preferences.properties")) {
+          UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
+          zipParams.setFileNameInZip(parentFolder + "/" + file.getName());
+          zos.putNextEntry(zipParams);
+          zos.write(prefs.exportValues().getBytes(StandardCharsets.UTF_8));
+          zos.closeEntry();
           continue;
         }
         if (file.isDirectory()) {
