@@ -216,6 +216,9 @@ public class X509Utils {
         systemStore = KeyStore.getInstance("KeychainStore");
         List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
         for (X509Certificate certificate : caList) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("Loaded "+certificate.getSubjectX500Principal().getName()+" from system file");
+          }
           count += X509Utils.addToTrust(certificate, truststore, provider);
         }
       }
@@ -245,8 +248,11 @@ public class X509Utils {
           Enumeration<String> trustAliases = systemStore.aliases();
           while (trustAliases.hasMoreElements()) {
             String alias = trustAliases.nextElement();
-            Certificate ca = systemStore.getCertificate(alias);
-            count += X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+            X509Certificate ca = (X509Certificate) systemStore.getCertificate(alias);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Loaded ("+alias+") "+ca.getSubjectX500Principal().getName()+" from system truststore");
+            }
+            count += X509Utils.addToTrust(ca, truststore, provider);
           }
         }
       }
