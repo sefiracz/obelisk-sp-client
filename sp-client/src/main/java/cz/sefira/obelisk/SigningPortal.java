@@ -40,9 +40,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
-public class AppLauncher {
+public class SigningPortal {
 
-  private static final Logger logger = LoggerFactory.getLogger(AppLauncher.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SigningPortal.class.getName());
 
   private static AppConfig appConfig;
 
