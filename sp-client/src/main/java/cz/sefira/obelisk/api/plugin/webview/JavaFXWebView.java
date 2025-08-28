@@ -4,6 +4,7 @@ import com.sun.javafx.webkit.WebConsoleListener;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
+import cz.sefira.obelisk.api.ws.ApacheCookieStore;
 import cz.sefira.obelisk.util.HttpUtils;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -24,7 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
-public class JavaFXWebView {
+public class JavaFXWebView implements cz.sefira.obelisk.api.plugin.webview.WebView {
 
   private static final Logger logger = LoggerFactory.getLogger(JavaFXWebView.class.getName());
 
@@ -32,7 +33,12 @@ public class JavaFXWebView {
   private WebView webView;
   private WebEngine webEngine;
 
-  public FutureTask<List<InitErrorMessage>> init(PlatformAPI api) {
+  @Override
+  public void init(PlatformAPI api) throws Exception {
+    throw new UnsupportedOperationException("Not supported.");
+  }
+
+  public FutureTask<List<InitErrorMessage>> futureInit(PlatformAPI api) {
     // this call will check if javafx-web libraries are present
     WebConsoleListener.setDefaultListener((webView1, message, lineNumber, sourceId) -> {
       if (logger.isDebugEnabled()) {
@@ -62,7 +68,11 @@ public class JavaFXWebView {
     });
   }
 
-  public void load(Object sync, PlatformAPI api, String url) {
+  public void dispose() {
+    // no-op
+  }
+
+  public void load(Object sync, PlatformAPI api, ApacheCookieStore cookieStore, String url) {
     Platform.runLater(()-> {
       initSSL(api);
       logger.info("Loading webview URL: {}", url);

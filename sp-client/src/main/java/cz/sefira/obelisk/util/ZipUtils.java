@@ -68,7 +68,7 @@ public class ZipUtils {
     if (list != null) {
       for (File file : list) {
         // skip all .files/jcef* files
-        if (file.isDirectory() && file.getName().startsWith("jcef")
+        if (file.isDirectory() && (file.getName().startsWith("jcef") || file.getName().startsWith("webview"))
             && file.getParentFile().getName().equals(".files")) {
           continue;
         }

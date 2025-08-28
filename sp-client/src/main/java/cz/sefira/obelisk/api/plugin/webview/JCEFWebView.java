@@ -3,6 +3,7 @@ package cz.sefira.obelisk.api.plugin.webview;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.model.OS;
+import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.ws.ApacheCookieStore;
 import cz.sefira.obelisk.api.ws.ssl.SSLCertificateProvider;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
@@ -36,11 +37,13 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.FutureTask;
 
 import static org.cef.CefSettings.LogSeverity.*;
 
-public class JCEFWebView {
+public class JCEFWebView implements WebView {
 
   private static final Logger logger = LoggerFactory.getLogger(JCEFWebView.class.getName());
 
@@ -227,7 +230,12 @@ public class JCEFWebView {
     });
   }
 
-  public void load(Object sync, ApacheCookieStore cookieStore, String url) {
+  @Override
+  public FutureTask<List<InitErrorMessage>> futureInit(PlatformAPI api) {
+    throw new UnsupportedOperationException("Not supported.");
+  }
+
+  public void load(Object sync, PlatformAPI api, ApacheCookieStore cookieStore, String url) {
     // initialize listeners
     if (!initialized) {
       logger.info("Create browser instance with URL: {}", url);

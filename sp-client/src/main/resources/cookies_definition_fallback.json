@@ -1,0 +1,17 @@
+{
+  "F5_ST": {
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  },
+  "LastMRH_Sesssion": {
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  },
+  "MRHSesssion": {
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  }
+}
