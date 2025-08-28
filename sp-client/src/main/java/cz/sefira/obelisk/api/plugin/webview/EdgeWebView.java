@@ -65,7 +65,7 @@ public class EdgeWebView implements WebView {
     if (OS.isWindows() && System.getProperty("force.dynamic.libs") == null) {
       webViewFixedVersion = Paths.get(AppConfig.get().getWindowsInstalledPath(), "Microsoft.WebView2.FixedVersionRuntime");
     } else {
-      webViewFixedVersion = Paths.get("C:\\tmp\\Microsoft.WebView2.FixedVersionRuntime.139.0.3405.102.x64");
+      webViewFixedVersion = Paths.get("C:\\tmp\\Microsoft.WebView2.FixedVersionRuntime");
     }
     System.setProperty("org.eclipse.swt.browser.EdgeDir", webViewFixedVersion.toString());
     Path profile = AppConfig.get().getAppProcessDirectory().resolve("webview2_profile");
@@ -80,6 +80,7 @@ public class EdgeWebView implements WebView {
     ExecutorService executor = Executors.newSingleThreadExecutor();
     executor.execute(() -> {
       try {
+        logger.info("Initialization of Edge WebView2 started...");
         display = new Display();
         // shell
         shell = new Shell(display);
@@ -131,6 +132,8 @@ public class EdgeWebView implements WebView {
         shell.open();
         shell.setVisible(false);
 
+        logger.info("Initialization of Edge WebView2 finished...");
+
         while (!shell.isDisposed()) {
           if (!display.readAndDispatch()) {
             display.sleep();
@@ -149,6 +152,7 @@ public class EdgeWebView implements WebView {
   }
 
   public void dispose() {
+    logger.info("Edge dispose");
     // clean up
     Display.getDefault().asyncExec(() -> {
       if (image != null) {
