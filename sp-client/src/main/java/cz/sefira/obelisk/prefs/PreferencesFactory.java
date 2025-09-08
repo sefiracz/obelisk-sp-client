@@ -24,6 +24,9 @@ package cz.sefira.obelisk.prefs;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
+import cz.sefira.obelisk.prefs.file.FilePreferences;
+import cz.sefira.obelisk.prefs.java.JavaPreferences;
 
 /**
  * User preferences factory
@@ -35,10 +38,10 @@ public class PreferencesFactory {
     if ("java".equalsIgnoreCase(prefsImpl)) {
       return new JavaPreferences(config);
     } else if ("file".equalsIgnoreCase(prefsImpl)) {
-      return new FilePreferences(config);
+      return new FilePreferences(AppDataProvider.get().getUserPreferenceDirPath());
     }
     // default impl
-    return new FilePreferences(config);
+    return new FilePreferences(AppDataProvider.get().getUserPreferenceDirPath());
   }
 
 }

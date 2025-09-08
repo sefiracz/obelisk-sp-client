@@ -11,20 +11,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
  */
-package cz.sefira.obelisk.prefs;
+package cz.sefira.obelisk.prefs.file;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.prefs.FilePreferences
+ * cz.sefira.obelisk.prefs.file.FilePreferences
  *
  * Created: 07.06.2023
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.notification.NotificationType;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.FileBasedBuilderParameters;
@@ -54,9 +54,9 @@ public class FilePreferences extends UserPreferences {
 
   protected FilePreferences() {}
 
-  public FilePreferences(AppConfig appConfig) {
+  public FilePreferences(Path userPreferenceDirPath) {
     try {
-      Path configFile = appConfig.getAppUserHome().toPath().resolve("user-preferences.properties");
+      Path configFile = userPreferenceDirPath.resolve("user-preferences.properties");
       if (!configFile.toFile().exists()) {
         try {
           Files.createFile(configFile);
@@ -74,8 +74,8 @@ public class FilePreferences extends UserPreferences {
         }
       }
       // load default values
-      DefaultFilePreferences defaultUserConfig = new DefaultFilePreferences(appConfig, "default-user-preferences.properties");
-      DefaultFilePreferences defaultProxyConfig = new DefaultFilePreferences(appConfig, "default-proxy-preferences.properties");
+      DefaultFilePreferences defaultUserConfig = new DefaultFilePreferences("default-user-preferences.properties");
+      DefaultFilePreferences defaultProxyConfig = new DefaultFilePreferences("default-proxy-preferences.properties");
 
       // config params
       FileBasedBuilderParameters fileBasedParams = new Parameters().fileBased();

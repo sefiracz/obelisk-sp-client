@@ -1,3 +1,16 @@
+/**
+ * © SEFIRA spol. s r.o., 2020-2025
+ * <p>
+ * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
+ * <p>
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * <p>
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
+ */
 package cz.sefira.obelisk.logging;
 
 /*
@@ -17,10 +30,7 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.spi.LifeCycle;
-import cz.sefira.obelisk.api.AppConfig;
-
-import java.io.IOException;
-import java.util.Properties;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 
 /**
  * description
@@ -35,7 +45,7 @@ public class LoggerStartupListener extends ContextAwareBase implements LoggerCon
       return;
     // set logger path
     Context context = getContext();
-    context.putProperty("APP_USER_HOME", AppConfig.get().getAppUserHome().getAbsolutePath());
+    context.putProperty("APP_LOG_DIR", AppDataProvider.get().getLogDirPath().toString());
     running = true;
   }
 

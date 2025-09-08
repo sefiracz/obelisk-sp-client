@@ -50,55 +50,6 @@
     <org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>webview-jfx</id>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>win</classifier>
-            <scope>compile</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-      <id>webview-jcef</id>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>me.friwi</groupId>
-            <artifactId>jcefmaven</artifactId>
-            <version>${jcef.version}</version>
-            <scope>compile</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-      <id>webview-eclipse-swt</id>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt</artifactId>
-            <version>${eclipse-swt.version}</version>
-            <scope>compile</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
-            <version>${eclipse-swt-win32-x86_64-obelisk.version}</version>
-            <scope>compile</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-  </profiles>
-
   <repositories>
     <repository>
       <id>maven2-repository.dev.java.net</id>

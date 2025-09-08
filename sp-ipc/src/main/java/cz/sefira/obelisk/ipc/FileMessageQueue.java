@@ -23,14 +23,13 @@ package cz.sefira.obelisk.ipc;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -45,25 +44,20 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 public final class FileMessageQueue implements MessageQueue {
 
   private static final Logger logger = LoggerFactory.getLogger(FileMessageQueue.class.getName());
-  private static final String messageFilesDir = "queue";
   private static final String fileExt = ".obmsg";
   private static final String partExt = ".obmsg.part";
 
-  private final AppConfig appConfig;
-
-  FileMessageQueue(AppConfig appConfig) {
-    this.appConfig = appConfig;
-  }
+  FileMessageQueue(){}
 
   public String addMessage(byte[] message) {
     try {
-      String messagesDir = getMessagesDirectory();
+      Path messagesDir = AppDataProvider.get().getQueueDirPath();
       String filenameId = getFileMessageId();
-      Path filename = Paths.get(messagesDir, filenameId + partExt);
+      Path filename = messagesDir.resolve(filenameId + partExt);
       try (OutputStream out = Files.newOutputStream(filename)) {
         out.write(message); // TODO - encrypt message?
       }
-      Files.move(filename, Paths.get(messagesDir, filenameId + fileExt), ATOMIC_MOVE);
+      Files.move(filename, messagesDir.resolve(filenameId + fileExt), ATOMIC_MOVE);
       return filenameId + fileExt;
     }
     catch (Exception e) {
@@ -74,13 +68,13 @@ public final class FileMessageQueue implements MessageQueue {
 
   public String addMessage(Message message) {
     try {
-      String messagesDir = getMessagesDirectory();
+      Path messagesDir = AppDataProvider.get().getQueueDirPath();
       String filenameId = message.getId();
-      Path filename = Paths.get(messagesDir, filenameId + partExt);
+      Path filename = messagesDir.resolve(filenameId + partExt);
       try (OutputStream out = Files.newOutputStream(filename)) {
         out.write(message.getPayload()); // TODO - encrypt message?
       }
-      Files.move(filename, Paths.get(messagesDir, filenameId + fileExt), ATOMIC_MOVE);
+      Files.move(filename, messagesDir.resolve(filenameId + fileExt), ATOMIC_MOVE);
       return filenameId + fileExt;
     } catch (Exception e) {
       logger.error("Failed to push message object to queue: "+e.getMessage(), e);
@@ -90,8 +84,8 @@ public final class FileMessageQueue implements MessageQueue {
 
   public Message getMessage() throws Exception {
     try {
-      String messagesDir = getMessagesDirectory();
-      try (Stream<Path> list = Files.list(Paths.get(messagesDir))) {
+      Path messagesDir = AppDataProvider.get().getQueueDirPath();
+      try (Stream<Path> list = Files.list(messagesDir)) {
         List<Path> msgFiles = list.filter(Files::isRegularFile)
             .filter(file -> file.getFileName().toString().endsWith(fileExt))
             .collect(Collectors.toList());
@@ -136,12 +130,4 @@ public final class FileMessageQueue implements MessageQueue {
     }
   }
 
-  private synchronized String getMessagesDirectory() throws IOException {
-    final Path processDir = appConfig.getAppProcessDirectory();
-    Path messagesDir = processDir.resolve(messageFilesDir);
-    if (!messagesDir.toFile().exists()) {
-      Files.createDirectories(messagesDir);
-    }
-    return messagesDir.toFile().getAbsolutePath();
-  }
 }

@@ -1,7 +1,21 @@
+/**
+ * © SEFIRA spol. s r.o., 2020-2025
+ * <p>
+ * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
+ * <p>
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * <p>
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
+ */
 package cz.sefira.obelisk.api.plugin.webview;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.ws.ApacheCookieStore;
@@ -66,7 +80,7 @@ public class JCEFWebView implements WebView {
     if (OS.isWindows() && System.getProperty("force.dynamic.libs") == null) {
       builder.setInstallDir(Paths.get(AppConfig.get().getWindowsInstalledPath(), "jcef-bundle").toFile());
     } else {
-      builder.setInstallDir(AppConfig.get().getAppProcessDirectory().resolve("jcef-bundle").toFile());
+      builder.setInstallDir(AppDataProvider.get().getAppStorageDirPath().resolve("jcef-bundle").toFile());
     }
 
     builder.setProgressHandler((state, percent) -> {
@@ -88,8 +102,8 @@ public class JCEFWebView implements WebView {
     } else {
       builder.getCefSettings().log_severity = LOGSEVERITY_INFO;
     }
-    builder.getCefSettings().log_file = AppConfig.get().getAppUserHome().toPath().resolve("logs").resolve("cef.log").toFile().getAbsolutePath();
-    Path jcefRootPath = AppConfig.get().getAppProcessDirectory().resolve("jcef_cache");
+    builder.getCefSettings().log_file = AppDataProvider.get().getLogDirPath().resolve("cef.log").toFile().getAbsolutePath();
+    Path jcefRootPath = AppDataProvider.get().getAppStorageDirPath().resolve("jcef_cache");
     builder.getCefSettings().root_cache_path = jcefRootPath.toFile().getAbsolutePath();
     builder.getCefSettings().cache_path = jcefRootPath.resolve("Cache Data").toFile().getAbsolutePath();
     CefApp.addAppHandler(new LanguageAwareCefAppHandlerAdapter());

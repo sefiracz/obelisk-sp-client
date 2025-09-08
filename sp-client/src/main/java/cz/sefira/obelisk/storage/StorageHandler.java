@@ -23,7 +23,7 @@ package cz.sefira.obelisk.storage;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class StorageHandler implements Closeable {
   private final SSLCacheStorage sslCacheStorage;
 
   public StorageHandler() throws IOException {
-    Path storage = AppConfig.get().getAppStorageDirectory();
+    Path storage = AppDataProvider.get().getUserStorageDirPath();
     productStorage = new ProductStorage<>(storage.resolve("products"));
     smartcardStorage = new SmartcardStorage(storage.resolve("smartcards"));
     eventsStorage = new EventsStorage(storage.resolve("events"));

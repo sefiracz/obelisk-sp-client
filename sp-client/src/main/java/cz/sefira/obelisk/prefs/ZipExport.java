@@ -1,5 +1,5 @@
 /**
- * © SEFIRA spol. s r.o., 2020-2023
+ * © SEFIRA spol. s r.o., 2020-2025
  * <p>
  * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
  * You may use this work only in accordance with the License.
@@ -11,28 +11,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
  */
-package cz.sefira.obelisk.util;
+package cz.sefira.obelisk.prefs;
 
 /*
- * Copyright 2023 by SEFIRA, spol. s r. o.
+ * Copyright 2025 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.util.ZipUtils
+ * cz.sefira.obelisk.prefs.ZipExportStream
  *
- * Created: 24.03.2023
+ * Created: 08/09/2025
  * Author: hlavnicka
  */
 
 import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.prefs.PreferencesFactory;
-import cz.sefira.obelisk.prefs.UserPreferences;
-import cz.sefira.obelisk.util.annotation.NotNull;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.AesKeyStrength;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.model.enums.CompressionMethod;
-import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -40,36 +36,33 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
- * ZIP utility methods
+ * Export zipped app data to output
  */
-public class ZipUtils {
+public class ZipExport implements AutoCloseable {
 
-  public static byte[] zipDirectory(@NotNull File directory, @NotNull String name,
-                                    @NotNull String prefs, char[] password) throws IOException {
-    ZipParameters zipParams = new ZipParameters();
+  private final OutputStream out;
+
+  private final ZipParameters zipParams;
+  private final ByteArrayOutputStream baos;
+  private final ZipOutputStream zos;
+
+  public ZipExport(OutputStream out) throws IOException {
+    this.out = out;
+    zipParams = new ZipParameters();
     zipParams.setCompressionMethod(CompressionMethod.DEFLATE);
     zipParams.setCompressionLevel(CompressionLevel.MAXIMUM);
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ZipOutputStream zos = new ZipOutputStream(baos, StandardCharsets.UTF_8)) {
-      // write AppHome directory
-      zipDirectory(directory, directory.getName(), zos, zipParams);
-    }
-    // return if no encryption
-    if (password == null) {
-      return baos.toByteArray();
-    }
-    // return encrypted
-    return zipAndEncrypt(name, baos.toByteArray(), password);
+    baos = new ByteArrayOutputStream();
+    zos = new ZipOutputStream(baos, StandardCharsets.UTF_8);
   }
 
-  private static void zipDirectory(File folder, String parentFolder, ZipOutputStream zos, ZipParameters zipParams)
+  public void zipDirectory(File folder, String parentFolder)
       throws IOException {
     File[] list = folder.listFiles();
     if (list != null) {
       for (File file : list) {
-        // skip all .files/jcef* files
+        // skip all webview profile files
         if (file.isDirectory() && (file.getName().startsWith("jcef") || file.getName().startsWith("webview"))
-            && file.getParentFile().getName().equals(".files")) {
+            && file.getParentFile().getName().equals(AppDataProvider.get().getAppStorageDirPath().getFileName().toString())) {
           continue;
         }
         // replace user-preferences with current runtime values (and redact any secrets) and skip the actual file
@@ -82,7 +75,7 @@ public class ZipUtils {
           continue;
         }
         if (file.isDirectory()) {
-          zipDirectory(file, parentFolder + "/" + file.getName(), zos, zipParams);
+          zipDirectory(file, parentFolder + "/" + file.getName());
         }
         else {
           zipParams.setFileNameInZip(parentFolder + "/" + file.getName());
@@ -96,20 +89,11 @@ public class ZipUtils {
     }
   }
 
-  private static byte[] zipAndEncrypt(String name, byte[] data, char[] password) throws IOException {
-    ZipParameters zipParams = new ZipParameters();
-    zipParams.setCompressionMethod(CompressionMethod.DEFLATE);
-    zipParams.setCompressionLevel(CompressionLevel.MAXIMUM);
-    zipParams.setEncryptFiles(true);
-    zipParams.setEncryptionMethod(EncryptionMethod.AES);
-    zipParams.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ZipOutputStream zos = new ZipOutputStream(baos, password, StandardCharsets.UTF_8)) {
-      zipParams.setFileNameInZip(name);
-      zos.putNextEntry(zipParams);
-      zos.write(data);
-    }
-    return baos.toByteArray();
+  @Override
+  public void close() throws IOException {
+    out.write(baos.toByteArray());
+    out.flush();
+    out.close();
   }
 
 }

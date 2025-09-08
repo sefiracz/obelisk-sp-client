@@ -97,14 +97,14 @@ public class SigningPortal {
     logger.info("Queued message: " + msgId);
   }
 
-  private static void checkForRunningProcess() throws IOException {
+  private static void checkForRunningProcess() {
     ProcessHandler handler;
     if (OS.isWindows()) {
       handler = new WindowsProcessHandler();
     } else {
       handler = new UnixProcessHandler();
     }
-    ProcessService s = new ProcessService(handler, appConfig);
+    ProcessService s = new ProcessService(handler);
     s.checkRunning();
   }
 
