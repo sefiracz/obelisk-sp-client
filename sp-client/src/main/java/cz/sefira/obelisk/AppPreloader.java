@@ -142,6 +142,8 @@ public class AppPreloader extends Preloader {
 					System.setProperty("sefira.mscrypto.library.name", cryptoStoreDll);
 					System.setProperty("sefira.mscrypto.library.path", libraryPath); // dir containing MSCryptoStore.dll
 				}
+        // set SWT library path
+        System.setProperty("swt.library.path", libraryPath);
 				// set java library path
 				System.setProperty("javafx.cachedir", libraryPath);
 				// set PKCS11 wrapper path

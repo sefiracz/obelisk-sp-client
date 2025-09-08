@@ -41,6 +41,8 @@
     <proxy.vole.version>1.1.0</proxy.vole.version>
     <windpapi4j.version>2.1.0</windpapi4j.version>
     <jcef.version>135.0.20</jcef.version>
+    <eclipse-swt.version>3.130.0</eclipse-swt.version>
+    <eclipse-swt-win32-x86_64-obelisk.version>3.130.999</eclipse-swt-win32-x86_64-obelisk.version>
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.13.2</junit.version>
@@ -71,6 +73,25 @@
             <groupId>me.friwi</groupId>
             <artifactId>jcefmaven</artifactId>
             <version>${jcef.version}</version>
+            <scope>compile</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+    <profile>
+      <id>webview-eclipse-swt</id>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt</artifactId>
+            <version>${eclipse-swt.version}</version>
+            <scope>compile</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+            <version>${eclipse-swt-win32-x86_64-obelisk.version}</version>
             <scope>compile</scope>
           </dependency>
         </dependencies>
@@ -182,6 +203,20 @@
         <artifactId>jcefmaven</artifactId>
         <version>${jcef.version}</version>
         <scope>provided</scope> <!-- optional, available for compile via profile webview-jcef -->
+      </dependency>
+
+      <!-- Eclipse SWT -->
+      <dependency>
+        <groupId>org.eclipse.platform</groupId>
+        <artifactId>org.eclipse.swt</artifactId>
+        <version>${eclipse-swt.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.platform</groupId>
+        <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+        <version>${eclipse-swt-win32-x86_64-obelisk.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
       </dependency>
 
       <!-- Windows DPAPI -->
