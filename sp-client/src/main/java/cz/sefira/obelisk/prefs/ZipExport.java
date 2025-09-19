@@ -25,34 +25,26 @@ package cz.sefira.obelisk.prefs;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.config.AppDataProvider;
-import net.lingala.zip4j.io.outputstream.ZipOutputStream;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.CompressionLevel;
-import net.lingala.zip4j.model.enums.CompressionMethod;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.zip.Deflater;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Export zipped app data to output
  */
 public class ZipExport implements AutoCloseable {
 
-  private final OutputStream out;
-
-  private final ZipParameters zipParams;
-  private final ByteArrayOutputStream baos;
   private final ZipOutputStream zos;
 
   public ZipExport(OutputStream out) throws IOException {
-    this.out = out;
-    zipParams = new ZipParameters();
-    zipParams.setCompressionMethod(CompressionMethod.DEFLATE);
-    zipParams.setCompressionLevel(CompressionLevel.MAXIMUM);
-    baos = new ByteArrayOutputStream();
-    zos = new ZipOutputStream(baos, StandardCharsets.UTF_8);
+    zos = new ZipOutputStream(out, StandardCharsets.UTF_8);
+    zos.setMethod(ZipOutputStream.DEFLATED);
+    zos.setLevel(Deflater.BEST_COMPRESSION);
   }
 
   public void zipDirectory(File folder, String parentFolder)
@@ -68,8 +60,7 @@ public class ZipExport implements AutoCloseable {
         // replace user-preferences with current runtime values (and redact any secrets) and skip the actual file
         if (file.getName().equals("user-preferences.properties")) {
           UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
-          zipParams.setFileNameInZip(parentFolder + "/" + file.getName());
-          zos.putNextEntry(zipParams);
+          zos.putNextEntry(new ZipEntry(parentFolder + "/" + file.getName()));
           zos.write(prefs.exportValues().getBytes(StandardCharsets.UTF_8));
           zos.closeEntry();
           continue;
@@ -78,8 +69,7 @@ public class ZipExport implements AutoCloseable {
           zipDirectory(file, parentFolder + "/" + file.getName());
         }
         else {
-          zipParams.setFileNameInZip(parentFolder + "/" + file.getName());
-          zos.putNextEntry(zipParams);
+          zos.putNextEntry(new ZipEntry(parentFolder + "/" + file.getName()));
           try (InputStream f = Files.newInputStream(file.toPath())) {
             IOUtils.copy(f, zos);
           }
@@ -91,9 +81,8 @@ public class ZipExport implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
-    out.write(baos.toByteArray());
-    out.flush();
-    out.close();
+    zos.flush();
+    zos.close();
   }
 
 }
