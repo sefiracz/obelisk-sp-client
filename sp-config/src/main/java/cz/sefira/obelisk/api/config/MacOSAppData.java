@@ -39,8 +39,8 @@ public class MacOSAppData extends AppData {
 
   @Override
   public Path getLogDirPath() {
-    // ~/Library/Logs/cz.sefira.obelisk.SigningPortal/
-    Path logs = getUserLibrary().resolve("Logs").resolve(appId);
+    // ~/Library/Logs/cz.sefira.obelisk.SigningPortal/logs/
+    Path logs = getUserLibrary().resolve("Logs").resolve(appId).resolve("logs");
     checkAndCreateDirectories(logs);
     return logs;
   }
@@ -60,7 +60,7 @@ public class MacOSAppData extends AppData {
 
   @Override
   public Path getAppStorageDirPath() {
-    // ~/Library/cz.sefira.obelisk.SigningPortal/
+    // ~/Library/OBELISK Signing Portal/
     Path files = getUserLibrary().resolve(applicationName);
     checkAndCreateDirectories(files);
     return files;
@@ -84,7 +84,7 @@ public class MacOSAppData extends AppData {
 
   @Override
   public Path getUserStorageDirPath() {
-    // ~/Library/cz.sefira.obelisk.SigningPortal/storage/
+    // ~/Library/OBELISK Signing Portal/storage/
     Path storage = getUserLibrary().resolve(applicationName).resolve("storage");
     checkAndCreateDirectories(storage);
     return storage;
@@ -92,7 +92,7 @@ public class MacOSAppData extends AppData {
 
   @Override
   public Path getAppVersionDirPath() {
-    // ~/Library/cz.sefira.obelisk.SigningPortal/
+    // ~/Library/OBELISK Signing Portal/
     Path version = getUserLibrary().resolve(applicationName);
     checkAndCreateDirectories(version);
     return version;
@@ -105,7 +105,7 @@ public class MacOSAppData extends AppData {
 
   @Override
   public List<Path> exportable() {
-    return List.of(getLogDirPath(), getUserPreferenceDirPath(), getAppVersionDirPath());
+    return List.of(getLogDirPath(), getUserPreferenceDirPath(), getAppStorageDirPath());
   }
 
 }
