@@ -24,6 +24,7 @@ package cz.sefira.obelisk.process;
  */
 
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +64,9 @@ public class ProcessService {
   private final ProcessHandler handler;
   private final Path pidFile;
 
-  public ProcessService(ProcessHandler handler, AppConfig config) throws IOException {
+  public ProcessService(ProcessHandler handler) {
     this.handler = handler;
-    this.pidFile = config.getAppRunDirectory().resolve(APP_PID_FILE);
+    this.pidFile = AppDataProvider.get().getAppProcessDirPath().resolve(APP_PID_FILE);
   }
 
   /**

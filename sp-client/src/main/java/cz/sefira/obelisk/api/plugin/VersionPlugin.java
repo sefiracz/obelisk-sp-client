@@ -14,6 +14,7 @@
 package cz.sefira.obelisk.api.plugin;
 
 import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import cz.sefira.obelisk.storage.ProductStorage;
 import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.PlatformAPI;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,12 +39,12 @@ public class VersionPlugin implements AppPlugin {
   @Override
   public List<InitErrorMessage> init(String pluginId, PlatformAPI api) {
     try {
-      final File appUserHome = AppConfig.get().getAppUserHome();
+      final Path versionDirPath = AppDataProvider.get().getAppVersionDirPath();
       final String currentVersion = AppConfig.get().getApplicationVersion();
       logger.info("Current version: "+currentVersion);
-      final File versionFile = new File(appUserHome, "version");
+      final Path versionFile = versionDirPath.resolve("version");
       // first test if file exists
-      if (!versionFile.exists()) {
+      if (!versionFile.toFile().exists()) {
         migrateLegacyVersionDatabase(api);
         writeVersion(currentVersion, versionFile);
       } else {
@@ -66,11 +68,11 @@ public class VersionPlugin implements AppPlugin {
   }
 
   private void migrateLegacyVersionDatabase(PlatformAPI api) {
-    final File legacyHome = AppConfig.get().getLegacyAppUserHome();
-    if (legacyHome != null && legacyHome.exists()) {
+    final Path legacyHome = AppDataProvider.get().getLegacyAppHomePath();
+    if (legacyHome != null && Files.exists(legacyHome)) {
       LegacyProductStorage legacyStorage = new LegacyProductStorage();
       ProductStorage<AbstractProduct> storage = api.getProductStorage(AbstractProduct.class);
-      for (AbstractProduct p : legacyStorage.load(legacyHome.toPath())) {
+      for (AbstractProduct p : legacyStorage.load(legacyHome)) {
         storage.add(p);
       }
     }
@@ -87,8 +89,8 @@ public class VersionPlugin implements AppPlugin {
    * @return Version number
    * @throws IOException
    */
-  private String readVersion(File versionFile) throws IOException {
-    try (InputStream in = Files.newInputStream(versionFile.toPath())) {
+  private String readVersion(Path versionFile) throws IOException {
+    try (InputStream in = Files.newInputStream(versionFile)) {
       return IOUtils.toString(in, StandardCharsets.UTF_8); // read version value from version file
     }
   }
@@ -98,8 +100,8 @@ public class VersionPlugin implements AppPlugin {
    * @param version Version number
    * @param versionFile Version file
    */
-  private void writeVersion(String version, File versionFile) throws IOException {
-    try (OutputStream out = Files.newOutputStream(versionFile.toPath())) {
+  private void writeVersion(String version, Path versionFile) throws IOException {
+    try (OutputStream out = Files.newOutputStream(versionFile)) {
       out.write(version.getBytes(StandardCharsets.UTF_8)); // write new version to version file
     }
   }

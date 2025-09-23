@@ -11,19 +11,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
  */
-package cz.sefira.obelisk.prefs;
+package cz.sefira.obelisk.prefs.file;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.prefs.FilePreferences
+ * cz.sefira.obelisk.prefs.file.FilePreferences
  *
  * Created: 07.06.2023
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import cz.sefira.obelisk.api.notification.NotificationType;
 import cz.sefira.obelisk.util.annotation.NotNull;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -45,10 +45,10 @@ public class DefaultFilePreferences extends FilePreferences {
 
   private static final Logger logger = LoggerFactory.getLogger(DefaultFilePreferences.class.getName());
 
-  public DefaultFilePreferences(@NotNull AppConfig appConfig, @NotNull String defaultPreferencesFile) {
+  public DefaultFilePreferences(@NotNull String defaultPreferencesFile) {
     try {
       // load default config file
-      Path defaultDir = appConfig.getDefaultUserConfigDir();
+      Path defaultDir = AppDataProvider.get().getDefaultPreferencesDirPath();
       if (defaultDir != null) {
         Path defaultConfigFile = defaultDir.resolve(defaultPreferencesFile);
         if (defaultConfigFile.toFile().exists()) {

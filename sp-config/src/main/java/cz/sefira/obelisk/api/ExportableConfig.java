@@ -1,5 +1,5 @@
 /**
- * © SEFIRA spol. s r.o., 2020-2023
+ * © SEFIRA spol. s r.o., 2020-2025
  * <p>
  * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
  * You may use this work only in accordance with the License.
@@ -11,27 +11,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
  */
-package cz.sefira.obelisk.ipc;
+package cz.sefira.obelisk.api;
 
 /*
- * Copyright 2023 by SEFIRA, spol. s r. o.
+ * Copyright 2025 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.ipc.MessageQueueFactory
+ * cz.sefira.obelisk.api.ExportableConfig
  *
- * Created: 26.01.2023
+ * Created: 08.09.2025
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
+import java.nio.file.Path;
+import java.util.List;
 
-/**
- * MessageQueue factory
- */
-public class MessageQueueFactory {
+public interface ExportableConfig {
 
-  public static MessageQueue getInstance(AppConfig appConfig) {
-    return new FileMessageQueue();
-  }
+  List<Path> exportable();
 
 }

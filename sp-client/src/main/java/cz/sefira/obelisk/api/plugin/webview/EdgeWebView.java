@@ -1,9 +1,23 @@
+/**
+ * © SEFIRA spol. s r.o., 2020-2025
+ * <p>
+ * Licensed under EUPL Version 1.2 or - upon approval by the European Commission - later versions of the EUPL (the "License").
+ * You may use this work only in accordance with the License.
+ * You can obtain a copy of the License at the following address:
+ * <p>
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * <p>
+ * Unless there is a legal or contractual obligation in writing, the software distributed under the License is distributed "as is",
+ * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
+ * See the License for specific permissions and language restrictions under the License.
+ */
 package cz.sefira.obelisk.api.plugin.webview;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.webview.model.CookieDefinition;
@@ -68,7 +82,7 @@ public class EdgeWebView implements WebView {
       webViewFixedVersion = Paths.get("C:\\tmp\\Microsoft.WebView2.FixedVersionRuntime");
     }
     System.setProperty("org.eclipse.swt.browser.EdgeDir", webViewFixedVersion.toString());
-    Path profile = AppConfig.get().getAppProcessDirectory().resolve("webview2_profile");
+    Path profile = AppDataProvider.get().getAppStorageDirPath().resolve("webview2_profile");
     System.setProperty("org.eclipse.swt.browser.EdgeDataDir", profile.toFile().getAbsolutePath());
     // System.setProperty("org.eclipse.swt.browser.EdgeArgs", "--disable-gpu");
     System.setProperty("org.eclipse.swt.browser.EdgeLanguage", buildAcceptLanguageHeader());
@@ -274,10 +288,14 @@ public class EdgeWebView implements WebView {
 
   private Map<String, CookieDefinition> processCookiesDef() {
     // load default definition values
-    Path defaultCookiesDef = AppConfig.get().getDefaultUserConfigDir().resolve("cookies_definition.json");
-    Map<String, CookieDefinition> cookies = new HashMap<>(loadCookieJson(defaultCookiesDef));
+    Path defaultPreferencesDirPath = AppDataProvider.get().getDefaultPreferencesDirPath();
+    Map<String, CookieDefinition> cookies = new HashMap<>();
+    if (defaultPreferencesDirPath != null) {
+      Path defaultCookiesDef = defaultPreferencesDirPath.resolve("cookies_definition.json");
+      cookies.putAll(loadCookieJson(defaultCookiesDef));
+    }
     // load user defined values
-    Path userCookiesDef = Paths.get(AppConfig.get().getAppUserHome().getAbsolutePath()).resolve("cookies_definition.json");
+    Path userCookiesDef = AppDataProvider.get().getUserPreferenceDirPath().resolve("cookies_definition.json");
     cookies.putAll(loadCookieJson(userCookiesDef));
     // if empty, load fallback values
     if (cookies.isEmpty()) {
@@ -295,7 +313,7 @@ public class EdgeWebView implements WebView {
   }
 
   private Map<String, CookieDefinition> loadCookieJson(Path json) {
-    if (json.toFile().exists()) {
+    if (Files.exists(json)) {
       try (InputStream in = Files.newInputStream(json)) {
         Type mapType = new TypeToken<Map<String, CookieDefinition>>() {
         }.getType();
