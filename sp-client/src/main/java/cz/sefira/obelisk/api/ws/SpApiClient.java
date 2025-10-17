@@ -31,6 +31,8 @@ import cz.sefira.obelisk.api.ws.auth.AuthenticationProviderException;
 import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
 import cz.sefira.obelisk.json.GsonHelper;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -78,6 +80,7 @@ public class SpApiClient {
     if (authProvider != null) {
       request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
     }
+    request.addHeader(HttpHeaders.ACCEPT_LANGUAGE, getLanguage());
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
         .setConnectionRequestTimeout(5, TimeUnit.SECONDS)
@@ -87,6 +90,15 @@ public class SpApiClient {
       request.setEntity(entity);
     }
     return client.execute(request, clientBuilder);
+  }
+
+  private String getLanguage() {
+    UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
+    String lang = prefs.getLanguage();
+    if (lang == null) {
+      lang = "en"; // default to english (language will be set eventually once server tells us which to use)
+    }
+    return lang;
   }
 
 }
