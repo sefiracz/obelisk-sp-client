@@ -120,6 +120,7 @@ public class SSLCertificateProvider {
       addToRuntimeTruststore(chain);
       // trusted chain found - add to cache if needed
       if (addToCache) {
+        logger.info("Added trusted certificate chain to permanent store.");
         cache.add(chain);
       }
       // used as trusted chain
