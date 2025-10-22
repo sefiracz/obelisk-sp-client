@@ -47,7 +47,6 @@ public class LogUtils {
   /**
    * Helper logging method that prevents repeatable logging of the same messages.
    * Example: logMessage(logger::info, "Log this message", null, disabledLogFlag);
-   * @param logger Method reference to the logger
    * @param message Logged message
    * @param t Thrown exception to get logged
    * @param disableLog Flag that disabled repeated log of this message + throwable
