@@ -87,7 +87,7 @@ public class LogUtils {
       }
       // log error response body
       if (e.getContent() != null && e.getContent().length > 0) {
-        int maxLen = 4096; // 4kiB
+        int maxLen = 16384; // 16kiB
         if (logger.isDebugEnabled()) {
           maxLen = 1024 * 1024; // 1MiB
         }
