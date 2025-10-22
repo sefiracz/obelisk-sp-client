@@ -23,10 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -238,6 +235,20 @@ public class PKCS11Manager {
       }
     }
     return null;
+  }
+
+  public Set<String> getInstalledDrivers() {
+    Set<String> installed = new HashSet<>();
+    supported.values().forEach(info -> {
+      if(info.getDrivers() != null) {
+        for(String driver : info.getDrivers()) {
+          if(driver != null && new File(driver).exists() && new File(driver).canRead()) {
+            installed.add(driver);
+          }
+        }
+      }
+    });
+    return installed;
   }
 
 }

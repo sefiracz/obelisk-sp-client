@@ -16,21 +16,25 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="AnchorPane" prefHeight="230.0" prefWidth="550.0" xmlns="http://javafx.com/javafx"
+<?import javafx.scene.text.TextFlow?>
+<BorderPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.UnsupportedProductController">
 
-	<center>
+  <center>
     <VBox fx:id="messageBox" styleClass="form-container" BorderPane.alignment="CENTER">
-      <Label styleClass="message" wrapText="true" fx:id="message"/>
+      <TextFlow styleClass="message" fx:id="message"/>
+      <TextArea fx:id="details" wrapText="true" styleClass="device-report" minHeight="280" />
     </VBox>
-	</center>
+  </center>
 
-	<bottom>
+  <bottom>
     <HBox styleClass="btn-container">
+      <Button fx:id="advancedSetup" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.warningRead"/>
+      <Region HBox.hgrow="ALWAYS"/>
       <Button fx:id="back" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.back"/>
-      <Button fx:id="hicSuntDracones" wrapText="true" styleClass="btn-danger" mnemonicParsing="false"
-              text="%button.warningRead"/>
+      <Button fx:id="cancel" wrapText="true" styleClass="btn-default" mnemonicParsing="false" text="%button.cancel"/>
+      <Button fx:id="support" mnemonicParsing="false" styleClass="btn-secondary" text="%button.contact.support"/>
     </HBox>
-	</bottom>
+  </bottom>
 
 </BorderPane>

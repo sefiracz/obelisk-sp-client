@@ -35,6 +35,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -110,6 +112,10 @@ public class TextUtils {
     } else {
       return value.getLabel();
     }
+  }
+
+  public static String urlEncode(String str) {
+    return URLEncoder.encode(str, StandardCharsets.UTF_8).replace("+", "%20");
   }
 
 }

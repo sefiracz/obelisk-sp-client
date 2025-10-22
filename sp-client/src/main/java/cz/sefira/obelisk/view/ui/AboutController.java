@@ -16,6 +16,7 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.DesktopUtils;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
 import javafx.fxml.FXML;
@@ -70,11 +71,7 @@ public class AboutController extends ControllerCore implements StandaloneUIContr
 		this.applicationVersion.setText(applicationVersion);
 		this.sourceCodeLink.setOnAction(link -> {
 			logger.info("User clicked source code URL");
-			try {
-				Desktop.getDesktop().browse(new URI(this.sourceCodeLink.getText()));
-			} catch (Exception e) {
-				logger.error("Unable to open URL: " + e.getMessage());
-			}
+      DesktopUtils.browse(this.sourceCodeLink.getText());
 		});
 		setLogoBackground(gridPane);
 	}

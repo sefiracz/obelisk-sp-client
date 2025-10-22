@@ -78,18 +78,20 @@ public class CreateTokenOperation extends AbstractCompositeOperation<Map<TokenOp
         } else {
           // unavailable/unsupported configuration - want to continue?
           OperationResult<Object> result;
-          if(product instanceof DetectedCard && ((DetectedCard) product).isKnownToken() != null) {
+          if(product instanceof DetectedCard c && c.isKnownToken() != null) {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unavailable-config.fxml",
-                    ((DetectedCard) product).isKnownToken()).perform();
+                c.isKnownToken()).perform();
           } else {
             result = this.operationFactory.getOperation(UIOperation.class, "/fxml/unsupported-product.fxml",
-                            new Object[]{AppConfig.get().getApplicationName()}).perform();
+                new Object[]{api, product}).perform();
           }
           // advanced config?
           if (result.getStatus().equals(BasicOperationStatus.SUCCESS)) {
             return this.createTokenAdvanced(); // manual token configuration
           } else if (result.getStatus().equals(CoreOperationStatus.BACK)) {
             return new OperationResult<>(CoreOperationStatus.BACK); // go back
+          } else if (result.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
+            return new OperationResult<>(BasicOperationStatus.USER_CANCEL); // user canceled
           } else {
             throw new IllegalStateException("Unexpected result status: "+result.getStatus().getCode());
           }

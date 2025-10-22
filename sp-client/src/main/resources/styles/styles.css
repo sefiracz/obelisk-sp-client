@@ -233,6 +233,22 @@ ComboBox:selected {
 
 }
 
+.device-report {
+
+    -fx-highlight-fill: #4AA9E7;
+    -fx-highlight-text-fill: #000000;
+    -fx-control-inner-background: #4AA9E7;
+    -fx-background-color: #4AA9E7;
+
+}
+
+.device-report .content {
+
+    -fx-control-inner-background: #4AA9E7;
+    -fx-background-color: #F5F5F5;
+
+}
+
 .dash-container {
 
     -fx-background-color: white;
@@ -543,12 +559,6 @@ ComboBox:selected {
 
     -fx-background-color: #F5F5F5;
     -fx-padding: 7 15 7 15;
-
-}
-
-.text-area .content{
-
-    -fx-background-color: #C0C0C0;
 
 }
 
