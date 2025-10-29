@@ -42,14 +42,14 @@
         <dependency>
           <groupId>com.github.peter-gergely-horvath</groupId>
           <artifactId>windpapi4j</artifactId>
-          <scope>provided</scope>
+          <scope>compile</scope>
         </dependency>
         <!-- SEFIRA MS CRYPTO -->
         <dependency>
           <groupId>cz.sefira.crypto</groupId>
           <artifactId>MSCryptoStore</artifactId>
           <version>1.0</version>
-          <scope>provided</scope>
+          <scope>compile</scope>
         </dependency>
         <!-- JavaFX Linux -->
         <dependency>
