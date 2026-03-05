@@ -29,6 +29,8 @@ public class Execution<T> {
 
 	private Long stepId;
 
+	private Long signatureId;
+
 	private final boolean success;
 
 	private final T result;
@@ -133,6 +135,14 @@ public class Execution<T> {
 
 	public void setStepId(Long stepId) {
 		this.stepId = stepId;
+	}
+
+	public Long getSignatureId() {
+		return signatureId;
+	}
+
+	public void setSignatureId(Long signatureId) {
+		this.signatureId = signatureId;
 	}
 
 	public OperationResult<?> getOperationResult() {

@@ -15,11 +15,11 @@
 package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.AppConfigurer;
-import cz.sefira.obelisk.api.AppConfig;
+import cz.sefira.obelisk.api.config.AppDataProvider;
 import cz.sefira.obelisk.api.notification.NotificationType;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.prefs.UserPreferences;
-import cz.sefira.obelisk.util.ZipUtils;
+import cz.sefira.obelisk.prefs.ZipExport;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.StandaloneUIController;
 import cz.sefira.obelisk.view.core.ControllerCore;
@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -192,9 +193,11 @@ public class PreferencesController extends ControllerCore implements StandaloneU
 			File f = fileChooser.showSaveDialog(primaryStage);
 			if (f != null) {
 				logger.info("Exporting configuration: "+f.getAbsolutePath());
-				try (OutputStream out = Files.newOutputStream(f.toPath())) {
-					File userHome = AppConfig.get().getAppUserHome();
-					out.write(ZipUtils.zipDirectory(userHome, name, userPreferences.toString(), null));
+				try (OutputStream out = Files.newOutputStream(f.toPath()); ZipExport zipExport = new ZipExport(out)) {
+					for (Path exportableDir : AppDataProvider.get().exportable()) {
+						File directory = exportableDir.toFile();
+						zipExport.zipDirectory(directory, directory.getName());
+					}
 				}
 				catch (IOException ex) {
 					StandaloneDialog.showGenericErrorDialog(ex);

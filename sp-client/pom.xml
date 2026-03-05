@@ -10,13 +10,264 @@
   <parent>
     <groupId>cz.sefira.obelisk</groupId>
     <artifactId>obelisk-sp-client</artifactId>
-    <version>2.0.9</version>
+    <version>2.0.11</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <properties>
-    <main.class>cz.sefira.obelisk.AppLauncher</main.class>
+    <main.class>cz.sefira.obelisk.SigningPortal</main.class>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>win_linux</id>
+      <dependencies>
+        <!-- JavaFX Windows -->
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <classifier>win</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <classifier>win</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <classifier>win</classifier>
+        </dependency>
+        <!-- Windows DPAPI -->
+        <dependency>
+          <groupId>com.github.peter-gergely-horvath</groupId>
+          <artifactId>windpapi4j</artifactId>
+          <scope>compile</scope>
+        </dependency>
+        <!-- SEFIRA MS CRYPTO -->
+        <dependency>
+          <groupId>cz.sefira.crypto</groupId>
+          <artifactId>MSCryptoStore</artifactId>
+          <version>1.0</version>
+          <scope>compile</scope>
+        </dependency>
+        <!-- JavaFX Linux -->
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <classifier>linux</classifier>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <filters>
+                    <filter>
+                      <artifact>*:*</artifact>
+                      <!-- exclude unnecessary files from final build -->
+                      <excludes>
+                        <exclude>META-INF/*</exclude>
+                        <!-- IAIK PKCS11 Wrapper unused natives -->
+                        <exclude>natives/unix/linux-x86/**</exclude>
+                        <exclude>natives/unix/solaris-*/**</exclude>
+                        <exclude>natives/windows/win-x86/**</exclude>
+                        <!-- JNA unused natives -->
+                        <exclude>com/sun/jna/*-x86/**</exclude>
+                        <exclude>com/sun/jna/sunos-*/**</exclude>
+                        <exclude>com/sun/jna/aix-*/**</exclude>
+                        <exclude>com/sun/jna/*-arm/**</exclude>
+                        <exclude>com/sun/jna/*-armel/**</exclude>
+                        <exclude>com/sun/jna/*-mips64el/**</exclude>
+                        <exclude>com/sun/jna/*-ppc/**</exclude>
+                        <exclude>com/sun/jna/*-ppc64/**</exclude>
+                        <exclude>com/sun/jna/*-ppc64le/**</exclude>
+                        <exclude>com/sun/jna/*-riscv64/**</exclude>
+                        <exclude>com/sun/jna/*-s390x/**</exclude>
+                        <!-- JOGL unused natives -->
+                        <exclude>natives/linux-aarch64/**</exclude>
+                        <exclude>natives/linux-armv6hf/**</exclude>
+                        <exclude>natives/linux-i586/**</exclude>
+                        <exclude>natives/windows-i586/**</exclude>
+                      </excludes>
+                    </filter>
+                  </filters>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>${main.class}</mainClass>
+                    </transformer>
+                  </transformers>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>macos</id>
+      <dependencies>
+        <!-- JavaFX MacOS -->
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <classifier>mac</classifier>
+        </dependency>
+      </dependencies>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <filters>
+                    <filter>
+                      <artifact>*:*</artifact>
+                      <!-- exclude unnecessary files from final build -->
+                      <excludes>
+                        <exclude>META-INF/*</exclude>
+                        <!-- exclude all non-macOS natives -->
+                        <!-- IAIK PKCS11 Wrapper unused natives -->
+                        <exclude>natives/unix/linux-*/**</exclude>
+                        <exclude>natives/unix/solaris-*/**</exclude>
+                        <exclude>natives/unix/macosx_universal/debug/**</exclude>
+                        <exclude>natives/windows/**</exclude>
+                        <!-- JNA unused natives -->
+                        <exclude>com/sun/jna/*-x86/**</exclude>
+                        <exclude>com/sun/jna/sunos-*/**</exclude>
+                        <exclude>com/sun/jna/aix-*/**</exclude>
+                        <exclude>com/sun/jna/*-arm/**</exclude>
+                        <exclude>com/sun/jna/*-armel/**</exclude>
+                        <exclude>com/sun/jna/*-mips64el/**</exclude>
+                        <exclude>com/sun/jna/*-ppc/**</exclude>
+                        <exclude>com/sun/jna/*-ppc64/**</exclude>
+                        <exclude>com/sun/jna/*-ppc64le/**</exclude>
+                        <exclude>com/sun/jna/*-riscv64/**</exclude>
+                        <exclude>com/sun/jna/*-s390x/**</exclude>
+                        <exclude>com/sun/jna/*-aarch64/**</exclude>
+                        <exclude>com/sun/jna/win32*/**</exclude>
+                        <exclude>com/sun/jna/linux*/**</exclude>
+                        <exclude>com/sun/jna/*bsd*/**</exclude>
+                        <!-- JOGL unused natives -->
+                        <exclude>natives/linux-aarch64/**</exclude>
+                        <exclude>natives/linux-armv6hf/**</exclude>
+                        <exclude>natives/linux-i586/**</exclude>
+                        <exclude>natives/windows-i586/**</exclude>
+                      </excludes>
+                    </filter>
+                  </filters>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>${main.class}</mainClass>
+                    </transformer>
+                  </transformers>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--  WEBVIEW PROFILES  -->
+    <profile>
+      <id>webview-jfx</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-web</artifactId>
+          <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>webview-jcef</id>
+      <dependencies>
+        <dependency>
+          <groupId>me.friwi</groupId>
+          <artifactId>jcefmaven</artifactId>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>webview-eclipse-swt</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.swt</artifactId>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.eclipse.platform</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+              <!-- app bundling scripts expect this format and name of the jar file -->
+              <finalName>obelisk-sp-client-${project.version}</finalName>
+              <archive>
+                <manifestEntries>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <SWT-WS>win32</SWT-WS>
+                  <SWT-OS>win32</SWT-OS>
+                  <SWT-Arch>x86_64</SWT-Arch>
+                  <Eclipse-PlatformFilter>(&amp; (osgi.ws=win32) (osgi.os=win32) (osgi.arch=x86_64))</Eclipse-PlatformFilter>
+                  <Bundle-SymbolicName>org.eclipse.swt.win32.win32.x86_64; singleton:=true</Bundle-SymbolicName>
+                </manifestEntries>
+                <manifest>
+                  <addClasspath>true</addClasspath>
+                  <mainClass>${main.class}</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <dependencies>
     <!-- project dependencies -->
@@ -29,55 +280,37 @@
       <artifactId>sp-config</artifactId>
     </dependency>
     <!-- JavaFX -->
-    <!-- JavaFX Windows -->
     <dependency>
       <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
+      <artifactId>javafx-web</artifactId>
       <classifier>win</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <classifier>win</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-graphics</artifactId>
-      <classifier>win</classifier>
+      <scope>provided</scope>
     </dependency>
 
-    <!-- JavaFX Linux -->
+    <!-- JCEF -->
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <classifier>linux</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <classifier>linux</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-graphics</artifactId>
-      <classifier>linux</classifier>
+      <groupId>me.friwi</groupId>
+      <artifactId>jcefmaven</artifactId>
+      <scope>provided</scope> <!-- optional, available for compile via profile webview-jcef -->
     </dependency>
 
-    <!-- JavaFX MacOS -->
+    <!-- Eclipse SWT -->
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <classifier>mac</classifier>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.swt</artifactId>
+      <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
     </dependency>
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <classifier>mac</classifier>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+      <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
     </dependency>
+
+    <!-- Windows DPAPI -->
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-graphics</artifactId>
-      <classifier>mac</classifier>
+      <groupId>com.github.peter-gergely-horvath</groupId>
+      <artifactId>windpapi4j</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- SEFIRA MS CRYPTO -->
@@ -85,6 +318,7 @@
       <groupId>cz.sefira.crypto</groupId>
       <artifactId>MSCryptoStore</artifactId>
       <version>1.0</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Bouncycastle -->
@@ -157,10 +391,6 @@
     <dependency>
       <groupId>org.syncope.identityconnectors</groupId>
       <artifactId>framework-internal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>net.lingala.zip4j</groupId>
-      <artifactId>zip4j</artifactId>
     </dependency>
     <dependency>
       <groupId>org.bidib.com.github.markusbernhardt</groupId>
@@ -247,50 +477,6 @@
             </manifest>
           </archive>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <!-- exclude unnecessary files from final build -->
-                  <excludes>
-                    <exclude>META-INF/*</exclude>
-                    <!-- IAIK PKCS11 Wrapper unused natives -->
-                    <exclude>natives/unix/linux-x86/**</exclude>
-                    <exclude>natives/unix/solaris-*/**</exclude>
-                    <exclude>natives/windows/win-x86/**</exclude>
-                    <!-- JNA unused natives -->
-                    <exclude>com/sun/jna/*-x86/**</exclude>
-                    <exclude>com/sun/jna/sunos-*/**</exclude>
-                    <exclude>com/sun/jna/aix-*/**</exclude>
-                    <exclude>com/sun/jna/*-arm/**</exclude>
-                    <exclude>com/sun/jna/*-armel/**</exclude>
-                    <exclude>com/sun/jna/*-mips64el/**</exclude>
-                    <exclude>com/sun/jna/*-ppc/**</exclude>
-                    <exclude>com/sun/jna/*-ppc64/**</exclude>
-                    <exclude>com/sun/jna/*-ppc64le/**</exclude>
-                    <exclude>com/sun/jna/*-riscv64/**</exclude>
-                    <exclude>com/sun/jna/*-s390x/**</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>${main.class}</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -63,7 +63,7 @@ public class TokenPrivateKeyOperation extends AbstractCompositeOperation<DSSPriv
   @SuppressWarnings("unchecked")
   public OperationResult<DSSPrivateKeyEntry> perform() {
     final List<DSSPrivateKeyEntry> keys;
-    try (BusyIndicator busyIndicator = new BusyIndicator()){
+    try (BusyIndicator busyIndicator = BusyIndicator.getInstance()){
       if (this.token != null) {
         keys = this.token.getKeys();
       }

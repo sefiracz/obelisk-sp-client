@@ -36,6 +36,10 @@ import javafx.stage.Stage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.hc.client5.http.utils.Hex;
+import org.bouncycastle.asn1.BERTags;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.slf4j.Logger;
@@ -50,10 +54,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,14 +65,66 @@ public class X509Utils {
   public static X509Certificate getCertificateFromBase64(String base64certificate) throws CertificateException {
     return getCertificateFromBytes(Base64.decodeBase64(base64certificate));
   }
-
-  public static X509Certificate getCertificateFromBytes(byte[] encoded) throws CertificateException {
-    return getCertificateFromStream(new ByteArrayInputStream(encoded));
+  public static X509Certificate getCertificateFromStream(InputStream in) throws CertificateException, IOException {
+    return getCertificateFromBytes(in.readAllBytes());
   }
 
-  public static X509Certificate getCertificateFromStream(InputStream in) throws CertificateException {
+  public static X509Certificate getCertificateFromBytes(byte[] encoded) throws CertificateException {
+    List<X509Certificate> chain = getCertificatesFromBytes(encoded);
+    if (chain.isEmpty()) throw new CertificateException("Unable to parse certificate data");
+    return getCertificatesFromBytes(encoded).get(0);
+  }
+
+  public static List<X509Certificate> getCertificatesFromStream(InputStream in) throws IOException {
+    return getCertificatesFromBytes(in.readAllBytes());
+  }
+
+  public static List<X509Certificate> getCertificatesFromBytes(byte[] bytes) {
+    List<X509Certificate> certificates = new ArrayList<>();
+    if (bytes[0] == (BERTags.SEQUENCE | BERTags.CONSTRUCTED)) {
+      // DER encoded
+      try {
+        certificates.addAll(generateCertificates(new ByteArrayInputStream(bytes)));
+      } catch (Exception e) {
+        logger.error("Unable process certificate: "+e.getMessage(), e);
+      }
+    }
+    else if (bytes[0] == '-' || bytes[0] == '#' ||
+        new String(Arrays.copyOfRange(bytes, 0, Math.min(bytes.length, 1024))).contains("-----BEGIN")) {
+      // PEM encoded
+      try {
+        certificates.addAll(convertPEMToX509s(bytes));
+      } catch (Exception e) {
+        logger.error("Unable process certificate: "+e.getMessage(), e);
+      }
+    }
+    return certificates;
+  }
+
+  private static Set<X509Certificate> generateCertificates(InputStream in) throws CertificateException {
+    Set<X509Certificate> certificates = new HashSet<>();
     CertificateFactory factory = CertificateFactory.getInstance("X509");
-    return (X509Certificate) factory.generateCertificate(in);
+    for (Certificate certificate : factory.generateCertificates(in)) {
+      certificates.add((X509Certificate) certificate);
+    }
+    return certificates;
+  }
+
+  private static Set<X509Certificate> convertPEMToX509s(final byte[] pemEncoded) {
+    Set<X509Certificate> certificates = new HashSet<>();
+    try (ByteArrayInputStream stream = new ByteArrayInputStream(pemEncoded);
+         Reader reader = new InputStreamReader(stream);
+         PEMParser pemParser = new PEMParser(reader)) {
+      Object object;
+      while ((object = pemParser.readObject()) != null) {
+        if(object instanceof X509CertificateHolder h) {
+          certificates.add(new JcaX509CertificateConverter().getCertificate(h));
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Error processing certificate PEM data: "+e.getMessage(), e);
+    }
+    return certificates;
   }
 
   public static boolean isSelfSigned(X509Certificate x509Certificate) {
@@ -216,25 +269,32 @@ public class X509Utils {
         systemStore = KeyStore.getInstance("KeychainStore");
         List<X509Certificate> caList = X509Utils.loadMacOSSystemRoot();
         for (X509Certificate certificate : caList) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("Loaded "+certificate.getSubjectX500Principal().getName()+" from system file");
+          }
           count += X509Utils.addToTrust(certificate, truststore, provider);
         }
       }
 
       // load up Linux trusted certificates
       if (OS.isLinux()) {
+        Set<X509Certificate> caList = new HashSet<>();
         try (Stream<Path> list = Files.list(Paths.get("/etc/ssl/certs"));
              LogUtils.Time linux = new LogUtils.Time("Linux SSL CAs loaded in")) {
-          List<Path> certificates = list.filter(Files::isRegularFile).collect(Collectors.toList());
+          List<Path> certificates = list.filter(Files::isRegularFile).toList();
           for (Path certPath : certificates) {
             try (InputStream in = Files.newInputStream(certPath)) {
-              X509Certificate certificate = X509Utils.getCertificateFromStream(in);
-              count += X509Utils.addToTrust(certificate, truststore, provider);
+              List<X509Certificate> certs = X509Utils.getCertificatesFromStream(in);
+              caList.addAll(certs);
             } catch (Exception e) {
-              logger.error(e.getMessage());
+              logger.error("Failed to load certificate '"+certPath+"': "+e.getMessage());
             }
           }
         } catch (Exception e) {
           logger.error("Unable to load /etc/ssl/certs: " + e.getMessage());
+        }
+        for (X509Certificate ca : caList) {
+          count += X509Utils.addToTrust(ca, truststore, provider);
         }
       }
 
@@ -245,8 +305,11 @@ public class X509Utils {
           Enumeration<String> trustAliases = systemStore.aliases();
           while (trustAliases.hasMoreElements()) {
             String alias = trustAliases.nextElement();
-            Certificate ca = systemStore.getCertificate(alias);
-            count += X509Utils.addToTrust((X509Certificate) ca, truststore, provider);
+            X509Certificate ca = (X509Certificate) systemStore.getCertificate(alias);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Loaded ("+alias+") "+ca.getSubjectX500Principal().getName()+" from system truststore");
+            }
+            count += X509Utils.addToTrust(ca, truststore, provider);
           }
         }
       }
@@ -268,6 +331,21 @@ public class X509Utils {
   }
 
   private static List<X509Certificate> loadMacOSSystemRoot() {
+    List<X509Certificate> certificates = new ArrayList<>();
+    try (LogUtils.Time macOsTime = new LogUtils.Time("macOS system root loaded in")) {
+      ProcessBuilder builder = new ProcessBuilder();
+      builder.command("security", "find-certificate", "-a", "-p", "/System/Library/KeyChains/SystemRootCertificates.keychain");
+      Process p = builder.start();
+      try (InputStream in = p.getInputStream()) {
+        certificates.addAll(getCertificatesFromStream(in));
+      }
+    } catch (Exception e) {
+      logger.error("Unable to read macOS system root certificates: "+e.getMessage(), e);
+    }
+    return certificates;
+  }
+
+  private static List<X509Certificate> loadMacOSSystemRoot_legacy() {
     List<X509Certificate> certificates = new ArrayList<>();
     try (LogUtils.Time macOsTime = new LogUtils.Time("macOS system root loaded in")) {
       List<String> base64Certs = new ArrayList<>();

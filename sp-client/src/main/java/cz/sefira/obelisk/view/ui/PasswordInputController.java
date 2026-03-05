@@ -86,9 +86,14 @@ public class PasswordInputController extends AbstractUIOperationController<char[
       this.passwordPrompt.setText(passwordPrompt);
     } else if (product != null) {
     	String label = product.getSimpleLabel();
-      if(product instanceof DetectedCard) {
-        titleKey = "password.title.pin";
-        promptKey = "password.smartcard.prompt";
+      if(product instanceof DetectedCard d) {
+				titleKey = "password.title.pin";
+				promptKey = "password.smartcard.prompt";
+				if (d.isSlovakianEID()) {
+					// slovakian eID terminology
+					titleKey = "password.title.bok";
+					promptKey = "password.svk.eid.prompt";
+				}
       }
       if (product instanceof ConfiguredKeystore) {
 				try {

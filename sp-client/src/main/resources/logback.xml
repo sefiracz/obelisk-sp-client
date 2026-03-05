@@ -11,9 +11,9 @@
   </appender>
 
   <appender name="DAILY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${APP_USER_HOME}/logs/sp-client.log</file>
+    <file>${APP_LOG_DIR}/sp-client.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${APP_USER_HOME}/logs/sp-client.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <fileNamePattern>${APP_LOG_DIR}/sp-client.%d{yyyy-MM-dd}.log</fileNamePattern>
       <maxHistory>14</maxHistory>
     </rollingPolicy>
     <encoder>

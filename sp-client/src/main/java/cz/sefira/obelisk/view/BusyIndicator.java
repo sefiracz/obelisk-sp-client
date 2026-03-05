@@ -34,9 +34,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 
@@ -45,31 +45,20 @@ import java.io.Closeable;
  *
  * Can be put into try-with-resource block which will define the scope of the busy indicator,
  * the long work where user needs to patiently wait should happen inside this block
+ *
+ * WORKAROUND: JavaFX has no clean way to not steal focus on new window show,
+ * so busy indicator is always present, just hidden beyond viewport and is moved into view when needed.
  */
 public class BusyIndicator implements Closeable {
 
+  private static final Logger log = LoggerFactory.getLogger(BusyIndicator.class);
+  private static BusyIndicator instance;
+
+  private Scene scene = null;
   private Stage primaryStage = null;
   private Stage stage = null;
 
-  public BusyIndicator() {
-    this(true, true);
-  }
-
-  public BusyIndicator(boolean show) {
-    this(show, true);
-  }
-
-  public BusyIndicator(boolean show, boolean alwaysOnTop) {
-    if (show) {
-      show(alwaysOnTop);
-    }
-  }
-
-  /**
-   * Toggles busy indicator for potential long workloads to indicate
-   * to user that something is still happening
-   */
-  private void show(boolean alwaysOnTop) {
+  private BusyIndicator() {
     Platform.runLater(() -> {
       // toggle on busy indicator
       ProgressIndicator indicator = new ProgressIndicator();
@@ -82,11 +71,13 @@ public class BusyIndicator implements Closeable {
       progressIndicator.setStyle("-fx-background-color: rgba(0, 0, 0, 0)");
       final StackPane background = new StackPane(progressIndicator);
       background.setStyle("-fx-background-color: rgba(0, 0, 0, 0)");
-      final Scene scene = new Scene(background, 150, 150);
+      scene = new Scene(background, 150, 150);
       scene.setFill(Color.TRANSPARENT);
       // primary utility stage (does not show busy indicator window on taskbar)
       primaryStage = new Stage();
+      primaryStage.setTitle("Busy Indicator");
       primaryStage.initStyle(StageStyle.UTILITY);
+      primaryStage.initModality(Modality.NONE);
       primaryStage.setWidth(5);
       primaryStage.setHeight(30);
       primaryStage.setOpacity(0);
@@ -99,30 +90,90 @@ public class BusyIndicator implements Closeable {
       // stage
       stage = new Stage();
       stage.initOwner(primaryStage);
+      stage.setX(-1000);
+      stage.setY(-1000);
+      stage.setScene(scene);
+      stage.setTitle(AppConfig.get().getApplicationName()+" busy indicator");
+      stage.initStyle(StageStyle.TRANSPARENT);
+      stage.initModality(Modality.NONE);
+      stage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
+      stage.show();
+    });
+  }
+
+  public static synchronized void destroyInstance() {
+    if (instance != null) {
+      Platform.runLater(() -> {
+        synchronized (BusyIndicator.class) {
+          try {
+            if (instance != null && instance.stage != null) {
+              instance.stage.close();
+            }
+            if (instance != null && instance.primaryStage != null) {
+              instance.primaryStage.close();
+            }
+            instance = null;
+          } catch (Exception e) {
+            log.error(e.getMessage(), e);
+          }
+        }
+      });
+    }
+  }
+
+  /**
+   * Toggles busy indicator always on top for potential long workloads to indicate
+   * to user that something is still happening.
+   *
+   * @return Closable instance
+   */
+  public static synchronized BusyIndicator getInstance() {
+    return getInstance(true, true);
+  }
+
+  /**
+   * Toggles busy indicator always on top for potential long workloads to indicate
+   * to user that something is still happening.
+   *
+   * @param show If set to false the busy indicator actually does not show up.
+   * @return Closable instance
+   */
+  public static synchronized BusyIndicator getInstance(boolean show) {
+    return getInstance(show, true);
+  }
+
+  /**
+   * Toggles busy indicator always on top for potential long workloads to indicate
+   * to user that something is still happening.
+   *
+   * @param show If set to false the busy indicator actually does not show up.
+   * @param alwaysOnTop Flag setting the dialog to be set always on top.
+   * @return Closable instance
+   */
+  public static synchronized BusyIndicator getInstance(boolean show, boolean alwaysOnTop) {
+    if (instance == null) {
+      instance = new BusyIndicator();
+    }
+    if (show) {
+      instance.show(alwaysOnTop);
+    }
+    return instance;
+  }
+
+  private void show(boolean alwaysOnTop) {
+    Platform.runLater(() -> {
       final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
       stage.setX((screenResolution.getWidth() / 2) - (scene.getWidth() / 2));
       stage.setY((screenResolution.getHeight() / 2) - (scene.getHeight() / 2));
-      stage.setScene(scene);
-      stage.setTitle(AppConfig.get().getApplicationName()+" busy indicator");
       stage.setAlwaysOnTop(alwaysOnTop);
-      stage.initStyle(StageStyle.TRANSPARENT);
-      stage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
-      stage.show();
     });
   }
 
   @Override
   public void close() {
     Platform.runLater(() -> {
-      // toggle off busy indicator
-      if(stage != null) {
-        stage.close();
-        stage = null;
-      }
-      if (primaryStage != null) {
-        primaryStage.close();
-        primaryStage = null;
-      }
+      stage.setX(-1000);
+      stage.setY(-1000);
     });
   }
 }

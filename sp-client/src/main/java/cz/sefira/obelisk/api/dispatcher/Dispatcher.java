@@ -31,7 +31,9 @@ import cz.sefira.obelisk.api.notification.LongActivityNotifier;
 import cz.sefira.obelisk.api.notification.MessageType;
 import cz.sefira.obelisk.api.plugin.InitErrorMessage;
 import cz.sefira.obelisk.api.plugin.AppPlugin;
+import cz.sefira.obelisk.api.plugin.CookiesPlugin;
 import cz.sefira.obelisk.api.ws.GenericApiException;
+import cz.sefira.obelisk.api.ws.HttpMethod;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.SpApiClient;
 import cz.sefira.obelisk.api.ws.auth.*;
@@ -43,10 +45,7 @@ import cz.sefira.obelisk.ipc.Message;
 import cz.sefira.obelisk.ipc.MessageQueue;
 import cz.sefira.obelisk.ipc.MessageQueueFactory;
 import cz.sefira.obelisk.json.GsonHelper;
-import cz.sefira.obelisk.util.DSSUtils;
-import cz.sefira.obelisk.util.HttpUtils;
-import cz.sefira.obelisk.util.ResourceUtils;
-import cz.sefira.obelisk.util.TextUtils;
+import cz.sefira.obelisk.util.*;
 import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
@@ -76,10 +75,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Dispatcher implements AppPlugin {
 
   private static final Logger logger = LoggerFactory.getLogger(Dispatcher.class.getName());
+  private static final Object sync = new Object();
   private static final long SYNC_SUPPORTED_SMARTCARDS_MILLISECONDS = TimeUnit.MINUTES.toMillis(15);
   private static final long IDLE_PERIOD_MILLISECONDS = TimeUnit.SECONDS.toMillis(2);
   private static final long IDLE_TIMEOUT_MILLISECONDS = TimeUnit.SECONDS.toMillis(60);
   private static final long LONG_ACTIVITY_IDLE_MILLISECONDS = TimeUnit.SECONDS.toMillis(6);
+  private static final long AUTH_SESSION_MILLISECONDS = TimeUnit.MINUTES.toMillis(20) ;
+  private static final long WEBVIEW_WAIT_TIMEOUT_MILLISECONDS = TimeUnit.MINUTES.toMillis(10) ;
 
   private PlatformAPI api;
   private MessageQueue messageQueue;
@@ -89,7 +91,7 @@ public class Dispatcher implements AppPlugin {
   private boolean initialized;
 
   private long lastSyncTimestamp = 0L;
-
+  private long lastAuthCheckTimestamp = 0L;
   private long idleWaitStart = 0L;
   private BusyIndicator idleIndicator = null;
   private LongActivityNotifier activityNotifier = null;
@@ -169,10 +171,26 @@ public class Dispatcher implements AppPlugin {
         }
       }
       // process version
-      // TODO
+      // TODO version
+
+      // authentication
       String magicLink = URLDecoder.decode(magicParam.getValue(), UTF_8);
+      // obtain cookies if initialized plugin is present
+      CookiesPlugin cookiesPlugin = (CookiesPlugin) api.getPlugin(CookiesPlugin.class);
+      if (cookiesPlugin != null) {
+        synchronized (sync) {
+          String statusPage = HttpUtils.parseDiscoveryEndpoint(magicLink);
+          boolean accessTimeout = System.currentTimeMillis() - lastAuthCheckTimestamp >= AUTH_SESSION_MILLISECONDS; // use webview every 20 mins irregardless of status page access
+          if (!cookiesPlugin.checkAccess(client, statusPage) || accessTimeout) {
+            // HTTP client could not access /status page (or access timeout expired), load() cookies through plugin
+            cookiesPlugin.load(sync, api, statusPage);
+            sync.wait(WEBVIEW_WAIT_TIMEOUT_MILLISECONDS); // wait for cookie plugin to load and notify (or timeout in 10minutes)
+            lastAuthCheckTimestamp = System.currentTimeMillis();
+          }
+        }
+      }
       AuthenticationProvider tokenProvider = new BearerTokenProvider(magicLink, api); // obtain authorization credentials
-      Execution<?> result = processMessage(tokenProvider);
+      Execution<?> result = processMessage(tokenProvider); // process message
       if (result != null) {
         if (result.isSuccess()) {
           notificationProperty = "notification.event.success";
@@ -207,6 +225,7 @@ public class Dispatcher implements AppPlugin {
       notificationProperty = "notification.event.fatal";
       notificationType = MessageType.ERROR;
     } catch (HttpResponseException e) {
+      LogUtils.logHttpResponseException(e); // log headers from error response
       logger.error(e.getMessage(), e);
       DialogMessage dialogMessage;
       Problem p = null;
@@ -231,6 +250,7 @@ public class Dispatcher implements AppPlugin {
       notificationType = MessageType.ERROR;
     } finally {
       closeIdleNotifier();
+      BusyIndicator.destroyInstance();
       if (notificationProperty != null) {
         // close notification
         String messageText = ResourceUtils.getBundle().getString(notificationProperty);
@@ -243,15 +263,15 @@ public class Dispatcher implements AppPlugin {
       GeneralSecurityException, URISyntaxException, IOException, InterruptedException {
     String url = tokenProvider.getRedirectUri();
     boolean sync = performSync();
-    Execution<?> result;
+    Execution<?> result = null;
     do {
       // GET work request
-      HttpResponse response = client.call("GET", url, tokenProvider, null, sync);
+      HttpResponse response = client.call(HttpMethod.GET, url, tokenProvider, null, sync);
       if (response.getCode() == HttpStatus.SC_ACCEPTED) {
         idle(); // wait operation = go back to GET method
         continue;
       } else if (response.getCode() == HttpStatus.SC_NO_CONTENT) {
-        return null; // no work - finish process
+        return result; // no work - finish process
       } else if (response.getCode() != HttpStatus.SC_OK) {
         // unexpected status code result
         throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
@@ -266,7 +286,7 @@ public class Dispatcher implements AppPlugin {
         }
         // check session
         if (!checkSession(req.getSession(), url, tokenProvider)) {
-          return null;
+          return null; // invalid session
         }
         // notification
         api.getSystray().pushNotification(new EventNotification(req.getDescription()));
@@ -277,7 +297,7 @@ public class Dispatcher implements AppPlugin {
         if (result != null) {
           audit(result, response);
           // send results
-          response = client.call("POST", url, tokenProvider, result, false);
+          response = client.call(HttpMethod.POST, url, tokenProvider, result, false);
           // flow finished and result successfully transmitted
           flowFinished(req, result);
           // process response
@@ -311,6 +331,7 @@ public class Dispatcher implements AppPlugin {
         SignatureRequest signatureRequest = GsonHelper.fromJson(new String(requestData, StandardCharsets.UTF_8), SignatureRequest.class);
         result = api.sign(signatureRequest);
         result.setStepId(signatureRequest.getSignParams().getStepId());
+        result.setSignatureId(signatureRequest.getSignParams().getSignatureId());
         break;
       default:
         throw new IllegalStateException("Unknown operation: " + req.getOperation());
@@ -322,7 +343,7 @@ public class Dispatcher implements AppPlugin {
       throws AuthenticationProviderException, GeneralSecurityException, URISyntaxException, IOException {
     Execution<?> result = api.checkSession(sessionValue);
     if (!result.isSuccess()) {
-      client.call("POST", url, tokenProvider, result, false);
+      client.call(HttpMethod.POST, url, tokenProvider, result, false);
       logger.error("Session invalid, stop process");
       return false;
     }
@@ -331,7 +352,7 @@ public class Dispatcher implements AppPlugin {
 
   private void idle() throws InterruptedException {
     if (idleIndicator == null) {
-      idleIndicator = new BusyIndicator(true, true);
+      idleIndicator = BusyIndicator.getInstance();
       idleWaitStart = System.currentTimeMillis();
     }
     if (activityNotifier == null) {

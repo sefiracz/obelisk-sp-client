@@ -24,6 +24,8 @@ package cz.sefira.obelisk.api.ws.ssl;
  */
 
 import cz.sefira.obelisk.api.PlatformAPI;
+import cz.sefira.obelisk.api.plugin.CookiesPlugin;
+import cz.sefira.obelisk.api.ws.ApacheCookieStore;
 import cz.sefira.obelisk.api.ws.HttpResponseException;
 import cz.sefira.obelisk.api.ws.auth.CommunicationExpirationException;
 import cz.sefira.obelisk.api.notification.LongActivityNotifier;
@@ -51,10 +53,7 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import static org.apache.hc.core5.http.HttpStatus.*;
 
@@ -101,6 +100,10 @@ public class HttpsClient {
                                boolean reloadSSL) throws GeneralSecurityException, IOException, URISyntaxException {
 
     BasicHttpClientConnectionManager connectionManager;
+    if (api.getPlugin(CookiesPlugin.class) != null) {
+      ApacheCookieStore cookies = ((CookiesPlugin) api.getPlugin(CookiesPlugin.class)).getCookieStore();
+      clientBuilder.setDefaultCookieStore(cookies.getCookieStore());
+    }
     if (api.getSslCertificateProvider() != null) {
       connectionManager = new BasicHttpClientConnectionManager(api.getSslCertificateProvider().getSocketFactory());
     } else {
@@ -116,7 +119,7 @@ public class HttpsClient {
     clientBuilder.setConnectionManager(connectionManager);
     api.getProxyProvider().setupProxy(request, clientBuilder);
     setHardTimeout(request);
-    try (BusyIndicator busyIndicator = new BusyIndicator(true, false);
+    try (BusyIndicator busyIndicator = BusyIndicator.getInstance(true, false);
          LongActivityNotifier notifier = new LongActivityNotifier(api, "notification.long.activity.server", LONG_ACTIVITY.toMilliseconds());
          CloseableHttpClient httpClient = clientBuilder.build()) {
       HttpClientContext context = HttpClientContext.create();
@@ -145,20 +148,22 @@ public class HttpsClient {
         return execute(request, clientBuilder, true, false);
       }
       // if AIA is allowed
-      if (allowAIA && processSSLException(e, sslChain)) {
-        // we found trusted chain
-        // put all but end-certificate to SSL cache and add to runtime trust
-        List<X509Certificate> subChain = new ArrayList<>(sslChain.size() - 1);
-        for (int i = 1; i < sslChain.size(); i++) {
-          subChain.add(sslChain.get(i));
+      if (allowAIA) {
+        List<X509Certificate> trustedChain = processSSLException(e, sslChain);
+        if (trustedChain != null && !trustedChain.isEmpty()) {
+          // we found trusted chain
+          // put all but end-certificate to SSL cache and add to runtime trust
+          List<X509Certificate> subChain = new ArrayList<>(trustedChain.size() - 1);
+          for (int i = 1; i < trustedChain.size(); i++) {
+            subChain.add(trustedChain.get(i));
+          }
+          // add to cache and trusted store
+          provider.addTrustedChain(subChain, true);
+          // try again with new completed trust chain
+          return execute(request, clientBuilder, false, false);
         }
-        // add to cache and trusted store
-        provider.addTrustedChain(subChain, true);
-        // try again with new completed trust chain
-        return execute(request, clientBuilder, false, false);
-      } else {
-        throw new SSLCommunicationException(e, request.getUri().getHost(), sslChain);
       }
+      throw new SSLCommunicationException(e, request.getUri().getHost(), sslChain);
     } catch (SocketTimeoutException | RequestFailedException e) {
       throw new CommunicationExpirationException("Connection expired: "+e.getMessage(), e);
     }
@@ -174,20 +179,20 @@ public class HttpsClient {
     new Timer(true).schedule(task, HARD_TIMEOUT.toMilliseconds());
   }
 
-  private boolean processSSLException(SSLException e, List<X509Certificate> sslChain) {
+  private List<X509Certificate> processSSLException(SSLException e, List<X509Certificate> sslChain) {
     if (sslTrustIssue(e) && sslChain != null && !sslChain.isEmpty()) {
       return completeCertificateChain(sslChain.get(sslChain.size()-1), sslChain);
     }
-    return false;
+    return null;
   }
 
-  private boolean completeCertificateChain(X509Certificate subject, List<X509Certificate> certificates) {
+  private List<X509Certificate> completeCertificateChain(X509Certificate subject, List<X509Certificate> certificates) {
     if (X509Utils.isSelfSigned(subject)) {
-      return false; // chain ends with untrusted self-sign, nothing to do here
+      return null; // chain ends with untrusted self-sign, nothing to do here
     }
     List<String> urls = DSSUtils.getAccessLocations(subject);
     if (urls == null)
-      return false; // no AIA URLs
+      return null; // no AIA URLs
     for (String url : urls) {
       if (!url.toLowerCase().startsWith("http")) {
         continue; // not HTTP URL
@@ -198,25 +203,34 @@ public class HttpsClient {
         HttpResponse response = execute(request, HttpClientBuilder.create(), false, false);
         if (response == null || response.getContent() == null)
           continue; // no certificate downloaded
-        X509Certificate issuer = X509Utils.getCertificateFromBytes(response.getContent());
-        certificates.add(issuer);
-        // did we find certificate issued by trust-anchor?
-        List<X509Certificate> anchors = api.getSslCertificateProvider().getBySubject(issuer.getIssuerX500Principal());
-        if (anchors != null) {
-          boolean validChain = X509Utils.validateCertificateChain(certificates); // validate certificate chain
-          for (X509Certificate anchor : anchors) {
-            // find trusted-anchor that signs the chain
-            if (validChain && X509Utils.validateCertificateIssuer(issuer, anchor)) {
-              logger.info("Found trusted certificate chain");
-              return true;
+
+        // process next certificate in chain
+        Set<X509Certificate> issuers = new HashSet<>(X509Utils.getCertificatesFromBytes(response.getContent()));
+        for (X509Certificate issuer : issuers) {
+          logger.info("AIA: '{}' issued by '{}'", issuer.getSubjectX500Principal(), issuer.getIssuerX500Principal());
+          List<X509Certificate> newChain = new ArrayList<>(certificates);
+          newChain.add(issuer);
+          // did we find certificate issued by trust-anchor?
+          List<X509Certificate> anchors = api.getSslCertificateProvider().getBySubject(issuer.getIssuerX500Principal());
+          if (anchors != null) {
+            boolean validChain = X509Utils.validateCertificateChain(newChain); // validate certificate chain
+            for (X509Certificate anchor : anchors) {
+              // find trusted-anchor that signs the chain
+              if (validChain && X509Utils.validateCertificateIssuer(issuer, anchor)) {
+                logger.info("Found trusted certificate chain");
+                return newChain;
+              }
             }
           }
-        }
-        // is there a point to continue?
-        if (!X509Utils.isSelfSigned(issuer)) {
-          return completeCertificateChain(issuer, certificates); // still not at root or anchor
-        } else {
-          return false; // self-signed and not amongst trust-anchors
+          // is there a point to continue?
+          if (!X509Utils.isSelfSigned(issuer)) {
+            if (logger.isDebugEnabled()) {
+              logger.debug("Still not at root or trusted anchor");
+            }
+            return completeCertificateChain(issuer, newChain); // still not at root or anchor
+          } else {
+            return null; // self-signed and not amongst trust-anchors
+          }
         }
       } catch (HttpResponseException e) {
         logger.error("Unable to download AIA certificate: "+e.getStatusCode()+" "+e.getReasonPhrase());
@@ -224,7 +238,7 @@ public class HttpsClient {
         logger.error("Unable to download AIA certificate: "+e.getMessage(), e);
       }
     }
-    return false;
+    return null;
   }
 
   private boolean sslTrustIssue(SSLException e) {

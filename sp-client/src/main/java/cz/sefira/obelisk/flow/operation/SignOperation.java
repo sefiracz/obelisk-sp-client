@@ -87,7 +87,7 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 																							 MaskGenerationFunction maskGenerationFunction, DSSPrivateKeyEntry key) {
 		// to prevent covering windows minidriver PIN input being covered by busy indicator
 		boolean alwaysOnTop = !(token instanceof WindowsSignatureTokenAdapter);
-		try (BusyIndicator busyIndicator = new BusyIndicator(true, alwaysOnTop)) {
+		try (BusyIndicator busyIndicator = BusyIndicator.getInstance(true, alwaysOnTop)) {
 			return new OperationResult<>(token.sign(toBeSigned, digestAlgorithm, maskGenerationFunction, key));
 		} catch (AbstractTokenRuntimeException e) {
 			this.operationFactory.getMessageDialog(api, e.getDialogMessage(), true);
@@ -119,6 +119,8 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 					- Or unknown error happens (maybe RSA-PSS signature algorithm is not supported)
 					SCARD_F_UNKNOWN_ERROR - 0x80100014 - error 2148532244 - An internal error has been detected, but the source is unknown.
 					NTE_BUFFER_TOO_SMALL - 0x80090028 - error 2148073512 - The buffer supplied to a function was too small.
+					NTE_BAD_ALGID - 0x80090008 - error 2148073480 - Invalid algorithm specified.
+					NTE_BAD_FLAGS - 0x80090009 - error 2148073481 - Invalid flags specified.
 				*/
 				if (maskGenerationFunction != null) {
 					boolean fallback = false;
@@ -127,6 +129,12 @@ public class SignOperation extends AbstractCompositeOperation<SignatureValue> {
 						fallback = true;
 					} else if (message.contains("error 2148532244")) {
 						logger.error("SCARD_F_UNKNOWN_ERROR - 0x80100014 - error 2148532244 - An internal error has been detected, but the source is unknown.");
+						fallback = true;
+					} else if (message.contains("error 2148073480")) {
+						logger.error("NTE_BAD_ALGID - 0x80090008 - error 2148073480 - Invalid algorithm specified.");
+						fallback = true;
+					} else if (message.contains("error 2148073481")) {
+						logger.error("NTE_BAD_FLAGS - 0x80090009 - error 2148073481 - Invalid flags specified.");
 						fallback = true;
 					} else {
 						logger.error("Unexpected error: "+message); // https://learn.microsoft.com/cs-cz/windows/win32/com/com-error-codes-4

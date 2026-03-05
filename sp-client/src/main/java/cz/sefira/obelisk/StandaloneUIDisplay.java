@@ -17,6 +17,7 @@ package cz.sefira.obelisk;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.NonBlockingUIOperation;
 import cz.sefira.obelisk.dss.token.PasswordInputCallback;
@@ -228,6 +229,12 @@ public class StandaloneUIDisplay implements UIDisplay {
 
 	private final class Pkcs11ReauthCallback implements ReauthCallback {
 
+		private DetectedCard detectedCard;
+
+		public Pkcs11ReauthCallback(DetectedCard detectedCard) {
+			this.detectedCard = detectedCard;
+		}
+
 		@Override
 		@SuppressWarnings("unchecked")
 		public GuardedString getReauth() {
@@ -242,7 +249,7 @@ public class StandaloneUIDisplay implements UIDisplay {
 			}
 			// ask user for re-auth
 			final OperationResult<Object> reauthOperationResult = StandaloneUIDisplay.this.operationFactory.getOperation(
-					UIOperation.class, "/fxml/reauth-input.fxml", AppConfig.get()).perform();
+					UIOperation.class, "/fxml/reauth-input.fxml", AppConfig.get(), detectedCard).perform();
 			if(reauthOperationResult.getStatus().equals(BasicOperationStatus.SUCCESS)) {
 				return (GuardedString) reauthOperationResult.getResult();
 			} else if(reauthOperationResult.getStatus().equals(BasicOperationStatus.USER_CANCEL)) {
@@ -268,8 +275,8 @@ public class StandaloneUIDisplay implements UIDisplay {
 	}
 
 	@Override
-	public ReauthCallback getReauthCallback() {
-		return new Pkcs11ReauthCallback();
+	public ReauthCallback getReauthCallback(DetectedCard detectedCard) {
+		return new Pkcs11ReauthCallback(detectedCard);
 	}
 
 

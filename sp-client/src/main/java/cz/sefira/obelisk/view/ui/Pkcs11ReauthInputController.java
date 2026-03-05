@@ -28,6 +28,7 @@ import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.prefs.UserPreferences;
+import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -99,8 +100,17 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
   public void init(Object... params) {
     this.appConfig = (AppConfig) params[0];
     String titleKey = "reauth.title.qpin";
+    String promptKey = "reauth.dialog.label";
+    if (params.length > 1) {
+      DetectedCard detectedCard = (DetectedCard) params[1];
+      if (detectedCard != null && detectedCard.isSlovakianEID()) {
+        // slovakian eID terminology
+        titleKey = "reauth.title.svk.eid.qpin";
+        promptKey = "reauth.dialog.svk.eid.label";
+      }
+    }
     this.password.setPromptText(resources.getString(titleKey));
-    this.passwordPrompt.setText(resources.getString("reauth.dialog.label"));
+    this.passwordPrompt.setText(resources.getString(promptKey));
     executorService = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r, "ReAuth");
       t.setDaemon(true);

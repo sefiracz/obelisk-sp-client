@@ -6,7 +6,7 @@
 
   <groupId>cz.sefira.obelisk</groupId>
   <artifactId>obelisk-sp-client</artifactId>
-  <version>2.0.9</version>
+  <version>2.0.11</version>
   <packaging>pom</packaging>
   <name>OBELISK Signing Portal Client</name>
 
@@ -27,7 +27,7 @@
     <apache-httpclient5.version>5.2.1</apache-httpclient5.version>
     <bouncycastle.version>1.77</bouncycastle.version>
     <commons-lang.version>2.6</commons-lang.version>
-    <commons-io.version>2.7</commons-io.version>
+    <commons-io.version>2.18.0</commons-io.version>
     <commons-codec.version>1.15</commons-codec.version>
     <commons-configuration2.version>2.9.0</commons-configuration2.version>
     <beanutils.version>1.9.4</beanutils.version>
@@ -39,6 +39,10 @@
     <identityconnectors.framework.version>0.4.3</identityconnectors.framework.version>
     <zip4j.version>2.11.5</zip4j.version>
     <proxy.vole.version>1.1.0</proxy.vole.version>
+    <windpapi4j.version>2.1.0</windpapi4j.version>
+    <jcef.version>135.0.20</jcef.version>
+    <eclipse-swt.version>3.130.0</eclipse-swt.version>
+    <eclipse-swt-win32-x86_64-obelisk.version>3.130.999</eclipse-swt-win32-x86_64-obelisk.version>
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.13.2</junit.version>
@@ -77,7 +81,6 @@
         <version>${project.version}</version>
       </dependency>
       <!-- JavaFX -->
-      <!-- JavaFX Windows -->
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-fxml</artifactId>
@@ -95,6 +98,13 @@
         <artifactId>javafx-graphics</artifactId>
         <version>${javafx.version}</version>
         <classifier>win</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-web</artifactId>
+        <version>${javafx.version}</version>
+        <classifier>win</classifier>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-jfx -->
       </dependency>
 
       <!-- JavaFX Linux -->
@@ -137,11 +147,42 @@
         <classifier>mac</classifier>
       </dependency>
 
+      <!-- JCEF -->
+      <dependency>
+        <groupId>me.friwi</groupId>
+        <artifactId>jcefmaven</artifactId>
+        <version>${jcef.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-jcef -->
+      </dependency>
+
+      <!-- Eclipse SWT -->
+      <dependency>
+        <groupId>org.eclipse.platform</groupId>
+        <artifactId>org.eclipse.swt</artifactId>
+        <version>${eclipse-swt.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.platform</groupId>
+        <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+        <version>${eclipse-swt-win32-x86_64-obelisk.version}</version>
+        <scope>provided</scope> <!-- optional, available for compile via profile webview-eclipse-swt -->
+      </dependency>
+
+      <!-- Windows DPAPI -->
+      <dependency>
+        <groupId>com.github.peter-gergely-horvath</groupId>
+        <artifactId>windpapi4j</artifactId>
+        <version>${windpapi4j.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
       <!-- SEFIRA MS CRYPTO -->
       <dependency>
         <groupId>cz.sefira.crypto</groupId>
         <artifactId>MSCryptoStore</artifactId>
         <version>1.0</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- Bouncycastle -->
@@ -225,11 +266,6 @@
         <groupId>org.syncope.identityconnectors</groupId>
         <artifactId>framework-internal</artifactId>
         <version>${identityconnectors.framework.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.lingala.zip4j</groupId>
-        <artifactId>zip4j</artifactId>
-        <version>${zip4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bidib.com.github.markusbernhardt</groupId>

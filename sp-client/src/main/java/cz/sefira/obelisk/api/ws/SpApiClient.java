@@ -31,6 +31,8 @@ import cz.sefira.obelisk.api.ws.auth.AuthenticationProviderException;
 import cz.sefira.obelisk.api.ws.ssl.HttpResponse;
 import cz.sefira.obelisk.api.ws.ssl.HttpsClient;
 import cz.sefira.obelisk.json.GsonHelper;
+import cz.sefira.obelisk.prefs.PreferencesFactory;
+import cz.sefira.obelisk.prefs.UserPreferences;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -60,7 +62,11 @@ public class SpApiClient {
     this.client = new HttpsClient(api);
   }
 
-  public HttpResponse call(String method, String url, AuthenticationProvider authProvider, Object payload, boolean sync)
+  public HttpResponse call(HttpMethod method, String url) throws GeneralSecurityException, AuthenticationProviderException, URISyntaxException, IOException {
+    return call(method, url, null, null, false);
+  }
+
+  public HttpResponse call(HttpMethod method, String url, AuthenticationProvider authProvider, Object payload, boolean sync)
           throws AuthenticationProviderException, URISyntaxException, GeneralSecurityException, IOException {
     // URI builder
     URIBuilder uriBuilder = new URIBuilder(url);
@@ -69,9 +75,12 @@ public class SpApiClient {
     uriBuilder.addParameter(new BasicNameValuePair("devices", String.valueOf(sync)));
     // execute request
     URI requestUri = uriBuilder.build();
-    logger.info(method+" "+requestUri);
-    HttpUriRequestBase request = new HttpUriRequestBase(method, requestUri);
-    request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
+    logger.info("{} {}", method, requestUri);
+    HttpUriRequestBase request = new HttpUriRequestBase(method.getMethod(), requestUri);
+    if (authProvider != null) {
+      request.addHeader(HttpHeaders.AUTHORIZATION, authProvider.getEndpointAuthentication());
+    }
+    request.addHeader(HttpHeaders.ACCEPT_LANGUAGE, getLanguage());
     HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
     clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
         .setConnectionRequestTimeout(5, TimeUnit.SECONDS)
@@ -81,6 +90,15 @@ public class SpApiClient {
       request.setEntity(entity);
     }
     return client.execute(request, clientBuilder);
+  }
+
+  private String getLanguage() {
+    UserPreferences prefs = PreferencesFactory.getInstance(AppConfig.get());
+    String lang = prefs.getLanguage();
+    if (lang == null) {
+      lang = "en"; // default to english (language will be set eventually once server tells us which to use)
+    }
+    return lang;
   }
 
 }

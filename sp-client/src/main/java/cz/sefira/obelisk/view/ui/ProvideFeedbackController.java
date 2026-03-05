@@ -16,8 +16,8 @@ package cz.sefira.obelisk.view.ui;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.EnvironmentInfo;
-import cz.sefira.obelisk.api.model.Feedback;
 import cz.sefira.obelisk.flow.StageHelper;
+import cz.sefira.obelisk.util.DesktopUtils;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.util.TextUtils;
 import javafx.application.Platform;
@@ -43,7 +43,7 @@ import java.util.ResourceBundle;
 
 public class ProvideFeedbackController extends AbstractFeedbackUIOperationController implements Initializable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProvideFeedbackController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProvideFeedbackController.class);
 
 	@FXML
   private HBox btnContainer;
@@ -63,42 +63,37 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
 	public void initialize(URL location, ResourceBundle resources) {
     this.resources = ResourceUtils.getBundle();
 		report.setOnAction(e -> {
-			new Thread(() -> {
-				try {
-					// subject
-					String subject = MessageFormat.format(resources.getString("feedback.mail.subject"), getApplicationName());
-					// body
-          StringBuilder body = new StringBuilder();
-          body.append(resources.getString("feedback.mail.body.diagnostic.data")).append("\n\n");
+      logger.info("User clicked to send error feedback");
+      // subject
+      String subject = MessageFormat.format(resources.getString("feedback.mail.subject"), getApplicationName());
+      // body
+      StringBuilder body = new StringBuilder();
+      body.append(resources.getString("feedback.mail.body.diagnostic.data")).append("\n\n");
 
-          // environment info
-          body.append(resources.getString("feedback.mail.body.envInfo")).append("\n");
-          body.append("App version: ").append(AppConfig.get().getApplicationVersion()).append("\n");
-          body.append(EnvironmentInfo.buildDiagnosticEnvInfo()).append("\n");
+      // environment info
+      body.append(resources.getString("feedback.mail.body.envInfo")).append("\n");
+      body.append("App version: ").append(AppConfig.get().getApplicationVersion()).append("\n");
+      body.append(EnvironmentInfo.buildDiagnosticEnvInfo()).append("\n");
 
-          // initialized pkcs11 modules
-          body.append(resources.getString("feedback.mail.body.pkcs11.modules")).append("\n");
-          List<String> initModules = getApi().getPKCS11Manager().getInitializedModules();
-          for(String module : initModules) {
-            body.append(module).append("\n");
-          }
-          body.append("\n");
+      // initialized pkcs11 modules
+      body.append(resources.getString("feedback.mail.body.pkcs11.modules")).append("\n");
+      List<String> initModules = getApi().getPKCS11Manager().getInitializedModules();
+      for(String module : initModules) {
+        body.append(module).append("\n");
+      }
+      body.append("\n");
 
-          // error stackstrace
-          String stackTrace = TextUtils.printException(getException());
-          body.append(resources.getString("feedback.mail.body.stacktrace")).append("\n");
-					body.append(stackTrace).append("\n");
+      // error stackstrace
+      String stackTrace = TextUtils.printException(getException());
+      body.append(resources.getString("feedback.mail.body.stacktrace")).append("\n");
+      body.append(stackTrace).append("\n");
 
-					// mailto
-					String uriStr = String.format("mailto:%s?subject=%s&body=%s",
-							getAppConfig().getTicketUrl(),
-							urlEncode(subject),
-							urlEncode(body.toString()));
-					Desktop.getDesktop().browse(new URI(uriStr));
-				} catch (IOException | URISyntaxException ioe) {
-					LOGGER.error(ioe.getMessage());
-				}
-			}).start();
+      // mailto
+      String uriStr = String.format("mailto:%s?subject=%s&body=%s",
+          getAppConfig().getTicketUrl(),
+          TextUtils.urlEncode(subject),
+          TextUtils.urlEncode(body.toString()));
+      DesktopUtils.browse(uriStr);
 			signalEnd(null);
 		});
 		cancel.setOnAction(e -> signalUserCancel());
@@ -113,9 +108,5 @@ public class ProvideFeedbackController extends AbstractFeedbackUIOperationContro
       btnContainer.getChildren().removeIf(b -> !getAppConfig().isEnableIncidentReport() && b.getId().equals("report"));
     });
   }
-
-	private String urlEncode(String str) {
-		return URLEncoder.encode(str, StandardCharsets.UTF_8).replace("+", "%20");
-	}
 
 }

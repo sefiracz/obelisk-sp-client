@@ -31,6 +31,7 @@ import cz.sefira.obelisk.api.ws.ssl.SSLCommunicationException;
 import cz.sefira.obelisk.json.GsonHelper;
 import cz.sefira.obelisk.util.HttpUtils;
 import cz.sefira.obelisk.util.JwtTokenUtils;
+import cz.sefira.obelisk.util.LogUtils;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -172,7 +173,12 @@ public class BearerTokenProvider implements AuthenticationProvider {
       request.setEntity(new UrlEncodedFormEntity(params));
       HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
       HttpResponse response = client.execute(request, clientBuilder);
-      return GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
+      BearerToken bearerToken = GsonHelper.fromJson(new String(response.getContent(), StandardCharsets.UTF_8), BearerToken.class);
+      if (bearerToken == null || bearerToken.getAccessToken() == null) {
+        LogUtils.logHttpHeaders(logger::error, 200, "OK", response.getHeaders());
+        throw new AuthenticationProviderException("Unexpected state, server did not return any token");
+      }
+      return bearerToken;
     } catch (SSLCommunicationException e) {
       throw e;
     } catch (Exception e) {

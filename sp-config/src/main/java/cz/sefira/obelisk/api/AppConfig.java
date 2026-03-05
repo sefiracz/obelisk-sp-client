@@ -14,7 +14,6 @@
  */
 package cz.sefira.obelisk.api;
 
-import cz.sefira.obelisk.api.model.OS;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -23,10 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -52,8 +47,6 @@ public class AppConfig {
   private static final Logger logger = LoggerFactory.getLogger(AppConfig.class.getName());
 
   private String applicationVersion;
-  private File appUserHome;
-  private File legacyUserHome;
 
   private String applicationName;
   private String applicationPathName;
@@ -119,8 +112,8 @@ public class AppConfig {
   }
 
   public void loadFromProperties(final Properties props) {
-    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client v2"));
-    this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "OBELISK Signing Portal client"));
+    this.setApplicationName(props.getProperty(APPLICATION_NAME, "OBELISK Signing Portal Client"));
+    this.setApplicationPathName(props.getProperty(APPLICATION_PATH_NAME, "OBELISK Signing Portal Client"));
     this.setCompanyName(props.getProperty(COMPANY_NAME, "SEFIRA"));
 
     this.setDebug(Boolean.parseBoolean(props.getProperty(DEBUG, "false")));
@@ -137,16 +130,12 @@ public class AppConfig {
     this.setEnableIncidentReport(Boolean.parseBoolean(props.getProperty(ENABLE_INCIDENT_REPORT, "false")));
   }
 
-  public ConfigurationManager getConfigurationManager() {
-    return new ConfigurationManager();
-  }
-
   public boolean isDebug() {
     return this.debug;
   }
 
   public String getApplicationName() {
-    return MessageFormat.format(applicationName, "Client v2");
+    return MessageFormat.format(applicationName, "Client");
   }
 
   public String getApplicationPathName() {
@@ -175,81 +164,6 @@ public class AppConfig {
 
   public String getWindowsInstalledPath() {
     return windowsInstalledPath;
-  }
-
-  public File getAppUserHome() {
-    if (this.appUserHome != null) {
-      return this.appUserHome;
-    }
-    final ConfigurationManager configurationManager = this.getConfigurationManager();
-    try {
-      this.appUserHome = configurationManager.manageConfiguration(this.getApplicationPathName());
-    }
-    catch (final IOException e) {
-      logger.error("Error while managing App config : {}", e.getMessage(), e);
-      this.appUserHome = null;
-    }
-    return this.appUserHome;
-  }
-
-  public Path getDefaultUserConfigDir() {
-    if (OS.isWindows()) {
-      String commonAppData = System.getenv("AllUsersProfile");
-      if (commonAppData != null) {
-        return Paths.get(commonAppData).resolve(getCompanyName()).resolve(getApplicationName());
-      }
-    }
-    // TODO - macOS / Linux
-    return null;
-  }
-
-  /**
-   * Version 1.x.y app user home dir
-   */
-  public File getLegacyAppUserHome() {
-    if (this.legacyUserHome != null) {
-      return this.legacyUserHome;
-    }
-    final ConfigurationManager configurationManager = this.getConfigurationManager();
-    try {
-      this.legacyUserHome = configurationManager.manageConfiguration("OBELISK Signing Portal");
-    }
-    catch (final IOException e) {
-      logger.error("Error while managing App config : {}", e.getMessage(), e);
-      this.legacyUserHome = null;
-    }
-    return this.legacyUserHome;
-  }
-
-  public Path getAppProcessDirectory() throws IOException {
-    File appUserHome = getAppUserHome();
-    if (appUserHome == null) {
-      throw new IllegalStateException("Unable to determine user app home");
-    }
-    final Path files = appUserHome.toPath().resolve(".files");
-    if (!files.toFile().exists()) {
-      Files.createDirectories(files);
-      if (OS.isWindows()) {
-        Files.setAttribute(files, "dos:hidden", true, LinkOption.NOFOLLOW_LINKS);
-      }
-    }
-    return files;
-  }
-
-  public Path getAppRunDirectory() throws IOException {
-    Path runDir = getAppProcessDirectory().resolve("run");
-    if (!runDir.toFile().exists()) {
-      Files.createDirectory(runDir);
-    }
-    return runDir;
-  }
-
-  public Path getAppStorageDirectory() throws IOException {
-    Path storage = getAppProcessDirectory().resolve("storage");
-    if (!storage.toFile().exists()) {
-      Files.createDirectory(storage);
-    }
-    return storage;
   }
 
   public InputStream getIconLogoStream() {

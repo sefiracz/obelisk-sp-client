@@ -26,8 +26,10 @@ package cz.sefira.obelisk.prefs;
 import cz.sefira.obelisk.api.notification.NotificationType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Abstract user preferences
@@ -139,7 +141,7 @@ public abstract class UserPreferences {
   }
 
   public String getProxyServer() {
-    return proxyServer;
+    return proxyServer != null ? proxyServer : "";
   }
 
   public Integer getProxyPort() {
@@ -163,6 +165,32 @@ public abstract class UserPreferences {
   }
 
   public abstract void clear();
+
+  /**
+   * Exports user configuration with with secrets (passwords) redacted to be safe to export
+   * @return Exports safe user-preferences.properties values
+   */
+  public String exportValues() {
+    return LANGUAGE + "=" + getLanguage() + "\n" +
+        SHOW_NOTIFICATIONS + "=" + (showNotifications != null ? showNotifications.getType() : null) + "\n" +
+        SPLASH_SCREEN + "=" + isSplashScreen() + "\n" +
+        CACHE_DURATION + "=" + getCacheDuration() + "\n" +
+        HIDDEN_DIALOGS + "=" + getHiddenDialogIds().stream().map(Object::toString).collect(Collectors.joining(",")) + "\n" +
+        DEBUG_MODE + "=" + isDebugMode() + "\n" +
+        "\n" +
+        USE_SYSTEM_PROXY + "=" + isUseSystemProxy() + "\n" +
+        PROXY_SERVER + "=" + getProxyServer() + "\n" +
+        PROXY_PORT + "=" + (getProxyPort() != null ? getProxyPort() : "") + "\n" +
+        PROXY_USE_HTTPS + "=" + isProxyUseHttps() + "\n" +
+        PROXY_AUTHENTICATION + "=" + isProxyAuthentication() + "\n" +
+        PROXY_USERNAME + "=" + getProxyUsername() + "\n" +
+        // if proxy password is set add a comment and do not print the proxy password into exported file
+        (proxyPassword != null && !proxyPassword.isBlank() ?
+            "# Proxy password was set to a non-empty value, but was redacted from this output for security reasons.\n" :
+            ""
+        ) +
+        PROXY_PASSWORD + "=";
+  }
 
   @Override
   public String toString() {

@@ -15,10 +15,12 @@
 package cz.sefira.obelisk;
 
 import com.sun.javafx.application.LauncherImpl;
+import com.sun.javafx.application.ParametersImpl;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.model.OS;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.util.ResourceUtils;
+import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.DialogMessage;
 import cz.sefira.obelisk.view.StandaloneDialog;
 import iaik.pkcs.pkcs11.wrapper.PKCS11Implementation;
@@ -66,16 +68,25 @@ public class AppPreloader extends Preloader {
 	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Parameters params = getParameters();
-		if (params.getNamed().get("error") != null) {
-			String stacktrace = params.getNamed().get("stacktrace");
-			logger.error(stacktrace);
-			StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
-							DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
-			System.exit(1);
-		} else if (PreferencesFactory.getInstance(AppConfig.get()).isSplashScreen()) {
-			showSplashScreen(primaryStage);
+		try {
+			Parameters params = getParameters();
+			if (params.getNamed().get("error") != null) {
+				exitOnFail(params);
+			} else if (PreferencesFactory.getInstance(AppConfig.get()).isSplashScreen()) {
+				showSplashScreen(primaryStage);
+			}
+		} catch (Exception e) {
+			String[] args = new String[]{"--error=true", "--stacktrace=" + TextUtils.printException(e)};
+			exitOnFail(new ParametersImpl(args));
 		}
+	}
+
+	private void exitOnFail(Parameters params) {
+		String stacktrace = params.getNamed().get("stacktrace");
+		logger.error(stacktrace);
+		StandaloneDialog.showErrorDialog(new DialogMessage("preloader.error.fatal",
+				DialogMessage.Level.ERROR, 500, 180), null, stacktrace);
+		System.exit(1);
 	}
 
 	private void showSplashScreen(Stage primaryStage) {
@@ -84,7 +95,7 @@ public class AppPreloader extends Preloader {
 		primaryStage.setTitle(appName);
 		logger.info("Load splashscreen resources");
 		primaryStage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
-		final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash_min.png")));
+		final ImageView splash = new ImageView(new Image(AppPreloader.class.getResourceAsStream("/images/splash_light.png")));
 		logger.info("Resources loaded");
 		double splashWidth = splash.getImage().getWidth();
 		double splashHeight = splash.getImage().getHeight();
@@ -131,6 +142,8 @@ public class AppPreloader extends Preloader {
 					System.setProperty("sefira.mscrypto.library.name", cryptoStoreDll);
 					System.setProperty("sefira.mscrypto.library.path", libraryPath); // dir containing MSCryptoStore.dll
 				}
+        // set SWT library path
+        System.setProperty("swt.library.path", libraryPath);
 				// set java library path
 				System.setProperty("javafx.cachedir", libraryPath);
 				// set PKCS11 wrapper path

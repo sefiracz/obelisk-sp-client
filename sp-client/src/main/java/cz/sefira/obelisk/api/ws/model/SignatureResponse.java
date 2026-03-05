@@ -22,8 +22,8 @@ public class SignatureResponse {
 
 	private final byte[] signatureValue;
 	private final SignatureAlgorithm signatureAlgorithm;
-	private final CertificateToken certificate;
-	private final CertificateToken[] certificateChain;
+	private CertificateToken certificate;
+	private CertificateToken[] certificateChain;
 
 	public SignatureResponse(SignatureValue signatureValue, CertificateToken certificate, CertificateToken[] certificateChain) {
 		this.signatureValue = signatureValue.getValue();

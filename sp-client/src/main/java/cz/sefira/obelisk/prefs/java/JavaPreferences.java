@@ -11,13 +11,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS WHATSOEVER, express or implied.
  * See the License for specific permissions and language restrictions under the License.
  */
-package cz.sefira.obelisk.prefs;
+package cz.sefira.obelisk.prefs.java;
 
 /*
  * Copyright 2023 by SEFIRA, spol. s r. o.
  * http://www.sefira.cz
  *
- * cz.sefira.obelisk.prefs.JavaPreferences
+ * cz.sefira.obelisk.prefs.java.JavaPreferences
  *
  * Created: 07.06.2023
  * Author: hlavnicka
@@ -25,6 +25,7 @@ package cz.sefira.obelisk.prefs;
 
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.notification.NotificationType;
+import cz.sefira.obelisk.prefs.UserPreferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;

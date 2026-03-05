@@ -137,6 +137,11 @@ public class KeySelectionController extends AbstractUIOperationController<DSSPri
         }
       };
 
+      // pre-select a key, if it is the only key in the keystore
+      if (listView.getItems().size() == 1) {
+        listView.getSelectionModel().select(0);
+      }
+
       cell.setOnMouseClicked(event -> {
         if (event.getClickCount() == 2 && (!cell.isEmpty())) {
           selectItem();

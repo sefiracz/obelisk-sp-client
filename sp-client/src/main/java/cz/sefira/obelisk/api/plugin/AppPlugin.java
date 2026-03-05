@@ -34,4 +34,11 @@ public interface AppPlugin {
 	 */
 	List<InitErrorMessage> init(String pluginId, PlatformAPI api);
 
+	/**
+	 * Optional plugin can safely fail during initialization with {@link OptionalPluginException}
+	 * @return True if plugin is optional
+	 */
+	default boolean isOptional() {
+		return false;
+	}
 }

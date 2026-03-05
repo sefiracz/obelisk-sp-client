@@ -15,16 +15,21 @@
 package cz.sefira.obelisk.flow.operation;
 
 import cz.sefira.obelisk.CancelledOperationException;
+import cz.sefira.obelisk.api.AbstractProduct;
 import cz.sefira.obelisk.api.ws.model.CertificateFilter;
 import cz.sefira.obelisk.api.ProductAdapter;
 import cz.sefira.obelisk.api.flow.BasicOperationStatus;
 import cz.sefira.obelisk.flow.exceptions.AbstractTokenRuntimeException;
+import cz.sefira.obelisk.generic.QuickAccessProductsMap;
+import cz.sefira.obelisk.util.TextUtils;
 import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.dss.token.DSSPrivateKeyEntry;
 import cz.sefira.obelisk.dss.token.SignatureTokenConnection;
 import cz.sefira.obelisk.util.DSSUtils;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.api.flow.OperationResult;
+import cz.sefira.obelisk.view.DialogMessage;
+import cz.sefira.obelisk.view.StandaloneDialog;
 import cz.sefira.obelisk.view.core.UIOperation;
 
 import java.util.List;
@@ -73,7 +78,7 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
     @SuppressWarnings("unchecked")
     public OperationResult<DSSPrivateKeyEntry> perform() {
         final List<DSSPrivateKeyEntry> keys;
-        try (BusyIndicator busyIndicator = new BusyIndicator()){
+        try (BusyIndicator busyIndicator = BusyIndicator.getInstance()){
             keys = this.productAdapter.getKeys(this.token, this.certificateFilter);
         } catch (final CancelledOperationException e) {
           return new OperationResult<>(BasicOperationStatus.USER_CANCEL);
@@ -90,6 +95,20 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         // Microsoft keystore
         keys.removeIf(k -> "CN=Token Signing Public Key".equals(k.getCertificateToken().getCertificate().getIssuerDN().getName()));
 
+        // get details about selection
+        String lookup = null;
+        if (certificateFilter != null) {
+            if (certificateFilter.getCertificateId() != null) {
+                String certificateId = TextUtils.encodeHexString(certificateFilter.getCertificateId());
+                List<AbstractProduct> products = QuickAccessProductsMap.access().get(certificateId);
+                lookup = products != null && !products.isEmpty() ? products.get(0).getCertificate() : null;
+            }
+            if (certificateFilter.getIssuer() != null) {
+                lookup = "Issuer: \n" + certificateFilter.getIssuer().toString();
+            }
+        }
+
+        String finalLookup = lookup;
         DSSPrivateKeyEntry key = null;
         if (userInteraction) {
             // let user select private key
@@ -119,6 +138,8 @@ public class UserSelectPrivateKeyOperation extends AbstractCompositeOperation<DS
         }
 
         if(key == null) {
+            DialogMessage errMsg = new DialogMessage("key.selection.no.relevant.key", DialogMessage.Level.WARNING, 500, 170);
+            StandaloneDialog.runLater(() -> StandaloneDialog.showErrorDialog(errMsg, null, finalLookup));
             return new OperationResult<>(CoreOperationStatus.NO_KEY_SELECTED);
         }
         return new OperationResult<>(key);

@@ -17,6 +17,7 @@ import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.ws.model.SmartcardInfo;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.flow.operation.CoreOperationStatus;
+import cz.sefira.obelisk.util.DesktopUtils;
 import cz.sefira.obelisk.util.ResourceUtils;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.application.Platform;
@@ -97,13 +98,7 @@ public class UnavailableConfigController extends AbstractUIOperationController<V
               final Hyperlink link = new Hyperlink("URL");
               link.setBorder(Border.EMPTY);
               link.setPadding(new Insets(1, 0, 0, 5));
-              link.setOnAction(a -> {
-                try {
-                  Desktop.getDesktop().browse(new URI(info.getDownloadUrl()));
-                } catch (IOException | URISyntaxException e) {
-                  LOG.error(e.getMessage(), e);
-                }
-              });
+              link.setOnAction(a -> DesktopUtils.browse(info.getDownloadUrl()));
 
               HBox hBox = new HBox(driverUrl, link);
               hBox.setPadding(new Insets(0,0,0,15));

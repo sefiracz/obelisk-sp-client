@@ -126,6 +126,9 @@ public class KeychainSignatureTokenAdapter implements SignatureTokenConnection {
       value.setValue(signatureValue);
       return value;
     } catch (CancelledOperationException e) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(e.getMessage(), e);
+      }
       throw e;
     } catch (Exception e) {
       throw new DSSException(e);

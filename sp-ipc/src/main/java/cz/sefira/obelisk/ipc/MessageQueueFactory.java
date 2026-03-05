@@ -31,7 +31,7 @@ import cz.sefira.obelisk.api.AppConfig;
 public class MessageQueueFactory {
 
   public static MessageQueue getInstance(AppConfig appConfig) {
-    return new FileMessageQueue(appConfig);
+    return new FileMessageQueue();
   }
 
 }

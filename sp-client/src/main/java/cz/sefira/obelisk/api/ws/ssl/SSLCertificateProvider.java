@@ -120,6 +120,7 @@ public class SSLCertificateProvider {
       addToRuntimeTruststore(chain);
       // trusted chain found - add to cache if needed
       if (addToCache) {
+        logger.info("Added trusted certificate chain to permanent store.");
         cache.add(chain);
       }
       // used as trusted chain
@@ -142,18 +143,23 @@ public class SSLCertificateProvider {
     unregisterSocketFactory();
   }
 
-  public Registry<ConnectionSocketFactory> getSocketFactory()
-      throws KeyStoreException, KeyManagementException, NoSuchAlgorithmException {
-    if (socketFactory != null) {
-      return socketFactory;
-    }
-    logger.info("Creating new socket factory");
+  public SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
     TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     tmf.init(trustStore);
     delegatedTrustManager = new DelegatedTrustManager((X509ExtendedTrustManager) tmf.getTrustManagers()[0]);
     TrustManager[] trustManagers = {delegatedTrustManager};
     SSLContext sc = SSLContext.getInstance("TLS");
     sc.init(null, trustManagers, new SecureRandom());
+    return sc;
+  }
+
+  public Registry<ConnectionSocketFactory> getSocketFactory()
+      throws KeyStoreException, KeyManagementException, NoSuchAlgorithmException {
+    if (socketFactory != null) {
+      return socketFactory;
+    }
+    logger.info("Creating new socket factory");
+    SSLContext sc = getSSLContext();
     SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sc, new DefaultHostnameVerifier());
     socketFactory = RegistryBuilder.<ConnectionSocketFactory>create()
         .register("http", PlainConnectionSocketFactory.getSocketFactory())

@@ -13,6 +13,7 @@
  */
 package cz.sefira.obelisk.view;
 
+import cz.sefira.obelisk.util.annotation.NotNull;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
@@ -134,7 +135,7 @@ public class DialogMessage {
     return doNotShowCheckbox;
   }
 
-  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, boolean doNotShowSelected, String dialogId) {
+  public void setShowDoNotShowCheckbox(boolean doNotShowCheckbox, boolean doNotShowSelected, @NotNull String dialogId) {
     if(dialogId == null || dialogId.isEmpty())
       throw new IllegalArgumentException("DialogID must have proper value");
     this.doNotShowCheckbox = doNotShowCheckbox;

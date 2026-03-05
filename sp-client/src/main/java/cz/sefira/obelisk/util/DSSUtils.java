@@ -60,6 +60,8 @@ public class DSSUtils {
     if(exception.contains("CKR_PIN_INCORRECT") || exception.contains("CKR_PIN_LEN_RANGE")
         || exception.contains("PIN is incorrect")) {
       msg = "key.selection.error.pin.incorrect";
+    } else if (exception.contains("CKR_PIN_INVALID")) {
+      msg = "key.selection.error.pin.invalid";
     } else if (exception.contains("keystore password was incorrect")) {
       msg = "key.selection.error.password.incorrect";
     } else if(e.getCause() instanceof UnrecoverableKeyException) {

@@ -68,7 +68,7 @@ public class IAIKPkcs11SignatureTokenAdapter implements SignatureTokenConnection
     this.detectedCard = detectedCard;
     logger.info("Initializing token ATR: "+detectedCard.getAtr() + " with module library: " + pkcs11Path);
     this.callback = callback;
-    this.reauthCallback = api.getDisplay().getReauthCallback();
+    this.reauthCallback = api.getDisplay().getReauthCallback(detectedCard);
     try {
       // check state
       if(!detectedCard.isInitialized()) {
