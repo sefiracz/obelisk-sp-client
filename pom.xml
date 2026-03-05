@@ -40,6 +40,7 @@
     <zip4j.version>2.11.5</zip4j.version>
     <proxy.vole.version>1.1.0</proxy.vole.version>
     <windpapi4j.version>2.1.0</windpapi4j.version>
+    <jlibnotify.version>1.2.3</jlibnotify.version>
     <jcef.version>135.0.20</jcef.version>
     <eclipse-swt.version>3.130.0</eclipse-swt.version>
     <eclipse-swt-win32-x86_64-obelisk.version>3.130.999</eclipse-swt-win32-x86_64-obelisk.version>
@@ -184,6 +185,13 @@
         <artifactId>MSCryptoStore</artifactId>
         <version>1.0</version>
         <scope>provided</scope>
+      </dependency>
+
+      <!-- JLibNotify -->
+      <dependency>
+        <groupId>es.blackleg</groupId>
+        <artifactId>jlibnotify</artifactId>
+        <version>${jlibnotify.version}</version>
       </dependency>
 
       <!-- Bouncycastle -->

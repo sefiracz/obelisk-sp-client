@@ -397,6 +397,10 @@
       <artifactId>proxy-vole</artifactId>
     </dependency>
     <dependency>
+      <groupId>es.blackleg</groupId>
+      <artifactId>jlibnotify</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.zxing</groupId>
       <artifactId>javase</artifactId>
     </dependency>
