@@ -14,6 +14,10 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -32,7 +36,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
@@ -43,6 +50,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -68,6 +77,9 @@ public class UnsupportedProductController extends AbstractUIOperationController<
   private TextArea details;
 
   @FXML
+  private ImageView qrcode;
+
+  @FXML
   private Button advancedSetup;
 
   @FXML
@@ -81,6 +93,7 @@ public class UnsupportedProductController extends AbstractUIOperationController<
 
   private PlatformAPI api;
   private DetectedCard card;
+  private QRCodeWriter qrCodeWriter;
 
   @Override
   public void initialize(final URL location, final ResourceBundle resources) {
@@ -107,6 +120,16 @@ public class UnsupportedProductController extends AbstractUIOperationController<
         logger.error("Send device report failed: "+ex.getMessage(), ex);
       }
     });
+    qrCodeWriter = new QRCodeWriter();
+    WritableImage writableImage = new WritableImage(250, 250);
+    PixelWriter pw = writableImage.getPixelWriter();
+    for (int x = 0; x < 250; x++) {
+      for (int y = 0; y < 250; y++) {
+        Color c = ((x / 25) + (y / 25)) % 2 == 0 ? Color.MAGENTA : Color.BLACK;
+        pw.setColor(x, y, c);
+      }
+    }
+    qrcode.setImage(writableImage);
   }
 
   @Override
@@ -163,9 +186,28 @@ public class UnsupportedProductController extends AbstractUIOperationController<
       String message = MessageFormat.format(ResourceUtils.getBundle().getString("unsupported.mail.body.template"),
           atr, installedDrivers);
 
+      this.details.textProperty().addListener((observable, oldValue, newValue) -> {
+        Image image = generateQRCode(newValue);
+        if (image != null) {
+          qrcode.setImage(image);
+        }
+      });
       this.details.setText(message);
     });
 
     setLogoBackground(messageBox);
+  }
+
+  private Image generateQRCode(String text) {
+    try {
+      BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 250, 250);
+      try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", out);
+        return new Image(new ByteArrayInputStream(out.toByteArray()));
+      }
+    } catch (Exception e) {
+      logger.error("Error while generating QR code: "+e.getMessage());
+      return null;
+    }
   }
 }

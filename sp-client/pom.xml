@@ -10,7 +10,7 @@
   <parent>
     <groupId>cz.sefira.obelisk</groupId>
     <artifactId>obelisk-sp-client</artifactId>
-    <version>2.0.11</version>
+    <version>2.0.12</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -395,6 +395,10 @@
     <dependency>
       <groupId>org.bidib.com.github.markusbernhardt</groupId>
       <artifactId>proxy-vole</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>javase</artifactId>
     </dependency>
 
     <!-- logging -->
