@@ -23,9 +23,9 @@
 
     <!-- libs version -->
     <javafx.version>17.0.8</javafx.version>
-    <iaik.pkcs11.wrapper.version>1.6.2</iaik.pkcs11.wrapper.version>
+    <iaik.pkcs11.wrapper.version>1.8.0</iaik.pkcs11.wrapper.version>
     <apache-httpclient5.version>5.2.1</apache-httpclient5.version>
-    <bouncycastle.version>1.77</bouncycastle.version>
+    <bouncycastle.version>1.83</bouncycastle.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.18.0</commons-io.version>
     <commons-codec.version>1.15</commons-codec.version>

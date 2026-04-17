@@ -30,9 +30,6 @@ import cz.sefira.obelisk.dss.x509.CertificateToken;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 /**
  * Empty wrapper for entry without a private key
@@ -60,16 +57,7 @@ public class EmptyKeyEntry implements DSSPrivateKeyEntry {
   @Override
   public EncryptionAlgorithm getEncryptionAlgorithm() throws DSSException {
     PublicKey publicKey = certificateToken.getCertificate().getPublicKey();
-    if (publicKey instanceof RSAPublicKey) {
-      return EncryptionAlgorithm.RSA;
-    }
-    else if (publicKey instanceof DSAPublicKey) {
-      return EncryptionAlgorithm.DSA;
-    }
-    else {
-      return publicKey instanceof ECPublicKey ? EncryptionAlgorithm.ECDSA :
-          EncryptionAlgorithm.forName(publicKey.getAlgorithm());
-    }
+    return EncryptionAlgorithm.forValue(publicKey.getAlgorithm());
   }
 
   public String getAlias() {
