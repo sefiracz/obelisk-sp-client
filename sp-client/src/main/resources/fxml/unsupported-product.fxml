@@ -17,13 +17,17 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.TextFlow?>
-<BorderPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx"
+<?import javafx.scene.image.ImageView?>
+<BorderPane id="AnchorPane" prefWidth="870.0" prefHeight="650.0" xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml" fx:controller="cz.sefira.obelisk.view.ui.UnsupportedProductController">
 
   <center>
     <VBox fx:id="messageBox" styleClass="form-container" BorderPane.alignment="CENTER">
-      <TextFlow styleClass="message" fx:id="message"/>
-      <TextArea fx:id="details" wrapText="true" styleClass="device-report" minHeight="280" />
+      <HBox>
+        <TextFlow styleClass="message" fx:id="message"/>
+        <ImageView fx:id="qrcode" fitWidth="250" fitHeight="250" />
+      </HBox>
+      <TextArea fx:id="details" wrapText="true" styleClass="device-report" minHeight="100" VBox.vgrow="ALWAYS"/>
     </VBox>
   </center>
 
