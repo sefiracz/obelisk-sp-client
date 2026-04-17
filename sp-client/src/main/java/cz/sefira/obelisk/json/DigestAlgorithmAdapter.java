@@ -38,7 +38,7 @@ public class DigestAlgorithmAdapter implements JsonSerializer<DigestAlgorithm>, 
       throws JsonParseException {
     DigestAlgorithmIdentifierFinder hashAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
     AlgorithmIdentifier digestAlgorithmIdentifier = hashAlgorithmFinder.find(json.getAsString());
-    return DigestAlgorithm.forOID(digestAlgorithmIdentifier.getAlgorithm().getId());
+    return DigestAlgorithm.forValue(digestAlgorithmIdentifier.getAlgorithm().getId());
   }
 
   @Override

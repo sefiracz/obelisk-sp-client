@@ -55,8 +55,8 @@ public class IAIKPrivateKeyEntry implements DSSPrivateKeyEntry {
 
     certificate = new CertificateToken(cert);
 
-    String encryptionAlgo = certificate.getPublicKey().getAlgorithm(); // RSA, EC, DSA
-    this.encryptionAlgorithm = EncryptionAlgorithm.forName(encryptionAlgo);
+    String encryptionAlgo = certificate.getPublicKey().getAlgorithm(); // RSA, EC, DSA, ML-DSA
+    this.encryptionAlgorithm = EncryptionAlgorithm.forValue(encryptionAlgo);
 
     certificateChain = new CertificateToken[]{ certificate };
   }
