@@ -66,6 +66,8 @@ import java.util.Set;
 public class UnsupportedProductController extends AbstractUIOperationController<Void> implements Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(UnsupportedProductController.class.getName());
+  private static final int QR_CODE_WIDTH = 250;
+  private static final int QR_CODE_HEIGHT = 250;
 
   @FXML
   private VBox messageBox;
@@ -121,15 +123,7 @@ public class UnsupportedProductController extends AbstractUIOperationController<
       }
     });
     qrCodeWriter = new QRCodeWriter();
-    WritableImage writableImage = new WritableImage(250, 250);
-    PixelWriter pw = writableImage.getPixelWriter();
-    for (int x = 0; x < 250; x++) {
-      for (int y = 0; y < 250; y++) {
-        Color c = ((x / 25) + (y / 25)) % 2 == 0 ? Color.MAGENTA : Color.BLACK;
-        pw.setColor(x, y, c);
-      }
-    }
-    qrcode.setImage(writableImage);
+    qrcode.setImage(placeholder());
   }
 
   @Override
@@ -200,7 +194,7 @@ public class UnsupportedProductController extends AbstractUIOperationController<
 
   private Image generateQRCode(String text) {
     try {
-      BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 250, 250);
+      BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT);
       try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", out);
         return new Image(new ByteArrayInputStream(out.toByteArray()));
@@ -209,5 +203,17 @@ public class UnsupportedProductController extends AbstractUIOperationController<
       logger.error("Error while generating QR code: "+e.getMessage());
       return null;
     }
+  }
+
+  private Image placeholder() {
+    WritableImage placeholder = new WritableImage(QR_CODE_WIDTH, QR_CODE_HEIGHT);
+    PixelWriter pw = placeholder.getPixelWriter();
+    for (int x = 0; x < QR_CODE_WIDTH; x++) {
+      for (int y = 0; y < QR_CODE_HEIGHT; y++) {
+        Color c = ((x / (25)) + (y / 25)) % 2 == 0 ? Color.MAGENTA : Color.BLACK;
+        pw.setColor(x, y, c);
+      }
+    }
+    return placeholder;
   }
 }
