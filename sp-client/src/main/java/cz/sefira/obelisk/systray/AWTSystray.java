@@ -41,8 +41,6 @@ public class AWTSystray extends AbstractSystray {
 
   private static final Logger logger = LoggerFactory.getLogger(AWTSystray.class.getName());
 
-  private TrayIcon trayIcon;
-
   public AWTSystray(PlatformAPI api, String tooltip, URL icon) {
     super(api, tooltip, icon);
   }
@@ -60,7 +58,7 @@ public class AWTSystray extends AbstractSystray {
       }
     }
     final Image image = Toolkit.getDefaultToolkit().getImage(icon);
-    trayIcon = new TrayIcon(image, tooltip, popup);
+    TrayIcon trayIcon = new TrayIcon(image, tooltip, popup);
     trayIcon.setImageAutoSize(true);
     trayIcon.addMouseListener(new MouseAdapter() {
       @Override
