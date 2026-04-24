@@ -26,7 +26,9 @@ package cz.sefira.obelisk;
 import cz.sefira.obelisk.api.*;
 import cz.sefira.obelisk.api.notification.EventNotification;
 import cz.sefira.obelisk.api.notification.Notification;
+import cz.sefira.obelisk.api.notification.NotificationServiceFactory;
 import cz.sefira.obelisk.api.notification.NotificationType;
+import cz.sefira.obelisk.api.notification.NotificationService;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.systray.*;
 import cz.sefira.obelisk.util.ResourceUtils;
@@ -40,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
 
 /**
  * description
@@ -48,13 +49,10 @@ import java.util.concurrent.TimeUnit;
 public class Systray {
 
   private static final Logger logger = LoggerFactory.getLogger(Systray.class.getName());
-  private static final long DISPLAY_PERIOD = TimeUnit.SECONDS.toMillis(2);
 
   private final AbstractSystray systray;
   private final PlatformAPI api;
-
-  private long lastShown = 0;
-  private boolean showing = false;
+  private final NotificationService notificationService;
 
   public Systray(PlatformAPI api) {
     this.api = api;
@@ -77,6 +75,7 @@ public class Systray {
       };
       systray.spawnTray(r, items);
     }
+    this.notificationService = NotificationServiceFactory.get(api);
   }
 
   public void pushNotification(@NotNull Notification notification) {
@@ -89,14 +88,10 @@ public class Systray {
     // show notification
     switch (showNotification) {
       case NATIVE:
-        systray.pushNotification(notification);
+        notificationService.pushNativeNotification(notification);
         break;
       case INTEGRATED:
-        waitForLast(notification); // wait if last notification before closing wasn't displayed for longer period
-        // push notification
-        showing = true;
-        lastShown = System.currentTimeMillis();
-        api.pushIntegratedNotification(notification);
+        notificationService.pushIntegratedNotification(notification);
         break;
       case OFF:
       default:
@@ -108,15 +103,4 @@ public class Systray {
     systray.refreshLabels();
   }
 
-  private void waitForLast(Notification notification) {
-    long displayTime = System.currentTimeMillis() - lastShown;
-    if (showing && notification.isClose() && (displayTime < DISPLAY_PERIOD)) {
-      try {
-        showing = false;
-        Thread.sleep(DISPLAY_PERIOD - displayTime); // show last notification for longer
-      } catch (InterruptedException e) {
-        logger.error(e.getMessage(), e);
-      }
-    }
-  }
 }

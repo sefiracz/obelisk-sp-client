@@ -23,9 +23,6 @@ package cz.sefira.obelisk.systray;
  * Author: hlavnicka
  */
 
-import cz.sefira.obelisk.api.AppConfig;
-import cz.sefira.obelisk.api.notification.MessageType;
-import cz.sefira.obelisk.api.notification.Notification;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.util.ResourceUtils;
 import javafx.application.Platform;
@@ -44,8 +41,6 @@ public class AWTSystray extends AbstractSystray {
 
   private static final Logger logger = LoggerFactory.getLogger(AWTSystray.class.getName());
 
-  private TrayIcon trayIcon;
-
   public AWTSystray(PlatformAPI api, String tooltip, URL icon) {
     super(api, tooltip, icon);
   }
@@ -63,7 +58,7 @@ public class AWTSystray extends AbstractSystray {
       }
     }
     final Image image = Toolkit.getDefaultToolkit().getImage(icon);
-    trayIcon = new TrayIcon(image, tooltip, popup);
+    TrayIcon trayIcon = new TrayIcon(image, tooltip, popup);
     trayIcon.setImageAutoSize(true);
     trayIcon.addMouseListener(new MouseAdapter() {
       @Override
@@ -82,12 +77,6 @@ public class AWTSystray extends AbstractSystray {
     }
   }
 
-  @Override
-  public void pushNotification(Notification notification) {
-    TrayIcon.MessageType type = getAWTMessageType(notification.getType());
-    trayIcon.displayMessage(AppConfig.get().getApplicationName(), notification.getMessageText(), type);
-  }
-
   public void refreshLabels() {
     TrayIcon[] trayIcons = SystemTray.getSystemTray().getTrayIcons();
     if (trayIcons != null && trayIcons.length > 0) {
@@ -97,15 +86,6 @@ public class AWTSystray extends AbstractSystray {
         item.setLabel(ResourceUtils.getBundle().getString(item.getName()));
       }
     }
-  }
-
-  private TrayIcon.MessageType getAWTMessageType(MessageType messageType) {
-    return switch (messageType) {
-      case WARNING -> TrayIcon.MessageType.WARNING;
-      case ERROR -> TrayIcon.MessageType.ERROR;
-      case INFO -> TrayIcon.MessageType.INFO;
-      default -> TrayIcon.MessageType.NONE;
-    };
   }
 
 }
