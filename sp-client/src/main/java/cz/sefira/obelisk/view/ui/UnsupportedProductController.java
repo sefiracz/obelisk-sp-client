@@ -1,6 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
- * © SEFIRA spol. s r.o., 2020-2021
+ * © SEFIRA spol. s r.o., 2020-2026
  * <p>
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -15,6 +15,7 @@
 package cz.sefira.obelisk.view.ui;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -54,6 +55,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -180,8 +182,9 @@ public class UnsupportedProductController extends AbstractUIOperationController<
       String message = MessageFormat.format(ResourceUtils.getBundle().getString("unsupported.mail.body.template"),
           atr, installedDrivers);
 
+      String staticText = atr+"\n"+installed;
       this.details.textProperty().addListener((observable, oldValue, newValue) -> {
-        Image image = generateQRCode(newValue);
+        Image image = generateQRCode(staticText, newValue);
         if (image != null) {
           qrcode.setImage(image);
         }
@@ -192,9 +195,10 @@ public class UnsupportedProductController extends AbstractUIOperationController<
     setLogoBackground(messageBox);
   }
 
-  private Image generateQRCode(String text) {
+  private Image generateQRCode(String staticText, String text) {
     try {
-      BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT);
+      BitMatrix bitMatrix = qrCodeWriter.encode(staticText+"\n"+text,
+          BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT, Map.of(EncodeHintType.CHARACTER_SET, "UTF-8"));
       try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", out);
         return new Image(new ByteArrayInputStream(out.toByteArray()));
