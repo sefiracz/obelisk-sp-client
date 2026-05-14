@@ -20,6 +20,7 @@ import cz.sefira.obelisk.token.keystore.ConfiguredKeystore;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
 import cz.sefira.obelisk.flow.StageHelper;
 import cz.sefira.obelisk.util.TextUtils;
+import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -64,7 +65,10 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		EventHandler<ActionEvent> handler = event -> signalEnd(password.getText().toCharArray());
+		EventHandler<ActionEvent> handler = event -> {
+			BusyIndicator.getRawInstance().show(true);
+			signalEnd(password.getText().toCharArray());
+		};
 		ok.setOnAction(handler);
 		password.setOnAction(handler);
 		cancel.setOnAction(e -> signalUserCancel());
@@ -73,6 +77,7 @@ public class PasswordInputController extends AbstractUIOperationController<char[
 
 	@Override
 	public void init(Object... params) {
+		BusyIndicator.getRawInstance().close();
     final String passwordPrompt = (String) params[0];
 		if(params.length > 1) {
 			product = (AbstractProduct) params[1];
