@@ -88,8 +88,12 @@
                         <exclude>META-INF/*</exclude>
                         <!-- IAIK PKCS11 Wrapper unused natives -->
                         <exclude>natives/unix/linux-x86/**</exclude>
+                        <exclude>natives/unix/linux-arm64/**</exclude>
+                        <exclude>natives/unix/linux-riscv64/**</exclude>
                         <exclude>natives/unix/solaris-*/**</exclude>
+                        <exclude>natives/unix/macOS/**</exclude>
                         <exclude>natives/windows/win-x86/**</exclude>
+                        <exclude>natives/windows/win-arm64/**</exclude>
                         <!-- JNA unused natives -->
                         <exclude>com/sun/jna/*-x86/**</exclude>
                         <exclude>com/sun/jna/sunos-*/**</exclude>
@@ -165,7 +169,8 @@
                         <!-- IAIK PKCS11 Wrapper unused natives -->
                         <exclude>natives/unix/linux-*/**</exclude>
                         <exclude>natives/unix/solaris-*/**</exclude>
-                        <exclude>natives/unix/macosx_universal/debug/**</exclude>
+                        <exclude>natives/unix/macOS/universal/**</exclude>
+                        <exclude>natives/unix/macOS/arm64/**</exclude>
                         <exclude>natives/windows/**</exclude>
                         <!-- JNA unused natives -->
                         <exclude>com/sun/jna/*-x86/**</exclude>
