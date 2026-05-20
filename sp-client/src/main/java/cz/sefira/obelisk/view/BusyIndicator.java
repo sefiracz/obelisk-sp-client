@@ -58,14 +58,16 @@ public class BusyIndicator implements Closeable {
   private Stage primaryStage = null;
   private Stage stage = null;
 
+  private final ProgressIndicator indicator;
+
   private BusyIndicator() {
+    indicator = new ProgressIndicator();
     Platform.runLater(() -> {
       // toggle on busy indicator
-      ProgressIndicator indicator = new ProgressIndicator();
       indicator.setPrefSize(150, 150);
       indicator.setMinHeight(150);
       indicator.setMinWidth(150);
-      indicator.setStyle("-fx-progress-color: rgba(0, 0, 0, 0.75)");
+      indicator.setStyle("-fx-progress-color: rgba(0, 0, 0, 0)");
       VBox progressIndicator = new VBox(indicator);
       progressIndicator.setAlignment(Pos.CENTER);
       progressIndicator.setStyle("-fx-background-color: rgba(0, 0, 0, 0)");
@@ -75,14 +77,14 @@ public class BusyIndicator implements Closeable {
       scene.setFill(Color.TRANSPARENT);
       // primary utility stage (does not show busy indicator window on taskbar)
       primaryStage = new Stage();
-      primaryStage.setTitle("Busy Indicator");
+      primaryStage.setTitle(AppConfig.get().getApplicationName());
       primaryStage.initStyle(StageStyle.UTILITY);
       primaryStage.initModality(Modality.NONE);
       primaryStage.setWidth(5);
       primaryStage.setHeight(30);
       primaryStage.setOpacity(0);
-      primaryStage.setX(-1000);
-      primaryStage.setY(-1000);
+      primaryStage.setX(-90000);
+      primaryStage.setY(-90000);
       Scene s = new Scene(new BorderPane(),1, 1);
       s.setFill(Color.TRANSPARENT);
       primaryStage.setScene(s);
@@ -90,10 +92,10 @@ public class BusyIndicator implements Closeable {
       // stage
       stage = new Stage();
       stage.initOwner(primaryStage);
-      stage.setX(-1000);
-      stage.setY(-1000);
+      stage.setX(-90000);
+      stage.setY(-90000);
       stage.setScene(scene);
-      stage.setTitle(AppConfig.get().getApplicationName()+" busy indicator");
+      stage.setTitle(AppConfig.get().getApplicationName());
       stage.initStyle(StageStyle.TRANSPARENT);
       stage.initModality(Modality.NONE);
       stage.getIcons().add(new Image(AppConfig.get().getIconLogoStream()));
@@ -119,6 +121,15 @@ public class BusyIndicator implements Closeable {
         }
       });
     }
+  }
+
+  /**
+   * Only returns BusyIndicator singleton instance handle, without showing it or change its behavior.
+   *
+   * @return Closable instance
+   */
+  public static synchronized BusyIndicator getRawInstance() {
+    return getInstance(false, false);
   }
 
   /**
@@ -160,11 +171,17 @@ public class BusyIndicator implements Closeable {
     return instance;
   }
 
-  private void show(boolean alwaysOnTop) {
+  public void show(boolean alwaysOnTop) {
     Platform.runLater(() -> {
       final Rectangle2D screenResolution = Screen.getPrimary().getBounds();
       stage.setX((screenResolution.getWidth() / 2) - (scene.getWidth() / 2));
       stage.setY((screenResolution.getHeight() / 2) - (scene.getHeight() / 2));
+      stage.setWidth(150);
+      stage.setHeight(150);
+      indicator.setPrefSize(150, 150);
+      indicator.setMinHeight(150);
+      indicator.setMinWidth(150);
+      indicator.setStyle("-fx-progress-color: rgba(0, 0, 0, 0.75)");
       stage.setAlwaysOnTop(alwaysOnTop);
     });
   }
@@ -172,8 +189,14 @@ public class BusyIndicator implements Closeable {
   @Override
   public void close() {
     Platform.runLater(() -> {
-      stage.setX(-1000);
-      stage.setY(-1000);
+      indicator.setStyle("-fx-progress-color: rgba(0, 0, 0, 0)");
+      indicator.setPrefSize(1, 1);
+      indicator.setMinHeight(1);
+      indicator.setMinWidth(1);
+      stage.setWidth(1);
+      stage.setHeight(1);
+      stage.setX(-90000);
+      stage.setY(-90000);
     });
   }
 }

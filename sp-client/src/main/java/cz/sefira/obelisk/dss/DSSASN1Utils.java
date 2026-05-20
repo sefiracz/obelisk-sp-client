@@ -34,6 +34,7 @@ import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
+import org.bouncycastle.jcajce.provider.asymmetric.mldsa.BCMLDSAPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -168,6 +169,19 @@ public final class DSSASN1Utils {
 	}
 
 	public static int getPublicKeySize(final PublicKey publicKey) {
+		if (publicKey instanceof BCMLDSAPublicKey mldsaPublicKey) {
+			return switch (EncryptionAlgorithm.forValue(mldsaPublicKey.getAlgorithm())) {
+        case ML_DSA_44, ML_DSA_44_SHA512 -> 10_496;
+        case ML_DSA_65, ML_DSA_65_SHA512 -> 15_616;
+        case ML_DSA_87, ML_DSA_87_SHA512 -> 20_736;
+        default -> mldsaPublicKey.getPublicData().length * 8;
+      };
+		} else {
+			return getKeySize(publicKey);
+		}
+	}
+
+	private static int getKeySize(final PublicKey publicKey) {
 		int publicKeySize = -1;
 		if (publicKey instanceof RSAPublicKey rsaPublicKey) {
 			publicKeySize = rsaPublicKey.getModulus().bitLength();

@@ -6,7 +6,7 @@
 
   <groupId>cz.sefira.obelisk</groupId>
   <artifactId>obelisk-sp-client</artifactId>
-  <version>2.0.11</version>
+  <version>2.0.12</version>
   <packaging>pom</packaging>
   <name>OBELISK Signing Portal Client</name>
 
@@ -23,9 +23,9 @@
 
     <!-- libs version -->
     <javafx.version>17.0.8</javafx.version>
-    <iaik.pkcs11.wrapper.version>1.6.2</iaik.pkcs11.wrapper.version>
+    <iaik.pkcs11.wrapper.version>1.8.0</iaik.pkcs11.wrapper.version>
     <apache-httpclient5.version>5.2.1</apache-httpclient5.version>
-    <bouncycastle.version>1.77</bouncycastle.version>
+    <bouncycastle.version>1.83</bouncycastle.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-io.version>2.18.0</commons-io.version>
     <commons-codec.version>1.15</commons-codec.version>
@@ -40,9 +40,11 @@
     <zip4j.version>2.11.5</zip4j.version>
     <proxy.vole.version>1.1.0</proxy.vole.version>
     <windpapi4j.version>2.1.0</windpapi4j.version>
+    <jlibnotify.version>1.2.3</jlibnotify.version>
     <jcef.version>135.0.20</jcef.version>
     <eclipse-swt.version>3.130.0</eclipse-swt.version>
     <eclipse-swt-win32-x86_64-obelisk.version>3.130.999</eclipse-swt-win32-x86_64-obelisk.version>
+    <qrcode-zxing.version>3.4.1</qrcode-zxing.version>
     <!-- test libs version -->
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.13.2</junit.version>
@@ -185,6 +187,13 @@
         <scope>provided</scope>
       </dependency>
 
+      <!-- JLibNotify -->
+      <dependency>
+        <groupId>es.blackleg</groupId>
+        <artifactId>jlibnotify</artifactId>
+        <version>${jlibnotify.version}</version>
+      </dependency>
+
       <!-- Bouncycastle -->
       <dependency>
         <groupId>org.bouncycastle</groupId>
@@ -271,6 +280,11 @@
         <groupId>org.bidib.com.github.markusbernhardt</groupId>
         <artifactId>proxy-vole</artifactId>
         <version>${proxy.vole.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.zxing</groupId>
+        <artifactId>javase</artifactId>
+        <version>${qrcode-zxing.version}</version>
       </dependency>
 
       <!-- Logging -->

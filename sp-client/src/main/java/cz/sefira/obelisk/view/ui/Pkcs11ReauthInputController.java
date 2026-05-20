@@ -29,6 +29,7 @@ import cz.sefira.obelisk.generic.SessionManager;
 import cz.sefira.obelisk.prefs.PreferencesFactory;
 import cz.sefira.obelisk.prefs.UserPreferences;
 import cz.sefira.obelisk.token.pkcs11.DetectedCard;
+import cz.sefira.obelisk.view.BusyIndicator;
 import cz.sefira.obelisk.view.core.AbstractUIOperationController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -81,6 +82,7 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     EventHandler<ActionEvent> handler = event -> {
+      BusyIndicator.getRawInstance().show(true);
       GuardedString reauth = new GuardedString(password.getText().toCharArray());
       UserPreferences prefs = PreferencesFactory.getInstance(appConfig);
       boolean cacheEnabled = prefs.getCacheDuration() != null && prefs.getCacheDuration() > 0;
@@ -98,6 +100,7 @@ public class Pkcs11ReauthInputController extends AbstractUIOperationController<G
 
   @Override
   public void init(Object... params) {
+    BusyIndicator.getRawInstance().close();
     this.appConfig = (AppConfig) params[0];
     String titleKey = "reauth.title.qpin";
     String promptKey = "reauth.dialog.label";

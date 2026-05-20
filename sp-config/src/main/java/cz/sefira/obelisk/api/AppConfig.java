@@ -126,7 +126,7 @@ public class AppConfig {
     this.setWindowsInstalledPath(
         props.getProperty(WINDOWS_INSTALLED_PATH, "C:\\Program Files\\SEFIRA\\OBELISK Signing Portal Client v2\\"));
 
-    this.setTicketUrl(props.getProperty(TICKET_URL, "ob-support@sefira.cz"));
+    this.setTicketUrl(props.getProperty(TICKET_URL, "support@sefira.com"));
     this.setEnableIncidentReport(Boolean.parseBoolean(props.getProperty(ENABLE_INCIDENT_REPORT, "false")));
   }
 

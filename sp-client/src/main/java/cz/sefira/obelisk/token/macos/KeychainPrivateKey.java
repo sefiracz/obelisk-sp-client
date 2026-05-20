@@ -49,8 +49,8 @@ public class KeychainPrivateKey implements DSSPrivateKeyEntry {
     this.alias = alias;
     this.certificate = new CertificateToken((X509Certificate) keyStore.getCertificate(alias));
     this.certificateChain = new CertificateToken[]{ certificate };
-    String encryptionAlgo = certificate.getPublicKey().getAlgorithm(); // RSA, EC, DSA
-    this.encryptionAlgorithm = EncryptionAlgorithm.forName(encryptionAlgo);
+    String encryptionAlgo = certificate.getPublicKey().getAlgorithm(); // RSA, EC, DSA, ML-DSA
+    this.encryptionAlgorithm = EncryptionAlgorithm.forValue(encryptionAlgo);
   }
 
   /**

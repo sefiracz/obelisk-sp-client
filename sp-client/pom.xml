@@ -10,7 +10,7 @@
   <parent>
     <groupId>cz.sefira.obelisk</groupId>
     <artifactId>obelisk-sp-client</artifactId>
-    <version>2.0.11</version>
+    <version>2.0.12</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -88,8 +88,12 @@
                         <exclude>META-INF/*</exclude>
                         <!-- IAIK PKCS11 Wrapper unused natives -->
                         <exclude>natives/unix/linux-x86/**</exclude>
+                        <exclude>natives/unix/linux-arm64/**</exclude>
+                        <exclude>natives/unix/linux-riscv64/**</exclude>
                         <exclude>natives/unix/solaris-*/**</exclude>
+                        <exclude>natives/unix/macOS/**</exclude>
                         <exclude>natives/windows/win-x86/**</exclude>
+                        <exclude>natives/windows/win-arm64/**</exclude>
                         <!-- JNA unused natives -->
                         <exclude>com/sun/jna/*-x86/**</exclude>
                         <exclude>com/sun/jna/sunos-*/**</exclude>
@@ -165,7 +169,8 @@
                         <!-- IAIK PKCS11 Wrapper unused natives -->
                         <exclude>natives/unix/linux-*/**</exclude>
                         <exclude>natives/unix/solaris-*/**</exclude>
-                        <exclude>natives/unix/macosx_universal/debug/**</exclude>
+                        <exclude>natives/unix/macOS/universal/**</exclude>
+                        <exclude>natives/unix/macOS/arm64/**</exclude>
                         <exclude>natives/windows/**</exclude>
                         <!-- JNA unused natives -->
                         <exclude>com/sun/jna/*-x86/**</exclude>
@@ -395,6 +400,14 @@
     <dependency>
       <groupId>org.bidib.com.github.markusbernhardt</groupId>
       <artifactId>proxy-vole</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>es.blackleg</groupId>
+      <artifactId>jlibnotify</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>javase</artifactId>
     </dependency>
 
     <!-- logging -->

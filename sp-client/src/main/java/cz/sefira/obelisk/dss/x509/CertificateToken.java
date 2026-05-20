@@ -101,7 +101,7 @@ public class CertificateToken extends Token {
 		this.x509Certificate = x509Certificate;
 		this.issuerX500Principal = x509Certificate.getIssuerX500Principal();
 		// The Algorithm OID is used and not the name {@code x509Certificate.getSigAlgName()}
-		this.signatureAlgorithm = SignatureAlgorithm.forOID(x509Certificate.getSigAlgOID());
+		this.signatureAlgorithm = SignatureAlgorithm.forValue(x509Certificate.getSigAlgOID());
 		this.digestAlgorithm = signatureAlgorithm.getDigestAlgorithm();
 		this.encryptionAlgorithm = signatureAlgorithm.getEncryptionAlgorithm();
 	}

@@ -1,6 +1,6 @@
 /**
  * © Nowina Solutions, 2015-2015
- * © SEFIRA spol. s r.o., 2020-2021
+ * © SEFIRA spol. s r.o., 2020-2026
  * <p>
  * Concédée sous licence EUPL, version 1.1 ou – dès leur approbation par la Commission européenne - versions ultérieures de l’EUPL (la «Licence»).
  * Vous ne pouvez utiliser la présente œuvre que conformément à la Licence.
@@ -14,6 +14,11 @@
  */
 package cz.sefira.obelisk.view.ui;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import cz.sefira.obelisk.api.AppConfig;
 import cz.sefira.obelisk.api.PlatformAPI;
 import cz.sefira.obelisk.flow.StageHelper;
@@ -32,7 +37,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
@@ -43,8 +51,11 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -57,6 +68,8 @@ import java.util.Set;
 public class UnsupportedProductController extends AbstractUIOperationController<Void> implements Initializable {
 
   private static final Logger logger = LoggerFactory.getLogger(UnsupportedProductController.class.getName());
+  private static final int QR_CODE_WIDTH = 250;
+  private static final int QR_CODE_HEIGHT = 250;
 
   @FXML
   private VBox messageBox;
@@ -66,6 +79,9 @@ public class UnsupportedProductController extends AbstractUIOperationController<
 
   @FXML
   private TextArea details;
+
+  @FXML
+  private ImageView qrcode;
 
   @FXML
   private Button advancedSetup;
@@ -81,6 +97,7 @@ public class UnsupportedProductController extends AbstractUIOperationController<
 
   private PlatformAPI api;
   private DetectedCard card;
+  private QRCodeWriter qrCodeWriter;
 
   @Override
   public void initialize(final URL location, final ResourceBundle resources) {
@@ -107,6 +124,8 @@ public class UnsupportedProductController extends AbstractUIOperationController<
         logger.error("Send device report failed: "+ex.getMessage(), ex);
       }
     });
+    qrCodeWriter = new QRCodeWriter();
+    qrcode.setImage(placeholder());
   }
 
   @Override
@@ -163,9 +182,42 @@ public class UnsupportedProductController extends AbstractUIOperationController<
       String message = MessageFormat.format(ResourceUtils.getBundle().getString("unsupported.mail.body.template"),
           atr, installedDrivers);
 
+      String staticText = atr+"\n"+installed;
+      this.details.textProperty().addListener((observable, oldValue, newValue) -> {
+        Image image = generateQRCode(staticText, newValue);
+        if (image != null) {
+          qrcode.setImage(image);
+        }
+      });
       this.details.setText(message);
     });
 
     setLogoBackground(messageBox);
+  }
+
+  private Image generateQRCode(String staticText, String text) {
+    try {
+      BitMatrix bitMatrix = qrCodeWriter.encode(staticText+"\n"+text,
+          BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT, Map.of(EncodeHintType.CHARACTER_SET, "UTF-8"));
+      try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", out);
+        return new Image(new ByteArrayInputStream(out.toByteArray()));
+      }
+    } catch (Exception e) {
+      logger.error("Error while generating QR code: "+e.getMessage());
+      return null;
+    }
+  }
+
+  private Image placeholder() {
+    WritableImage placeholder = new WritableImage(QR_CODE_WIDTH, QR_CODE_HEIGHT);
+    PixelWriter pw = placeholder.getPixelWriter();
+    for (int x = 0; x < QR_CODE_WIDTH; x++) {
+      for (int y = 0; y < QR_CODE_HEIGHT; y++) {
+        Color c = ((x / (25)) + (y / 25)) % 2 == 0 ? Color.MAGENTA : Color.BLACK;
+        pw.setColor(x, y, c);
+      }
+    }
+    return placeholder;
   }
 }
